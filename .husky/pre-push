@@ -1,4 +1,4 @@
-. "$(dirname "$0")/h"
+. "$(dirname "$0")/_/h"
 
 echo "Running library coverage before push..."
 

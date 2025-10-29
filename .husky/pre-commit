@@ -1,9 +1,9 @@
 #!/usr/bin/env sh
-. "$(dirname "$0")/h"
+. "$(dirname "$0")/_/h"
 
 echo "Running lint + format + docs generation before commit..."
 
-npm run lint-staged || {
+npx lint-staged || {
   printf "\n\nERROR: Lint issues were found in the committed files. Please address them before proceeding.\n\n\n\n"
   exit 1
 }
