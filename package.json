@@ -32,7 +32,7 @@
     "format:all": "prettier --config ./.prettierrc --write .",
     "lint": "eslint .",
     "ng": "ng",
-    "prepare": "husky install",
+    "prepare": "husky",
     "release": "npm run clean && npm run build:lib && npm pack dist/ngss-state",
     "start": "ng serve",
     "test": "ng test",
