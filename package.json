@@ -1,0 +1,85 @@
+{
+  "name": "@ngss/state",
+  "version": "0.0.1",
+  "description": "NGSS — Angular Signal Store: a zoneless, service-first state management library for Angular 20+",
+  "author": "Brian Pilati <brianpilati@gmail.com>",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/ng-signal/state.git"
+  },
+  "homepage": "https://github.com/ng-signal/state#readme",
+  "bugs": {
+    "url": "https://github.com/ng-signal/state/issues"
+  },
+  "license": "MIT",
+  "keywords": [
+    "angular",
+    "signals",
+    "state",
+    "store",
+    "ngss",
+    "zoneless"
+  ],
+  "scripts": {
+    "build": "ng build",
+    "build:lib": "ng build ngss-state",
+    "clean": "rimraf dist .angular cache coverage",
+    "docs": "./node_modules/.bin/compodoc -p tsconfig.docs.json --name '@NGSS Documentation' --theme 'laravel'",
+    "docs:coverage": "./node_modules/.bin/compodoc -p tsconfig.docs.json --coverageTest 100 --coverageMinimumPerFile 100",
+    "docs:serve": "compodoc -s",
+    "format:fix": "pretty-quick --staged",
+    "format:check": "prettier --config ./.prettierrc --check \"projects/**/*.ts\" \"src/**/*.{ts,js,html,scss,json}\"",
+    "format:all": "prettier --config ./.prettierrc --write .",
+    "lint": "eslint .",
+    "ng": "ng",
+    "prepare": "husky install",
+    "release": "npm run clean && npm run build:lib && npm pack dist/ngss-state",
+    "start": "ng serve",
+    "test": "ng test",
+    "test:ci": "ng test --watch=false --browsers=ChromeHeadless",
+    "test:coverage": "ng test ngss-state --watch=false --browsers=ChromeHeadless --code-coverage --source-map=false",
+    "test:coverage:clean": "rimraf coverage",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "verify": "npm run lint && npm run format:check && npm run typecheck && npm run test:ci",
+    "watch": "ng build --watch --configuration development"
+  },
+  "lint-staged": {
+    "*.{ts,tsx,js,jsx,mjs,cjs}": [
+      "eslint --fix",
+      "prettier --write"
+    ],
+    "*.{json,md,scss,css,html,yml,yaml}": [
+      "prettier --write"
+    ]
+  },
+  "dependencies": {
+    "@angular/common": "^20.3.0",
+    "@angular/core": "^20.3.0",
+    "rxjs": "~7.8.0",
+    "tslib": "^2.3.0"
+  },
+  "devDependencies": {
+    "@angular/build": "^20.3.7",
+    "@angular/cli": "^20.3.7",
+    "@compodoc/compodoc": "^1.1.31",
+    "@types/jasmine": "~5.1.0",
+    "@types/node": "^20.11.30",
+    "@typescript-eslint/eslint-plugin": "^8.0.0",
+    "@typescript-eslint/parser": "^8.0.0",
+    "eslint": "^9.0.0",
+    "eslint-config-prettier": "^9.1.0",
+    "eslint-plugin-import": "^2.29.0",
+    "husky": "^9.0.0",
+    "jasmine-core": "~5.9.0",
+    "jasmine-spec-reporter": "^7.0.0",
+    "karma": "~6.4.0",
+    "karma-chrome-launcher": "~3.2.0",
+    "karma-coverage": "~2.2.0",
+    "karma-jasmine": "~5.1.0",
+    "karma-jasmine-html-reporter": "~2.1.0",
+    "lint-staged": "^15.2.0",
+    "prettier": "^3.3.0",
+    "rimraf": "^6.0.1",
+    "typescript": "~5.9.2"
+  }
+}
