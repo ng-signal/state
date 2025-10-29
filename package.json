@@ -54,13 +54,16 @@
   },
   "dependencies": {
     "@angular/common": "^20.3.0",
+    "@angular/compiler": "^20.3.0",
     "@angular/core": "^20.3.0",
+    "@angular/router": "^20.3.9",
     "rxjs": "~7.8.0",
     "tslib": "^2.3.0"
   },
   "devDependencies": {
     "@angular/build": "^20.3.7",
     "@angular/cli": "^20.3.7",
+    "@angular/compiler-cli": "^20.3.0",
     "@compodoc/compodoc": "^1.1.31",
     "@types/jasmine": "~5.1.0",
     "@types/node": "^20.11.30",
@@ -78,6 +81,7 @@
     "karma-jasmine": "~5.1.0",
     "karma-jasmine-html-reporter": "~2.1.0",
     "lint-staged": "^15.2.0",
+    "ng-packagr": "^20.3.0",
     "prettier": "^3.3.0",
     "rimraf": "^6.0.1",
     "typescript": "~5.9.2"

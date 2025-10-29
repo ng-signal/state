@@ -3,10 +3,15 @@
 {
   "compileOnSave": false,
   "compilerOptions": {
+    "baseUrl": "./",
     "strict": true,
     "noImplicitOverride": true,
     "noPropertyAccessFromIndexSignature": true,
     "noImplicitReturns": true,
+    "paths": {
+      "@ngss/state": ["projects/ngss-state/src/public-api"],
+      "@ngss/state/*": ["projects/ngss-state/src/lib/*"]
+    },
     "noFallthroughCasesInSwitch": true,
     "skipLibCheck": true,
     "isolatedModules": true,
@@ -29,6 +34,12 @@
     },
     {
       "path": "./tsconfig.spec.json"
+    },
+    {
+      "path": "./projects/ngss-state/tsconfig.lib.json"
+    },
+    {
+      "path": "./projects/ngss-state/tsconfig.spec.json"
     }
   ]
 }

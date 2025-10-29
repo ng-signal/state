@@ -3,7 +3,7 @@
   "version": 1,
   "newProjectRoot": "projects",
   "projects": {
-    "ngss-state": {
+    "ngss": {
       "projectType": "application",
       "schematics": {
         "@schematics/angular:component": {
@@ -56,10 +56,10 @@
           "builder": "@angular/build:dev-server",
           "configurations": {
             "production": {
-              "buildTarget": "angular-signal-state-management:build:production"
+              "buildTarget": "ngss:build:production"
             },
             "development": {
-              "buildTarget": "angular-signal-state-management:build:development"
+              "buildTarget": "ngss:build:development"
             }
           },
           "defaultConfiguration": "development"
@@ -79,6 +79,32 @@
               }
             ],
             "styles": ["src/styles.scss"]
+          }
+        }
+      }
+    },
+    "ngss-state": {
+      "projectType": "library",
+      "root": "projects/ngss-state",
+      "sourceRoot": "projects/ngss-state/src",
+      "prefix": "state",
+      "architect": {
+        "build": {
+          "builder": "@angular/build:ng-packagr",
+          "configurations": {
+            "production": {
+              "tsConfig": "projects/ngss-state/tsconfig.lib.prod.json"
+            },
+            "development": {
+              "tsConfig": "projects/ngss-state/tsconfig.lib.json"
+            }
+          },
+          "defaultConfiguration": "production"
+        },
+        "test": {
+          "builder": "@angular/build:karma",
+          "options": {
+            "tsConfig": "projects/ngss-state/tsconfig.spec.json"
           }
         }
       }
