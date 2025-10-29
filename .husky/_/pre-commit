@@ -18,4 +18,4 @@ npm run format:fix || {
   exit 1
 }
 
-echo "Post-commit checks complete."
+echo "Pre-commit checks complete."
