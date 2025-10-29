@@ -1,1 +1,18 @@
-npx lint-staged 
+echo "Running lint + format + docs generation pre-commit..."
+
+npx lint-staged || {
+  printf "\n\nERROR: Lint issues were found in the committed files. Please address them before proceeding.\n\n\n\n"
+  exit 1
+}
+
+npm run docs:coverage || {
+  printf "\n\nERROR: Doc issues were found in the committed files. Please address them before proceeding.\n\n\n\n"
+  exit 1
+}
+
+npm run format:fix || {
+  printf "\n\nERROR: Format:fix issues were found in the committed files. Please address them before proceeding.\n\n\n\n"
+  exit 1
+}
+
+echo "Pre-commit checks complete."
