@@ -76,4 +76,17 @@ describe('injectFeatureVault (Jasmine)', () => {
     const token = getOrCreateFeatureVaultToken<MockState>(newKey);
     expect(token.toString()).toContain(`NGSS_FEATURE_VAULT:${newKey}`);
   });
+
+  it('should throw an error if called without a decorated featureClass', () => {
+    // When no decorated class is provided
+    expect(() => injectFeatureVault(undefined as any)).toThrowError(
+      /injectFeatureVault\(\) must be called inside a @FeatureStore\(\)-decorated service/
+    );
+
+    // When a class without metadata is provided
+    class PlainService {}
+    expect(() => injectFeatureVault(PlainService)).toThrowError(
+      /injectFeatureVault\(\) must be called inside a @FeatureStore\(\)-decorated service/
+    );
+  });
 });
