@@ -42,7 +42,9 @@ import { UserModel } from './models/user.model';
  * ```
  */
 @FeatureStore<UserStateModel>('user')
-@Injectable()
+@Injectable({
+  providedIn: 'root'
+})
 export class UserStateService {
   /**
    * The feature vault that stores and manages the `UserStateModel`.
