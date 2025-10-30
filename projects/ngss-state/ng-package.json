@@ -3,5 +3,6 @@
   "dest": "../../dist/ngss-state",
   "lib": {
     "entryFile": "src/public-api.ts"
-  }
+  },
+  "assets": ["README.md"]
 }
