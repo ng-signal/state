@@ -1,5 +1,4 @@
 import { HttpErrorResponse } from '@angular/common/http';
-import { NormalizedError } from '@ngss/state';
 import { of, Subject, throwError } from 'rxjs';
 import { createResourceSignal } from './resource-signal.util';
 
@@ -44,48 +43,92 @@ describe('createResourceSignal', () => {
       expect(resource.data()).toBeNull();
       expect(resource.loading()).toBeFalse();
     });
-    describe('createHttpResourceSignal (HTTP error handling)', () => {
-      it('should normalize an HttpErrorResponse correctly', () => {
-        const subject = new Subject<number>();
-        const resource = createResourceSignal(subject.asObservable());
 
-        const httpError = new HttpErrorResponse({
-          status: 404,
-          statusText: 'Not Found',
-          error: { message: 'User not found' },
-          url: '/api/users'
-        });
-
-        subject.error(httpError);
-
-        const err = resource.error() as NormalizedError;
-
-        expect(err).toBeTruthy();
-        expect(err.message).toContain('Not Found');
-        expect(err.status).toBe(404);
-        expect(err.details).toEqual({ message: 'User not found' });
-        expect(resource.data()).toBeNull();
-        expect(resource.loading()).toBeFalse();
+    it('should handle HttpErrorResponse with message', () => {
+      const httpError = new HttpErrorResponse({
+        status: 404,
+        statusText: 'Not Found',
+        error: { reason: 'missing' },
+        // @ts-expect-error message property gets auto-generated but we can override
+        message: 'Custom message'
       });
 
-      it('should handle HttpErrorResponse from throwError()', () => {
-        const httpError = new HttpErrorResponse({
-          status: 500,
-          statusText: 'Internal Server Error',
-          error: { message: 'Server crashed' },
-          url: '/api/users'
-        });
+      const resource = createResourceSignal(throwError(() => httpError));
 
-        const resource = createResourceSignal(throwError(() => httpError));
+      const err = resource.error()!;
+      expect(err.message).toBe('Http failure response for (unknown url): 404 Not Found');
+      expect(err.status).toBe(404);
+      expect(err.statusText).toBe('Not Found');
+      expect(err.details).toEqual({ reason: 'missing' });
+      expect(resource.data()).toBeNull();
+      expect(resource.loading()).toBeFalse();
+    });
 
-        const err = resource.error() as NormalizedError;
-
-        expect(err.message).toContain('Internal Server Error');
-        expect(err.status).toBe(500);
-        expect(err.details).toEqual({ message: 'Server crashed' });
-        expect(resource.data()).toBeNull();
-        expect(resource.loading()).toBeFalse();
+    it('should handle HttpErrorResponse with no message but statusText', () => {
+      const httpError = new HttpErrorResponse({
+        status: 500,
+        statusText: 'Server Error',
+        error: { reason: 'boom' }
       });
+      // Explicitly delete message to hit statusText fallback
+      Object.defineProperty(httpError, 'message', { value: '' });
+
+      const resource = createResourceSignal(throwError(() => httpError));
+
+      const err = resource.error()!;
+      expect(err.message).toBe('Server Error');
+      expect(err.status).toBe(500);
+      expect(err.statusText).toBe('Server Error');
+      expect(err.details).toEqual({ reason: 'boom' });
+    });
+
+    it('should handle HttpErrorResponse with no message or statusText', () => {
+      const httpError = new HttpErrorResponse({ status: 0 });
+      Object.defineProperty(httpError, 'message', { value: '' });
+      Object.defineProperty(httpError, 'statusText', { value: '' });
+
+      const resource = createResourceSignal(throwError(() => httpError));
+
+      const err = resource.error()!;
+      expect(err.message).toBe('HTTP error');
+      expect(err.status).toBe(0);
+    });
+
+    it('should handle generic Error', () => {
+      const genericError = new Error('Something broke');
+      const resource = createResourceSignal(throwError(() => genericError));
+
+      const err = resource.error()!;
+      expect(err.message).toBe('Something broke');
+      expect(typeof err.details).toBe('string');
+      expect(resource.data()).toBeNull();
+      expect(resource.loading()).toBeFalse();
+    });
+
+    it('should handle Error with missing message and use fallback "Unexpected error"', () => {
+      // Create an Error with no message
+      const errorWithoutMessage = new Error();
+      // Force the message property to be empty to hit the fallback
+      Object.defineProperty(errorWithoutMessage, 'message', { value: '' });
+
+      const resource = createResourceSignal(throwError(() => errorWithoutMessage));
+
+      const err = resource.error()!;
+      expect(err.message).toBe('Unexpected error');
+      expect(typeof err.details).toBe('string'); // should still have stack trace
+      expect(resource.data()).toBeNull();
+      expect(resource.loading()).toBeFalse();
+    });
+
+    it('should handle unknown error type (non-Error)', () => {
+      const weirdError = { info: 'strange error' };
+      const resource = createResourceSignal(throwError(() => weirdError));
+
+      const err = resource.error()!;
+      expect(err.message).toContain('object');
+      expect(err.details).toEqual(weirdError);
+      expect(resource.data()).toBeNull();
+      expect(resource.loading()).toBeFalse();
     });
   });
 

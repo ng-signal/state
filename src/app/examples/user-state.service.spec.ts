@@ -4,7 +4,7 @@ import { UserStateModel } from './models/user-state.model';
 import { UserModel } from './models/user.model';
 import { UserStateService } from './user-state.service';
 
-import { HttpErrorResponse, provideHttpClient } from '@angular/common/http';
+import { provideHttpClient } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { provideMockFeatureVault } from '@ngss/state';
 
@@ -119,10 +119,11 @@ describe('UserStateService (Jasmine)', () => {
 
       expect(resourceSignal.data()).toBeNull();
       expect(resourceSignal.loading()).toBeFalse();
-      const err = resourceSignal.error() as HttpErrorResponse;
-      expect(err.status).toBe(500);
-      expect(err.statusText).toBe('Server Error');
-      expect(err.error.message).toBe('Internal Server Error');
+      const err = resourceSignal.error();
+      expect(err?.status).toBe(500);
+      expect(err?.statusText).toBe('Server Error');
+      expect(err?.message).toBe('Http failure response for /api/users: 500 Server Error');
+      expect(err?.details).toEqual(Object({ message: 'Internal Server Error' }));
     });
   });
 

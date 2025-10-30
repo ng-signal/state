@@ -30,6 +30,7 @@ export function createResourceSignal<T>(source$: Observable<T>): ResourceSignal<
         error.set({
           message: err.message || err.statusText || 'HTTP error',
           status: err.status,
+          statusText: err.statusText,
           details: err.error
         });
       } else if (err instanceof Error) {

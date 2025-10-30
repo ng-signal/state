@@ -15,19 +15,14 @@
  * const err: NormalizedError = {
  *   message: 'Not Found',
  *   status: 404,
+ *   statusText: 'Not Found',
  *   details: { endpoint: '/api/users' }
- * };
- *
- * // Example: Derived from a general Error
- * const err2: NormalizedError = {
- *   message: 'Unexpected failure',
- *   details: new Error('Something went wrong').stack
  * };
  * ```
  *
  * @remarks
- * - The `status` field is typically used for HTTP responses.
- * - The `details` field may contain any raw or structured context data.
+ * - The `status` and `statusText` fields are typically used for HTTP responses.
+ * - The `details` field may contain raw error payloads or stack traces.
  * - Always prefer `message` for displaying user-facing error text.
  */
 export interface NormalizedError {
@@ -42,6 +37,12 @@ export interface NormalizedError {
    * Present only for HTTP or protocol-based errors.
    */
   status?: number;
+
+  /**
+   * The textual status message associated with the HTTP response.
+   * Common examples: `'Not Found'`, `'Internal Server Error'`.
+   */
+  statusText?: string;
 
   /**
    * Arbitrary metadata or additional context about the error.
