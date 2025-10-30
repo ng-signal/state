@@ -3,7 +3,6 @@ import { getOrCreateFeatureVaultToken } from './feature-token-registry';
 
 describe('getOrCreateFeatureVaultToken (browser-safe Jasmine)', () => {
   beforeEach(() => {
-    // @ts-expect-error internal cache reset between tests if exposed
     (getOrCreateFeatureVaultToken as any)._featureVaultTokens?.clear?.();
   });
 
