@@ -2,8 +2,13 @@ echo "Running library coverage before push..."
 
 npm run test:coverage:clean
 
-npm run test:coverage || {
-  printf "\n\nERROR: Test Coverage issues were found in the committed files. Please address them before proceeding.\n\n\n\n"
+npm run test:coverage:app || {
+  printf "\n\nERROR: Test Coverage issues were found in the 'app' committed files. Please address them before proceeding.\n\n\n\n"
+  exit 1
+}
+
+npm run test:coverage:state || {
+  printf "\n\nERROR: Test Coverage issues were found in the 'state' committed files. Please address them before proceeding.\n\n\n\n"
   exit 1
 }
 
