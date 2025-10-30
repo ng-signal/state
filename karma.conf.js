@@ -30,7 +30,7 @@ module.exports = function (config) {
         lines: [90, 100]
       },
       check: {
-        emitWarning: true,
+        emitWarning: false,
         global: {
           statements: 100,
           branches: 100,
