@@ -2,7 +2,6 @@ const tseslint = require('@typescript-eslint/eslint-plugin');
 const tsParser = require('@typescript-eslint/parser');
 const eslintPluginPrettier = require('eslint-plugin-prettier');
 
-/** @type {import("eslint").Linter.FlatConfig[]} */
 module.exports = [
   {
     files: ['./src/**/*.ts', './projects/**/*.ts'],
@@ -29,6 +28,13 @@ module.exports = [
           varsIgnorePattern: '^_'
         }
       ]
+    }
+  },
+  {
+    files: ['**/*.spec.ts'],
+    rules: {
+      '@typescript-eslint/no-explicit-any': 'off',
+      '@typescript-eslint/no-unused-vars': 'off'
     }
   }
 ];

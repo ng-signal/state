@@ -1,5 +1,5 @@
 import { InjectionToken } from '@angular/core';
-import { FeatureVaultModel } from './model/feature-vault.model';
+import { FeatureVaultModel } from '../models/feature-vault.model';
 
 /**
  * Factory function that creates a **unique injection token** for a feature’s

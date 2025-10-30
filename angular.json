@@ -70,6 +70,7 @@
         "test": {
           "builder": "@angular/build:karma",
           "options": {
+            "karmaConfig": "karma.conf.js",
             "tsConfig": "tsconfig.spec.json",
             "inlineStyleLanguage": "scss",
             "assets": [
@@ -104,7 +105,13 @@
         "test": {
           "builder": "@angular/build:karma",
           "options": {
-            "tsConfig": "projects/ngss-state/tsconfig.spec.json"
+            "tsConfig": "projects/ngss-state/tsconfig.spec.json",
+            "karmaConfig": "projects/ngss-state/karma.conf.js",
+            "inlineStyleLanguage": "scss",
+            "stylePreprocessorOptions": {
+              "includePaths": ["dist/scss/"]
+            },
+            "scripts": []
           }
         }
       }

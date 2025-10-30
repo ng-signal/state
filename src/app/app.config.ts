@@ -2,7 +2,7 @@ import { ApplicationConfig, provideBrowserGlobalErrorListeners, provideZonelessC
 import { provideRouter } from '@angular/router';
 import { provideState, provideStore } from '@ngss/state';
 
-import { UserStateModel } from './examples/model/user-state.model';
+import { UserStateModel } from './examples/models/user-state.model';
 import { UserStateService } from './examples/user-state.service';
 import { routes } from './ngss.routes';
 

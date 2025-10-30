@@ -1,8 +1,8 @@
 import { Provider, Type, signal } from '@angular/core';
 import { FeatureDescriptorModel } from '@ngss/state';
 import { FEATURE_REGISTRY } from './constants/feature-registry.constant';
-import { FeatureVaultModel } from './model/feature-vault.model';
-import { FEATURE_VAULT_TOKEN } from './tokens';
+import { FeatureVaultModel } from './models/feature-vault.model';
+import { getOrCreateFeatureVaultToken } from './tokens/feature-token-registry';
 
 /**
  * Registers a feature state and its associated service with the NG Signal Store.
@@ -51,7 +51,7 @@ export function provideState<Svc, T>(service: Type<Svc>, desc: FeatureDescriptor
   /**
    * The feature-specific injection token for the vault.
    */
-  const token = FEATURE_VAULT_TOKEN<T>(desc.key);
+  const token = getOrCreateFeatureVaultToken<T>(desc.key);
 
   /**
    * Provides the feature vault that holds this feature’s state.

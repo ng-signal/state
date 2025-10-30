@@ -1,8 +1,8 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable, computed, inject } from '@angular/core';
-import { FEATURE_VAULT_TOKEN } from '@ngss/state';
-import { UserStateModel } from './model/user-state.model';
-import { UserModel } from './model/user.model';
+import { FeatureStore, injectFeatureVault } from '@ngss/state';
+import { UserStateModel } from './models/user-state.model';
+import { UserModel } from './models/user.model';
 
 /**
  * Feature service that manages **user-related state** in the NG Signal Store.
@@ -15,13 +15,10 @@ import { UserModel } from './model/user.model';
  * - Acts as the **action**, **reducer**, and **selector** layer for this feature.
  * - Uses Angular’s `signal()` API to provide reactive, zoneless state management.
  * - Consumes backend data through Angular’s `HttpClient`.
- * - Registered via {@link provideState} with the feature key `'user'`.
+ * - Registered via {@link provideState} — no need to pass the feature key.
  *
  * @example
  * ```ts
- * import { inject } from '@angular/core';
- * import { UserStateService } from './examples/user-state.service';
- *
  * @Component({
  *   selector: 'user-list',
  *   template: `
@@ -29,7 +26,10 @@ import { UserModel } from './model/user.model';
  *       <li *ngFor="let user of users()">{{ user.name }}</li>
  *     </ul>
  *   `,
- *   providers: [provideState(UserStateService, { key: 'user', initial: initialUser })]
+ *   providers: [
+ *     provideStore(),
+ *     provideState(UserStateService, { initial: initialUser })
+ *   ]
  * })
  * export class UserListComponent {
  *   readonly users = inject(UserStateService).users;
@@ -41,15 +41,16 @@ import { UserModel } from './model/user.model';
  * }
  * ```
  */
+@FeatureStore<UserStateModel>('user')
 @Injectable()
 export class UserStateService {
   /**
    * The feature vault that stores and manages the `UserStateModel`.
    *
-   * Injected using the feature-specific {@link FEATURE_VAULT_TOKEN} for the `'user'` key.
-   * Provides internal state mutation methods (`_set`, `_patch`) and the reactive `state` signal.
+   * Injected automatically using the `@FeatureStore()` metadata
+   * and resolved via `injectFeatureVault(UserStateService)`.
    */
-  private readonly vault = inject(FEATURE_VAULT_TOKEN<UserStateModel>('user'));
+  private readonly vault = injectFeatureVault<UserStateModel>(UserStateService);
 
   /**
    * Angular HTTP client used to fetch user data from the API.
@@ -58,40 +59,21 @@ export class UserStateService {
 
   /**
    * The read-only signal representing the current user state snapshot.
-   *
-   * Exposed to allow components and computed signals to observe state changes.
    */
   readonly state = this.vault.state;
 
   /**
    * Computed signal that returns an array of all user entities.
-   *
-   * Derived from the `entities` map in the current state.
-   *
-   * @example
-   * ```ts
-   * const users = userStateService.users();
-   * ```
    */
   readonly users = computed(() => Object.values(this.state().entities));
 
   /**
    * Computed signal indicating whether a user operation is currently loading.
-   *
-   * Useful for displaying loading spinners or disabling UI interactions during requests.
    */
   readonly isLoading = computed(() => this.state().loading);
 
   /**
    * Loads all users from the backend API.
-   *
-   * Dispatches a state update to set `loading` to `true` before making the request,
-   * then merges the results into the store on success or logs the error on failure.
-   *
-   * @example
-   * ```ts
-   * userStateService.loadUsers();
-   * ```
    */
   loadUsers() {
     this.vault._patch({ loading: true, error: null });
@@ -106,15 +88,6 @@ export class UserStateService {
 
   /**
    * Inserts or updates a user entity in the current state.
-   *
-   * If a user with the same `id` already exists, it is replaced; otherwise, it is added.
-   *
-   * @param user The user entity to upsert.
-   *
-   * @example
-   * ```ts
-   * userStateService.upsert({ id: '1', name: 'Ada Lovelace' });
-   * ```
    */
   upsert(user: UserModel) {
     const curr = this.state().entities;
@@ -123,13 +96,6 @@ export class UserStateService {
 
   /**
    * Removes a user entity from the state by its ID.
-   *
-   * @param id The unique identifier of the user to remove.
-   *
-   * @example
-   * ```ts
-   * userStateService.remove('1');
-   * ```
    */
   remove(id: string) {
     const { entities, ...rest } = this.state();

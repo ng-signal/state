@@ -20,7 +20,7 @@ module.exports = function (config) {
     },
     coverageReporter: {
       dir: require('path').join(__dirname, 'coverage'),
-      subdir: 'ngss-app',
+      subdir: 'ngss-state',
       reports: ['html', 'lcovonly'],
       fixWebpackSourcePaths: true,
       watermarks: {
