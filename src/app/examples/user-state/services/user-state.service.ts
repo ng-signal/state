@@ -2,8 +2,8 @@ import { HttpClient } from '@angular/common/http';
 import { computed, inject, Injectable } from '@angular/core';
 import { createResourceSignal, FeatureStore, injectFeatureVault, ResourceSignal } from '@ngss/state';
 import { map } from 'rxjs';
-import { UserStateModel } from './models/user-state.model';
-import { UserModel } from './models/user.model';
+import { UserStateModel } from '../models/user-state.model';
+import { UserModel } from '../models/user.model';
 
 /**
  * Feature service that manages **user-related state** in the NG Signal Store.
@@ -65,10 +65,64 @@ export class UserStateService {
    */
   readonly state = this.vault.state;
 
-  /**
-   * Computed signal that returns an array of all user entities.
-   */
-  readonly users = computed(() => Object.values(this.state().entities));
+  /** Computed users array that reacts to ResourceSignal.data() */
+  /*
+  Good
+  readonly users: ResourceSignal<UserModel[]> = (() => {
+    let resource = this.userResource();
+
+    // lazily initialize
+    if (!resource) {
+      resource = this.loadUsers();
+      this.userResource.set(resource);
+    }
+
+    return {
+      loading: resource.loading,
+      error: resource.error,
+      data: computed(() => {
+        const data = resource!.data(); // <-- subscribe to data signal
+        const entities = data?.entities ?? {};
+        return Object.values(entities);
+      })
+    };
+  })();
+  */
+
+  /** Computed users array that reacts to ResourceSignal changes and reloads */
+  /*
+  Better
+readonly users: ResourceSignal<UserModel[]> = {
+  loading: computed(() => this.userResource()?.loading() ?? false),
+  error: computed(() => this.userResource()?.error() ?? null),
+  data: computed(() => {
+    let resource = this.userResource();
+
+    // lazily initialize if missing
+    if (!resource) {
+      resource = this.loadUsers();
+      this.userResource.set(resource);
+    }
+
+    const data = resource.data();
+    const entities = data?.entities ?? {};
+    return Object.values(entities);
+  })
+};
+*/
+
+  /** Reactive users resource derived from loadUsers() */
+  readonly users: ResourceSignal<UserModel[]> = (() => {
+    const resource = this.loadUsers();
+    return {
+      loading: resource.loading,
+      error: resource.error,
+      data: computed(() => {
+        const entities = resource.data()?.entities ?? {};
+        return Object.values(entities);
+      })
+    };
+  })();
 
   /**
    * Computed signal indicating whether a user operation is currently loading.

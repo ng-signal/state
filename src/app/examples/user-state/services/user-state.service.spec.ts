@@ -1,14 +1,14 @@
 import { provideZonelessChangeDetection, signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
-import { UserStateModel } from './models/user-state.model';
-import { UserModel } from './models/user.model';
+import { UserStateModel } from '../models/user-state.model';
+import { UserModel } from '../models/user.model';
 import { UserStateService } from './user-state.service';
 
 import { provideHttpClient } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { provideMockFeatureVault } from '@ngss/state';
 
-describe('UserStateService (Jasmine)', () => {
+describe('Service: User State', () => {
   let service: UserStateService;
   let mockHttpClient: HttpTestingController;
   let mockVault: {
@@ -44,26 +44,31 @@ describe('UserStateService (Jasmine)', () => {
     mockHttpClient = TestBed.inject(HttpTestingController);
   });
 
-  it('should create the service', () => {
-    expect(service).toBeTruthy();
-  });
-
   describe('computed properties', () => {
     it('should reflect users() based on current state', () => {
-      mockVault.state.set({
-        loading: false,
-        error: null,
-        entities: {
-          a: { id: 'a', name: 'Alice' },
-          b: { id: 'b', name: 'Bob' }
-        }
-      });
+      const mockUsers: UserModel[] = [
+        { id: '1', name: 'Ada' },
+        { id: '2', name: 'Grace' }
+      ];
 
-      const result = service.users();
-      expect(result).toEqual([
-        { id: 'a', name: 'Alice' },
-        { id: 'b', name: 'Bob' }
+      const userList = service.users;
+
+      expect(userList.data()).toEqual([]);
+      expect(userList.loading()).toBeTrue();
+      expect(userList.error()).toBeNull();
+
+      const result = mockHttpClient.expectOne('/api/users');
+      expect(result.request.method).toBe('GET');
+
+      result.flush(mockUsers);
+
+      expect(userList.data()).toEqual([
+        { id: '1', name: 'Ada' },
+        { id: '2', name: 'Grace' }
       ]);
+
+      expect(userList.loading()).toBeFalse();
+      expect(userList.error()).toBeNull();
     });
 
     it('should reflect isLoading() based on current state', () => {
@@ -87,10 +92,10 @@ describe('UserStateService (Jasmine)', () => {
       expect(resourceSignal.loading()).toBeTrue();
       expect(resourceSignal.error()).toBeNull();
 
-      const result = mockHttpClient.expectOne('/api/users');
-      expect(result.request.method).toBe('GET');
-
-      result.flush(mockUsers);
+      const result = mockHttpClient.match('/api/users');
+      expect(result[0].request.method).toBe('GET');
+      result[0].flush(mockUsers);
+      result[1].flush(mockUsers);
 
       expect(resourceSignal.data()).toEqual(
         Object({ entities: Object({ 1: Object({ id: '1', name: 'Ada' }), 2: Object({ id: '2', name: 'Grace' }) }) })
@@ -106,10 +111,18 @@ describe('UserStateService (Jasmine)', () => {
       expect(resourceSignal.loading()).toBeTrue();
       expect(resourceSignal.error()).toBeNull();
 
-      const result = mockHttpClient.expectOne('/api/users');
-      expect(result.request.method).toBe('GET');
+      const result = mockHttpClient.match('/api/users');
+      expect(result[0].request.method).toBe('GET');
 
-      result.flush(
+      result[0].flush(
+        { message: 'Internal Server Error' }, // response body
+        {
+          status: 500,
+          statusText: 'Server Error'
+        }
+      );
+
+      result[1].flush(
         { message: 'Internal Server Error' }, // response body
         {
           status: 500,

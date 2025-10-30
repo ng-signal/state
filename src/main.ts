@@ -1,5 +1,5 @@
 import { bootstrapApplication } from '@angular/platform-browser';
 import { appConfig } from './app/app.config';
-import { App } from './app/ngss/ngss';
+import { NGSSComponent } from './app/ngss/ngss.component';
 
-bootstrapApplication(App, appConfig).catch((err) => console.error(err));
+bootstrapApplication(NGSSComponent, appConfig).catch((err) => console.error(err));

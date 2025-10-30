@@ -1,9 +1,17 @@
-import { ApplicationConfig, provideBrowserGlobalErrorListeners, provideZonelessChangeDetection } from '@angular/core';
+import {
+  ApplicationConfig,
+  importProvidersFrom,
+  provideBrowserGlobalErrorListeners,
+  provideZonelessChangeDetection
+} from '@angular/core';
 import { provideRouter } from '@angular/router';
 import { provideState, provideStore } from '@ngss/state';
 
-import { UserStateModel } from './examples/models/user-state.model';
-import { UserStateService } from './examples/user-state.service';
+import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
+import { HttpClientInMemoryWebApiModule } from 'angular-in-memory-web-api';
+import { MockApiService } from 'src/testing/mock-api.service';
+import { UserStateModel } from './examples/user-state/models/user-state.model';
+import { UserStateService } from './examples/user-state/services/user-state.service';
 import { routes } from './ngss.routes';
 
 /**
@@ -70,6 +78,49 @@ export const appConfig: ApplicationConfig = {
      * Registers the 'user' feature state using the UserStateService.
      * Seeds the feature with its initial state object.
      */
-    provideState(UserStateService, { key: 'user', initial: initialUser })
+    provideState(UserStateService, { key: 'user', initial: initialUser }),
+
+    /**
+     * Configures Angular's built-in **HttpClient** with dependency-injected interceptors.
+     *
+     * - Registers the HttpClient globally for all services and components.
+     * - Enables the use of interceptors defined via Angular's DI system.
+     * - Required for the in-memory API and for all backend communication.
+     *
+     * @see https://angular.dev/api/common/http/provideHttpClient
+     * @see https://angular.dev/guide/http
+     */
+    provideHttpClient(withInterceptorsFromDi()),
+
+    /**
+     * Sets up the **in-memory web API** to simulate a backend during development.
+     *
+     * - Intercepts HTTP requests (e.g., `/api/users`) and returns mock data.
+     * - Uses the provided `MockApiService` to define mock collections.
+     * - Applies a simulated network delay for realistic behavior.
+     * - Passes through any unknown URLs to the real backend if needed.
+     *
+     * @remarks
+     * This should only be enabled in **non-production** builds to avoid
+     * intercepting real HTTP requests in production environments.
+     *
+     * @example
+     * ```ts
+     * importProvidersFrom(
+     *   HttpClientInMemoryWebApiModule.forRoot(MockApiService, {
+     *     delay: 500,
+     *     passThruUnknownUrl: true
+     *   })
+     * )
+     * ```
+     *
+     * @see https://github.com/angular/in-memory-web-api
+     */
+    importProvidersFrom(
+      HttpClientInMemoryWebApiModule.forRoot(MockApiService, {
+        delay: 500,
+        passThruUnknownUrl: true
+      })
+    )
   ]
 };

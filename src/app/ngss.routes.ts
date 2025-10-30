@@ -1,4 +1,6 @@
 import { Routes } from '@angular/router';
+import { UserListComponent } from './examples/user-state/user-list.component';
+import { SplashPageComponent } from './splash-page/splash-page.component';
 
 /**
  * Root routing configuration for the NG Signal Store example application.
@@ -27,4 +29,8 @@ import { Routes } from '@angular/router';
  *
  * @see {@link appConfig} for how this routing configuration is registered.
  */
-export const routes: Routes = [];
+export const routes: Routes = [
+  { path: 'users', component: UserListComponent },
+  { path: '', component: SplashPageComponent },
+  { path: '**', redirectTo: '' }
+];

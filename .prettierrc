@@ -6,11 +6,5 @@
   "semi": true,
   "bracketSpacing": true,
   "trailingComma": "none",
-  "bracketSameLine": true,
-  "overrides": [
-    {
-      "files": "*.html",
-      "options": { "parser": "angular" }
-    }
-  ]
+  "bracketSameLine": true
 }

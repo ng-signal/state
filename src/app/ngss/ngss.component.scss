@@ -1,0 +1,42 @@
+.container {
+  height: 100vh;
+}
+
+.toolbar {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+}
+
+.sidenav {
+  width: 240px;
+  background: #fafafa;
+  border-right: 1px solid #e0e0e0;
+}
+
+.sidenav-header {
+  font-weight: 600;
+  color: black;
+}
+
+.mat-nav-list a.active {
+  background-color: rgba(0, 0, 0, 0.08);
+}
+
+.content {
+  padding: 1.5rem;
+}
+
+/* Responsive toggle for smaller screens */
+.hide-desktop {
+  display: none;
+}
+
+@media (max-width: 768px) {
+  .hide-desktop {
+    display: inline-flex;
+  }
+  .sidenav {
+    width: 200px;
+  }
+}
