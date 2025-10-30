@@ -1,6 +1,7 @@
 import { HttpClient } from '@angular/common/http';
-import { Injectable, computed, inject } from '@angular/core';
-import { FeatureStore, injectFeatureVault } from '@ngss/state';
+import { computed, inject, Injectable } from '@angular/core';
+import { createResourceSignal, FeatureStore, injectFeatureVault, ResourceSignal } from '@ngss/state';
+import { map } from 'rxjs';
 import { UserStateModel } from './models/user-state.model';
 import { UserModel } from './models/user.model';
 
@@ -77,15 +78,15 @@ export class UserStateService {
   /**
    * Loads all users from the backend API.
    */
-  loadUsers() {
-    this.vault._patch({ loading: true, error: null });
-    this.http.get<UserModel[]>('/api/users').subscribe({
-      next: (list) => {
-        const entities = Object.fromEntries(list.map((u) => [u.id, u]));
-        this.vault._patch({ loading: false, entities });
-      },
-      error: (err) => this.vault._patch({ loading: false, error: String(err) })
-    });
+  loadUsers(): ResourceSignal<{ entities: Record<string, UserModel> }> {
+    return createResourceSignal(
+      this.http.get<UserModel[]>('/api/users').pipe(
+        map((list: UserModel[]) => {
+          const entities = Object.fromEntries(list.map((u) => [u.id, u]));
+          return { entities };
+        })
+      )
+    );
   }
 
   /**

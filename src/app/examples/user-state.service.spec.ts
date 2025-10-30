@@ -1,16 +1,16 @@
-import { HttpClient } from '@angular/common/http';
 import { provideZonelessChangeDetection, signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
-import { of, throwError } from 'rxjs';
 import { UserStateModel } from './models/user-state.model';
 import { UserModel } from './models/user.model';
 import { UserStateService } from './user-state.service';
 
+import { HttpErrorResponse, provideHttpClient } from '@angular/common/http';
+import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { provideMockFeatureVault } from '@ngss/state';
 
 describe('UserStateService (Jasmine)', () => {
   let service: UserStateService;
-  let httpClientSpy: jasmine.SpyObj<HttpClient>;
+  let mockHttpClient: HttpTestingController;
   let mockVault: {
     _set: jasmine.Spy;
     _patch: jasmine.Spy;
@@ -24,7 +24,6 @@ describe('UserStateService (Jasmine)', () => {
   };
 
   beforeEach(() => {
-    httpClientSpy = jasmine.createSpyObj('HttpClient', ['get']);
     mockVault = {
       _set: jasmine.createSpy('_set'),
       _patch: jasmine.createSpy('_patch'),
@@ -33,14 +32,16 @@ describe('UserStateService (Jasmine)', () => {
 
     TestBed.configureTestingModule({
       providers: [
+        provideHttpClient(),
+        provideHttpClientTesting(),
         provideZonelessChangeDetection(),
         provideMockFeatureVault('user', mockVault),
-        { provide: HttpClient, useValue: httpClientSpy },
         UserStateService
       ]
     });
 
     service = TestBed.inject(UserStateService);
+    mockHttpClient = TestBed.inject(HttpTestingController);
   });
 
   it('should create the service', () => {
@@ -80,29 +81,48 @@ describe('UserStateService (Jasmine)', () => {
         { id: '1', name: 'Ada' },
         { id: '2', name: 'Grace' }
       ];
-      httpClientSpy.get.and.returnValue(of(mockUsers));
+      const resourceSignal = service.loadUsers();
 
-      service.loadUsers();
+      expect(resourceSignal.data()).toBeNull();
+      expect(resourceSignal.loading()).toBeTrue();
+      expect(resourceSignal.error()).toBeNull();
 
-      expect(mockVault._patch).toHaveBeenCalledWith({ loading: true, error: null });
+      const result = mockHttpClient.expectOne('/api/users');
+      expect(result.request.method).toBe('GET');
 
-      // simulate async response
-      expect(httpClientSpy.get).toHaveBeenCalledWith('/api/users');
+      result.flush(mockUsers);
 
-      const entities = {
-        '1': { id: '1', name: 'Ada' },
-        '2': { id: '2', name: 'Grace' }
-      };
-      expect(mockVault._patch).toHaveBeenCalledWith({ loading: false, entities });
+      expect(resourceSignal.data()).toEqual(
+        Object({ entities: Object({ 1: Object({ id: '1', name: 'Ada' }), 2: Object({ id: '2', name: 'Grace' }) }) })
+      );
+      expect(resourceSignal.loading()).toBeFalse();
+      expect(resourceSignal.error()).toBeNull();
     });
 
     it('should set error when http fails', () => {
-      httpClientSpy.get.and.returnValue(throwError(() => 'NetworkError'));
+      const resourceSignal = service.loadUsers();
 
-      service.loadUsers();
+      expect(resourceSignal.data()).toBeNull();
+      expect(resourceSignal.loading()).toBeTrue();
+      expect(resourceSignal.error()).toBeNull();
 
-      expect(mockVault._patch).toHaveBeenCalledWith({ loading: true, error: null });
-      expect(mockVault._patch).toHaveBeenCalledWith({ loading: false, error: 'NetworkError' });
+      const result = mockHttpClient.expectOne('/api/users');
+      expect(result.request.method).toBe('GET');
+
+      result.flush(
+        { message: 'Internal Server Error' }, // response body
+        {
+          status: 500,
+          statusText: 'Server Error'
+        }
+      );
+
+      expect(resourceSignal.data()).toBeNull();
+      expect(resourceSignal.loading()).toBeFalse();
+      const err = resourceSignal.error() as HttpErrorResponse;
+      expect(err.status).toBe(500);
+      expect(err.statusText).toBe('Server Error');
+      expect(err.error.message).toBe('Internal Server Error');
     });
   });
 
