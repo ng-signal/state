@@ -90,11 +90,7 @@ export function provideState<Svc, T>(
          * Automatically updates the vault when the resource emits new values.
          */
         fromResource(source$: Observable<T>) {
-          const hasCache = !!(cache && cache.size > 0);
-
-          if (hasCache) {
-            return;
-          }
+          if (cache?.size) return;
 
           _set({ loading: true, error: null });
 
