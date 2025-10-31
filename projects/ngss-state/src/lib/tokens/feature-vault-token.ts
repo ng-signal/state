@@ -29,7 +29,7 @@ import { FeatureVaultModel } from '../models/feature-vault.model';
  *
  * interface UserState {
  *   loading: boolean;
- *   entities: Record<string, User>;
+ *   data:  T | null;
  *   error: string | null;
  * }
  *
@@ -37,7 +37,7 @@ import { FeatureVaultModel } from '../models/feature-vault.model';
  * const vault = inject(FEATURE_VAULT_TOKEN<UserState>('user'));
  *
  * vault._patch({ loading: true });
- * console.log(vault.state()); // { loading: true, entities: {}, error: null }
+ * console.log(vault.state()); // { loading: true, data: null, error: null }
  * ```
  *
  * @remarks

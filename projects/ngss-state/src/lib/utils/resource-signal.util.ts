@@ -1,8 +1,8 @@
-import { HttpErrorResponse } from '@angular/common/http';
 import { signal } from '@angular/core';
 import { NormalizedError } from '@ngss/state';
 import { Observable } from 'rxjs';
 import { ResourceSignal } from '../models/resource-signal.model';
+import { normalizeError } from './normalize-error.util';
 
 /**
  * Creates a reactive `ResourceSignal` that mirrors the lifecycle
@@ -26,25 +26,7 @@ export function createResourceSignal<T>(source$: Observable<T>): ResourceSignal<
       error.set(null);
     },
     error: (err: unknown) => {
-      if (err instanceof HttpErrorResponse) {
-        error.set({
-          message: err.message || err.statusText || 'HTTP error',
-          status: err.status,
-          statusText: err.statusText,
-          details: err.error
-        });
-      } else if (err instanceof Error) {
-        error.set({
-          message: err.message || 'Unexpected error',
-          details: err.stack
-        });
-      } else {
-        error.set({
-          message: String(err),
-          details: err
-        });
-      }
-
+      error.set(normalizeError(err));
       data.set(null);
       loading.set(false);
     },

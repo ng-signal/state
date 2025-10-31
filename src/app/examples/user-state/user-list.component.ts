@@ -43,7 +43,7 @@ export class UserListComponent {
    * - Automatically triggers load when empty.
    * - Reactively updates as state changes.
    */
-  readonly userList = this.userState.users;
+  readonly userList = this.userState.users();
 
   /**
    * Retry handler for re-fetching users after an error.

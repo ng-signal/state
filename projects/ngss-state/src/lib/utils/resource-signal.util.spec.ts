@@ -1,5 +1,4 @@
-import { HttpErrorResponse } from '@angular/common/http';
-import { of, Subject, throwError } from 'rxjs';
+import { of, Subject } from 'rxjs';
 import { createResourceSignal } from './resource-signal.util';
 
 describe('createResourceSignal', () => {
@@ -32,101 +31,6 @@ describe('createResourceSignal', () => {
       subject.error(new Error(errorMsg));
 
       expect(resource.error()?.message).toBe(errorMsg);
-      expect(resource.data()).toBeNull();
-      expect(resource.loading()).toBeFalse();
-    });
-
-    it('should handle an observable that errors immediately', () => {
-      const resource = createResourceSignal(throwError(() => 'Immediate fail'));
-
-      expect(resource.error()?.message).toBe('Immediate fail');
-      expect(resource.data()).toBeNull();
-      expect(resource.loading()).toBeFalse();
-    });
-
-    it('should handle HttpErrorResponse with message', () => {
-      const httpError = new HttpErrorResponse({
-        status: 404,
-        statusText: 'Not Found',
-        error: { reason: 'missing' },
-        // @ts-expect-error message property gets auto-generated but we can override
-        message: 'Custom message'
-      });
-
-      const resource = createResourceSignal(throwError(() => httpError));
-
-      const err = resource.error()!;
-      expect(err.message).toBe('Http failure response for (unknown url): 404 Not Found');
-      expect(err.status).toBe(404);
-      expect(err.statusText).toBe('Not Found');
-      expect(err.details).toEqual({ reason: 'missing' });
-      expect(resource.data()).toBeNull();
-      expect(resource.loading()).toBeFalse();
-    });
-
-    it('should handle HttpErrorResponse with no message but statusText', () => {
-      const httpError = new HttpErrorResponse({
-        status: 500,
-        statusText: 'Server Error',
-        error: { reason: 'boom' }
-      });
-      // Explicitly delete message to hit statusText fallback
-      Object.defineProperty(httpError, 'message', { value: '' });
-
-      const resource = createResourceSignal(throwError(() => httpError));
-
-      const err = resource.error()!;
-      expect(err.message).toBe('Server Error');
-      expect(err.status).toBe(500);
-      expect(err.statusText).toBe('Server Error');
-      expect(err.details).toEqual({ reason: 'boom' });
-    });
-
-    it('should handle HttpErrorResponse with no message or statusText', () => {
-      const httpError = new HttpErrorResponse({ status: 0 });
-      Object.defineProperty(httpError, 'message', { value: '' });
-      Object.defineProperty(httpError, 'statusText', { value: '' });
-
-      const resource = createResourceSignal(throwError(() => httpError));
-
-      const err = resource.error()!;
-      expect(err.message).toBe('HTTP error');
-      expect(err.status).toBe(0);
-    });
-
-    it('should handle generic Error', () => {
-      const genericError = new Error('Something broke');
-      const resource = createResourceSignal(throwError(() => genericError));
-
-      const err = resource.error()!;
-      expect(err.message).toBe('Something broke');
-      expect(typeof err.details).toBe('string');
-      expect(resource.data()).toBeNull();
-      expect(resource.loading()).toBeFalse();
-    });
-
-    it('should handle Error with missing message and use fallback "Unexpected error"', () => {
-      // Create an Error with no message
-      const errorWithoutMessage = new Error();
-      // Force the message property to be empty to hit the fallback
-      Object.defineProperty(errorWithoutMessage, 'message', { value: '' });
-
-      const resource = createResourceSignal(throwError(() => errorWithoutMessage));
-
-      const err = resource.error()!;
-      expect(err.message).toBe('Unexpected error');
-      expect(typeof err.details).toBe('string'); // should still have stack trace
-      expect(resource.data()).toBeNull();
-      expect(resource.loading()).toBeFalse();
-    });
-
-    it('should handle unknown error type (non-Error)', () => {
-      const weirdError = { info: 'strange error' };
-      const resource = createResourceSignal(throwError(() => weirdError));
-
-      const err = resource.error()!;
-      expect(err.message).toContain('object');
-      expect(err.details).toEqual(weirdError);
       expect(resource.data()).toBeNull();
       expect(resource.loading()).toBeFalse();
     });

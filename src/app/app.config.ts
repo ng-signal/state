@@ -10,7 +10,7 @@ import { provideState, provideStore } from '@ngss/state';
 import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
 import { HttpClientInMemoryWebApiModule } from 'angular-in-memory-web-api';
 import { MockApiService } from 'src/testing/mock-api.service';
-import { UserStateModel } from './examples/user-state/models/user-state.model';
+import { UserModel } from './examples/user-state/models/user.model';
 import { UserStateService } from './examples/user-state/services/user-state.service';
 import { routes } from './ngss.routes';
 
@@ -42,7 +42,7 @@ import { routes } from './ngss.routes';
  * bootstrapApplication(App, appConfig);
  * ```
  */
-const initialUser: UserStateModel = { loading: false, entities: {}, error: null };
+const initialUsers: UserModel[] | null = null;
 
 /**
  * Global application configuration object.
@@ -78,7 +78,7 @@ export const appConfig: ApplicationConfig = {
      * Registers the 'user' feature state using the UserStateService.
      * Seeds the feature with its initial state object.
      */
-    provideState(UserStateService, { key: 'user', initial: initialUser }),
+    provideState(UserStateService, { key: 'user', initial: initialUsers }),
 
     /**
      * Configures Angular's built-in **HttpClient** with dependency-injected interceptors.

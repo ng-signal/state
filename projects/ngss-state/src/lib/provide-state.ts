@@ -1,99 +1,93 @@
 import { Provider, Type, signal } from '@angular/core';
-import { FeatureDescriptorModel } from '@ngss/state';
+import { FeatureDescriptorModel, NormalizedError } from '@ngss/state';
+import { Observable } from 'rxjs';
 import { FEATURE_REGISTRY } from './constants/feature-registry.constant';
-import { FeatureVaultModel } from './models/feature-vault.model';
+import { ResourceVaultModel } from './models/resource-vault.model';
 import { getOrCreateFeatureVaultToken } from './tokens/feature-token-registry';
+import { normalizeError } from './utils/normalize-error.util';
 
-/**
- * Registers a feature state and its associated service with the NG Signal Store.
- *
- * @template Svc The feature service type that manages state, actions, and selectors.
- * @template T The feature’s state model type.
- *
- * The `provideState()` function connects a **feature service** to its own
- * isolated **feature vault** (a signal-based container for state) and adds it
- * to the global feature registry.
- *
- * - The vault is created from the `FeatureDescriptorModel.initial` value.
- * - The service gains write access to the vault through injection.
- * - Other consumers only read from the exposed signals.
- * - The feature is automatically registered for devtools or debugging.
- *
- * Typically used within application bootstrap configuration or route-level
- * providers to register feature-scoped state services.
- *
- * @example
- * ```ts
- * // 1. Define your state model
- * interface UserState {
- *   loading: boolean;
- *   entities: Record<string, User>;
- *   error: string | null;
- * }
- *
- * // 2. Provide the feature
- * bootstrapApplication(AppComponent, {
- *   providers: [
- *     provideState(UserStateService, {
- *       key: 'user',
- *       initial: { loading: false, entities: {}, error: null }
- *     })
- *   ]
- * });
- * ```
- *
- * @param service The feature service class that manages this feature’s state.
- * @param desc The feature descriptor defining the unique key and initial state.
- * @returns An array of Angular providers that set up the feature vault,
- *          the feature service, and register the feature in the global registry.
- */
 export function provideState<Svc, T>(service: Type<Svc>, desc: FeatureDescriptorModel<T>): Provider[] {
-  /**
-   * The feature-specific injection token for the vault.
-   */
   const token = getOrCreateFeatureVaultToken<T>(desc.key);
 
-  /**
-   * Provides the feature vault that holds this feature’s state.
-   * The vault exposes:
-   * - `_set`: replaces the entire state
-   * - `_patch`: merges partial state
-   * - `state`: a read-only signal for observation
-   */
   const vaultProvider: Provider = {
     provide: token,
-    useFactory: (): FeatureVaultModel<T> => {
-      const s = signal<T>(desc.initial);
+    useFactory: (): ResourceVaultModel<T> => {
+      const _loading = signal(false);
+      const _error = signal<NormalizedError | null>(null);
 
-      const _set = (next: T) => s.set(next);
-      const _patch = (partial: Partial<T>) => {
-        const curr = s();
-        s.set({ ...curr, ...partial });
+      // Prevent incorrect initialization (e.g., passing a resource object)
+      // eslint-disable-next-line
+      if (typeof desc.initial === 'object' && desc.initial !== null && 'data' in (desc.initial as any)) {
+        throw new Error(
+          `[NGSS] Invalid FeatureDescriptorModel.initial for feature "${desc.key}". ` +
+            `Expected raw data (e.g., [] or {}), but received an object with resource fields { loading, data, error }. ` +
+            `Pass plain data to avoid double-wrapping.`
+        );
+      }
+
+      const _data = signal<T | null>(desc.initial === null || desc.initial === undefined ? null : (desc.initial as T));
+
+      // State manipulation helpers
+      const _set = (next: Partial<{ loading: boolean; data: T | null; error: NormalizedError | null }>) => {
+        if (next.loading !== undefined) _loading.set(next.loading);
+        if (next.data !== undefined) _data.set(next.data);
+        if (next.error !== undefined) _error.set(next.error);
       };
 
-      return {
-        _set,
-        _patch,
-        state: s.asReadonly()
+      /*
+      const _patch = (partial: Partial<{ loading: boolean; data: T | null; error: any }>) => {
+        if (partial.loading !== undefined) _loading.set(partial.loading);
+
+        if (partial.data !== undefined) {
+          const curr = _data();
+          const next = partial.data;
+
+          if (Array.isArray(curr) && Array.isArray(next)) {
+            _data.set([...curr, ...next] as T);
+          } else if (typeof curr === 'object' && typeof next === 'object' && curr !== null && next !== null) {
+            _data.set({ ...curr, ...next } as T);
+          } else {
+            _data.set(next);
+          }
+        }
+
+        if (partial.error !== undefined) _error.set(partial.error);
       };
+      */
+
+      // Create vault first so we can reference it inside fromResource
+      const vault: ResourceVaultModel<T> = {
+        state: {
+          loading: _loading.asReadonly(),
+          data: _data.asReadonly(),
+          error: _error.asReadonly()
+        },
+        /**
+         * Connects an observable resource stream to this vault’s lifecycle.
+         * Automatically updates the vault when the resource emits new values.
+         */
+        fromResource(source$: Observable<T>) {
+          _set({ loading: true, error: null });
+
+          source$.subscribe({
+            next: (value) => _set({ loading: false, data: value }),
+            error: (err: unknown) => {
+              _set({ loading: false, data: null, error: normalizeError(err) });
+            },
+            complete: () => _set({ loading: false })
+          });
+        }
+      };
+
+      return vault;
     }
   };
 
-  /**
-   * Registers this feature service in the global feature registry.
-   * Useful for devtools, debugging, or dynamic feature discovery.
-   */
   const registryProvider: Provider = {
     provide: FEATURE_REGISTRY,
     multi: true,
     useValue: { key: desc.key, token: service }
   };
 
-  /**
-   * Returns all providers required to register and use the feature:
-   * - The feature vault provider
-   * - The feature service itself
-   * - The feature registry entry
-   */
   return [vaultProvider, service, registryProvider];
 }

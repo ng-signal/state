@@ -33,7 +33,7 @@ export interface FeatureDescriptorModel<T> {
    * ```ts
    * initial: {
    *   loading: false,
-   *   entities: {},
+   *   data: null,
    *   error: null
    * }
    * ```

@@ -1,92 +1,105 @@
-import { provideZonelessChangeDetection, signal } from '@angular/core';
+import { effect, provideZonelessChangeDetection } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
+import { FeatureDescriptorModel, FeatureVaultModel } from '@ngss/state';
 import 'reflect-metadata';
+import { of } from 'rxjs';
 import { NGSS_METADATA_KEYS } from '../constants/metadata-keys.constant';
-import { FeatureStore } from '../decorators/feature-store.decorator';
-import { FeatureVaultModel } from '../models/feature-vault.model';
+import { provideState } from '../provide-state';
 import { getOrCreateFeatureVaultToken } from '../tokens/feature-token-registry';
 import { injectFeatureVault } from './feature-vault.injector';
 
-interface MockState {
+/** Dummy model and service for testing */
+interface TestState {
   count: number;
+  name: string;
 }
 
-function createMockVault(initial: MockState): FeatureVaultModel<MockState> {
-  const s = signal(initial);
-  return {
-    _set: jasmine.createSpy('_set').and.callFake((next: MockState) => s.set(next)),
-    _patch: jasmine.createSpy('_patch').and.callFake((partial: Partial<MockState>) => s.set({ ...s(), ...partial })),
-    state: s.asReadonly()
-  };
+class TestFeatureService {
+  vault = injectFeatureVault<TestState>(TestFeatureService);
 }
 
-describe('injectFeatureVault (Jasmine)', () => {
-  const featureKey = 'mockFeature';
-  const vaultToken = getOrCreateFeatureVaultToken<MockState>(featureKey);
-  const initialState: MockState = { count: 0 };
+/** Decorator simulation (normally done by @FeatureStore) */
+Reflect.defineMetadata(NGSS_METADATA_KEYS.FEATURE_KEY, 'testFeature', TestFeatureService);
+
+describe('injectFeatureVault', () => {
+  let vault: FeatureVaultModel<TestState>;
+  let desc: FeatureDescriptorModel<TestState>;
 
   beforeEach(() => {
+    desc = {
+      key: 'testFeature',
+      initial: { count: 1, name: 'Ada' }
+    };
+
     TestBed.configureTestingModule({
-      providers: [provideZonelessChangeDetection(), { provide: vaultToken, useValue: createMockVault(initialState) }]
+      providers: [provideZonelessChangeDetection(), ...provideState(TestFeatureService, desc)]
     });
+
+    // Resolve vault directly using injector
+    const token = getOrCreateFeatureVaultToken<TestState>('testFeature');
+    vault = TestBed.inject(token) as FeatureVaultModel<TestState>;
   });
 
-  it('should inject the correct vault inside a @FeatureStore-decorated service', () => {
-    @FeatureStore<MockState>(featureKey)
-    class DecoratedService {
-      vault = injectFeatureVault<MockState>(DecoratedService);
-    }
+  it('should inject the correct vault instance for a decorated service', () => {
+    const service = TestBed.inject(TestFeatureService);
 
-    TestBed.configureTestingModule({
-      providers: [
-        provideZonelessChangeDetection(),
-        { provide: vaultToken, useValue: createMockVault(initialState) },
-        DecoratedService
-      ]
-    });
-
-    const service = TestBed.inject(DecoratedService);
+    // Should be a valid vault
     expect(service.vault).toBeTruthy();
-    expect(service.vault.state().count).toBe(0);
-
-    service.vault._patch({ count: 5 });
-    expect(service.vault.state().count).toBe(5);
+    expect(service.vault.state.data()?.count).toBe(1);
   });
 
-  it('should throw an error if used outside a decorated service', () => {
-    class NonDecoratedService {
-      vault = injectFeatureVault<MockState>(NonDecoratedService);
-    }
-
-    expect(() => new NonDecoratedService()).toThrowError(
+  it('should throw an error when called without a @FeatureStore-decorated class', () => {
+    expect(() => injectFeatureVault()).toThrowError(
       /injectFeatureVault\(\) must be called inside a @FeatureStore\(\)-decorated service/
     );
   });
 
-  it('should read metadata key set by the @FeatureStore decorator', () => {
-    @FeatureStore<MockState>('anotherFeature')
-    class AnotherService {}
+  it('should throw an error if called without a @FeatureStore-decorated class', () => {
+    class UndecoratedService {}
 
-    const meta = Reflect.getMetadata(NGSS_METADATA_KEYS.FEATURE_KEY, AnotherService);
-    expect(meta).toBe('anotherFeature');
+    expect(() => injectFeatureVault(UndecoratedService)).toThrowError(
+      /must be called inside a @FeatureStore\(\)-decorated service/
+    );
   });
 
-  it('should use getOrCreateFeatureVaultToken to resolve InjectionToken', () => {
-    const newKey = 'resolveFeature';
-    const token = getOrCreateFeatureVaultToken<MockState>(newKey);
-    expect(token.toString()).toContain(`NGSS_FEATURE_VAULT:${newKey}`);
+  it('should retrieve the same vault instance as the one provided by Angular DI', () => {
+    const service = TestBed.inject(TestFeatureService);
+
+    // Inject vault manually again using token
+    const token = getOrCreateFeatureVaultToken<TestState>('testFeature');
+    const vaultFromToken = TestBed.inject(token);
+
+    expect(vaultFromToken).toBe(service.vault);
   });
 
-  it('should throw an error if called without a decorated featureClass', () => {
-    // When no decorated class is provided
-    expect(() => injectFeatureVault(undefined as any)).toThrowError(
-      /injectFeatureVault\(\) must be called inside a @FeatureStore\(\)-decorated service/
-    );
+  it('should maintain signal reactivity inside the vault via fromResource', () => {
+    const service = TestBed.inject(TestFeatureService);
+    const vault = service.vault;
 
-    // When a class without metadata is provided
-    class PlainService {}
-    expect(() => injectFeatureVault(PlainService)).toThrowError(
-      /injectFeatureVault\(\) must be called inside a @FeatureStore\(\)-decorated service/
-    );
+    const observed: (TestState | null)[] = [];
+
+    // Watch for changes in vault.state.data()
+    TestBed.runInInjectionContext(() => {
+      effect(() => {
+        const value = vault.state.data();
+        if (value) {
+          observed.push(value);
+        }
+      });
+    });
+
+    // Simulate an observable emitting new state
+    const source$ = of({ count: 2, name: 'Updated' });
+    vault.fromResource!(source$);
+
+    TestBed.tick();
+
+    // Assertions
+    expect(observed.length).toBe(1);
+    expect(observed[0]).toEqual({ count: 2, name: 'Updated' });
+
+    // Verify reactive signal values
+    expect(vault.state.loading()).toBeFalse();
+    expect(vault.state.error()).toBeNull();
   });
 });
