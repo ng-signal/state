@@ -1,12 +1,17 @@
 import { Provider, Type, signal } from '@angular/core';
 import { FeatureDescriptorModel, NormalizedError } from '@ngss/state';
-import { Observable } from 'rxjs';
+import { Observable, take } from 'rxjs';
 import { FEATURE_REGISTRY } from './constants/feature-registry.constant';
+import { CacheConfigModel } from './models/cache-policy.model';
 import { ResourceVaultModel } from './models/resource-vault.model';
 import { getOrCreateFeatureVaultToken } from './tokens/feature-token-registry';
 import { normalizeError } from './utils/normalize-error.util';
 
-export function provideState<Svc, T>(service: Type<Svc>, desc: FeatureDescriptorModel<T>): Provider[] {
+export function provideState<Svc, T>(
+  service: Type<Svc>,
+  desc: FeatureDescriptorModel<T>,
+  cacheConfig: CacheConfigModel = { strategy: 'none' }
+): Provider[] {
   const token = getOrCreateFeatureVaultToken<T>(desc.key);
 
   const vaultProvider: Provider = {
@@ -25,12 +30,29 @@ export function provideState<Svc, T>(service: Type<Svc>, desc: FeatureDescriptor
         );
       }
 
+      const cache = cacheConfig.strategy === 'memory' ? new Map<string, T>() : null;
+
       const _data = signal<T | null>(desc.initial === null || desc.initial === undefined ? null : (desc.initial as T));
 
       // State manipulation helpers
       const _set = (next: Partial<{ loading: boolean; data: T | null; error: NormalizedError | null }>) => {
         if (next.loading !== undefined) _loading.set(next.loading);
-        if (next.data !== undefined) _data.set(next.data);
+        if (next.data !== undefined) {
+          if (cache) {
+            // eslint-disable-next-line
+            const value: any = next.data;
+            if (Array.isArray(value)) {
+              cache.clear();
+              // eslint-disable-next-line
+              value.forEach((item: any) => cache.set(item.id, item));
+              /*
+            } else if (value && typeof value === 'object' && 'id' in value) {
+              cache.set(value.id, value);
+              */
+            }
+          }
+          _data.set(next.data);
+        }
         if (next.error !== undefined) _error.set(next.error);
       };
 
@@ -67,10 +89,18 @@ export function provideState<Svc, T>(service: Type<Svc>, desc: FeatureDescriptor
          * Automatically updates the vault when the resource emits new values.
          */
         fromResource(source$: Observable<T>) {
+          const hasCache = cache?.size || 0 > 0;
+
+          if (hasCache) {
+            return;
+          }
+
           _set({ loading: true, error: null });
 
-          source$.subscribe({
-            next: (value) => _set({ loading: false, data: value }),
+          source$.pipe(take(1)).subscribe({
+            next: (value) => {
+              _set({ loading: false, data: value });
+            },
             error: (err: unknown) => {
               _set({ loading: false, data: null, error: normalizeError(err) });
             },
