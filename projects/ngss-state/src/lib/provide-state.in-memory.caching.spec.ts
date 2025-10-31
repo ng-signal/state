@@ -1,5 +1,5 @@
 import { provideHttpClient } from '@angular/common/http';
-import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
+import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { provideZonelessChangeDetection } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { FeatureDescriptorModel, provideStore } from '@ngss/state';
@@ -14,7 +14,6 @@ interface TestModel {
 
 describe('Vault fromResource() Caching Behavior', () => {
   let providers: any[];
-  let httpMock: HttpTestingController;
   let vault: ResourceVaultModel<TestModel[]>;
 
   beforeEach(() => {
@@ -35,7 +34,6 @@ describe('Vault fromResource() Caching Behavior', () => {
       ]
     }).compileComponents();
 
-    httpMock = TestBed.inject(HttpTestingController);
     const vaultToken = (providers[0] as any).provide;
     vault = TestBed.inject(vaultToken) as ResourceVaultModel<TestModel[]>;
   });
@@ -110,6 +108,7 @@ describe('Vault fromResource() Caching Behavior', () => {
     subject.complete();
     expect(vault.state.loading()).toBeFalse();
   });
+
   it('should return early and preserve data when cache already has data', () => {
     const subject = new Subject<TestModel[]>();
 

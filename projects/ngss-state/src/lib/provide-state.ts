@@ -30,13 +30,15 @@ export function provideState<Svc, T>(
         );
       }
 
-      const cache = cacheConfig.strategy === 'memory' ? new Map<string, T>() : null;
+      // eslint-disable-next-line
+      const cache: Map<string, any> | null = cacheConfig.strategy === 'memory' ? new Map<string, any>() : null;
 
       const _data = signal<T | null>(desc.initial === null || desc.initial === undefined ? null : (desc.initial as T));
 
       // State manipulation helpers
       const _set = (next: Partial<{ loading: boolean; data: T | null; error: NormalizedError | null }>) => {
-        if (next.loading !== undefined) _loading.set(next.loading);
+        if (next.loading !== undefined && _loading() !== next.loading) _loading.set(next.loading);
+        if (next.error !== undefined && _error() !== next.error) _error.set(next.error);
         if (next.data !== undefined) {
           if (cache) {
             // eslint-disable-next-line
@@ -53,7 +55,6 @@ export function provideState<Svc, T>(
           }
           _data.set(next.data);
         }
-        if (next.error !== undefined) _error.set(next.error);
       };
 
       /*
@@ -89,7 +90,7 @@ export function provideState<Svc, T>(
          * Automatically updates the vault when the resource emits new values.
          */
         fromResource(source$: Observable<T>) {
-          const hasCache = cache?.size || 0 > 0;
+          const hasCache = !!(cache && cache.size > 0);
 
           if (hasCache) {
             return;
