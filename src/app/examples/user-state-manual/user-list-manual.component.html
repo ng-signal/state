@@ -21,11 +21,30 @@
 
   <!-- DATA -->
   <div class="user-container">
+    <div class="title">
+      <h3>Reactive Fetch</h3>
+    </div>
+
     @for (user of userList.data(); track user.id) {
       <mat-card class="user-card">
         <mat-card-header>
           <mat-icon mat-card-avatar>person</mat-icon>
           <mat-card-title>{{ user.name }}</mat-card-title>
+          <mat-card-subtitle>ID: {{ user.id }}</mat-card-subtitle>
+        </mat-card-header>
+      </mat-card>
+    }
+  </div>
+
+  <div class="user-container">
+    <div class="title">
+      <h3>Reactive Signal Based Selector</h3>
+    </div>
+    @for (user of usersWithName(); track user.id) {
+      <mat-card class="user-card">
+        <mat-card-header>
+          <mat-icon mat-card-avatar>person</mat-icon>
+          <mat-card-title>{{ user.firstName }} {{ user.lastName }}</mat-card-title>
           <mat-card-subtitle>ID: {{ user.id }}</mat-card-subtitle>
         </mat-card-header>
       </mat-card>

@@ -30,6 +30,114 @@ describe('Service: User State Manual', () => {
     mockHttpClient = TestBed.inject(HttpTestingController);
   });
 
+  describe('usersWithNames', () => {
+    it('should return [] when vault state has no users', () => {
+      const result = service.usersWithNames();
+      expect(result).toEqual([]);
+    });
+
+    it('should compute reversed names when vault state is populated', () => {
+      // Arrange: simulate a setState (real method)
+      const testUsers: UserModel[] = [
+        { id: '1', name: 'Ada Lovelace', firstName: '', lastName: '' },
+        { id: '2', name: 'Alan Turing', firstName: '', lastName: '' },
+        { id: '3', name: 'Grace Hopper', firstName: '', lastName: '' }
+      ];
+
+      // Act: update vault (this is the real reactive store)
+      service['vault'].setState({
+        loading: false,
+        data: testUsers,
+        error: null
+      });
+
+      // Assert: computed selector should reflect reversed names
+      const result = service.usersWithNames();
+
+      expect(result.length).toBe(3);
+      expect(result[0]).toEqual(
+        jasmine.objectContaining({
+          id: '1',
+          name: 'Ada Lovelace',
+          firstName: 'Lovelace',
+          lastName: 'Ada'
+        })
+      );
+      expect(result[1]).toEqual(
+        jasmine.objectContaining({
+          id: '2',
+          name: 'Alan Turing',
+          firstName: 'Turing',
+          lastName: 'Alan'
+        })
+      );
+      expect(result[2]).toEqual(
+        jasmine.objectContaining({
+          id: '3',
+          name: 'Grace Hopper',
+          firstName: 'Hopper',
+          lastName: 'Grace'
+        })
+      );
+    });
+
+    it('should handle single-word names gracefully', () => {
+      service['vault'].setState({
+        loading: false,
+        data: [{ id: '4', name: 'Cher', firstName: '', lastName: '' }],
+        error: null
+      });
+
+      const result = service.usersWithNames();
+
+      expect(result.length).toBe(1);
+      expect(result[0].firstName).toBe('');
+      expect(result[0].lastName).toBe('Cher');
+    });
+
+    it('should recompute reactively when vault data changes', () => {
+      service['vault'].setState({
+        loading: false,
+        data: [{ id: '1', name: 'Ada Lovelace', firstName: '', lastName: '' }],
+        error: null
+      });
+
+      const first = service.usersWithNames();
+      expect(first[0].name).toBe('Ada Lovelace');
+
+      // Update real vault again — signal change should propagate
+      service['vault'].setState({
+        loading: false,
+        data: [{ id: '2', name: 'Alan Turing', firstName: '', lastName: '' }],
+        error: null
+      });
+
+      const second = service.usersWithNames();
+      expect(second[0].name).toBe('Alan Turing');
+    });
+
+    it('should handle no name', () => {
+      service['vault'].setState({
+        loading: false,
+        data: [{ id: '1', name: '', firstName: '', lastName: '' }],
+        error: null
+      });
+
+      const first = service.usersWithNames();
+      expect(first[0].name).toBe('');
+
+      // Update real vault again — signal change should propagate
+      service['vault'].setState({
+        loading: false,
+        data: [{ id: '2', name: '', firstName: '', lastName: '' }],
+        error: null
+      });
+
+      const second = service.usersWithNames();
+      expect(second[0].name).toBe('');
+    });
+  });
+
   describe('users', () => {
     it('should reflect users() based on current state', () => {
       const mockUsers: UserModel[] = [

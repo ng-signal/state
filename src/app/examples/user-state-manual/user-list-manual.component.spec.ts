@@ -63,7 +63,7 @@ describe('Component: User List Manual', () => {
     fixture.detectChanges();
 
     const cards = fixture.debugElement.queryAll(By.css('.user-card'));
-    expect(cards.length).toBe(2);
+    expect(cards.length).toBe(4);
     expect(cards[0].nativeElement.textContent).toContain('Ada Lovelace');
     expect(cards[1].nativeElement.textContent).toContain('Alan Turing');
   });
@@ -102,7 +102,7 @@ describe('Component: User List Manual', () => {
 
     // Should now show the data cards again
     const cards = fixture.debugElement.queryAll(By.css('.user-card'));
-    expect(cards.length).toBe(2);
+    expect(cards.length).toBe(4);
     expect(cards[0].nativeElement.textContent).toContain('Ada Lovelace');
   });
 

@@ -1,5 +1,5 @@
 import { HttpClient } from '@angular/common/http';
-import { inject, Injectable } from '@angular/core';
+import { computed, inject, Injectable } from '@angular/core';
 import { FeatureStore, injectFeatureVault, ResourceSignal } from '@ngss/state';
 import { map, take } from 'rxjs';
 import { UserModel } from '../../models/user.model';
@@ -18,6 +18,21 @@ export class UserStateManualService {
 
     return this.vault.state;
   }
+
+  /** Computed selector that reverses first/last names reactively */
+  readonly usersWithNames = computed(() => {
+    const users = this.vault.state.data();
+    if (!users) return [];
+
+    return users.map((u) => {
+      const [firstName, lastName = ''] = u.name.split(' ');
+      return {
+        ...u,
+        firstName: lastName,
+        lastName: firstName
+      };
+    });
+  });
 
   loadUsers(): void {
     const state = this.vault.state;

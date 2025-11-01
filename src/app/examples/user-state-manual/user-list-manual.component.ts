@@ -4,6 +4,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
 import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { UserListDirective } from '../directive/user-list-base.directive';
 import { UserStateManualService } from './services/user-state-manual.service';
 
 /**
@@ -20,29 +21,14 @@ import { UserStateManualService } from './services/user-state-manual.service';
   templateUrl: './user-list-manual.component.html',
   styleUrls: ['../scss/user-list.scss']
 })
-export class UserListManualComponent {
+export class UserListManualComponent extends UserListDirective {
   /** Header title for the view */
-  title = 'Signal Store Manually Persisted - No Cache';
+  override title = 'Signal Store Manually Persisted - No Cache';
 
   /** Spinner caption shown during manual load operations */
-  spinnerTitle = 'Manual';
-  /**
-   * Injected instance of the user feature store service.
-   */
-  private readonly userState = inject(UserStateManualService);
+  override spinnerTitle = 'Manual';
 
-  /**
-   * Reactive list of users derived from the store.
-   *
-   * - Automatically triggers load when empty.
-   * - Reactively updates as state changes.
-   */
-  readonly userList = this.userState.users();
-
-  /**
-   * Retry handler for re-fetching users after an error.
-   */
-  retry() {
-    this.userState.loadUsers();
+  constructor() {
+    super(inject(UserStateManualService));
   }
 }
