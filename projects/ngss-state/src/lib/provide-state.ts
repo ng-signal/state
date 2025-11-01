@@ -13,7 +13,7 @@ export function provideState<Svc, T>(
   desc: FeatureDescriptorModel<T>,
   cacheConfig: CacheConfigModel = { strategy: 'none' }
 ): Provider[] {
-  const token = getOrCreateFeatureVaultToken<T>(desc.key);
+  const token = getOrCreateFeatureVaultToken<T>(desc.key, false);
 
   const vaultProvider: Provider = {
     provide: token,

@@ -12,12 +12,12 @@ const _featureVaultTokens = new Map<string, ReturnType<typeof FEATURE_VAULT_TOKE
  *
  * @param key The unique feature identifier (matches FeatureDescriptorModel.key)
  */
-export function getOrCreateFeatureVaultToken<T>(key: string) {
+export function getOrCreateFeatureVaultToken<T>(key: string, allowExisting: boolean) {
   const { strict } = getNgssStoreConfig();
 
   if (_featureVaultTokens.has(key)) {
     // istanbul ignore next
-    if (strict) {
+    if (strict && !allowExisting) {
       const existing = _featureVaultTokens.get(key);
       throw new Error(
         `[NGSS] Duplicate FeatureStore key detected: "${key}".\n` +

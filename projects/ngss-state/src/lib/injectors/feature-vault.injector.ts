@@ -19,6 +19,6 @@ export function injectFeatureVault<T>(
     throw new Error(`injectFeatureVault() must be called inside a @FeatureStore()-decorated service.`);
   }
 
-  const token = getOrCreateFeatureVaultToken<T>(key);
+  const token = getOrCreateFeatureVaultToken<T>(key, true);
   return inject(token) as ResourceVaultModel<T>;
 }

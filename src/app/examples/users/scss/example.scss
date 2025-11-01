@@ -27,25 +27,75 @@
     }
   }
 
-  .item-container {
+  .insight-accordion {
     width: 100%;
-    display: flex;
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 1rem;
-    padding-bottom: 1rem;
-    border-bottom: 1px solid black;
+    margin-top: 1rem;
 
-    .header {
-      width: 100%;
-      display: flex;
-      flex-direction: column;
-      align-items: flex-start;
+    .mat-expansion-panel {
+      border-radius: 10px;
+      margin-bottom: 0.75rem;
+      overflow: hidden;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08);
+    }
+
+    .mat-expansion-panel-header {
+      background: linear-gradient(to right, #1976d2, #2196f3);
+      color: white;
+
+      .mat-panel-title {
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+      }
+
+      .mat-panel-description {
+        opacity: 0.9;
+        font-size: 0.9rem;
+      }
     }
 
     .item-card {
-      width: 300px;
-      text-align: left;
+      margin: 0.5rem 0;
+      padding: 0.25rem 0;
+
+      &.alert {
+        background: #fff8e1;
+        border-left: 4px solid #ff9800;
+      }
+
+      &.make-group {
+        background: #f5f5f5;
+      }
+    }
+
+    .no-car-list {
+      h4 {
+        margin-bottom: 0.5rem;
+        font-weight: 500;
+      }
+    }
+
+    .user-line {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.25rem 0;
+
+      mat-icon {
+        color: #757575;
+        font-size: 18px;
+      }
+
+      span {
+        font-weight: 500;
+      }
+    }
+
+    .empty-state {
+      color: #4caf50;
+      font-weight: 500;
+      margin: 0.75rem 0;
     }
   }
 }

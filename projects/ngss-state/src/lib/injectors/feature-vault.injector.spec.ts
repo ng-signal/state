@@ -61,7 +61,7 @@ describe('injectFeatureVault', () => {
     const service = TestBed.inject(TestFeatureService);
 
     // Inject vault manually again using token
-    const token = getOrCreateFeatureVaultToken<TestState>('testFeature');
+    const token = getOrCreateFeatureVaultToken<TestState>('testFeature', false);
     const vaultFromToken = TestBed.inject(token);
 
     expect(vaultFromToken).toBe(service.vault);

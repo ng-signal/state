@@ -27,7 +27,9 @@ export abstract class UserListDirective {
 
   protected readonly userCarFacadeService = inject(UserCarFacadeService);
 
-  readonly usersWithCars = this.userCarFacadeService.usersWithCars();
+  readonly usersWithoutCars = this.userCarFacadeService.usersWithoutCars;
+
+  readonly groupedByMake = this.userCarFacadeService.groupedByMake;
 
   constructor(service: ExampleServiceInterface) {
     this.userState = service;
