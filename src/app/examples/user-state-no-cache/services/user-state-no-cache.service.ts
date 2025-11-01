@@ -2,7 +2,7 @@ import { HttpClient } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
 import { FeatureStore, injectFeatureVault, ResourceSignal } from '@ngss/state';
 import { map } from 'rxjs';
-import { UserModel } from '../models/user.model';
+import { UserModel } from '../../models/user.model';
 
 @FeatureStore<UserModel[]>('user')
 @Injectable({

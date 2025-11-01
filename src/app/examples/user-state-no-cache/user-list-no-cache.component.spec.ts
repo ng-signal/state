@@ -4,14 +4,13 @@ import { provideZonelessChangeDetection } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { By } from '@angular/platform-browser';
 import { provideState, provideStore } from '@ngss/state';
-import { UserModel } from './models/user.model';
-import { UserStateService } from './services/user-state.service';
-import { UserListComponent } from './user-list.component';
+import { UserModel } from '../models/user.model';
+import { UserStateService } from './services/user-state-no-cache.service';
+import { UserListComponent } from './user-list-no-cache.component';
 
-describe('Component: User List', () => {
+describe('Component: User List No Cache', () => {
   let fixture: ComponentFixture<UserListComponent>;
   let component: UserListComponent;
-  let service: UserStateService;
   let httpMock: HttpTestingController;
 
   const mockUsers: UserModel[] = [
@@ -33,7 +32,6 @@ describe('Component: User List', () => {
 
     fixture = TestBed.createComponent(UserListComponent);
     component = fixture.componentInstance;
-    service = TestBed.inject(UserStateService);
     httpMock = TestBed.inject(HttpTestingController);
   });
 

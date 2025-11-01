@@ -10,8 +10,8 @@ import { provideState, provideStore } from '@ngss/state';
 import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
 import { HttpClientInMemoryWebApiModule } from 'angular-in-memory-web-api';
 import { MockApiService } from 'src/testing/mock-api.service';
-import { UserModel } from './examples/user-state/models/user.model';
-import { UserStateService } from './examples/user-state/services/user-state.service';
+import { UserModel } from './examples/models/user.model';
+import { UserStateService } from './examples/user-state-no-cache/services/user-state-no-cache.service';
 import { routes } from './ngss.routes';
 
 /**

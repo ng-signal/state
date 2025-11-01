@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { InMemoryDbService } from 'angular-in-memory-web-api';
-import { UserModel } from 'src/app/examples/user-state/models/user.model';
+import { UserModel } from 'src/app/examples/models/user.model';
 
 /**
  * Mock in-memory API for development and demos.

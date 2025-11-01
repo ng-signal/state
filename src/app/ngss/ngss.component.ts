@@ -23,7 +23,7 @@ import { RouterModule } from '@angular/router';
  *
  * ### Example
  * ```html
- * <app-root>
+ * <ngss-root>
  *   <mat-toolbar color="primary">{{ title }}</mat-toolbar>
  *   <mat-sidenav-container>
  *     <mat-sidenav mode="side" [opened]="opened">
@@ -36,7 +36,7 @@ import { RouterModule } from '@angular/router';
  *       <router-outlet></router-outlet>
  *     </mat-sidenav-content>
  *   </mat-sidenav-container>
- * </app-root>
+ * </ngss-root>
  * ```
  *
  * @remarks
@@ -46,7 +46,7 @@ import { RouterModule } from '@angular/router';
  * @see {@link https://material.angular.io/components/categories|Angular Material Components}
  */
 @Component({
-  selector: 'app-root',
+  selector: 'ngss-root',
   standalone: true,
   imports: [RouterModule, MatToolbarModule, MatSidenavModule, MatListModule, MatIconModule, MatButtonModule],
   templateUrl: './ngss.component.html',

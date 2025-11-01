@@ -1,0 +1,42 @@
+.user-list-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 1rem;
+  gap: 1rem;
+
+  .header {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .loading-state,
+  .error-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: calc(100vh - var(--mat-toolbar-standard-height, 64px));
+    text-align: center;
+
+    mat-icon {
+      font-size: 48px;
+      margin-bottom: 0.5rem;
+    }
+  }
+
+  .user-container {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1rem;
+
+    .user-card {
+      width: 300px;
+      text-align: left;
+    }
+  }
+}

@@ -1,8 +1,12 @@
 const tseslint = require('@typescript-eslint/eslint-plugin');
 const tsParser = require('@typescript-eslint/parser');
 const eslintPluginPrettier = require('eslint-plugin-prettier');
+const angular = require('@angular-eslint/eslint-plugin');
 
 module.exports = [
+  {
+    ignores: ['**/coverage/*']
+  },
   {
     files: ['./src/**/*.ts', './projects/**/*.ts'],
     languageOptions: {
@@ -16,6 +20,7 @@ module.exports = [
     },
     plugins: {
       '@typescript-eslint': tseslint,
+      '@angular-eslint': angular,
       prettier: eslintPluginPrettier
     },
     rules: {
@@ -27,6 +32,22 @@ module.exports = [
         {
           argsIgnorePattern: '^_',
           varsIgnorePattern: '^_'
+        }
+      ],
+      '@angular-eslint/component-selector': [
+        'error',
+        {
+          prefix: 'ngss',
+          style: 'kebab-case',
+          type: 'element'
+        }
+      ],
+      '@angular-eslint/directive-selector': [
+        'error',
+        {
+          prefix: 'ngss',
+          style: 'camelCase',
+          type: 'attribute'
         }
       ]
     }

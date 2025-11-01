@@ -4,32 +4,14 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
 import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
-import { UserStateService } from './services/user-state.service';
+import { UserStateService } from './services/user-state-no-cache.service';
 
-/**
- * Example component that demonstrates how to consume the
- * {@link UserStateService} feature store in a reactive, signal-driven way.
- *
- * Displays:
- * - A loading spinner while users are being fetched.
- * - A list of user cards once data is available.
- * - An error message if the HTTP request fails.
- *
- * @example
- * ```html
- * <app-user-list></app-user-list>
- * ```
- *
- * @remarks
- * This component is standalone and uses Angular Material components for layout.
- * It serves as a live example of the NG Signal Store pattern.
- */
 @Component({
-  selector: 'app-user-list',
+  selector: 'ngss-user-list-no-cache',
   standalone: true,
   imports: [CommonModule, MatCardModule, MatButtonModule, MatIconModule, MatProgressSpinnerModule],
-  templateUrl: './user-list.component.html',
-  styleUrls: ['./user-list.component.scss']
+  templateUrl: './user-list-no-cache.component.html',
+  styleUrls: ['../scss/user-list.scss']
 })
 export class UserListComponent {
   /**

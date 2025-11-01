@@ -9,7 +9,7 @@ import { MatIconModule } from '@angular/material/icon';
  * Optionally shows a subtle Material spinner for polish.
  */
 @Component({
-  selector: 'app-splash-page',
+  selector: 'ngss-splash-page',
   standalone: true,
   imports: [CommonModule, MatIconModule],
   templateUrl: './splash-page.component.html',

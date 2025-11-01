@@ -1,5 +1,5 @@
 import { Routes } from '@angular/router';
-import { UserListComponent } from './examples/user-state/user-list.component';
+import { UserListComponent } from './examples/user-state-no-cache/user-list-no-cache.component';
 import { SplashPageComponent } from './splash-page/splash-page.component';
 
 /**
