@@ -1,4 +1,4 @@
-<div class="user-list-container">
+<div class="list-container">
   <div class="header">
     <h3>{{ title }}</h3>
   </div>
@@ -20,9 +20,9 @@
   }
 
   <!-- DATA -->
-  <div class="user-container">
+  <div class="item-container">
     @for (user of userList.data(); track user.id) {
-      <mat-card class="user-card">
+      <mat-card class="item-card">
         <mat-card-header>
           <mat-icon mat-card-avatar>person</mat-icon>
           <mat-card-title>{{ user.name }}</mat-card-title>
@@ -32,9 +32,9 @@
     }
   </div>
 
-  <div class="user-container">
+  <div class="item-container">
     @for (user of usersWithName(); track user.id) {
-      <mat-card class="user-card">
+      <mat-card class="item-card">
         <mat-card-header>
           <mat-icon mat-card-avatar>person</mat-icon>
           <mat-card-title>{{ user.name }}</mat-card-title>

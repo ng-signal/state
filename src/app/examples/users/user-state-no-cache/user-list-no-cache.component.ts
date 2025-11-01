@@ -19,7 +19,7 @@ import { UserStateNoCacheService } from './services/user-state-no-cache.service'
   standalone: true,
   imports: [CommonModule, MatCardModule, MatButtonModule, MatIconModule, MatProgressSpinnerModule],
   templateUrl: '../html/user-list.component.html',
-  styleUrls: ['../scss/user-list.scss']
+  styleUrls: ['../scss/example.scss']
 })
 export class UserListNoCacheComponent extends UserListDirective {
   /** Header title for the view */

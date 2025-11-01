@@ -2,7 +2,7 @@ import { provideHttpClient } from '@angular/common/http';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { provideZonelessChangeDetection } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
-import { FeatureDescriptorModel, provideStore } from '@ngss/state';
+import { FeatureDescriptorModel } from '@ngss/state';
 import { Observable, Subject } from 'rxjs';
 import { ResourceVaultModel } from '../../../models/resource-vault.model';
 import { provideState } from '../../../provide-state';
@@ -25,13 +25,7 @@ describe('Vault loadListFrom() Caching Behavior', () => {
     providers = provideState(class CacheTestService {}, desc, { strategy: 'memory' });
 
     TestBed.configureTestingModule({
-      providers: [
-        provideHttpClient(),
-        provideHttpClientTesting(),
-        provideZonelessChangeDetection(),
-        provideStore(),
-        ...providers
-      ]
+      providers: [provideHttpClient(), provideHttpClientTesting(), provideZonelessChangeDetection(), ...providers]
     }).compileComponents();
 
     const vaultToken = (providers[0] as any).provide;

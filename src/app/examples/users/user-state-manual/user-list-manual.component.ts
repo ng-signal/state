@@ -19,7 +19,7 @@ import { UserStateManualService } from './services/user-state-manual.service';
   standalone: true,
   imports: [CommonModule, MatCardModule, MatButtonModule, MatIconModule, MatProgressSpinnerModule],
   templateUrl: './user-list-manual.component.html',
-  styleUrls: ['../scss/user-list.scss']
+  styleUrls: ['../scss/example.scss']
 })
 export class UserListManualComponent extends UserListDirective {
   /** Header title for the view */

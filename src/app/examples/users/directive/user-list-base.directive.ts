@@ -1,5 +1,7 @@
-import { Directive, Signal } from '@angular/core';
+import { Directive, inject, Signal } from '@angular/core';
 import { ResourceSignal } from '@ngss/state';
+import { CarService } from '../../cars/services/car.service';
+import { UserCarFacadeService } from '../../facades/car-user.service';
 import { UserModel } from '../../models/user.model';
 import { ExampleServiceInterface } from '../interfaces/example-service.interface';
 
@@ -18,6 +20,14 @@ export abstract class UserListDirective {
   readonly userList: ResourceSignal<UserModel[]>;
 
   readonly usersWithName: Signal<UserModel[]>;
+
+  protected readonly carState = inject(CarService);
+
+  readonly cars = this.carState.cars();
+
+  protected readonly userCarFacadeService = inject(UserCarFacadeService);
+
+  readonly usersWithCars = this.userCarFacadeService.usersWithCars();
 
   constructor(service: ExampleServiceInterface) {
     this.userState = service;

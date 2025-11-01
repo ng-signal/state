@@ -3,7 +3,7 @@ import { HttpTestingController, provideHttpClientTesting } from '@angular/common
 import { provideZonelessChangeDetection } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { By } from '@angular/platform-browser';
-import { provideState, provideStore } from '@ngss/state';
+import { provideState } from '@ngss/state';
 import { UserModel } from '../../models/user.model';
 import { UserStateManualService } from './services/user-state-manual.service';
 import { UserListManualComponent } from './user-list-manual.component';
@@ -25,7 +25,6 @@ describe('Component: User List Manual', () => {
         provideHttpClient(),
         provideHttpClientTesting(),
         provideZonelessChangeDetection(),
-        provideStore(),
         ...provideState(UserStateManualService, { key: 'userManual', initial: null })
       ]
     }).compileComponents();
@@ -62,7 +61,7 @@ describe('Component: User List Manual', () => {
     req.flush(mockUsers);
     fixture.detectChanges();
 
-    const cards = fixture.debugElement.queryAll(By.css('.user-card'));
+    const cards = fixture.debugElement.queryAll(By.css('.item-card'));
     expect(cards.length).toBe(4);
     expect(cards[0].nativeElement.textContent).toContain('Ada Lovelace');
     expect(cards[1].nativeElement.textContent).toContain('Alan Turing');
@@ -101,7 +100,7 @@ describe('Component: User List Manual', () => {
     fixture.detectChanges();
 
     // Should now show the data cards again
-    const cards = fixture.debugElement.queryAll(By.css('.user-card'));
+    const cards = fixture.debugElement.queryAll(By.css('.item-card'));
     expect(cards.length).toBe(4);
     expect(cards[0].nativeElement.textContent).toContain('Ada Lovelace');
   });

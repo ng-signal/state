@@ -1,4 +1,4 @@
-.user-list-container {
+.list-container {
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -27,7 +27,7 @@
     }
   }
 
-  .user-container {
+  .item-container {
     width: 100%;
     display: flex;
     flex-direction: column;
@@ -43,7 +43,7 @@
       align-items: flex-start;
     }
 
-    .user-card {
+    .item-card {
       width: 300px;
       text-align: left;
     }

@@ -1,7 +1,7 @@
 import { InjectionToken } from '@angular/core';
 import { getOrCreateFeatureVaultToken } from './feature-token-registry';
 
-describe('getOrCreateFeatureVaultToken (browser-safe Jasmine)', () => {
+describe('token: getOrCreateFeatureVaultToken', () => {
   beforeEach(() => {
     (getOrCreateFeatureVaultToken as any)._featureVaultTokens?.clear?.();
   });

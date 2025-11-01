@@ -2,7 +2,6 @@ import {
   ClassProvider,
   ExistingProvider,
   FactoryProvider,
-  Provider,
   provideZonelessChangeDetection,
   ValueProvider
 } from '@angular/core';
@@ -12,11 +11,9 @@ import { STORE_ROOT } from './constants/store-root.constant';
 import { provideStore } from './provide-store';
 
 describe('provideStore', () => {
-  let providers: Provider[];
+  let providers = provideStore();
 
   beforeEach(() => {
-    providers = provideStore();
-
     TestBed.configureTestingModule({
       providers: [
         provideZonelessChangeDetection(),

@@ -5,7 +5,7 @@ import { UserStateManualService } from './user-state-manual.service';
 
 import { provideHttpClient } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
-import { provideState, provideStore } from '@ngss/state';
+import { provideState } from '@ngss/state';
 
 describe('Service: User State Manual', () => {
   let service: UserStateManualService;
@@ -18,7 +18,6 @@ describe('Service: User State Manual', () => {
         provideHttpClient(),
         provideHttpClientTesting(),
         provideZonelessChangeDetection(),
-        provideStore(),
         provideState(UserStateManualService, {
           key: 'userManual',
           initial: null // initial vault state shape
