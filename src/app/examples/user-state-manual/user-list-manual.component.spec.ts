@@ -5,12 +5,12 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { By } from '@angular/platform-browser';
 import { provideState, provideStore } from '@ngss/state';
 import { UserModel } from '../models/user.model';
-import { UserStateNoCacheService } from './services/user-state-no-cache.service';
-import { UserListNoCacheComponent } from './user-list-no-cache.component';
+import { UserStateManualService } from './services/user-state-manual.service';
+import { UserListManualComponent } from './user-list-manual.component';
 
-describe('Component: User List No Cache', () => {
-  let fixture: ComponentFixture<UserListNoCacheComponent>;
-  let component: UserListNoCacheComponent;
+describe('Component: User List Manual', () => {
+  let fixture: ComponentFixture<UserListManualComponent>;
+  let component: UserListManualComponent;
   let httpMock: HttpTestingController;
 
   const mockUsers: UserModel[] = [
@@ -20,17 +20,17 @@ describe('Component: User List No Cache', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [UserListNoCacheComponent],
+      imports: [UserListManualComponent],
       providers: [
         provideHttpClient(),
         provideHttpClientTesting(),
         provideZonelessChangeDetection(),
         provideStore(),
-        ...provideState(UserStateNoCacheService, { key: 'userNoCache', initial: null })
+        ...provideState(UserStateManualService, { key: 'userManual', initial: null })
       ]
     }).compileComponents();
 
-    fixture = TestBed.createComponent(UserListNoCacheComponent);
+    fixture = TestBed.createComponent(UserListManualComponent);
     component = fixture.componentInstance;
     httpMock = TestBed.inject(HttpTestingController);
   });
@@ -117,7 +117,7 @@ describe('Component: User List No Cache', () => {
 
     const loadingElement = fixture.debugElement.query(By.css('.loading-state'));
     expect(loadingElement).toBeTruthy();
-    expect(loadingElement.nativeElement.textContent).toContain('Loading users (Reactive) ...');
+    expect(loadingElement.nativeElement.textContent).toContain('Loading users (Manual) ...');
 
     // Complete the request
     req.flush(mockUsers);

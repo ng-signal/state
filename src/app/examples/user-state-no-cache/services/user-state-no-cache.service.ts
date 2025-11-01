@@ -4,12 +4,12 @@ import { FeatureStore, injectFeatureVault, ResourceSignal } from '@ngss/state';
 import { map } from 'rxjs';
 import { UserModel } from '../../models/user.model';
 
-@FeatureStore<UserModel[]>('user')
+@FeatureStore<UserModel[]>('userNoCache')
 @Injectable({
   providedIn: 'root'
 })
-export class UserStateService {
-  private readonly vault = injectFeatureVault<UserModel[]>(UserStateService);
+export class UserStateNoCacheService {
+  private readonly vault = injectFeatureVault<UserModel[]>(UserStateNoCacheService);
 
   private readonly http = inject(HttpClient);
 
@@ -27,17 +27,4 @@ export class UserStateService {
       this.vault.loadListFrom!(source$);
     }
   }
-
-  /*
-  upsert(user: UserModel) {
-    const curr = this.vault.state().entities;
-    this.vault._patch({ entities: { ...curr, [user.id]: user } });
-  }
-
-  remove(id: string) {
-    const { entities, ...rest } = this.vault.state();
-    const { [id]: _, ...remaining } = entities;
-    this.vault._set({ ...rest, entities: remaining });
-  }
-    */
 }

@@ -6,7 +6,7 @@ import { CacheConfigModel } from './models/cache-policy.model';
 import { ResourceVaultModel } from './models/resource-vault.model';
 import { getOrCreateFeatureVaultToken } from './tokens/feature-token-registry';
 import { VaultDataType } from './types/vault-data.type';
-import { normalizeError } from './utils/normalize-error.util';
+import { resourceError } from './utils/resource-error.util';
 
 export function provideState<Svc, T>(
   service: Type<Svc>,
@@ -95,31 +95,33 @@ export function provideState<Svc, T>(
         }
       };
 
-      const _fromResource = (source$: Observable<T>): ResourceSignal<T> => {
-        const _loading = signal(true);
-        const _error = signal<ResourceStateError | null>(null);
-        const _data = signal<VaultDataType<T>>(null);
+      const _fromResource = (source$: Observable<T>): Observable<ResourceSignal<T>> => {
+        return new Observable<ResourceSignal<T>>((observer) => {
+          const _loadingSignal = signal(true);
+          const _errorSignal = signal<ResourceStateError | null>(null);
+          const _dataSignal = signal<VaultDataType<T>>(null);
 
-        source$.pipe(take(1)).subscribe({
-          next: (value) => {
-            _data.set(value);
-            _loading.set(false);
-          },
-          error: (err: unknown) => {
-            _error.set(normalizeError(err));
-            _loading.set(false);
-            _data.set(null);
-          },
-          complete: () => _loading.set(false)
+          source$.pipe(take(1)).subscribe({
+            next: (value) => {
+              _dataSignal.set(value);
+              _loadingSignal.set(false);
+              observer.next({
+                loading: _loadingSignal.asReadonly(),
+                data: _dataSignal.asReadonly(),
+                error: _errorSignal.asReadonly()
+              });
+              observer.complete();
+            },
+            error: (err) => {
+              observer.error(resourceError(err));
+            },
+            complete: () => {
+              _loadingSignal.set(false);
+              observer.complete();
+            }
+          });
         });
-
-        return {
-          loading: _loading.asReadonly(),
-          data: _data.asReadonly(),
-          error: _error.asReadonly()
-        };
       };
-
       const _loadListFrom = (source$: Observable<T>): void => {
         if (cache?.size) return;
 
@@ -130,7 +132,7 @@ export function provideState<Svc, T>(
             _set({ loading: false, data: value });
           },
           error: (err: unknown) => {
-            _set({ loading: false, data: null, error: normalizeError(err) });
+            _set({ loading: false, data: null, error: resourceError(err) });
           },
           complete: () => _set({ loading: false })
         });

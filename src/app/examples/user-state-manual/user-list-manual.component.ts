@@ -4,32 +4,32 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
 import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
-import { UserStateNoCacheService } from './services/user-state-no-cache.service';
+import { UserStateManualService } from './services/user-state-manual.service';
 
 /**
  * @component UserListManualComponent
  *
  * @description
- * The **UserListNoCacheComponent** is a standalone Angular component
- * responsible for displaying a list of users managed via a **automatic signal store**.
+ * The **UserListManualComponent** is a standalone Angular component
+ * responsible for displaying a list of users managed via a **manual signal store**.
  */
 @Component({
-  selector: 'ngss-user-list-no-cache',
+  selector: 'ngss-user-list-manual',
   standalone: true,
   imports: [CommonModule, MatCardModule, MatButtonModule, MatIconModule, MatProgressSpinnerModule],
-  templateUrl: './user-list-no-cache.component.html',
+  templateUrl: './user-list-manual.component.html',
   styleUrls: ['../scss/user-list.scss']
 })
-export class UserListNoCacheComponent {
+export class UserListManualComponent {
   /** Header title for the view */
-  title = 'Signal Store Automatically Persisted - No Cache';
+  title = 'Signal Store Manually Persisted - No Cache';
 
   /** Spinner caption shown during manual load operations */
-  spinnerTitle = 'Reactive';
+  spinnerTitle = 'Manual';
   /**
    * Injected instance of the user feature store service.
    */
-  private readonly userState = inject(UserStateNoCacheService);
+  private readonly userState = inject(UserStateManualService);
 
   /**
    * Reactive list of users derived from the store.

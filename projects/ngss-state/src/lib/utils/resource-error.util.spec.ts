@@ -1,9 +1,9 @@
 import { HttpErrorResponse } from '@angular/common/http';
 import { throwError } from 'rxjs';
-import { normalizeError } from './normalize-error.util';
+import { resourceError } from './resource-error.util';
 import { createResourceSignal } from './resource-signal.util';
 
-describe('Util: normalizeError', () => {
+describe('Util: Resource Error', () => {
   it('should normalize HttpErrorResponse correctly', () => {
     const httpError = new HttpErrorResponse({
       status: 500,
@@ -11,7 +11,7 @@ describe('Util: normalizeError', () => {
       error: 'Internal Failure'
     });
 
-    const result = normalizeError(httpError);
+    const result = resourceError(httpError);
     expect(result).toEqual(
       jasmine.objectContaining({
         message: 'Http failure response for (unknown url): 500 Server Error',
@@ -24,14 +24,14 @@ describe('Util: normalizeError', () => {
 
   it('should normalize generic Error objects', () => {
     const error = new Error('Boom!');
-    const result = normalizeError(error);
+    const result = resourceError(error);
 
     expect(result.message).toBe('Boom!');
     expect(result.details).toContain('Error: Boom');
   });
 
   it('should normalize string errors', () => {
-    const result = normalizeError('Something bad');
+    const result = resourceError('Something bad');
     expect(result).toEqual({
       message: 'Something bad',
       details: 'Something bad'
@@ -40,7 +40,7 @@ describe('Util: normalizeError', () => {
 
   it('should normalize unknown object types', () => {
     const weird = { foo: 'bar' };
-    const result = normalizeError(weird);
+    const result = resourceError(weird);
 
     expect(result).toEqual({
       message: 'Unexpected error',
@@ -49,12 +49,12 @@ describe('Util: normalizeError', () => {
   });
 
   it('should default to Unexpected error for null or undefined', () => {
-    expect(normalizeError(null)).toEqual({
+    expect(resourceError(null)).toEqual({
       message: 'Unexpected error',
       details: null
     });
 
-    expect(normalizeError(undefined)).toEqual({
+    expect(resourceError(undefined)).toEqual({
       message: 'Unexpected error',
       details: undefined
     });
@@ -80,7 +80,7 @@ describe('Util: normalizeError', () => {
     // Manually blank out the message to hit fallback branch
     Object.defineProperty(httpError, 'message', { value: '', writable: false });
 
-    const result = normalizeError(httpError);
+    const result = resourceError(httpError);
     expect(result.message).toBe('Not Found');
     expect(result.status).toBe(404);
     expect(result.statusText).toBe('Not Found');
@@ -92,20 +92,20 @@ describe('Util: normalizeError', () => {
     Object.defineProperty(httpError, 'message', { value: '', writable: false });
     Object.defineProperty(httpError, 'statusText', { value: '', writable: false });
 
-    const result = normalizeError(httpError);
+    const result = resourceError(httpError);
     expect(result.message).toBe('HTTP error');
     expect(result.details).toBe('Oops!');
   });
 
   it('should use "Unexpected error" when Error.message is empty', () => {
     const err = new Error('');
-    const result = normalizeError(err);
+    const result = resourceError(err);
     expect(result.message).toBe('Unexpected error');
     expect(result.details).toContain('Error');
   });
 
   it('should handle numeric error values correctly', () => {
-    const result = normalizeError(404);
+    const result = resourceError(404);
     expect(result).toEqual({
       message: 'Unexpected error',
       details: 404
@@ -113,7 +113,7 @@ describe('Util: normalizeError', () => {
   });
 
   it('should handle boolean error values correctly', () => {
-    const result = normalizeError(false);
+    const result = resourceError(false);
     expect(result).toEqual({
       message: 'Unexpected error',
       details: false

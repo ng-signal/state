@@ -1,14 +1,14 @@
 import { provideZonelessChangeDetection } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { UserModel } from '../../models/user.model';
-import { UserStateNoCacheService } from './user-state-no-cache.service';
+import { UserStateManualService } from './user-state-manual.service';
 
 import { provideHttpClient } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { provideState, provideStore } from '@ngss/state';
 
-describe('Service: User State No Cache', () => {
-  let service: UserStateNoCacheService;
+describe('Service: User State Manual', () => {
+  let service: UserStateManualService;
   let mockHttpClient: HttpTestingController;
 
   beforeEach(async () => {
@@ -19,14 +19,14 @@ describe('Service: User State No Cache', () => {
         provideHttpClientTesting(),
         provideZonelessChangeDetection(),
         provideStore(),
-        provideState(UserStateNoCacheService, {
-          key: 'userNoCache',
+        provideState(UserStateManualService, {
+          key: 'userManual',
           initial: null // initial vault state shape
         })
       ]
     });
 
-    service = TestBed.inject(UserStateNoCacheService);
+    service = TestBed.inject(UserStateManualService);
     mockHttpClient = TestBed.inject(HttpTestingController);
   });
 
@@ -59,7 +59,7 @@ describe('Service: User State No Cache', () => {
   });
 
   describe('loadUsers()', () => {
-    it('should set loading to true, then patch users on success', () => {
+    it('should set loading to true, then set users on success', () => {
       const mockUsers: UserModel[] = [
         { id: '1', name: 'Ada' },
         { id: '2', name: 'Grace' }

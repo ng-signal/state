@@ -5,20 +5,33 @@
       <span class="ml-2">Examples</span>
     </mat-toolbar>
 
-    <mat-nav-list>
-      <a mat-list-item routerLink="/users" routerLinkActive="active">
-        <mat-icon>group</mat-icon>
-        <span>Users</span>
+    <mat-nav-list class="navigation-list">
+      <a mat-list-item routerLink="/users/manual" routerLinkActive="active">
+        <div class="menu-content">
+          <mat-icon>group</mat-icon>
+          <span>Users <span class="type">(Manual)</span></span>
+        </div>
+      </a>
+
+      <a mat-list-item routerLink="/users/no-cache" routerLinkActive="active">
+        <div class="menu-content">
+          <mat-icon>group</mat-icon>
+          <span>Users <span class="type">(No Cache)</span></span>
+        </div>
       </a>
 
       <a mat-list-item routerLink="/settings" routerLinkActive="active">
-        <mat-icon>settings</mat-icon>
-        <span>Settings</span>
+        <div class="menu-content">
+          <mat-icon>settings</mat-icon>
+          <span>Settings</span>
+        </div>
       </a>
 
       <a mat-list-item routerLink="/about" routerLinkActive="active">
-        <mat-icon>info</mat-icon>
-        <span>About</span>
+        <div class="menu-content">
+          <mat-icon>info</mat-icon>
+          <span>About</span>
+        </div>
       </a>
     </mat-nav-list>
   </mat-sidenav>

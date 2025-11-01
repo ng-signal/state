@@ -1,5 +1,6 @@
 import { Routes } from '@angular/router';
-import { UserListComponent } from './examples/user-state-no-cache/user-list-no-cache.component';
+import { UserListManualComponent } from './examples/user-state-manual/user-list-manual.component';
+import { UserListNoCacheComponent } from './examples/user-state-no-cache/user-list-no-cache.component';
 import { SplashPageComponent } from './splash-page/splash-page.component';
 
 /**
@@ -30,7 +31,8 @@ import { SplashPageComponent } from './splash-page/splash-page.component';
  * @see {@link appConfig} for how this routing configuration is registered.
  */
 export const routes: Routes = [
-  { path: 'users', component: UserListComponent },
+  { path: 'users/no-cache', component: UserListNoCacheComponent },
+  { path: 'users/manual', component: UserListManualComponent },
   { path: '', component: SplashPageComponent },
   { path: '**', redirectTo: '' }
 ];

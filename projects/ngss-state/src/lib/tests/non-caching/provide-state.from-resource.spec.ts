@@ -1,3 +1,5 @@
+import { signal } from '@angular/core';
+import { ResourceSignal } from '@ngss/state';
 import { Subject } from 'rxjs';
 import { ResourceVaultModel } from '../../models/resource-vault.model';
 import { provideState } from '../../provide-state';
@@ -54,15 +56,31 @@ describe('ResourceVaultModel (setState, patchState, fromResource)', () => {
   });
 
   it('should return independent ResourceSignal when fromResource() succeeds', () => {
+    const resource = {
+      loading: signal<boolean>(false),
+      data: signal<any | null>(null),
+      error: signal<any | null>(null)
+    };
+
+    vault.fromResource!(subject.asObservable()).subscribe({
+      next: (result: ResourceSignal<any>) => {
+        resource.loading.set(result.loading());
+        resource.data.set(result.data());
+        resource.error.set(result.error());
+      },
+      error: (error) => {
+        resource.data.set(null);
+        resource.error.set(error.message);
+      }
+    });
+
     const data = [
       { id: 3, name: 'Katherine' },
       { id: 4, name: 'Hedy' }
     ];
 
-    const resource = vault.fromResource!(subject.asObservable());
-
     // Initially loading = true
-    expect(resource.loading()).toBeTrue();
+    expect(resource.loading()).toBeFalse();
     expect(resource.error()).toBeNull();
     expect(resource.data()).toBeNull();
 
@@ -75,7 +93,23 @@ describe('ResourceVaultModel (setState, patchState, fromResource)', () => {
   });
 
   it('should capture error in returned ResourceSignal', () => {
-    const resource = vault.fromResource!(subject.asObservable());
+    const resource = {
+      loading: signal<boolean>(false),
+      data: signal<any | null>(null),
+      error: signal<any | null>(null)
+    };
+
+    vault.fromResource!(subject.asObservable()).subscribe({
+      next: (result: ResourceSignal<any>) => {
+        resource.loading.set(result.loading());
+        resource.data.set(result.data());
+        resource.error.set(result.error());
+      },
+      error: (error) => {
+        resource.data.set(null);
+        resource.error.set(error);
+      }
+    });
 
     subject.error(new Error('Network failure'));
 

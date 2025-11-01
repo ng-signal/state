@@ -2,7 +2,7 @@ import { signal } from '@angular/core';
 import { ResourceStateError } from '@ngss/state';
 import { Observable } from 'rxjs';
 import { ResourceSignal } from '../models/resource-signal.model';
-import { normalizeError } from './normalize-error.util';
+import { resourceError } from './resource-error.util';
 
 /**
  * Creates a reactive `ResourceSignal` that mirrors the lifecycle
@@ -26,7 +26,7 @@ export function createResourceSignal<T>(source$: Observable<T>): ResourceSignal<
       error.set(null);
     },
     error: (err: unknown) => {
-      error.set(normalizeError(err));
+      error.set(resourceError(err));
       data.set(null);
       loading.set(false);
     },
