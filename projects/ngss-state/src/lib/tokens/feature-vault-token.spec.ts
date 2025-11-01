@@ -1,5 +1,5 @@
 import { InjectionToken } from '@angular/core';
-import { FeatureVaultModel } from '../models/feature-vault.model';
+import { ResourceVaultModel } from '../models/resource-vault.model';
 import { FEATURE_VAULT_TOKEN } from './feature-vault-token';
 
 describe('FEATURE_VAULT_TOKEN', () => {
@@ -24,8 +24,8 @@ describe('FEATURE_VAULT_TOKEN', () => {
   });
 
   it('should produce distinct tokens even for the same key (by design)', () => {
-    const token1 = FEATURE_VAULT_TOKEN<FeatureVaultModel<any>>('duplicate');
-    const token2 = FEATURE_VAULT_TOKEN<FeatureVaultModel<any>>('duplicate');
+    const token1 = FEATURE_VAULT_TOKEN<ResourceVaultModel<any>>('duplicate');
+    const token2 = FEATURE_VAULT_TOKEN<ResourceVaultModel<any>>('duplicate');
 
     // Same key, but different instances
     expect(token1).not.toBe(token2);
@@ -40,7 +40,7 @@ describe('FEATURE_VAULT_TOKEN', () => {
     // Runtime shape check
     expect(token.toString()).toContain('NGSS_FEATURE_VAULT:counter');
     // TypeScript should infer correctly; this ensures compile-time safety.
-    const assign: InjectionToken<FeatureVaultModel<TestModel>> = token;
+    const assign: InjectionToken<ResourceVaultModel<TestModel>> = token;
     expect(assign).toBe(token);
   });
 });

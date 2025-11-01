@@ -3,9 +3,9 @@ import { provideZonelessChangeDetection } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { FeatureDescriptorModel } from '@ngss/state';
 import { of, Subject, throwError } from 'rxjs';
-import { FEATURE_REGISTRY } from './constants/feature-registry.constant';
-import { ResourceVaultModel } from './models/resource-vault.model';
-import { provideState } from './provide-state';
+import { FEATURE_REGISTRY } from '../../constants/feature-registry.constant';
+import { ResourceVaultModel } from '../../models/resource-vault.model';
+import { provideState } from '../../provide-state';
 
 /** Dummy feature service and model for testing */
 class TestFeatureService {}
@@ -14,7 +14,7 @@ interface TestModel {
   name: string;
 }
 
-describe('provideState (vault lifecycle)', () => {
+describe('function: provideState - loadListFrom', () => {
   let providers: any[];
   let desc: FeatureDescriptorModel<TestModel[]>;
   let vault: ResourceVaultModel<TestModel[]>;
@@ -44,7 +44,7 @@ describe('provideState (vault lifecycle)', () => {
 
     it('should update loading and data when observable emits successfully', () => {
       const subject = new Subject<TestModel[]>();
-      vault.fromResource!(subject.asObservable());
+      vault.loadListFrom!(subject.asObservable());
 
       // Initially, loading should be true
       expect(vault.state.loading()).toBeTrue();
@@ -90,7 +90,7 @@ describe('provideState (vault lifecycle)', () => {
 
     it('should handle generic Error correctly', () => {
       const err = new Error('Boom!');
-      vault.fromResource!(throwError(() => err));
+      vault.loadListFrom!(throwError(() => err));
 
       expect(vault.state.loading()).toBeFalse();
       expect(vault.state.data()).toBeNull();
@@ -101,7 +101,7 @@ describe('provideState (vault lifecycle)', () => {
 
     it('should update state correctly on immediate observable', () => {
       const newData = [{ id: 10, name: 'Instant' }];
-      vault.fromResource!(of(newData));
+      vault.loadListFrom!(of(newData));
 
       expect(vault.state.loading()).toBeFalse();
       expect(vault.state.data()).toEqual(newData);
@@ -110,7 +110,7 @@ describe('provideState (vault lifecycle)', () => {
 
     it('should keep loading false after observable completes', () => {
       const subject = new Subject<TestModel[]>();
-      vault.fromResource!(subject.asObservable());
+      vault.loadListFrom!(subject.asObservable());
 
       expect(vault.state.loading()).toBeTrue();
 
@@ -165,7 +165,7 @@ describe('provideState (vault lifecycle)', () => {
       vault = TestBed.inject(vaultToken) as ResourceVaultModel<TestModel[]>;
     });
 
-    it('should handle errors emitted by fromResource and normalize them', () => {
+    it('should handle errors emitted by loadListFrom and normalize them', () => {
       // Simulate an HttpErrorResponse being emitted
       const errorResponse = new HttpErrorResponse({
         status: 500,
@@ -174,7 +174,7 @@ describe('provideState (vault lifecycle)', () => {
       });
 
       const source$ = throwError(() => errorResponse);
-      vault.fromResource!(source$);
+      vault.loadListFrom!(source$);
 
       const err = vault.state.error();
       expect(err?.message).toContain('Server Error');

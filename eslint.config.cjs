@@ -20,6 +20,7 @@ module.exports = [
     },
     rules: {
       ...tseslint.configs.recommended.rules,
+      'no-console': 2,
       'prettier/prettier': 'error',
       '@typescript-eslint/no-unused-vars': [
         'error',

@@ -1,9 +1,9 @@
 import { effect, provideZonelessChangeDetection } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
-import { FeatureDescriptorModel, FeatureVaultModel } from '@ngss/state';
 import 'reflect-metadata';
 import { of } from 'rxjs';
 import { NGSS_METADATA_KEYS } from '../constants/metadata-keys.constant';
+import { FeatureDescriptorModel } from '../models/feature-descriptor.model';
 import { provideState } from '../provide-state';
 import { getOrCreateFeatureVaultToken } from '../tokens/feature-token-registry';
 import { injectFeatureVault } from './feature-vault.injector';
@@ -22,7 +22,6 @@ class TestFeatureService {
 Reflect.defineMetadata(NGSS_METADATA_KEYS.FEATURE_KEY, 'testFeature', TestFeatureService);
 
 describe('injectFeatureVault', () => {
-  let vault: FeatureVaultModel<TestState>;
   let desc: FeatureDescriptorModel<TestState>;
 
   beforeEach(() => {
@@ -34,10 +33,6 @@ describe('injectFeatureVault', () => {
     TestBed.configureTestingModule({
       providers: [provideZonelessChangeDetection(), ...provideState(TestFeatureService, desc)]
     });
-
-    // Resolve vault directly using injector
-    const token = getOrCreateFeatureVaultToken<TestState>('testFeature');
-    vault = TestBed.inject(token) as FeatureVaultModel<TestState>;
   });
 
   it('should inject the correct vault instance for a decorated service', () => {
@@ -72,7 +67,7 @@ describe('injectFeatureVault', () => {
     expect(vaultFromToken).toBe(service.vault);
   });
 
-  it('should maintain signal reactivity inside the vault via fromResource', () => {
+  it('should maintain signal reactivity inside the vault via loadListFrom', () => {
     const service = TestBed.inject(TestFeatureService);
     const vault = service.vault;
 
@@ -90,7 +85,7 @@ describe('injectFeatureVault', () => {
 
     // Simulate an observable emitting new state
     const source$ = of({ count: 2, name: 'Updated' });
-    vault.fromResource!(source$);
+    vault.loadListFrom!(source$);
 
     TestBed.tick();
 

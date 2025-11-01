@@ -4,15 +4,15 @@ import { provideZonelessChangeDetection } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { FeatureDescriptorModel, provideStore } from '@ngss/state';
 import { Observable, Subject } from 'rxjs';
-import { ResourceVaultModel } from './models/resource-vault.model';
-import { provideState } from './provide-state';
+import { ResourceVaultModel } from '../../../models/resource-vault.model';
+import { provideState } from '../../../provide-state';
 
 interface TestModel {
   id: number;
   name: string;
 }
 
-describe('Vault fromResource() Caching Behavior', () => {
+describe('Vault loadListFrom() Caching Behavior', () => {
   let providers: any[];
   let vault: ResourceVaultModel<TestModel[]>;
 
@@ -40,7 +40,7 @@ describe('Vault fromResource() Caching Behavior', () => {
 
   it('should populate cache after successful HTTP fetch', () => {
     const subject = new Subject<TestModel[]>();
-    vault.fromResource!(subject.asObservable());
+    vault.loadListFrom!(subject.asObservable());
 
     // Initially, loading should be true
     expect(vault.state.loading()).toBeTrue();
@@ -65,7 +65,7 @@ describe('Vault fromResource() Caching Behavior', () => {
 
   it('should return early if cache already has data', () => {
     const subject = new Subject<TestModel[]>();
-    vault.fromResource!(subject.asObservable());
+    vault.loadListFrom!(subject.asObservable());
 
     // Initially, loading should be true
     expect(vault.state.loading()).toBeTrue();
@@ -84,7 +84,7 @@ describe('Vault fromResource() Caching Behavior', () => {
       { id: 2, name: 'Ada' },
       { id: 3, name: 'Grace' }
     ];
-    vault.fromResource!(subject.asObservable());
+    vault.loadListFrom!(subject.asObservable());
     subject.next(newValue);
 
     // Verify update
@@ -96,7 +96,7 @@ describe('Vault fromResource() Caching Behavior', () => {
       { id: 4, name: 'Bruce' },
       { id: 5, name: 'Wayne' }
     ];
-    vault.fromResource!(subject.asObservable());
+    vault.loadListFrom!(subject.asObservable());
     subject.next(notUpdatedValues);
 
     // Verify update
@@ -112,7 +112,7 @@ describe('Vault fromResource() Caching Behavior', () => {
   it('should return early and preserve data when cache already has data', () => {
     const subject = new Subject<TestModel[]>();
 
-    vault.fromResource!(subject.asObservable());
+    vault.loadListFrom!(subject.asObservable());
 
     // Initial state
     expect(vault.state.loading()).toBeTrue();
@@ -133,7 +133,7 @@ describe('Vault fromResource() Caching Behavior', () => {
     expect(vault.state.data()).toEqual(initialData);
 
     const newSubject = new Observable<TestModel[]>((observer) => {
-      fail('fromResource should not re-subscribe when cache already exists');
+      fail('loadListFrom should not re-subscribe when cache already exists');
       observer.next([
         { id: 3, name: 'Bruce' },
         { id: 4, name: 'Wayne' }
@@ -141,7 +141,7 @@ describe('Vault fromResource() Caching Behavior', () => {
       observer.complete();
     });
 
-    vault.fromResource!(newSubject);
+    vault.loadListFrom!(newSubject);
 
     // Verify state unchanged (from cache)
     expect(vault.state.loading()).toBeFalse();

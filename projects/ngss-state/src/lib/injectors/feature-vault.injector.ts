@@ -1,6 +1,6 @@
 import { inject } from '@angular/core';
 import { NGSS_METADATA_KEYS } from '../constants/metadata-keys.constant';
-import { FeatureVaultModel } from '../models/feature-vault.model';
+import { ResourceVaultModel } from '../models/resource-vault.model';
 import { getOrCreateFeatureVaultToken } from '../tokens/feature-token-registry';
 
 /**
@@ -12,7 +12,7 @@ import { getOrCreateFeatureVaultToken } from '../tokens/feature-token-registry';
  */
 export function injectFeatureVault<T>(
   featureClass?: abstract new (...args: unknown[]) => object
-): FeatureVaultModel<T> {
+): ResourceVaultModel<T> {
   const key = featureClass ? Reflect.getMetadata(NGSS_METADATA_KEYS.FEATURE_KEY, featureClass) : undefined;
 
   if (!key) {
@@ -20,5 +20,5 @@ export function injectFeatureVault<T>(
   }
 
   const token = getOrCreateFeatureVaultToken<T>(key);
-  return inject(token) as FeatureVaultModel<T>;
+  return inject(token) as ResourceVaultModel<T>;
 }

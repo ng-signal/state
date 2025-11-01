@@ -24,7 +24,7 @@ export class UserStateService {
 
     if (!state.data() && !state.loading()) {
       const source$ = this.http.get<UserModel[]>('/api/users').pipe(map((list: UserModel[]) => list));
-      this.vault.fromResource!(source$);
+      this.vault.loadListFrom!(source$);
     }
   }
 
