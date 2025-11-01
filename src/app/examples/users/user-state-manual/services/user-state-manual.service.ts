@@ -1,15 +1,15 @@
 import { HttpClient } from '@angular/common/http';
 import { computed, inject, Injectable } from '@angular/core';
 import { FeatureStore, injectFeatureVault, ResourceSignal } from '@ngss/state';
-import { map } from 'rxjs';
-import { UserModel } from '../../models/user.model';
+import { map, take } from 'rxjs';
+import { UserModel } from '../../../models/user.model';
 
-@FeatureStore<UserModel[]>('userNoCache')
+@FeatureStore<UserModel[]>('userManual')
 @Injectable({
   providedIn: 'root'
 })
-export class UserStateNoCacheService {
-  private readonly vault = injectFeatureVault<UserModel[]>(UserStateNoCacheService);
+export class UserStateManualService {
+  private readonly vault = injectFeatureVault<UserModel[]>(UserStateManualService);
 
   private readonly http = inject(HttpClient);
 
@@ -28,8 +28,8 @@ export class UserStateNoCacheService {
       const [firstName, lastName = ''] = u.name.split(' ');
       return {
         ...u,
-        firstName,
-        lastName
+        firstName: lastName,
+        lastName: firstName
       };
     });
   });
@@ -38,8 +38,28 @@ export class UserStateNoCacheService {
     const state = this.vault.state;
 
     if (!state.data() && !state.loading()) {
+      this.vault.setState({
+        loading: true,
+        error: null
+      });
       const source$ = this.http.get<UserModel[]>('/api/users').pipe(map((list: UserModel[]) => list));
-      this.vault.loadListFrom!(source$);
+      this.vault.fromResource!(source$)
+        .pipe(take(1))
+        .subscribe({
+          next: (state: ResourceSignal<UserModel[]>) => {
+            this.vault.setState({
+              loading: false,
+              data: state.data(),
+              error: null
+            });
+          },
+          error: (err) => {
+            this.vault.setState({
+              loading: false,
+              error: err
+            });
+          }
+        });
     }
   }
 }

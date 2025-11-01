@@ -4,7 +4,7 @@ import { provideZonelessChangeDetection } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { By } from '@angular/platform-browser';
 import { provideState, provideStore } from '@ngss/state';
-import { UserModel } from '../models/user.model';
+import { UserModel } from '../../models/user.model';
 import { UserStateManualService } from './services/user-state-manual.service';
 import { UserListManualComponent } from './user-list-manual.component';
 

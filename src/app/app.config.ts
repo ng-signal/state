@@ -5,14 +5,12 @@ import {
   provideZonelessChangeDetection
 } from '@angular/core';
 import { provideRouter } from '@angular/router';
-import { provideState, provideStore } from '@ngss/state';
+import { provideStore } from '@ngss/state';
 
 import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
 import { HttpClientInMemoryWebApiModule } from 'angular-in-memory-web-api';
 import { MockApiService } from 'src/testing/mock-api.service';
-import { UserModel } from './examples/models/user.model';
-import { UserStateManualService } from './examples/user-state-manual/services/user-state-manual.service';
-import { UserStateNoCacheService } from './examples/user-state-no-cache/services/user-state-no-cache.service';
+import { NGSS_STATES } from './inital-states/application-states';
 import { routes } from './ngss.routes';
 
 /**
@@ -43,12 +41,6 @@ import { routes } from './ngss.routes';
  * bootstrapApplication(App, appConfig);
  * ```
  */
-const initialUsers: UserModel[] | null = null;
-
-export const USER_PROVIDERS = [
-  provideState(UserStateNoCacheService, { key: 'userNoCache', initial: initialUsers }),
-  provideState(UserStateManualService, { key: 'userManual', initial: initialUsers })
-];
 
 /**
  * Global application configuration object.
@@ -84,7 +76,7 @@ export const appConfig: ApplicationConfig = {
      * Registers the 'user' feature state using the UserStateService.
      * Seeds the feature with its initial state object.
      */
-    ...USER_PROVIDERS,
+    ...NGSS_STATES,
 
     /**
      * Configures Angular's built-in **HttpClient** with dependency-injected interceptors.

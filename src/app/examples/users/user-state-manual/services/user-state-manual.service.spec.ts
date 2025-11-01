@@ -1,6 +1,6 @@
 import { provideZonelessChangeDetection } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
-import { UserModel } from '../../models/user.model';
+import { UserModel } from '../../../models/user.model';
 import { UserStateManualService } from './user-state-manual.service';
 
 import { provideHttpClient } from '@angular/common/http';

@@ -1,7 +1,7 @@
 import { Directive, Signal } from '@angular/core';
 import { ResourceSignal } from '@ngss/state';
+import { UserModel } from '../../models/user.model';
 import { ExampleServiceInterface } from '../interfaces/example-service.interface';
-import { UserModel } from '../models/user.model';
 
 @Directive()
 export abstract class UserListDirective {
