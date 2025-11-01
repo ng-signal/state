@@ -1,9 +1,9 @@
 import { HttpErrorResponse } from '@angular/common/http';
-import { NormalizedError } from '../models/resource-signal.normalized-error.model';
+import { ResourceStateError } from '../models/resource-state-error.model';
 
 /**
  * Converts any kind of error (HTTP, Error, string, or object)
- * into a structured {@link NormalizedError} format.
+ * into a structured {@link ResourceStateError} format.
  *
  * This function is used internally by the vault and resource utilities
  * to unify error handling across all reactive state operations.
@@ -17,7 +17,7 @@ import { NormalizedError } from '../models/resource-signal.normalized-error.mode
  * console.log(normalized.message); // 'HTTP error'
  * ```
  */
-export function normalizeError(err: unknown): NormalizedError {
+export function normalizeError(err: unknown): ResourceStateError {
   if (err instanceof HttpErrorResponse) {
     return {
       message: err.message || err.statusText || 'HTTP error',

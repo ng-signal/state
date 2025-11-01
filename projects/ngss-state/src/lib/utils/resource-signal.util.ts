@@ -1,5 +1,5 @@
 import { signal } from '@angular/core';
-import { NormalizedError } from '@ngss/state';
+import { ResourceStateError } from '@ngss/state';
 import { Observable } from 'rxjs';
 import { ResourceSignal } from '../models/resource-signal.model';
 import { normalizeError } from './normalize-error.util';
@@ -15,7 +15,7 @@ import { normalizeError } from './normalize-error.util';
 export function createResourceSignal<T>(source$: Observable<T>): ResourceSignal<T> {
   const loading = signal(false);
   const data = signal<T | null>(null);
-  const error = signal<NormalizedError | null>(null);
+  const error = signal<ResourceStateError | null>(null);
 
   loading.set(true);
   error.set(null);

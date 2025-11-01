@@ -1,5 +1,5 @@
 import { Provider, Type, signal } from '@angular/core';
-import { FeatureDescriptorModel, NormalizedError, ResourceSignal } from '@ngss/state';
+import { FeatureDescriptorModel, ResourceSignal, ResourceStateError } from '@ngss/state';
 import { Observable, take } from 'rxjs';
 import { FEATURE_REGISTRY } from './constants/feature-registry.constant';
 import { CacheConfigModel } from './models/cache-policy.model';
@@ -19,7 +19,7 @@ export function provideState<Svc, T>(
     provide: token,
     useFactory: (): ResourceVaultModel<T> => {
       const _loading = signal(false);
-      const _error = signal<NormalizedError | null>(null);
+      const _error = signal<ResourceStateError | null>(null);
 
       // Prevent incorrect initialization (e.g., passing a resource object)
       // eslint-disable-next-line
@@ -39,7 +39,7 @@ export function provideState<Svc, T>(
       );
 
       // State manipulation helpers
-      const _set = (next: Partial<{ loading: boolean; data: VaultDataType<T>; error: NormalizedError | null }>) => {
+      const _set = (next: Partial<{ loading: boolean; data: VaultDataType<T>; error: ResourceStateError | null }>) => {
         if (next.loading !== undefined && _loading() !== next.loading) _loading.set(next.loading);
         if (next.error !== undefined && _error() !== next.error) _error.set(next.error);
         if (next.data !== undefined) {
@@ -61,7 +61,7 @@ export function provideState<Svc, T>(
       };
 
       const _patch = (
-        partial: Partial<{ loading: boolean; data: VaultDataType<T>; error: NormalizedError | null }>
+        partial: Partial<{ loading: boolean; data: VaultDataType<T>; error: ResourceStateError | null }>
       ): void => {
         if (partial.loading !== undefined) {
           _loading.set(partial.loading);
@@ -97,7 +97,7 @@ export function provideState<Svc, T>(
 
       const _fromResource = (source$: Observable<T>): ResourceSignal<T> => {
         const _loading = signal(true);
-        const _error = signal<NormalizedError | null>(null);
+        const _error = signal<ResourceStateError | null>(null);
         const _data = signal<VaultDataType<T>>(null);
 
         source$.pipe(take(1)).subscribe({
