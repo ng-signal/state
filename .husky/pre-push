@@ -7,8 +7,8 @@ npm run test:coverage:app || {
   exit 1
 }
 
-npm run test:coverage:state || {
-  printf "\n\nERROR: Test Coverage issues were found in the 'state' committed files. Please address them before proceeding.\n\n\n\n"
+npm run test:coverage:core || {
+  printf "\n\nERROR: Test Coverage issues were found in the 'core' committed files. Please address them before proceeding.\n\n\n\n"
   exit 1
 }
 
