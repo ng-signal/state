@@ -1,4 +1,4 @@
 // store-config.ts
-export interface NgssStoreConfigModel {
+export interface NgVaultConfigModel {
   strict: boolean;
 }

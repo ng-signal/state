@@ -1,6 +1,6 @@
 import { Routes } from '@angular/router';
-import { UserListManualComponent } from './examples/users/user-state-manual/user-list-manual.component';
-import { UserListNoCacheComponent } from './examples/users/user-state-no-cache/user-list-no-cache.component';
+import { UserListManualComponent } from './examples/users/user-cell-manual/user-list-manual.component';
+import { UserListNoCacheComponent } from './examples/users/user-cell-no-cache/user-list-no-cache.component';
 import { SplashPageComponent } from './splash-page/splash-page.component';
 
 /**

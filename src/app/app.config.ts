@@ -5,48 +5,14 @@ import {
   provideZonelessChangeDetection
 } from '@angular/core';
 import { provideRouter } from '@angular/router';
-import { provideStore } from '@ngss/state';
+import { provideVault } from '@ngvault/core';
 
 import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
 import { HttpClientInMemoryWebApiModule } from 'angular-in-memory-web-api';
 import { MockApiService } from 'src/testing/mock-api.service';
-import { NGSS_STATES } from './inital-states/application-states';
-import { routes } from './ngss.routes';
+import { NGVAULT_CELLS } from './inital-cells/application-cells';
+import { routes } from './ngvault.routes';
 
-/**
- * Root **application configuration** for the NG Signal Store example app.
- *
- * The `appConfig` object defines all top-level Angular providers that
- * configure the runtime environment, routing, error handling, and state
- * management for the application.
- *
- * This configuration is passed directly to Angular’s
- * `bootstrapApplication()` function to initialize the application
- * without using a traditional `AppModule`.
- *
- * @remarks
- * - Uses **zoneless change detection** to take full advantage of
- *   Angular Signals.
- * - Sets up **global error listeners** for browser-level error handling.
- * - Configures the **router** with application routes.
- * - Initializes the **NG Signal Store** root context and registers
- *   the `UserStateService` as a feature.
- *
- * @example
- * ```ts
- * import { bootstrapApplication } from '@angular/platform-browser';
- * import { App } from './app.component';
- * import { appConfig } from './app.config';
- *
- * bootstrapApplication(App, appConfig);
- * ```
- */
-
-/**
- * Global application configuration object.
- *
- * Includes core Angular platform providers and NG Signal Store setup.
- */
 export const appConfig: ApplicationConfig = {
   providers: [
     /**
@@ -70,13 +36,13 @@ export const appConfig: ApplicationConfig = {
      * Initializes the root NG Signal Store context.
      * Provides the global store registry and root configuration.
      */
-    provideStore(),
+    provideVault(),
 
     /**
      * Registers the 'user' feature state using the UserStateService.
      * Seeds the feature with its initial state object.
      */
-    ...NGSS_STATES,
+    ...NGVAULT_CELLS,
 
     /**
      * Configures Angular's built-in **HttpClient** with dependency-injected interceptors.

@@ -1,8 +1,8 @@
 import { signal } from '@angular/core';
-import { ResourceSignal } from '@ngss/state';
+import { ResourceSignal } from '@ngvault/core';
 import { Subject } from 'rxjs';
 import { ResourceVaultModel } from '../../models/resource-vault.model';
-import { provideState } from '../../provide-state';
+import { provideFeatureCell } from '../../provide-feature-cell';
 
 interface TestModel {
   id: number;
@@ -14,7 +14,7 @@ describe('ResourceVaultModel (setState, patchState, fromResource)', () => {
   let subject: Subject<TestModel[]>;
 
   beforeEach(() => {
-    const providers = provideState(class TestService {}, { key: 'test', initial: [] });
+    const providers = provideFeatureCell(class TestService {}, { key: 'test', initial: [] });
     const vaultFactory = (providers[0] as any).useFactory;
     vault = vaultFactory();
     subject = new Subject<TestModel[]>();
@@ -47,7 +47,7 @@ describe('ResourceVaultModel (setState, patchState, fromResource)', () => {
   });
 
   it('should shallow merge objects when patchState() is called with object data', () => {
-    const providers = provideState(class ObjService {}, { key: 'obj', initial: { id: 1, name: 'Ada' } });
+    const providers = provideFeatureCell(class ObjService {}, { key: 'obj', initial: { id: 1, name: 'Ada' } });
     const vaultFactory = (providers[0] as any).useFactory;
     const objVault = vaultFactory();
 

@@ -9,8 +9,8 @@
     "noPropertyAccessFromIndexSignature": true,
     "noImplicitReturns": true,
     "paths": {
-      "@ngss/state": ["projects/ngss-state/src/public-api"],
-      "@ngss/state/*": ["projects/ngss-state/src/lib/*"]
+      "@ngvault/core": ["projects/ngss-state/src/public-api"],
+      "@ngvault/core/*": ["projects/ngss-state/src/lib/*"]
     },
     "noFallthroughCasesInSwitch": true,
     "skipLibCheck": true,

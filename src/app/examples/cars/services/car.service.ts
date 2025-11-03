@@ -1,15 +1,15 @@
 import { HttpClient } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
-import { FeatureStore, injectFeatureVault, ResourceSignal } from '@ngss/state';
+import { FeatureCell, injectVault, ResourceSignal } from '@ngvault/core';
 import { map, take } from 'rxjs';
 import { CarModel } from '../../models/car.model';
 
-@FeatureStore<CarModel[]>('cars')
+@FeatureCell<CarModel[]>('cars')
 @Injectable({
   providedIn: 'root'
 })
 export class CarService {
-  private readonly vault = injectFeatureVault<CarModel[]>(CarService);
+  private readonly vault = injectVault<CarModel[]>(CarService);
 
   private readonly http = inject(HttpClient);
 

@@ -1,24 +1,17 @@
 import { inject } from '@angular/core';
-import { NGSS_METADATA_KEYS } from '../constants/metadata-keys.constant';
+import { NGVAULT_METADATA_KEYS } from '../constants/metadata-keys.constant';
 import { ResourceVaultModel } from '../models/resource-vault.model';
-import { getOrCreateFeatureVaultToken } from '../tokens/feature-token-registry';
+import { getOrCreateFeatureCellToken } from '../tokens/feature-cell-token-registry';
 
-/**
- * Injects the feature-specific vault (`FeatureVaultModel<T>`)
- * for a service decorated with `@FeatureStore()`.
- *
- * @param featureClass The decorated feature store class.
- * @returns The vault instance associated with the feature key.
- */
-export function injectFeatureVault<T>(
-  featureClass?: abstract new (...args: unknown[]) => object
-): ResourceVaultModel<T> {
-  const key = featureClass ? Reflect.getMetadata(NGSS_METADATA_KEYS.FEATURE_KEY, featureClass) : undefined;
+export function injectVault<T>(featureCellClass?: abstract new (...args: unknown[]) => object): ResourceVaultModel<T> {
+  const key = featureCellClass
+    ? Reflect.getMetadata(NGVAULT_METADATA_KEYS.FEATURE_CELL_KEY, featureCellClass)
+    : undefined;
 
   if (!key) {
-    throw new Error(`injectFeatureVault() must be called inside a @FeatureStore()-decorated service.`);
+    throw new Error(`injectVault() must be called inside a @FeatureCell()-decorated service.`);
   }
 
-  const token = getOrCreateFeatureVaultToken<T>(key, true);
+  const token = getOrCreateFeatureCellToken<T>(key, true);
   return inject(token) as ResourceVaultModel<T>;
 }

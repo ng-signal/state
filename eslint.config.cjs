@@ -37,7 +37,7 @@ module.exports = [
       '@angular-eslint/component-selector': [
         'error',
         {
-          prefix: 'ngss',
+          prefix: 'ngvault',
           style: 'kebab-case',
           type: 'element'
         }
@@ -45,7 +45,7 @@ module.exports = [
       '@angular-eslint/directive-selector': [
         'error',
         {
-          prefix: 'ngss',
+          prefix: 'ngvault',
           style: 'camelCase',
           type: 'attribute'
         }

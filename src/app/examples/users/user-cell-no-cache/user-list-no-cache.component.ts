@@ -5,7 +5,7 @@ import { MatCardModule } from '@angular/material/card';
 import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { UserListDirective } from '../directive/user-list-base.directive';
-import { UserStateNoCacheService } from './services/user-state-no-cache.service';
+import { UserCellNoCacheService } from './services/user-cell-no-cache.service';
 
 /**
  * @component UserListManualComponent
@@ -15,7 +15,7 @@ import { UserStateNoCacheService } from './services/user-state-no-cache.service'
  * responsible for displaying a list of users managed via a **automatic signal store**.
  */
 @Component({
-  selector: 'ngss-user-list-no-cache',
+  selector: 'ngvault-user-list-no-cache',
   standalone: true,
   imports: [CommonModule, MatCardModule, MatButtonModule, MatIconModule, MatProgressSpinnerModule],
   templateUrl: '../html/user-list.component.html',
@@ -29,6 +29,6 @@ export class UserListNoCacheComponent extends UserListDirective {
   override spinnerTitle = 'Reactive';
 
   constructor() {
-    super(inject(UserStateNoCacheService));
+    super(inject(UserCellNoCacheService));
   }
 }

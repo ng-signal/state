@@ -1,9 +1,9 @@
 import { computed, effect, inject, Injectable, signal } from '@angular/core';
-import { ResourceSignal, ResourceStateError } from '@ngss/state';
+import { ResourceSignal, ResourceStateError } from '@ngvault/core';
 import { CarService } from '../cars/services/car.service';
 import { CarModel } from '../models/car.model';
 import { UserModel } from '../models/user.model';
-import { UserStateManualService } from '../users/user-state-manual/services/user-state-manual.service';
+import { UserCellManualService } from '../users/user-cell-manual/services/user-cell-manual.service';
 
 export interface UserWithCarModel extends UserModel {
   car?: CarModel | null;
@@ -18,7 +18,7 @@ export interface UsersGroupedByMake {
   providedIn: 'root'
 })
 export class UserCarFacadeService {
-  private readonly userState = inject(UserStateManualService);
+  private readonly userState = inject(UserCellManualService);
   private readonly carState = inject(CarService);
 
   private readonly _loading = signal(false);

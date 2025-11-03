@@ -1,11 +1,11 @@
 import { HttpErrorResponse } from '@angular/common/http';
 import { provideZonelessChangeDetection } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
-import { FeatureDescriptorModel } from '@ngss/state';
+import { FeatureCellDescriptorModel } from '@ngvault/core';
+import { FEATURE_CELL_REGISTRY } from '@ngvault/core/constants/feature-cell-registry.constant';
 import { of, Subject, throwError } from 'rxjs';
-import { FEATURE_REGISTRY } from '../../constants/feature-registry.constant';
 import { ResourceVaultModel } from '../../models/resource-vault.model';
-import { provideState } from '../../provide-state';
+import { provideFeatureCell } from '../../provide-feature-cell';
 
 /** Dummy feature service and model for testing */
 class TestFeatureService {}
@@ -16,7 +16,7 @@ interface TestModel {
 
 describe('function: provideState - loadListFrom', () => {
   let providers: any[];
-  let desc: FeatureDescriptorModel<TestModel[]>;
+  let desc: FeatureCellDescriptorModel<TestModel[]>;
   let vault: ResourceVaultModel<TestModel[]>;
 
   describe('normal state', () => {
@@ -25,7 +25,7 @@ describe('function: provideState - loadListFrom', () => {
         key: 'testFeature',
         initial: [{ id: 1, name: 'Initial' }]
       };
-      providers = provideState(TestFeatureService, desc);
+      providers = provideFeatureCell(TestFeatureService, desc);
 
       TestBed.configureTestingModule({
         providers: [provideZonelessChangeDetection(), ...providers]
@@ -80,7 +80,7 @@ describe('function: provideState - loadListFrom', () => {
         initial: { loading: false, data: [], error: null } as any
       };
 
-      const providers = provideState(class TestSvc {}, badDescriptor);
+      const providers = provideFeatureCell(class TestSvc {}, badDescriptor);
       const vaultProvider = providers[0] as any;
 
       expect(() => vaultProvider.useFactory()).toThrowError(
@@ -118,8 +118,8 @@ describe('function: provideState - loadListFrom', () => {
       expect(vault.state.loading()).toBeFalse();
     });
 
-    it('should register correct FEATURE_REGISTRY entry', () => {
-      const registry = TestBed.inject(FEATURE_REGISTRY);
+    it('should register correct FEATURE_CELL_REGISTRY entry', () => {
+      const registry = TestBed.inject(FEATURE_CELL_REGISTRY);
       const entry = registry.find((r: any) => r.key === 'testFeature');
       expect(entry).toEqual({
         key: 'testFeature',
@@ -130,7 +130,7 @@ describe('function: provideState - loadListFrom', () => {
 
   describe('no initial state', () => {
     beforeEach(async () => {
-      const providers = provideState<TestFeatureService, TestModel>(TestFeatureService, {
+      const providers = provideFeatureCell<TestFeatureService, TestModel>(TestFeatureService, {
         key: 'dummy',
         initial: undefined as any
       });
@@ -152,7 +152,7 @@ describe('function: provideState - loadListFrom', () => {
 
   describe('error state', () => {
     beforeEach(() => {
-      const providers = provideState<TestFeatureService, TestModel>(TestFeatureService, {
+      const providers = provideFeatureCell<TestFeatureService, TestModel>(TestFeatureService, {
         key: 'error-case',
         initial: { id: 1, name: 'Initial' }
       });

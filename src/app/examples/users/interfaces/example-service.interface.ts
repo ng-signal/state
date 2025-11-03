@@ -1,5 +1,5 @@
 import { Signal } from '@angular/core';
-import { ResourceSignal } from '@ngss/state';
+import { ResourceSignal } from '@ngvault/core';
 import { UserModel } from '../../models/user.model';
 
 /**

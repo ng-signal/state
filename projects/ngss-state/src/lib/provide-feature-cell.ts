@@ -1,21 +1,21 @@
 import { Provider, Type, signal } from '@angular/core';
-import { FeatureDescriptorModel, ResourceSignal, ResourceStateError } from '@ngss/state';
+import { FeatureCellDescriptorModel, ResourceSignal, ResourceStateError } from '@ngvault/core';
 import { Observable, take } from 'rxjs';
-import { FEATURE_REGISTRY } from './constants/feature-registry.constant';
+import { FEATURE_CELL_REGISTRY } from './constants/feature-cell-registry.constant';
 import { CacheConfigModel } from './models/cache-policy.model';
 import { ResourceVaultModel } from './models/resource-vault.model';
-import { getOrCreateFeatureVaultToken } from './tokens/feature-token-registry';
+import { getOrCreateFeatureCellToken } from './tokens/feature-cell-token-registry';
 import { VaultDataType } from './types/vault-data.type';
 import { resourceError } from './utils/resource-error.util';
 
-export function provideState<Svc, T>(
+export function provideFeatureCell<Svc, T>(
   service: Type<Svc>,
-  desc: FeatureDescriptorModel<T>,
+  desc: FeatureCellDescriptorModel<T>,
   cacheConfig: CacheConfigModel = { strategy: 'none' }
 ): Provider[] {
-  const token = getOrCreateFeatureVaultToken<T>(desc.key, false);
+  const token = getOrCreateFeatureCellToken<T>(desc.key, false);
 
-  const vaultProvider: Provider = {
+  const featureCellProvider: Provider = {
     provide: token,
     useFactory: (): ResourceVaultModel<T> => {
       const _loading = signal(false);
@@ -156,10 +156,10 @@ export function provideState<Svc, T>(
   };
 
   const registryProvider: Provider = {
-    provide: FEATURE_REGISTRY,
+    provide: FEATURE_CELL_REGISTRY,
     multi: true,
     useValue: { key: desc.key, token: service }
   };
 
-  return [vaultProvider, service, registryProvider];
+  return [featureCellProvider, service, registryProvider];
 }

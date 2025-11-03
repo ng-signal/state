@@ -2,11 +2,11 @@ import { provideHttpClient } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { provideZonelessChangeDetection } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
-import { provideState } from '@ngss/state';
+import { provideFeatureCell } from '@ngvault/core';
 import { CarService } from '../cars/services/car.service';
 import { CarModel } from '../models/car.model';
 import { UserModel } from '../models/user.model';
-import { UserStateManualService } from '../users/user-state-manual/services/user-state-manual.service';
+import { UserCellManualService } from '../users/user-cell-manual/services/user-cell-manual.service';
 import { UserCarFacadeService } from './car-user.service';
 
 describe('UserCarFacadeService (integration)', () => {
@@ -14,8 +14,8 @@ describe('UserCarFacadeService (integration)', () => {
   let http: HttpTestingController;
 
   const NGSS_STATES = [
-    provideState(UserStateManualService, { key: 'userManual', initial: null }),
-    provideState(CarService, { key: 'cars', initial: null })
+    provideFeatureCell(UserCellManualService, { key: 'userManual', initial: null }),
+    provideFeatureCell(CarService, { key: 'cars', initial: null })
   ];
 
   beforeEach(() => {
@@ -27,7 +27,7 @@ describe('UserCarFacadeService (integration)', () => {
         provideZonelessChangeDetection(),
         UserCarFacadeService,
         CarService,
-        UserStateManualService,
+        UserCellManualService,
         ...NGSS_STATES
       ]
     });

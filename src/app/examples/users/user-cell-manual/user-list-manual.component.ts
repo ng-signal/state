@@ -6,7 +6,7 @@ import { MatExpansionModule } from '@angular/material/expansion';
 import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { UserListDirective } from '../directive/user-list-base.directive';
-import { UserStateManualService } from './services/user-state-manual.service';
+import { UserCellManualService } from './services/user-cell-manual.service';
 
 /**
  * @component UserListManualComponent
@@ -16,7 +16,7 @@ import { UserStateManualService } from './services/user-state-manual.service';
  * responsible for displaying a list of users managed via a **manual signal store**.
  */
 @Component({
-  selector: 'ngss-user-list-manual',
+  selector: 'ngvault-user-list-manual',
   standalone: true,
   imports: [CommonModule, MatCardModule, MatButtonModule, MatIconModule, MatProgressSpinnerModule, MatExpansionModule],
   templateUrl: './user-list-manual.component.html',
@@ -30,6 +30,6 @@ export class UserListManualComponent extends UserListDirective {
   override spinnerTitle = 'Manual';
 
   constructor() {
-    super(inject(UserStateManualService));
+    super(inject(UserCellManualService));
   }
 }

@@ -4,7 +4,7 @@ import { CarService } from './car.service';
 
 import { provideHttpClient } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
-import { provideState } from '@ngss/state';
+import { provideFeatureCell } from '@ngvault/core';
 import { getCarData } from 'src/testing/data/car.data';
 
 describe('Service: Car State', () => {
@@ -18,7 +18,7 @@ describe('Service: Car State', () => {
         provideHttpClient(),
         provideHttpClientTesting(),
         provideZonelessChangeDetection(),
-        provideState(CarService, {
+        provideFeatureCell(CarService, {
           key: 'cars',
           initial: null // initial vault state shape
         })

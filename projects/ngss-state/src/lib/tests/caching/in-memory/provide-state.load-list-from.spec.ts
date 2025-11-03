@@ -2,10 +2,10 @@ import { provideHttpClient } from '@angular/common/http';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { provideZonelessChangeDetection } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
-import { FeatureDescriptorModel } from '@ngss/state';
+import { FeatureCellDescriptorModel } from '@ngvault/core';
 import { Observable, Subject } from 'rxjs';
 import { ResourceVaultModel } from '../../../models/resource-vault.model';
-import { provideState } from '../../../provide-state';
+import { provideFeatureCell } from '../../../provide-feature-cell';
 
 interface TestModel {
   id: number;
@@ -17,12 +17,12 @@ describe('Vault loadListFrom() Caching Behavior', () => {
   let vault: ResourceVaultModel<TestModel[]>;
 
   beforeEach(() => {
-    const desc: FeatureDescriptorModel<TestModel[]> = {
+    const desc: FeatureCellDescriptorModel<TestModel[]> = {
       key: 'cache-test',
       initial: null as any
     };
 
-    providers = provideState(class CacheTestService {}, desc, { strategy: 'memory' });
+    providers = provideFeatureCell(class CacheTestService {}, desc, { strategy: 'memory' });
 
     TestBed.configureTestingModule({
       providers: [provideHttpClient(), provideHttpClientTesting(), provideZonelessChangeDetection(), ...providers]

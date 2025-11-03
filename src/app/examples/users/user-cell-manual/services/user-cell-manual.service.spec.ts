@@ -1,14 +1,14 @@
 import { provideZonelessChangeDetection } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { UserModel } from '../../../models/user.model';
-import { UserStateManualService } from './user-state-manual.service';
+import { UserCellManualService } from './user-cell-manual.service';
 
 import { provideHttpClient } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
-import { provideState } from '@ngss/state';
+import { provideFeatureCell } from '@ngvault/core';
 
-describe('Service: User State Manual', () => {
-  let service: UserStateManualService;
+describe('Service: User Cell Manual', () => {
+  let service: UserCellManualService;
   let mockHttpClient: HttpTestingController;
 
   beforeEach(async () => {
@@ -18,14 +18,14 @@ describe('Service: User State Manual', () => {
         provideHttpClient(),
         provideHttpClientTesting(),
         provideZonelessChangeDetection(),
-        provideState(UserStateManualService, {
+        provideFeatureCell(UserCellManualService, {
           key: 'userManual',
           initial: null // initial vault state shape
         })
       ]
     });
 
-    service = TestBed.inject(UserStateManualService);
+    service = TestBed.inject(UserCellManualService);
     mockHttpClient = TestBed.inject(HttpTestingController);
   });
 

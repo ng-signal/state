@@ -1,5 +1,5 @@
 import { Directive, inject, Signal } from '@angular/core';
-import { ResourceSignal } from '@ngss/state';
+import { ResourceSignal } from '@ngvault/core';
 import { CarService } from '../../cars/services/car.service';
 import { UserCarFacadeService } from '../../facades/car-user.service';
 import { UserModel } from '../../models/user.model';
@@ -15,15 +15,15 @@ export abstract class UserListDirective {
   /**
    * Injected instance of the user feature store service.
    */
-  protected readonly userState!: ExampleServiceInterface;
+  protected readonly userCellService!: ExampleServiceInterface;
 
   readonly userList: ResourceSignal<UserModel[]>;
 
   readonly usersWithName: Signal<UserModel[]>;
 
-  protected readonly carState = inject(CarService);
+  protected readonly carCell = inject(CarService);
 
-  readonly cars = this.carState.cars();
+  readonly cars = this.carCell.cars();
 
   protected readonly userCarFacadeService = inject(UserCarFacadeService);
 
@@ -31,23 +31,23 @@ export abstract class UserListDirective {
 
   readonly groupedByMake = this.userCarFacadeService.groupedByMake;
 
-  constructor(service: ExampleServiceInterface) {
-    this.userState = service;
-    this.userList = this.userState.users();
-    this.usersWithName = this.userState.usersWithNames;
+  constructor(userCellService: ExampleServiceInterface) {
+    this.userCellService = userCellService;
+    this.userList = this.userCellService.users();
+    this.usersWithName = this.userCellService.usersWithNames;
   }
 
   /**
    * Reactive list of users derived from the store.
    *
    * - Automatically triggers load when empty.
-   * - Reactively updates as state changes.
+   * - Reactively updates as cell changes.
    */
 
   /**
    * Retry handler for re-fetching users after an error.
    */
   retry() {
-    this.userState.loadUsers();
+    this.userCellService.loadUsers();
   }
 }
