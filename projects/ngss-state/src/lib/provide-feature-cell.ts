@@ -49,7 +49,7 @@ export function provideFeatureCell<Svc, T>(
           : (featureCellDescriptorModel.initial as T)
       );
 
-      const hasValue = computed(() => {
+      const _hasValue = computed(() => {
         const val = _value();
         return val !== null && val !== undefined;
       });
@@ -199,7 +199,7 @@ export function provideFeatureCell<Svc, T>(
                 isLoading: _loadingSignal.asReadonly(),
                 value: _valueSignal.asReadonly(),
                 error: _errorSignal.asReadonly(),
-                hasValue
+                hasValue: _hasValue
               });
               observer.complete();
             },
@@ -220,7 +220,7 @@ export function provideFeatureCell<Svc, T>(
           isLoading: _isLoading.asReadonly(),
           value: _value.asReadonly(),
           error: _error.asReadonly(),
-          hasValue
+          hasValue: _hasValue
         },
         setState: _set,
         patchState: _patch,

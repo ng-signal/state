@@ -33,8 +33,8 @@ describe('Service: Car State', () => {
     it('should reflect cars() based on current state', () => {
       const carList = service.cars();
 
-      expect(carList.data()).toBeNull();
-      expect(carList.loading()).toBeTrue();
+      expect(carList.value()).toBeUndefined();
+      expect(carList.isLoading()).toBeTrue();
       expect(carList.error()).toBeNull();
 
       const result = mockHttpClient.expectOne('/api/cars');
@@ -42,9 +42,9 @@ describe('Service: Car State', () => {
 
       result.flush(getCarData(0, true));
 
-      expect(carList.data()).toEqual([Object({ id: '1', year: 2022, make: 'Tesla', model: 'Model 3' })]);
+      expect(carList.value()).toEqual([Object({ id: '1', year: 2022, make: 'Tesla', model: 'Model 3' })]);
 
-      expect(carList.loading()).toBeFalse();
+      expect(carList.isLoading()).toBeFalse();
       expect(carList.error()).toBeNull();
     });
   });
@@ -55,17 +55,18 @@ describe('Service: Car State', () => {
 
       const state = service.cars();
 
-      expect(state.data()).toBeNull();
-      expect(state.loading()).toBeTrue();
+      expect(state.value()).toBeUndefined();
+      expect(state.isLoading()).toBeTrue();
       expect(state.error()).toBeNull();
 
       const result = mockHttpClient.expectOne('/api/cars');
       expect(result.request.method).toBe('GET');
       result.flush(getCarData(0, true));
 
-      expect(state.data()).toEqual([Object({ id: '1', year: 2022, make: 'Tesla', model: 'Model 3' })]);
+      expect(state.value()).toEqual([Object({ id: '1', year: 2022, make: 'Tesla', model: 'Model 3' })]);
+      expect(state.hasValue()).toBeTrue();
 
-      expect(state.loading()).toBeFalse();
+      expect(state.isLoading()).toBeFalse();
       expect(state.error()).toBeNull();
     });
 
@@ -74,8 +75,9 @@ describe('Service: Car State', () => {
 
       const state = service.cars();
 
-      expect(state.data()).toBeNull();
-      expect(state.loading()).toBeTrue();
+      expect(state.value()).toBeUndefined();
+      expect(state.hasValue()).toBeFalse();
+      expect(state.isLoading()).toBeTrue();
       expect(state.error()).toBeNull();
 
       const result = mockHttpClient.expectOne('/api/cars');
@@ -89,8 +91,9 @@ describe('Service: Car State', () => {
         }
       );
 
-      expect(state.data()).toBeNull();
-      expect(state.loading()).toBeFalse();
+      expect(state.value()).toBeUndefined();
+      expect(state.hasValue()).toBeFalse();
+      expect(state.isLoading()).toBeFalse();
       const err = state.error();
       expect(err?.status).toBe(500);
       expect(err?.statusText).toBe('Server Error');

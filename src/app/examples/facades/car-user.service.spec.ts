@@ -42,9 +42,10 @@ describe('UserCarFacadeService (integration)', () => {
 
   it('should initialize with empty state', () => {
     const res = service.usersWithCars;
-    expect(res.data()).toEqual([]);
+    expect(res.value()).toEqual([]);
     expect(res.error()).toBeNull();
-    expect(res.loading()).toBeFalse();
+    expect(res.isLoading()).toBeFalse();
+    expect(res.hasValue()).toBeTrue();
   });
 
   it('should merge users and cars after loadAll()', (done) => {
@@ -74,7 +75,7 @@ describe('UserCarFacadeService (integration)', () => {
     carReq.flush(cars);
 
     setTimeout(() => {
-      const result = service.usersWithCars.data();
+      const result = service.usersWithCars.value();
 
       expect(result?.length).toBe(3);
       const ada = result?.find((u) => u.name.includes('Ada'));
@@ -108,7 +109,7 @@ describe('UserCarFacadeService (integration)', () => {
     carReq.flush([{ id: '1', year: 2022, make: 'Tesla', model: 'Model S' }]);
 
     setTimeout(() => {
-      expect(service.usersWithCars.data()).toEqual([]);
+      expect(service.usersWithCars.value()).toEqual([]);
       expect(service.usersWithoutCars()).toEqual([]);
       done();
     }, 0);

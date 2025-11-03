@@ -46,7 +46,7 @@ describe('Service: User Cell Manual', () => {
       // Act: update vault (this is the real reactive store)
       service['vault'].setState({
         loading: false,
-        data: testUsers,
+        value: testUsers,
         error: null
       });
 
@@ -83,7 +83,7 @@ describe('Service: User Cell Manual', () => {
     it('should handle single-word names gracefully', () => {
       service['vault'].setState({
         loading: false,
-        data: [{ id: '4', name: 'Cher', firstName: '', lastName: '' }],
+        value: [{ id: '4', name: 'Cher', firstName: '', lastName: '' }],
         error: null
       });
 
@@ -97,7 +97,7 @@ describe('Service: User Cell Manual', () => {
     it('should recompute reactively when vault data changes', () => {
       service['vault'].setState({
         loading: false,
-        data: [{ id: '1', name: 'Ada Lovelace', firstName: '', lastName: '' }],
+        value: [{ id: '1', name: 'Ada Lovelace', firstName: '', lastName: '' }],
         error: null
       });
 
@@ -107,7 +107,7 @@ describe('Service: User Cell Manual', () => {
       // Update real vault again — signal change should propagate
       service['vault'].setState({
         loading: false,
-        data: [{ id: '2', name: 'Alan Turing', firstName: '', lastName: '' }],
+        value: [{ id: '2', name: 'Alan Turing', firstName: '', lastName: '' }],
         error: null
       });
 
@@ -118,7 +118,7 @@ describe('Service: User Cell Manual', () => {
     it('should handle no name', () => {
       service['vault'].setState({
         loading: false,
-        data: [{ id: '1', name: '', firstName: '', lastName: '' }],
+        value: [{ id: '1', name: '', firstName: '', lastName: '' }],
         error: null
       });
 
@@ -128,7 +128,7 @@ describe('Service: User Cell Manual', () => {
       // Update real vault again — signal change should propagate
       service['vault'].setState({
         loading: false,
-        data: [{ id: '2', name: '', firstName: '', lastName: '' }],
+        value: [{ id: '2', name: '', firstName: '', lastName: '' }],
         error: null
       });
 
@@ -146,8 +146,8 @@ describe('Service: User Cell Manual', () => {
 
       const userList = service.users();
 
-      expect(userList.data()).toBeNull();
-      expect(userList.loading()).toBeTrue();
+      expect(userList.value()).toBeUndefined();
+      expect(userList.isLoading()).toBeTrue();
       expect(userList.error()).toBeNull();
 
       const result = mockHttpClient.expectOne('/api/users');
@@ -155,12 +155,12 @@ describe('Service: User Cell Manual', () => {
 
       result.flush(mockUsers);
 
-      expect(userList.data()).toEqual([
+      expect(userList.value()).toEqual([
         { id: '1', name: 'Ada' },
         { id: '2', name: 'Grace' }
       ]);
 
-      expect(userList.loading()).toBeFalse();
+      expect(userList.isLoading()).toBeFalse();
       expect(userList.error()).toBeNull();
     });
   });
@@ -175,17 +175,18 @@ describe('Service: User Cell Manual', () => {
 
       const state = service.users();
 
-      expect(state.data()).toBeNull();
-      expect(state.loading()).toBeTrue();
+      expect(state.value()).toBeUndefined();
+      expect(state.isLoading()).toBeTrue();
       expect(state.error()).toBeNull();
 
       const result = mockHttpClient.expectOne('/api/users');
       expect(result.request.method).toBe('GET');
       result.flush(mockUsers);
 
-      expect(state.data()).toEqual([Object({ id: '1', name: 'Ada' }), Object({ id: '2', name: 'Grace' })]);
+      expect(state.value()).toEqual([Object({ id: '1', name: 'Ada' }), Object({ id: '2', name: 'Grace' })]);
+      expect(state.hasValue()).toBeTrue();
 
-      expect(state.loading()).toBeFalse();
+      expect(state.isLoading()).toBeFalse();
       expect(state.error()).toBeNull();
     });
 
@@ -194,9 +195,10 @@ describe('Service: User Cell Manual', () => {
 
       const state = service.users();
 
-      expect(state.data()).toBeNull();
-      expect(state.loading()).toBeTrue();
+      expect(state.value()).toBeUndefined();
+      expect(state.isLoading()).toBeTrue();
       expect(state.error()).toBeNull();
+      expect(state.hasValue()).toBeFalse();
 
       const result = mockHttpClient.expectOne('/api/users');
       expect(result.request.method).toBe('GET');
@@ -209,8 +211,9 @@ describe('Service: User Cell Manual', () => {
         }
       );
 
-      expect(state.data()).toBeNull();
-      expect(state.loading()).toBeFalse();
+      expect(state.value()).toBeUndefined();
+      expect(state.isLoading()).toBeFalse();
+      expect(state.hasValue()).toBeFalse();
       const err = state.error();
       expect(err?.status).toBe(500);
       expect(err?.statusText).toBe('Server Error');
