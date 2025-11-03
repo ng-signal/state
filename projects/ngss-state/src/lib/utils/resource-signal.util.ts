@@ -1,7 +1,7 @@
 import { signal } from '@angular/core';
-import { ResourceStateError } from '@ngvault/core';
 import { Observable } from 'rxjs';
 import { ResourceSignal } from '../models/resource-signal.model';
+import { ResourceStateError } from '../models/resource-state-error.model';
 import { resourceError } from './resource-error.util';
 
 /**

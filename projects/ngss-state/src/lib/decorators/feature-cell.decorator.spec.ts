@@ -1,5 +1,5 @@
-import { NGVAULT_METADATA_KEYS } from '@ngvault/core';
 import 'reflect-metadata';
+import { NGVAULT_METADATA_KEYS } from '../constants/metadata-keys.constant';
 import { FeatureCell } from './feature-cell.decorator';
 
 /**

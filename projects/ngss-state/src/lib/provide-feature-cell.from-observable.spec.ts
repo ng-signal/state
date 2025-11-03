@@ -1,8 +1,11 @@
-import { signal } from '@angular/core';
+import { provideHttpClient } from '@angular/common/http';
+import { provideHttpClientTesting } from '@angular/common/http/testing';
+import { Injector, provideZonelessChangeDetection, runInInjectionContext, signal } from '@angular/core';
+import { TestBed } from '@angular/core/testing';
 import { ResourceSignal } from '@ngvault/core';
 import { Subject } from 'rxjs';
-import { ResourceVaultModel } from '../../models/resource-vault.model';
-import { provideFeatureCell } from '../../provide-feature-cell';
+import { ResourceVaultModel } from './models/resource-vault.model';
+import { provideFeatureCell } from './provide-feature-cell';
 
 interface TestModel {
   id: number;
@@ -14,10 +17,17 @@ describe('ResourceVaultModel (setState, patchState, fromObservable)', () => {
   let subject: Subject<TestModel[]>;
 
   beforeEach(() => {
-    const providers = provideFeatureCell(class TestService {}, { key: 'test', initial: [] });
-    const vaultFactory = (providers[0] as any).useFactory;
-    vault = vaultFactory();
     subject = new Subject<TestModel[]>();
+
+    TestBed.configureTestingModule({
+      providers: [provideHttpClient(), provideHttpClientTesting(), provideZonelessChangeDetection()]
+    });
+    const providers = provideFeatureCell(class TestService {}, { key: 'http', initial: [] });
+
+    const vaultFactory = (providers[0] as any).useFactory;
+    runInInjectionContext(TestBed.inject(Injector), () => {
+      vault = vaultFactory();
+    });
   });
 
   it('should set state fully with setState()', () => {
@@ -48,11 +58,17 @@ describe('ResourceVaultModel (setState, patchState, fromObservable)', () => {
 
   it('should shallow merge objects when patchState() is called with object data', () => {
     const providers = provideFeatureCell(class ObjService {}, { key: 'obj', initial: { id: 1, name: 'Ada' } });
-    const vaultFactory = (providers[0] as any).useFactory;
-    const objVault = vaultFactory();
 
-    objVault.patchState({ data: { name: 'Grace' } as any });
-    expect(objVault.state.data()).toEqual({ id: 1, name: 'Grace' });
+    const provider = providers.find((p: any) => typeof p.useFactory === 'function');
+
+    let vault!: ResourceVaultModel<any>;
+
+    runInInjectionContext(TestBed.inject(Injector), () => {
+      vault = (provider as any).useFactory();
+    });
+
+    vault.patchState({ data: { name: 'Grace' } as any });
+    expect(vault.state.data()).toEqual({ id: 1, name: 'Grace' });
   });
 
   it('should return independent ResourceSignal when fromObservable() succeeds', () => {

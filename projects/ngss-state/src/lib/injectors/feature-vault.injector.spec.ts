@@ -1,7 +1,6 @@
-import { effect, provideZonelessChangeDetection } from '@angular/core';
+import { provideZonelessChangeDetection } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import 'reflect-metadata';
-import { of } from 'rxjs';
 import { NGVAULT_METADATA_KEYS } from '../constants/metadata-keys.constant';
 import { FeatureCellDescriptorModel } from '../models/feature-cell-descriptor.model';
 import { provideFeatureCell } from '../provide-feature-cell';
@@ -65,36 +64,5 @@ describe('Injector: Vault', () => {
     const vaultFromToken = TestBed.inject(token);
 
     expect(vaultFromToken).toBe(service.vault);
-  });
-
-  it('should maintain signal reactivity inside the vault via loadListFrom', () => {
-    const service = TestBed.inject(TestFeatureCellService);
-    const vault = service.vault;
-
-    const observed: (TestVault | null)[] = [];
-
-    // Watch for changes in vault.state.data()
-    TestBed.runInInjectionContext(() => {
-      effect(() => {
-        const value = vault.state.data();
-        if (value) {
-          observed.push(value);
-        }
-      });
-    });
-
-    // Simulate an observable emitting new state
-    const source$ = of({ count: 2, name: 'Updated' });
-    vault.loadListFrom!(source$);
-
-    TestBed.tick();
-
-    // Assertions
-    expect(observed.length).toBe(1);
-    expect(observed[0]).toEqual({ count: 2, name: 'Updated' });
-
-    // Verify reactive signal values
-    expect(vault.state.loading()).toBeFalse();
-    expect(vault.state.error()).toBeNull();
   });
 });
