@@ -1,5 +1,5 @@
 import { HttpResourceRef } from '@angular/common/http';
-import { Injector, Provider, Type, effect, inject, runInInjectionContext, signal } from '@angular/core';
+import { Injector, Provider, Type, computed, effect, inject, runInInjectionContext, signal } from '@angular/core';
 import { Observable, take } from 'rxjs';
 import { NGVAULT_EXPERIMENTAL_HTTP_RESOURCE } from './constants/experimental-flag.constant';
 import { FEATURE_CELL_REGISTRY } from './constants/feature-cell-registry.constant';
@@ -47,6 +47,11 @@ export function provideFeatureCell<Svc, T>(
           ? null
           : (featureCellDescriptorModel.initial as T)
       );
+
+      const hasValue = computed(() => {
+        const val = _value();
+        return val !== null && val !== undefined;
+      });
 
       /**
        * Updates the vault’s state reactively.
@@ -192,7 +197,8 @@ export function provideFeatureCell<Svc, T>(
               observer.next({
                 isLoading: _loadingSignal.asReadonly(),
                 value: _dataSignal.asReadonly(),
-                error: _errorSignal.asReadonly()
+                error: _errorSignal.asReadonly(),
+                hasValue
               });
               observer.complete();
             },
@@ -212,7 +218,8 @@ export function provideFeatureCell<Svc, T>(
         state: {
           isLoading: _isLoading.asReadonly(),
           value: _value.asReadonly(),
-          error: _error.asReadonly()
+          error: _error.asReadonly(),
+          hasValue
         },
         setState: _set,
         patchState: _patch,

@@ -9,6 +9,7 @@ describe('createResourceSignal', () => {
     expect(resource.isLoading()).toBeTrue();
     expect(resource.value()).toBeNull();
     expect(resource.error()).toBeNull();
+    expect(resource.hasValue()).toBeFalse();
   });
 
   it('should update data and clear error on next', () => {
@@ -20,6 +21,7 @@ describe('createResourceSignal', () => {
     expect(resource.value()).toBe(42);
     expect(resource.error()).toBeNull();
     expect(resource.isLoading()).toBeTrue(); // still true until complete
+    expect(resource.hasValue()).toBeTrue();
   });
 
   describe('errors', () => {
@@ -33,6 +35,7 @@ describe('createResourceSignal', () => {
       expect(resource.error()?.message).toBe(errorMsg);
       expect(resource.value()).toBeNull();
       expect(resource.isLoading()).toBeFalse();
+      expect(resource.hasValue()).toBeFalse();
     });
   });
 
@@ -46,6 +49,7 @@ describe('createResourceSignal', () => {
     expect(resource.value()).toBe(123);
     expect(resource.isLoading()).toBeFalse();
     expect(resource.error()).toBeNull();
+    expect(resource.hasValue()).toBeTrue();
   });
 
   it('should handle multiple emissions correctly', () => {
@@ -59,6 +63,7 @@ describe('createResourceSignal', () => {
     expect(resource.value()).toBe('second');
     expect(resource.error()).toBeNull();
     expect(resource.isLoading()).toBeFalse();
+    expect(resource.hasValue()).toBeTrue();
   });
 
   it('should handle an observable that completes immediately', () => {
@@ -67,6 +72,7 @@ describe('createResourceSignal', () => {
     expect(resource.value()).toBe('done');
     expect(resource.error()).toBeNull();
     expect(resource.isLoading()).toBeFalse();
+    expect(resource.hasValue()).toBeTrue();
   });
 
   it('should maintain correct readonly signal structure', () => {
@@ -76,11 +82,13 @@ describe('createResourceSignal', () => {
     expect(typeof resource.value).toBe('function');
     expect(typeof resource.isLoading).toBe('function');
     expect(typeof resource.error).toBe('function');
+    expect(typeof resource.hasValue).toBe('function');
 
     // Verify readonly nature (should not have set)
     expect((resource.value as any).set).toBeUndefined();
     expect((resource.isLoading as any).set).toBeUndefined();
     expect((resource.error as any).set).toBeUndefined();
+    expect(resource.hasValue()).toBeTrue();
   });
 
   it('should allow manual teardown via subscription unsubscribe', () => {
@@ -93,5 +101,6 @@ describe('createResourceSignal', () => {
 
     expect(resource.value()).toBe(1);
     expect(resource.isLoading()).toBeFalse();
+    expect(resource.hasValue()).toBeTrue();
   });
 });

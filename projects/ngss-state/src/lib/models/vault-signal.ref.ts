@@ -6,4 +6,5 @@ export interface VaultSignalRef<T> {
   isLoading: Signal<boolean>;
   value: Signal<VaultDataType<T>>;
   error: Signal<ResourceStateError | null>;
+  hasValue: Signal<boolean>;
 }

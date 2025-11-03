@@ -88,11 +88,13 @@ describe('Provider: Feature Cell (core vault functionality)', () => {
     expect(nullVault.state.value()).toBeNull();
     expect(nullVault.state.isLoading()).toBeFalse();
     expect(nullVault.state.error()).toBeNull();
+    expect(nullVault.state.hasValue()).toBeFalse();
 
     const undefinedVault = makeVault(undefined);
     expect(undefinedVault.state.value()).toBeNull();
     expect(undefinedVault.state.isLoading()).toBeFalse();
     expect(undefinedVault.state.error()).toBeNull();
+    expect(undefinedVault.state.hasValue()).toBeFalse();
   });
 
   it('should gracefully reset all vault signals when setState(null) or patchState(null) is used', () => {
@@ -108,17 +110,20 @@ describe('Provider: Feature Cell (core vault functionality)', () => {
     expect(vault.state.isLoading()).toBeTrue();
     expect(vault.state.error()).toEqual({ message: 'fail' });
     expect(vault.state.value()).toEqual([1, 2, 3]);
+    expect(vault.state.hasValue()).toBeTrue();
 
     vault.setState(null);
     expect(vault.state.isLoading()).toBeFalse();
     expect(vault.state.error()).toBeNull();
     expect(vault.state.value()).toBeNull();
+    expect(vault.state.hasValue()).toBeFalse();
 
     vault.patchState({ loading: true, value: [4, 5] });
     vault.patchState(null);
     expect(vault.state.isLoading()).toBeFalse();
     expect(vault.state.error()).toBeNull();
     expect(vault.state.value()).toBeNull();
+    expect(vault.state.hasValue()).toBeFalse();
   });
 
   it('should merge arrays and objects correctly using patchState()', () => {
@@ -133,10 +138,12 @@ describe('Provider: Feature Cell (core vault functionality)', () => {
     vault.setState({ value: [1, 2] });
     vault.patchState({ value: [3, 4] });
     expect(vault.state.value()).toEqual([1, 2, 3, 4]);
+    expect(vault.state.hasValue()).toBeTrue();
 
     vault.setState({ value: { name: 'Alice', age: 30 } });
     vault.patchState({ value: { age: 31 } });
     expect(vault.state.value()).toEqual({ name: 'Alice', age: 31 });
+    expect(vault.state.hasValue()).toBeTrue();
   });
 
   it('should replace data completely when type differs between current and next', () => {
@@ -150,6 +157,7 @@ describe('Provider: Feature Cell (core vault functionality)', () => {
 
     vault.patchState({ value: { user: 'Alice' } });
     expect(vault.state.value()).toEqual({ user: 'Alice' });
+    expect(vault.state.hasValue()).toBeTrue();
   });
 
   it('should correctly propagate loading and error updates', () => {
@@ -163,10 +171,12 @@ describe('Provider: Feature Cell (core vault functionality)', () => {
 
     vault.setState({ loading: true });
     expect(vault.state.isLoading()).toBeTrue();
+    expect(vault.state.hasValue()).toBeTrue();
 
     vault.patchState({ loading: false, error: { message: 'timeout' } });
     expect(vault.state.isLoading()).toBeFalse();
     expect(vault.state.error()).toEqual({ message: 'timeout' });
+    expect(vault.state.hasValue()).toBeTrue();
   });
 
   it('should correctly handle primitive and null data updates in setState()', () => {
@@ -183,27 +193,33 @@ describe('Provider: Feature Cell (core vault functionality)', () => {
     expect(vault.state.value()).toBe(0);
     expect(vault.state.isLoading()).toBeFalse();
     expect(vault.state.error()).toBeNull();
+    expect(vault.state.hasValue()).toBeTrue();
 
     // Set a new primitive (string)
     vault.setState({ value: 'new-value' });
     expect(vault.state.value()).toBe('new-value');
     expect(vault.state.isLoading()).toBeFalse();
     expect(vault.state.error()).toBeNull();
+    expect(vault.state.hasValue()).toBeTrue();
 
     // Set a different primitive (boolean)
     vault.setState({ value: true });
     expect(vault.state.value()).toBeTrue();
+    expect(vault.state.hasValue()).toBeTrue();
 
     // Set same primitive value (should not throw or rewrap)
     vault.setState({ value: true });
     expect(vault.state.value()).toBeTrue();
+    expect(vault.state.hasValue()).toBeTrue();
 
     // Set null (reset to null state)
     vault.setState({ value: null });
     expect(vault.state.value()).toBeNull();
+    expect(vault.state.hasValue()).toBeFalse();
 
     // Set a number again after null (rehydrate)
     vault.setState({ value: 42 });
     expect(vault.state.value()).toBe(42);
+    expect(vault.state.hasValue()).toBeTrue();
   });
 });

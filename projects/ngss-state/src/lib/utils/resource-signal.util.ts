@@ -1,4 +1,4 @@
-import { signal } from '@angular/core';
+import { computed, signal } from '@angular/core';
 import { Observable } from 'rxjs';
 import { ResourceStateError } from '../models/resource-state-error.model';
 import { VaultSignalRef } from '../models/vault-signal.ref';
@@ -13,31 +13,33 @@ import { resourceError } from './resource-error.util';
  * - Updates signals on `next`, `error`, and `complete`.
  */
 export function createResourceSignal<T>(source$: Observable<T>): VaultSignalRef<T> {
-  const loading = signal(false);
-  const data = signal<T | null>(null);
-  const error = signal<ResourceStateError | null>(null);
+  const _loading = signal(false);
+  const _value = signal<T | null>(null);
+  const _error = signal<ResourceStateError | null>(null);
+  const _hasValue = computed(() => _value() !== null && _value() !== undefined);
 
-  loading.set(true);
-  error.set(null);
+  _loading.set(true);
+  _error.set(null);
 
   source$.subscribe({
     next: (value) => {
-      data.set(value);
-      error.set(null);
+      _value.set(value);
+      _error.set(null);
     },
     error: (err: unknown) => {
-      error.set(resourceError(err));
-      data.set(null);
-      loading.set(false);
+      _error.set(resourceError(err));
+      _value.set(null);
+      _loading.set(false);
     },
     complete: () => {
-      loading.set(false);
+      _loading.set(false);
     }
   });
 
   return {
-    isLoading: loading.asReadonly(),
-    value: data.asReadonly(),
-    error: error.asReadonly()
+    isLoading: _loading.asReadonly(),
+    value: _value.asReadonly(),
+    error: _error.asReadonly(),
+    hasValue: _hasValue
   };
 }

@@ -33,6 +33,7 @@ describe('Provider: Feature Cell Resource', () => {
       expect(vault.state.isLoading()).toBeFalse();
       expect(vault.state.value()).toEqual([{ id: 1, name: 'Ada' }]);
       expect(vault.state.error()).toBeNull();
+      expect(vault.state.hasValue()).toBeTrue();
 
       const id = signal(0);
       const mockBackend = TestBed.inject(HttpTestingController);
@@ -44,6 +45,7 @@ describe('Provider: Feature Cell Resource', () => {
       expect(vault.state.isLoading()).toBeTrue();
       expect(vault.state.value()).toBeUndefined();
       expect(vault.state.error()).toBeNull();
+      expect(vault.state.hasValue()).toBeFalse();
 
       const firstRequest = mockBackend.expectOne('/data/0');
       firstRequest.flush([Object({ id: 1, name: 'Ada' }), Object({ id: 2, name: 'Grace' })]);
@@ -53,6 +55,7 @@ describe('Provider: Feature Cell Resource', () => {
       expect(vault.state.isLoading()).toBeFalse();
       expect(vault.state.value()).toEqual([Object({ id: 1, name: 'Ada' }), Object({ id: 2, name: 'Grace' })]);
       expect(vault.state.error()).toBeNull();
+      expect(vault.state.hasValue()).toBeTrue();
 
       response.reload();
       TestBed.tick();
@@ -60,6 +63,7 @@ describe('Provider: Feature Cell Resource', () => {
       expect(vault.state.isLoading()).toBeTrue();
       expect(vault.state.value()).toEqual([Object({ id: 1, name: 'Ada' }), Object({ id: 2, name: 'Grace' })]);
       expect(vault.state.error()).toBeNull();
+      expect(vault.state.hasValue()).toBeTrue();
 
       const secondRequest = mockBackend.expectOne('/data/0');
       secondRequest.flush([Object({ id: 3, name: 'Brian' })]);
@@ -69,6 +73,7 @@ describe('Provider: Feature Cell Resource', () => {
       expect(vault.state.isLoading()).toBeFalse();
       expect(vault.state.value()).toEqual([Object({ id: 3, name: 'Brian' })]);
       expect(vault.state.error()).toBeNull();
+      expect(vault.state.hasValue()).toBeTrue();
 
       response.reload();
       TestBed.tick();
@@ -79,6 +84,7 @@ describe('Provider: Feature Cell Resource', () => {
       expect(vault.state.isLoading()).toBeTrue();
       expect(vault.state.value()).toEqual([Object({ id: 3, name: 'Brian' })]);
       expect(vault.state.error()).toBeNull();
+      expect(vault.state.hasValue()).toBeTrue();
 
       await TestBed.inject(ApplicationRef).whenStable();
 
@@ -92,6 +98,7 @@ describe('Provider: Feature Cell Resource', () => {
       );
       expect(vault.state.isLoading()).toBeFalse();
       expect(vault.state.value()).toEqual([Object({ id: 3, name: 'Brian' })]);
+      expect(vault.state.hasValue()).toBeTrue();
     });
 
     it('should react when underlying HttpResourceRef signals reloads', async () => {
@@ -108,6 +115,7 @@ describe('Provider: Feature Cell Resource', () => {
       await TestBed.inject(ApplicationRef).whenStable();
 
       expect(vault.state.value()).toEqual([{ id: 1, name: 'Ada' }]);
+      expect(vault.state.hasValue()).toBeTrue();
 
       // trigger reload
       id.set(1);
@@ -117,6 +125,7 @@ describe('Provider: Feature Cell Resource', () => {
       await TestBed.inject(ApplicationRef).whenStable();
 
       expect(vault.state.value()).toEqual([{ id: 2, name: 'Grace' }]);
+      expect(vault.state.hasValue()).toBeTrue();
     });
 
     it('should capture HttpResourceRef errors reactively', async () => {
@@ -141,6 +150,7 @@ describe('Provider: Feature Cell Resource', () => {
       );
       expect(vault.state.isLoading()).toBeFalse();
       expect(vault.state.value()).toBeUndefined();
+      expect(vault.state.hasValue()).toBeFalse();
     });
 
     it('should reset vault state when setState(null) is called after HttpResourceRef', async () => {
@@ -160,6 +170,7 @@ describe('Provider: Feature Cell Resource', () => {
       expect(vault.state.value()).toBeNull();
       expect(vault.state.isLoading()).toBeFalse();
       expect(vault.state.error()).toBeNull();
+      expect(vault.state.hasValue()).toBeFalse();
     });
   });
 
@@ -187,6 +198,7 @@ describe('Provider: Feature Cell Resource', () => {
       ]);
       expect(vault.state.isLoading()).toBeFalse();
       expect(vault.state.error()).toBeNull();
+      expect(vault.state.hasValue()).toBeTrue();
     });
 
     it('should shallow merge object data reactively from HttpResourceRef', async () => {
@@ -208,6 +220,7 @@ describe('Provider: Feature Cell Resource', () => {
       expect(objVault.state.value()).toEqual({ id: 1, name: 'Grace' });
       expect(objVault.state.error()).toBeNull();
       expect(objVault.state.isLoading()).toBeFalse();
+      expect(vault.state.hasValue()).toBeTrue();
     });
 
     it('should preserve data and set error when HttpResourceRef request fails', async () => {
@@ -235,6 +248,7 @@ describe('Provider: Feature Cell Resource', () => {
       // data should remain unchanged after error
       expect(vault.state.value()).toEqual([{ id: 9, name: 'Existing' }]);
       expect(vault.state.isLoading()).toBeFalse();
+      expect(vault.state.hasValue()).toBeTrue();
     });
 
     it('should reset vault state when patchState(null) is called after HttpResourceRef', async () => {
@@ -248,12 +262,14 @@ describe('Provider: Feature Cell Resource', () => {
       await TestBed.inject(ApplicationRef).whenStable();
 
       expect(vault.state.value()).toEqual([{ id: 1, name: 'Ada' }]);
+      expect(vault.state.hasValue()).toBeTrue();
 
       vault.patchState(null);
 
       expect(vault.state.value()).toBeNull();
       expect(vault.state.isLoading()).toBeFalse();
       expect(vault.state.error()).toBeNull();
+      expect(vault.state.hasValue()).toBeFalse();
     });
 
     it('should correctly update primitive data types from HttpResourceRef via patchState (final else path)', async () => {
@@ -268,6 +284,7 @@ describe('Provider: Feature Cell Resource', () => {
       // Before response arrives, value() throws → _data should remain undefined
       expect(vault.state.value()).toEqual([]);
       expect(vault.state.isLoading()).toBeTrue();
+      expect(vault.state.hasValue()).toBeTrue();
 
       // Simulate backend returning a primitive (final else case)
       mockBackend.expectOne('/primitive').flush(42);
@@ -277,6 +294,7 @@ describe('Provider: Feature Cell Resource', () => {
       expect(vault.state.value()).toBe(42);
       expect(vault.state.isLoading()).toBeFalse();
       expect(vault.state.error()).toBeNull();
+      expect(vault.state.hasValue()).toBeTrue();
 
       // Trigger reload → should still follow same "primitive replace" path
       response.reload();
@@ -287,6 +305,7 @@ describe('Provider: Feature Cell Resource', () => {
       expect(vault.state.value()).toBe(7);
       expect(vault.state.error()).toBeNull();
       expect(vault.state.isLoading()).toBeFalse();
+      expect(vault.state.hasValue()).toBeTrue();
     });
   });
 });
