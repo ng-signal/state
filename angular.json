@@ -112,7 +112,7 @@
             "stylePreprocessorOptions": {
               "includePaths": ["dist/scss/"]
             },
-            "codeCoverageExclude": ["**/ngss-store.config.ts", "**/helpers/testing-environment.helper.ts"],
+            "codeCoverageExclude": ["**/ng-vault.config.ts", "**/helpers/testing-environment.helper.ts"],
             "scripts": []
           }
         }
