@@ -1,7 +1,5 @@
 import { HttpErrorResponse } from '@angular/common/http';
-import { throwError } from 'rxjs';
 import { resourceError } from './resource-error.util';
-import { createResourceSignal } from './resource-signal.util';
 
 describe('Util: Resource Error', () => {
   it('should normalize HttpErrorResponse correctly', () => {
@@ -58,17 +56,6 @@ describe('Util: Resource Error', () => {
       message: 'Unexpected error',
       details: undefined
     });
-  });
-
-  it('should handle unknown error type (non-Error)', () => {
-    const weirdError = { info: 'strange error' };
-    const resource = createResourceSignal(throwError(() => weirdError));
-
-    const err = resource.error()!;
-    expect(err.message).toContain('Unexpected error');
-    expect(err.details).toEqual(weirdError);
-    expect(resource.value()).toBeUndefined();
-    expect(resource.isLoading()).toBeFalse();
   });
 
   it('should use statusText when HttpErrorResponse.message is empty', () => {

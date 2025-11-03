@@ -10,4 +10,3 @@ export * from './lib/models/vault-signal.ref';
 export * from './lib/provide-feature-cell';
 export * from './lib/provide-vault';
 export * from './lib/tokens/feature-cell-token-registry';
-export * from './lib/utils/resource-signal.util';
