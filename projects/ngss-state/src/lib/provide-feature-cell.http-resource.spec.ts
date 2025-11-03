@@ -165,9 +165,9 @@ describe('Provider: Feature Cell Resource', () => {
 
       expect(vault.state.value()).toEqual([{ id: 1, name: 'Ada' }]);
 
-      vault.setState(null);
+      vault.setState(undefined);
 
-      expect(vault.state.value()).toBeNull();
+      expect(vault.state.value()).toBeUndefined();
       expect(vault.state.isLoading()).toBeFalse();
       expect(vault.state.error()).toBeNull();
       expect(vault.state.hasValue()).toBeFalse();
@@ -264,9 +264,9 @@ describe('Provider: Feature Cell Resource', () => {
       expect(vault.state.value()).toEqual([{ id: 1, name: 'Ada' }]);
       expect(vault.state.hasValue()).toBeTrue();
 
-      vault.patchState(null);
+      vault.patchState(undefined);
 
-      expect(vault.state.value()).toBeNull();
+      expect(vault.state.value()).toBeUndefined();
       expect(vault.state.isLoading()).toBeFalse();
       expect(vault.state.error()).toBeNull();
       expect(vault.state.hasValue()).toBeFalse();

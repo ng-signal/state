@@ -7,7 +7,7 @@ describe('createResourceSignal', () => {
     const resource = createResourceSignal(subject.asObservable());
 
     expect(resource.isLoading()).toBeTrue();
-    expect(resource.value()).toBeNull();
+    expect(resource.value()).toBeUndefined();
     expect(resource.error()).toBeNull();
     expect(resource.hasValue()).toBeFalse();
   });
@@ -33,7 +33,7 @@ describe('createResourceSignal', () => {
       subject.error(new Error(errorMsg));
 
       expect(resource.error()?.message).toBe(errorMsg);
-      expect(resource.value()).toBeNull();
+      expect(resource.value()).toBeUndefined();
       expect(resource.isLoading()).toBeFalse();
       expect(resource.hasValue()).toBeFalse();
     });

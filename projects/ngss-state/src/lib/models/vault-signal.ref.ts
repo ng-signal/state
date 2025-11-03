@@ -4,7 +4,7 @@ import { ResourceStateError } from './resource-state-error.model';
 
 export interface VaultSignalRef<T> {
   isLoading: Signal<boolean>;
-  value: Signal<VaultDataType<T>>;
+  value: Signal<VaultDataType<T | undefined>>;
   error: Signal<ResourceStateError | null>;
   hasValue: Signal<boolean>;
 }

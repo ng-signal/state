@@ -1,1 +1,1 @@
-export type VaultDataType<T> = T | null;
+export type VaultDataType<T> = T | undefined;

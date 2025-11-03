@@ -79,18 +79,18 @@ describe('ResourceVaultModel (setState, patchState, fromObservable)', () => {
   it('should return independent ResourceSignal when fromObservable() succeeds', () => {
     const resource = {
       loading: signal<boolean>(false),
-      data: signal<any | null>(null),
+      value: signal<any | undefined>(undefined),
       error: signal<any | null>(null)
     };
 
     vault.fromObservable!(subject.asObservable()).subscribe({
       next: (result: VaultSignalRef<any>) => {
         resource.loading.set(result.isLoading());
-        resource.data.set(result.value());
+        resource.value.set(result.value());
         resource.error.set(result.error());
       },
       error: (error) => {
-        resource.data.set(null);
+        resource.value.set(null);
         resource.error.set(error.message);
       }
     });
@@ -103,14 +103,14 @@ describe('ResourceVaultModel (setState, patchState, fromObservable)', () => {
     // Initially loading = true
     expect(resource.loading()).toBeFalse();
     expect(resource.error()).toBeNull();
-    expect(resource.data()).toBeNull();
+    expect(resource.value()).toBeUndefined();
     expect(vault.state.hasValue()).toBeTrue();
 
     // Emit value
     subject.next(data);
 
     expect(resource.loading()).toBeFalse();
-    expect(resource.data()).toEqual(data);
+    expect(resource.value()).toEqual(data);
     expect(resource.error()).toBeNull();
     expect(vault.state.hasValue()).toBeTrue();
   });
@@ -118,7 +118,7 @@ describe('ResourceVaultModel (setState, patchState, fromObservable)', () => {
   it('should capture error in returned ResourceSignal', () => {
     const resource = {
       loading: signal<boolean>(false),
-      value: signal<any | null>(null),
+      value: signal<any | undefined>(undefined),
       error: signal<any | null>(null)
     };
 
@@ -139,54 +139,5 @@ describe('ResourceVaultModel (setState, patchState, fromObservable)', () => {
     expect(resource.loading()).toBeFalse();
     expect(resource.value()).toBeNull();
     expect(resource.error()!.message).toContain('Network failure');
-  });
-
-  it('should merge arrays when current and next are both arrays', () => {
-    vault.setState({ value: [{ id: 1, name: 'Ada' }] });
-    expect(vault.state.hasValue()).toBeTrue();
-    vault.patchState({ value: [{ id: 2, name: 'Grace' }] });
-    expect(vault.state.value()).toEqual([
-      { id: 1, name: 'Ada' },
-      { id: 2, name: 'Grace' }
-    ]);
-    expect(vault.state.hasValue()).toBeTrue();
-  });
-
-  it('should merge objects shallowly when both current and next are plain objects', () => {
-    // simulate current object state
-    vault.setState({ value: { id: 1, name: 'Initial' } as any });
-    expect(vault.state.hasValue()).toBeTrue();
-    vault.patchState({ value: { name: 'Updated' } as any });
-    expect(vault.state.value()).toEqual({ id: 1, name: 'Updated' });
-    expect(vault.state.hasValue()).toBeTrue();
-  });
-
-  it('should replace completely when types differ (array → object or null)', () => {
-    vault.setState({ value: [{ id: 1, name: 'Ada' }] });
-    expect(vault.state.hasValue()).toBeTrue();
-    vault.patchState({ value: { id: 99, name: 'Replaced' } as any });
-    expect(vault.state.value()).toEqual({ id: 99, name: 'Replaced' });
-    expect(vault.state.hasValue()).toBeTrue();
-
-    vault.patchState({ value: null });
-    expect(vault.state.value()).toBeNull();
-    expect(vault.state.hasValue()).toBeFalse();
-  });
-
-  it('should update loading when partial.loading is provided', () => {
-    expect(vault.state.isLoading()).toBeFalse();
-    expect(vault.state.hasValue()).toBeTrue();
-    vault.patchState({ loading: true });
-    expect(vault.state.isLoading()).toBeTrue();
-    expect(vault.state.hasValue()).toBeTrue();
-  });
-
-  it('should update error when partial.error is provided', () => {
-    expect(vault.state.error()).toBeNull();
-    expect(vault.state.hasValue()).toBeTrue();
-    const testError = { message: 'Something went wrong' } as any;
-    vault.patchState({ error: testError });
-    expect(vault.state.error()).toEqual(testError);
-    expect(vault.state.hasValue()).toBeTrue();
   });
 });

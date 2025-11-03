@@ -1,7 +1,7 @@
 import { isTestEnv } from '../helpers/testing-environment.helper';
 import { NgVaultConfigModel } from '../models/ng-vault-config.model';
 
-let _config: Readonly<NgVaultConfigModel> | null = null;
+let _config: Readonly<NgVaultConfigModel> | undefined = undefined;
 
 export function setNgVaultConfig(config: NgVaultConfigModel): void {
   if (_config) {

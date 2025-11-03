@@ -85,13 +85,13 @@ describe('Provider: Feature Cell (core vault functionality)', () => {
     };
 
     const nullVault = makeVault(null);
-    expect(nullVault.state.value()).toBeNull();
+    expect(nullVault.state.value()).toBeUndefined();
     expect(nullVault.state.isLoading()).toBeFalse();
     expect(nullVault.state.error()).toBeNull();
     expect(nullVault.state.hasValue()).toBeFalse();
 
     const undefinedVault = makeVault(undefined);
-    expect(undefinedVault.state.value()).toBeNull();
+    expect(undefinedVault.state.value()).toBeUndefined();
     expect(undefinedVault.state.isLoading()).toBeFalse();
     expect(undefinedVault.state.error()).toBeNull();
     expect(undefinedVault.state.hasValue()).toBeFalse();
@@ -112,17 +112,46 @@ describe('Provider: Feature Cell (core vault functionality)', () => {
     expect(vault.state.value()).toEqual([1, 2, 3]);
     expect(vault.state.hasValue()).toBeTrue();
 
+    vault.setState(undefined);
+    expect(vault.state.isLoading()).toBeFalse();
+    expect(vault.state.error()).toBeNull();
+    expect(vault.state.value()).toBeUndefined();
+    expect(vault.state.hasValue()).toBeFalse();
+
+    vault.setState({ loading: true, error: { message: 'fail' }, value: [1, 2, 3] });
+    expect(vault.state.isLoading()).toBeTrue();
+    expect(vault.state.error()).toEqual({ message: 'fail' });
+    expect(vault.state.value()).toEqual([1, 2, 3]);
+    expect(vault.state.hasValue()).toBeTrue();
+
     vault.setState(null);
     expect(vault.state.isLoading()).toBeFalse();
     expect(vault.state.error()).toBeNull();
-    expect(vault.state.value()).toBeNull();
+    expect(vault.state.value()).toBeUndefined();
     expect(vault.state.hasValue()).toBeFalse();
 
-    vault.patchState({ loading: true, value: [4, 5] });
+    vault.patchState({ loading: true, error: { message: 'fail' }, value: [1, 2, 3] });
+    expect(vault.state.isLoading()).toBeTrue();
+    expect(vault.state.error()).toEqual({ message: 'fail' });
+    expect(vault.state.value()).toEqual([1, 2, 3]);
+    expect(vault.state.hasValue()).toBeTrue();
+
+    vault.patchState(undefined);
+    expect(vault.state.isLoading()).toBeFalse();
+    expect(vault.state.error()).toBeNull();
+    expect(vault.state.value()).toBeUndefined();
+    expect(vault.state.hasValue()).toBeFalse();
+
+    vault.patchState({ loading: true, error: { message: 'fail' }, value: [1, 2, 3] });
+    expect(vault.state.isLoading()).toBeTrue();
+    expect(vault.state.error()).toEqual({ message: 'fail' });
+    expect(vault.state.value()).toEqual([1, 2, 3]);
+    expect(vault.state.hasValue()).toBeTrue();
+
     vault.patchState(null);
     expect(vault.state.isLoading()).toBeFalse();
     expect(vault.state.error()).toBeNull();
-    expect(vault.state.value()).toBeNull();
+    expect(vault.state.value()).toBeUndefined();
     expect(vault.state.hasValue()).toBeFalse();
   });
 
@@ -220,6 +249,90 @@ describe('Provider: Feature Cell (core vault functionality)', () => {
     // Set a number again after null (rehydrate)
     vault.setState({ value: 42 });
     expect(vault.state.value()).toBe(42);
+    expect(vault.state.hasValue()).toBeTrue();
+  });
+
+  it('should merge arrays when current and next are both arrays', () => {
+    const providers = provideFeatureCell(class DummyService {}, { key: 'reset-test', initial: [1, 2, 3] });
+    const provider = providers.find((p: any) => typeof p.useFactory === 'function');
+    let vault!: ResourceVaultModel<any>;
+
+    runInInjectionContext(TestBed.inject(Injector), () => {
+      vault = (provider as any).useFactory();
+    });
+    vault.setState({ value: [{ id: 1, name: 'Ada' }] });
+    expect(vault.state.hasValue()).toBeTrue();
+    vault.patchState({ value: [{ id: 2, name: 'Grace' }] });
+    expect(vault.state.value()).toEqual([
+      { id: 1, name: 'Ada' },
+      { id: 2, name: 'Grace' }
+    ]);
+    expect(vault.state.hasValue()).toBeTrue();
+  });
+
+  it('should merge objects shallowly when both current and next are plain objects', () => {
+    const providers = provideFeatureCell(class DummyService {}, { key: 'reset-test', initial: [1, 2, 3] });
+    const provider = providers.find((p: any) => typeof p.useFactory === 'function');
+    let vault!: ResourceVaultModel<any>;
+
+    runInInjectionContext(TestBed.inject(Injector), () => {
+      vault = (provider as any).useFactory();
+    });
+    // simulate current object state
+    vault.setState({ value: { id: 1, name: 'Initial' } as any });
+    expect(vault.state.hasValue()).toBeTrue();
+    vault.patchState({ value: { name: 'Updated' } as any });
+    expect(vault.state.value()).toEqual({ id: 1, name: 'Updated' });
+    expect(vault.state.hasValue()).toBeTrue();
+  });
+
+  it('should replace completely when types differ (array → object or null)', () => {
+    const providers = provideFeatureCell(class DummyService {}, { key: 'reset-test', initial: [1, 2, 3] });
+    const provider = providers.find((p: any) => typeof p.useFactory === 'function');
+    let vault!: ResourceVaultModel<any>;
+
+    runInInjectionContext(TestBed.inject(Injector), () => {
+      vault = (provider as any).useFactory();
+    });
+    vault.setState({ value: [{ id: 1, name: 'Ada' }] });
+    expect(vault.state.hasValue()).toBeTrue();
+    vault.patchState({ value: { id: 99, name: 'Replaced' } as any });
+    expect(vault.state.value()).toEqual({ id: 99, name: 'Replaced' });
+    expect(vault.state.hasValue()).toBeTrue();
+
+    vault.patchState({ value: undefined });
+    vault.patchState({ value: { id: 99, name: 'Replaced' } as any });
+    expect(vault.state.hasValue()).toBeTrue();
+  });
+
+  it('should update loading when partial.loading is provided', () => {
+    const providers = provideFeatureCell(class DummyService {}, { key: 'reset-test', initial: [1, 2, 3] });
+    const provider = providers.find((p: any) => typeof p.useFactory === 'function');
+    let vault!: ResourceVaultModel<any>;
+
+    runInInjectionContext(TestBed.inject(Injector), () => {
+      vault = (provider as any).useFactory();
+    });
+    expect(vault.state.isLoading()).toBeFalse();
+    expect(vault.state.hasValue()).toBeTrue();
+    vault.patchState({ loading: true });
+    expect(vault.state.isLoading()).toBeTrue();
+    expect(vault.state.hasValue()).toBeTrue();
+  });
+
+  it('should update error when partial.error is provided', () => {
+    const providers = provideFeatureCell(class DummyService {}, { key: 'reset-test', initial: [1, 2, 3] });
+    const provider = providers.find((p: any) => typeof p.useFactory === 'function');
+    let vault!: ResourceVaultModel<any>;
+
+    runInInjectionContext(TestBed.inject(Injector), () => {
+      vault = (provider as any).useFactory();
+    });
+    expect(vault.state.error()).toBeNull();
+    expect(vault.state.hasValue()).toBeTrue();
+    const testError = { message: 'Something went wrong' } as any;
+    vault.patchState({ error: testError });
+    expect(vault.state.error()).toEqual(testError);
     expect(vault.state.hasValue()).toBeTrue();
   });
 });

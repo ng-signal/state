@@ -14,7 +14,7 @@ import { resourceError } from './resource-error.util';
  */
 export function createResourceSignal<T>(source$: Observable<T>): VaultSignalRef<T> {
   const _loading = signal(false);
-  const _value = signal<T | null>(null);
+  const _value = signal<T | undefined>(undefined);
   const _error = signal<ResourceStateError | null>(null);
   const _hasValue = computed(() => _value() !== null && _value() !== undefined);
 
@@ -28,7 +28,7 @@ export function createResourceSignal<T>(source$: Observable<T>): VaultSignalRef<
     },
     error: (err: unknown) => {
       _error.set(resourceError(err));
-      _value.set(null);
+      _value.set(undefined);
       _loading.set(false);
     },
     complete: () => {

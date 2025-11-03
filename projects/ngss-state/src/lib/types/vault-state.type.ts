@@ -15,6 +15,6 @@ import { VaultDataType } from './vault-data.type';
  */
 export type VaultStateType<T> = Partial<{
   loading: boolean;
-  value: VaultDataType<T>;
+  value: VaultDataType<T | undefined>;
   error: ResourceStateError | null;
 }>;

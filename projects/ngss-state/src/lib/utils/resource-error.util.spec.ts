@@ -67,7 +67,7 @@ describe('Util: Resource Error', () => {
     const err = resource.error()!;
     expect(err.message).toContain('Unexpected error');
     expect(err.details).toEqual(weirdError);
-    expect(resource.value()).toBeNull();
+    expect(resource.value()).toBeUndefined();
     expect(resource.isLoading()).toBeFalse();
   });
 

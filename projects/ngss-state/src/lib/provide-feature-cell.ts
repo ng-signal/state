@@ -9,6 +9,7 @@ import { ResourceVaultModel } from './models/resource-vault.model';
 import { VaultSignalRef } from './models/vault-signal.ref';
 import { getOrCreateFeatureCellToken } from './tokens/feature-cell-token-registry';
 import { VaultDataType } from './types/vault-data.type';
+import { VaultStateInput } from './types/vault-state-input.type';
 import { VaultStateType } from './types/vault-state.type';
 import { devWarnExperimentalHttpResource } from './utils/dev-warning.util';
 import { isHttpResource } from './utils/is-http-resource.util';
@@ -44,7 +45,7 @@ export function provideFeatureCell<Svc, T>(
 
       const _value = signal<VaultDataType<T>>(
         featureCellDescriptorModel.initial === null || featureCellDescriptorModel.initial === undefined
-          ? null
+          ? undefined
           : (featureCellDescriptorModel.initial as T)
       );
 
@@ -57,11 +58,11 @@ export function provideFeatureCell<Svc, T>(
        * Updates the vault’s state reactively.
        * Supports partial updates, full resets, or Angular HttpResourceRef<T>.
        */
-      const _set = (next: VaultStateType<T> | HttpResourceRef<T> | null): void => {
-        if (next === null) {
+      const _set = (next: VaultStateInput<T>): void => {
+        if (next == null) {
           _isLoading.set(false);
           _error.set(null);
-          _value.set(null);
+          _value.set(undefined);
           return;
         }
 
@@ -105,11 +106,11 @@ export function provideFeatureCell<Svc, T>(
         }
       };
 
-      const _patch = (partial: VaultStateType<T> | HttpResourceRef<T> | null): void => {
-        if (partial === null) {
+      const _patch = (partial: VaultStateInput<T>): void => {
+        if (partial == null) {
           _isLoading.set(false);
           _error.set(null);
-          _value.set(null);
+          _value.set(undefined);
           return;
         }
 
@@ -188,15 +189,15 @@ export function provideFeatureCell<Svc, T>(
         return new Observable<VaultSignalRef<T>>((observer) => {
           const _loadingSignal = signal(true);
           const _errorSignal = signal<ResourceStateError | null>(null);
-          const _dataSignal = signal<VaultDataType<T>>(null);
+          const _valueSignal = signal<VaultDataType<T>>(undefined);
 
           source$.pipe(take(1)).subscribe({
             next: (value) => {
-              _dataSignal.set(value);
+              _valueSignal.set(value);
               _loadingSignal.set(false);
               observer.next({
                 isLoading: _loadingSignal.asReadonly(),
-                value: _dataSignal.asReadonly(),
+                value: _valueSignal.asReadonly(),
                 error: _errorSignal.asReadonly(),
                 hasValue
               });
