@@ -95,7 +95,7 @@ export function provideFeatureCell<Svc, T>(
         }
       };
 
-      const _fromResource = (source$: Observable<T>): Observable<ResourceSignal<T>> => {
+      const _fromObservable = (source$: Observable<T>): Observable<ResourceSignal<T>> => {
         return new Observable<ResourceSignal<T>>((observer) => {
           const _loadingSignal = signal(true);
           const _errorSignal = signal<ResourceStateError | null>(null);
@@ -148,7 +148,7 @@ export function provideFeatureCell<Svc, T>(
         setState: _set,
         patchState: _patch,
         loadListFrom: _loadListFrom,
-        fromResource: _fromResource
+        fromObservable: _fromObservable
       };
 
       return vault;

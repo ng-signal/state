@@ -43,7 +43,7 @@ export class UserCellManualService {
         error: null
       });
       const source$ = this.http.get<UserModel[]>('/api/users').pipe(map((list: UserModel[]) => list));
-      this.vault.fromResource!(source$)
+      this.vault.fromObservable!(source$)
         .pipe(take(1))
         .subscribe({
           next: (state: ResourceSignal<UserModel[]>) => {

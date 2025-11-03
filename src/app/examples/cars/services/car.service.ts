@@ -28,7 +28,7 @@ export class CarService {
         error: null
       });
       const source$ = this.http.get<CarModel[]>('/api/cars').pipe(map((list: CarModel[]) => list));
-      this.vault.fromResource!(source$)
+      this.vault.fromObservable!(source$)
         .pipe(take(1))
         .subscribe({
           next: (state: ResourceSignal<CarModel[]>) => {

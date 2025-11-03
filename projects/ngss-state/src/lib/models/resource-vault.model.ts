@@ -8,5 +8,5 @@ export interface ResourceVaultModel<T> extends SignalVaultModel<T> {
   setState(next: Partial<{ loading: boolean; data: VaultDataType<T>; error: ResourceStateError | null }>): void;
   patchState(partial: Partial<{ loading?: boolean; data?: VaultDataType<T>; error?: ResourceStateError | null }>): void;
   loadListFrom?(source$: Observable<T>): void;
-  fromResource?(source$: Observable<T>): Observable<ResourceSignal<T>>;
+  fromObservable?(source$: Observable<T>): Observable<ResourceSignal<T>>;
 }

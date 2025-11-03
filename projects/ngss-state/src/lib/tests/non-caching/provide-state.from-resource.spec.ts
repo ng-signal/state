@@ -9,7 +9,7 @@ interface TestModel {
   name: string;
 }
 
-describe('ResourceVaultModel (setState, patchState, fromResource)', () => {
+describe('ResourceVaultModel (setState, patchState, fromObservable)', () => {
   let vault: ResourceVaultModel<TestModel[] | TestModel>;
   let subject: Subject<TestModel[]>;
 
@@ -55,14 +55,14 @@ describe('ResourceVaultModel (setState, patchState, fromResource)', () => {
     expect(objVault.state.data()).toEqual({ id: 1, name: 'Grace' });
   });
 
-  it('should return independent ResourceSignal when fromResource() succeeds', () => {
+  it('should return independent ResourceSignal when fromObservable() succeeds', () => {
     const resource = {
       loading: signal<boolean>(false),
       data: signal<any | null>(null),
       error: signal<any | null>(null)
     };
 
-    vault.fromResource!(subject.asObservable()).subscribe({
+    vault.fromObservable!(subject.asObservable()).subscribe({
       next: (result: ResourceSignal<any>) => {
         resource.loading.set(result.loading());
         resource.data.set(result.data());
@@ -99,7 +99,7 @@ describe('ResourceVaultModel (setState, patchState, fromResource)', () => {
       error: signal<any | null>(null)
     };
 
-    vault.fromResource!(subject.asObservable()).subscribe({
+    vault.fromObservable!(subject.asObservable()).subscribe({
       next: (result: ResourceSignal<any>) => {
         resource.loading.set(result.loading());
         resource.data.set(result.data());
