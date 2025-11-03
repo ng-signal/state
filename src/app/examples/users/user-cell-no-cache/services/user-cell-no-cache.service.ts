@@ -39,7 +39,9 @@ export class UserCellNoCacheService {
 
     if (!state.data() && !state.loading()) {
       const source$ = this.http.get<UserModel[]>('/api/users').pipe(map((list: UserModel[]) => list));
-      this.vault.loadListFrom!(source$);
+      // TODO
+      // this.vault.loadListFrom!(source$);
+      this.vault.fromObservable!(source$);
     }
   }
 }
