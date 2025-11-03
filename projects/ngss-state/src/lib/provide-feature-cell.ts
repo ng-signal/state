@@ -1,6 +1,16 @@
 import { HttpResourceRef } from '@angular/common/http';
-import { Injector, Provider, Type, computed, effect, inject, runInInjectionContext, signal } from '@angular/core';
-import { Observable, take } from 'rxjs';
+import {
+  DestroyRef,
+  Injector,
+  Provider,
+  Type,
+  computed,
+  effect,
+  inject,
+  runInInjectionContext,
+  signal
+} from '@angular/core';
+import { Observable, Subject, take } from 'rxjs';
 import { NGVAULT_EXPERIMENTAL_HTTP_RESOURCE } from './constants/experimental-flag.constant';
 import { FEATURE_CELL_REGISTRY } from './constants/feature-cell-registry.constant';
 import { FeatureCellDescriptorModel } from './models/feature-cell-descriptor.model';
@@ -27,6 +37,8 @@ export function provideFeatureCell<Svc, T>(
       const _isLoading = signal(false);
       const _error = signal<ResourceStateError | null>(null);
       const _injector = inject(Injector);
+      const _destroyRef = inject(DestroyRef);
+      const _destroyed$ = new Subject<void>();
 
       // Prevent incorrect initialization (e.g., passing a resource object)
 
@@ -53,6 +65,21 @@ export function provideFeatureCell<Svc, T>(
         const val = _value();
         return val !== null && val !== undefined;
       });
+
+      const _reset = (): void => {
+        _isLoading.set(false);
+        _error.set(null);
+        _value.set(undefined);
+      };
+
+      const _destroy = (): void => {
+        _reset();
+        _destroyed$.next();
+        _destroyed$.complete();
+      };
+
+      // Angular DI teardown
+      _destroyRef.onDestroy(() => _destroy());
 
       /**
        * Updates the vault’s state reactively.
@@ -224,7 +251,10 @@ export function provideFeatureCell<Svc, T>(
         },
         setState: _set,
         patchState: _patch,
-        fromObservable: _fromObservable
+        fromObservable: _fromObservable,
+        reset: _reset,
+        destroy: _destroy,
+        destroyed$: _destroyed$.asObservable()
       };
 
       return vault;

@@ -335,4 +335,43 @@ describe('Provider: Feature Cell (core vault functionality)', () => {
     expect(vault.state.error()).toEqual(testError);
     expect(vault.state.hasValue()).toBeTrue();
   });
+
+  // FILE: provide-feature-cell.spec.ts
+  describe('FeatureCell Destroy Lifecycle', () => {
+    it('should fully destroy and reset signals on destroy()', () => {
+      const providers = provideFeatureCell(class TestService {}, { key: 'destroy-test', initial: [] });
+      const vaultFactory = (providers[0] as any).useFactory;
+
+      let vault!: ResourceVaultModel<any>;
+      runInInjectionContext(TestBed.inject(Injector), () => {
+        vault = vaultFactory();
+      });
+
+      vault.setState({ loading: true, value: [1, 2, 3], error: { message: 'oops' } as any });
+      expect(vault.state.isLoading()).toBeTrue();
+      expect(vault.state.value()).toEqual([1, 2, 3]);
+      expect(vault.state.error()).toEqual({ message: 'oops' });
+
+      vault.reset();
+
+      expect(vault.state.isLoading()).toBeFalse();
+      expect(vault.state.value()).toBeUndefined();
+      expect(vault.state.error()).toBeNull();
+
+      vault.setState({ loading: true, value: [1, 2, 3], error: { message: 'oops' } as any });
+      expect(vault.state.isLoading()).toBeTrue();
+      expect(vault.state.value()).toEqual([1, 2, 3]);
+      expect(vault.state.error()).toEqual({ message: 'oops' });
+
+      vault.destroy();
+
+      expect(vault.state.isLoading()).toBeFalse();
+      expect(vault.state.value()).toBeUndefined();
+      expect(vault.state.error()).toBeNull();
+
+      let completed = false;
+      vault.destroyed$?.subscribe({ complete: () => (completed = true) });
+      expect(completed).toBeTrue();
+    });
+  });
 });
