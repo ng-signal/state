@@ -2,7 +2,7 @@ import { provideHttpClient } from '@angular/common/http';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { Injector, provideZonelessChangeDetection, runInInjectionContext, signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
-import { ResourceSignal } from '@ngvault/core';
+import { VaultSignalRef } from '@ngvault/core';
 import { Subject } from 'rxjs';
 import { ResourceVaultModel } from './models/resource-vault.model';
 import { provideFeatureCell } from './provide-feature-cell';
@@ -31,7 +31,7 @@ describe('ResourceVaultModel (setState, patchState, fromObservable)', () => {
   });
 
   it('should set state fully with setState()', () => {
-    const initial = vault.state.data();
+    const initial = vault.state.value();
     expect(initial).toEqual([]);
 
     const newData = [
@@ -39,18 +39,18 @@ describe('ResourceVaultModel (setState, patchState, fromObservable)', () => {
       { id: 2, name: 'Grace' }
     ];
     vault.setState({ loading: true });
-    expect(vault.state.loading()).toBeTrue();
+    expect(vault.state.isLoading()).toBeTrue();
 
-    vault.setState({ data: newData, loading: false });
-    expect(vault.state.data()).toEqual(newData);
-    expect(vault.state.loading()).toBeFalse();
+    vault.setState({ value: newData, loading: false });
+    expect(vault.state.value()).toEqual(newData);
+    expect(vault.state.isLoading()).toBeFalse();
     expect(vault.state.error()).toBeNull();
   });
 
   it('should append arrays when patchState() is called with array data', () => {
-    vault.setState({ data: [{ id: 1, name: 'Ada' }] });
-    vault.patchState({ data: [{ id: 2, name: 'Grace' }] });
-    expect(vault.state.data()).toEqual([
+    vault.setState({ value: [{ id: 1, name: 'Ada' }] });
+    vault.patchState({ value: [{ id: 2, name: 'Grace' }] });
+    expect(vault.state.value()).toEqual([
       { id: 1, name: 'Ada' },
       { id: 2, name: 'Grace' }
     ]);
@@ -67,8 +67,8 @@ describe('ResourceVaultModel (setState, patchState, fromObservable)', () => {
       vault = (provider as any).useFactory();
     });
 
-    vault.patchState({ data: { name: 'Grace' } as any });
-    expect(vault.state.data()).toEqual({ id: 1, name: 'Grace' });
+    vault.patchState({ value: { name: 'Grace' } as any });
+    expect(vault.state.value()).toEqual({ id: 1, name: 'Grace' });
   });
 
   it('should return independent ResourceSignal when fromObservable() succeeds', () => {
@@ -79,9 +79,9 @@ describe('ResourceVaultModel (setState, patchState, fromObservable)', () => {
     };
 
     vault.fromObservable!(subject.asObservable()).subscribe({
-      next: (result: ResourceSignal<any>) => {
-        resource.loading.set(result.loading());
-        resource.data.set(result.data());
+      next: (result: VaultSignalRef<any>) => {
+        resource.loading.set(result.isLoading());
+        resource.data.set(result.value());
         resource.error.set(result.error());
       },
       error: (error) => {
@@ -116,9 +116,9 @@ describe('ResourceVaultModel (setState, patchState, fromObservable)', () => {
     };
 
     vault.fromObservable!(subject.asObservable()).subscribe({
-      next: (result: ResourceSignal<any>) => {
-        resource.loading.set(result.loading());
-        resource.data.set(result.data());
+      next: (result: VaultSignalRef<any>) => {
+        resource.loading.set(result.isLoading());
+        resource.data.set(result.value());
         resource.error.set(result.error());
       },
       error: (error) => {
@@ -135,9 +135,9 @@ describe('ResourceVaultModel (setState, patchState, fromObservable)', () => {
   });
 
   it('should merge arrays when current and next are both arrays', () => {
-    vault.setState({ data: [{ id: 1, name: 'Ada' }] });
-    vault.patchState({ data: [{ id: 2, name: 'Grace' }] });
-    expect(vault.state.data()).toEqual([
+    vault.setState({ value: [{ id: 1, name: 'Ada' }] });
+    vault.patchState({ value: [{ id: 2, name: 'Grace' }] });
+    expect(vault.state.value()).toEqual([
       { id: 1, name: 'Ada' },
       { id: 2, name: 'Grace' }
     ]);
@@ -145,24 +145,24 @@ describe('ResourceVaultModel (setState, patchState, fromObservable)', () => {
 
   it('should merge objects shallowly when both current and next are plain objects', () => {
     // simulate current object state
-    vault.setState({ data: { id: 1, name: 'Initial' } as any });
-    vault.patchState({ data: { name: 'Updated' } as any });
-    expect(vault.state.data()).toEqual({ id: 1, name: 'Updated' });
+    vault.setState({ value: { id: 1, name: 'Initial' } as any });
+    vault.patchState({ value: { name: 'Updated' } as any });
+    expect(vault.state.value()).toEqual({ id: 1, name: 'Updated' });
   });
 
   it('should replace completely when types differ (array → object or null)', () => {
-    vault.setState({ data: [{ id: 1, name: 'Ada' }] });
-    vault.patchState({ data: { id: 99, name: 'Replaced' } as any });
-    expect(vault.state.data()).toEqual({ id: 99, name: 'Replaced' });
+    vault.setState({ value: [{ id: 1, name: 'Ada' }] });
+    vault.patchState({ value: { id: 99, name: 'Replaced' } as any });
+    expect(vault.state.value()).toEqual({ id: 99, name: 'Replaced' });
 
-    vault.patchState({ data: null });
-    expect(vault.state.data()).toBeNull();
+    vault.patchState({ value: null });
+    expect(vault.state.value()).toBeNull();
   });
 
   it('should update loading when partial.loading is provided', () => {
-    expect(vault.state.loading()).toBeFalse();
+    expect(vault.state.isLoading()).toBeFalse();
     vault.patchState({ loading: true });
-    expect(vault.state.loading()).toBeTrue();
+    expect(vault.state.isLoading()).toBeTrue();
   });
 
   it('should update error when partial.error is provided', () => {

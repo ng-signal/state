@@ -27,11 +27,11 @@ describe('Provider: Feature Cell Resource', () => {
 
   describe('setState', () => {
     it('should reactively mirror HttpResourceRef signals via setState()', async () => {
-      vault.setState({ loading: false, data: [{ id: 1, name: 'Ada' }], error: null });
+      vault.setState({ loading: false, value: [{ id: 1, name: 'Ada' }], error: null });
 
       // initial snapshot
-      expect(vault.state.loading()).toBeFalse();
-      expect(vault.state.data()).toEqual([{ id: 1, name: 'Ada' }]);
+      expect(vault.state.isLoading()).toBeFalse();
+      expect(vault.state.value()).toEqual([{ id: 1, name: 'Ada' }]);
       expect(vault.state.error()).toBeNull();
 
       const id = signal(0);
@@ -41,8 +41,8 @@ describe('Provider: Feature Cell Resource', () => {
       vault.setState(response);
       TestBed.tick();
 
-      expect(vault.state.loading()).toBeTrue();
-      expect(vault.state.data()).toBeUndefined();
+      expect(vault.state.isLoading()).toBeTrue();
+      expect(vault.state.value()).toBeUndefined();
       expect(vault.state.error()).toBeNull();
 
       const firstRequest = mockBackend.expectOne('/data/0');
@@ -50,15 +50,15 @@ describe('Provider: Feature Cell Resource', () => {
 
       await TestBed.inject(ApplicationRef).whenStable();
 
-      expect(vault.state.loading()).toBeFalse();
-      expect(vault.state.data()).toEqual([Object({ id: 1, name: 'Ada' }), Object({ id: 2, name: 'Grace' })]);
+      expect(vault.state.isLoading()).toBeFalse();
+      expect(vault.state.value()).toEqual([Object({ id: 1, name: 'Ada' }), Object({ id: 2, name: 'Grace' })]);
       expect(vault.state.error()).toBeNull();
 
       response.reload();
       TestBed.tick();
 
-      expect(vault.state.loading()).toBeTrue();
-      expect(vault.state.data()).toEqual([Object({ id: 1, name: 'Ada' }), Object({ id: 2, name: 'Grace' })]);
+      expect(vault.state.isLoading()).toBeTrue();
+      expect(vault.state.value()).toEqual([Object({ id: 1, name: 'Ada' }), Object({ id: 2, name: 'Grace' })]);
       expect(vault.state.error()).toBeNull();
 
       const secondRequest = mockBackend.expectOne('/data/0');
@@ -66,8 +66,8 @@ describe('Provider: Feature Cell Resource', () => {
 
       await TestBed.inject(ApplicationRef).whenStable();
 
-      expect(vault.state.loading()).toBeFalse();
-      expect(vault.state.data()).toEqual([Object({ id: 3, name: 'Brian' })]);
+      expect(vault.state.isLoading()).toBeFalse();
+      expect(vault.state.value()).toEqual([Object({ id: 3, name: 'Brian' })]);
       expect(vault.state.error()).toBeNull();
 
       response.reload();
@@ -76,8 +76,8 @@ describe('Provider: Feature Cell Resource', () => {
       const thirdRequest = mockBackend.expectOne('/data/0');
       thirdRequest.flush('Internal Error', { status: 500, statusText: 'Server Error' });
 
-      expect(vault.state.loading()).toBeTrue();
-      expect(vault.state.data()).toEqual([Object({ id: 3, name: 'Brian' })]);
+      expect(vault.state.isLoading()).toBeTrue();
+      expect(vault.state.value()).toEqual([Object({ id: 3, name: 'Brian' })]);
       expect(vault.state.error()).toBeNull();
 
       await TestBed.inject(ApplicationRef).whenStable();
@@ -90,8 +90,8 @@ describe('Provider: Feature Cell Resource', () => {
           details: 'Internal Error'
         })
       );
-      expect(vault.state.loading()).toBeFalse();
-      expect(vault.state.data()).toEqual([Object({ id: 3, name: 'Brian' })]);
+      expect(vault.state.isLoading()).toBeFalse();
+      expect(vault.state.value()).toEqual([Object({ id: 3, name: 'Brian' })]);
     });
 
     it('should react when underlying HttpResourceRef signals reloads', async () => {
@@ -107,7 +107,7 @@ describe('Provider: Feature Cell Resource', () => {
       firstRequest.flush([{ id: 1, name: 'Ada' }]);
       await TestBed.inject(ApplicationRef).whenStable();
 
-      expect(vault.state.data()).toEqual([{ id: 1, name: 'Ada' }]);
+      expect(vault.state.value()).toEqual([{ id: 1, name: 'Ada' }]);
 
       // trigger reload
       id.set(1);
@@ -116,7 +116,7 @@ describe('Provider: Feature Cell Resource', () => {
       mockBackend.expectOne('/data/1').flush([{ id: 2, name: 'Grace' }]);
       await TestBed.inject(ApplicationRef).whenStable();
 
-      expect(vault.state.data()).toEqual([{ id: 2, name: 'Grace' }]);
+      expect(vault.state.value()).toEqual([{ id: 2, name: 'Grace' }]);
     });
 
     it('should capture HttpResourceRef errors reactively', async () => {
@@ -139,8 +139,8 @@ describe('Provider: Feature Cell Resource', () => {
           details: 'Internal Error'
         })
       );
-      expect(vault.state.loading()).toBeFalse();
-      expect(vault.state.data()).toBeUndefined();
+      expect(vault.state.isLoading()).toBeFalse();
+      expect(vault.state.value()).toBeUndefined();
     });
 
     it('should reset vault state when setState(null) is called after HttpResourceRef', async () => {
@@ -153,12 +153,12 @@ describe('Provider: Feature Cell Resource', () => {
       mockBackend.expectOne('/data').flush([{ id: 1, name: 'Ada' }]);
       await TestBed.inject(ApplicationRef).whenStable();
 
-      expect(vault.state.data()).toEqual([{ id: 1, name: 'Ada' }]);
+      expect(vault.state.value()).toEqual([{ id: 1, name: 'Ada' }]);
 
       vault.setState(null);
 
-      expect(vault.state.data()).toBeNull();
-      expect(vault.state.loading()).toBeFalse();
+      expect(vault.state.value()).toBeNull();
+      expect(vault.state.isLoading()).toBeFalse();
       expect(vault.state.error()).toBeNull();
     });
   });
@@ -166,7 +166,7 @@ describe('Provider: Feature Cell Resource', () => {
   describe('patchState', () => {
     it('should merge array data reactively from HttpResourceRef', async () => {
       // start with initial dataset
-      vault.setState({ loading: false, data: [{ id: 1, name: 'Ada' }], error: null });
+      vault.setState({ loading: false, value: [{ id: 1, name: 'Ada' }], error: null });
 
       const mockBackend = TestBed.inject(HttpTestingController);
       const response = httpResource<TestModel[]>(() => '/patch-array', { injector: TestBed.inject(Injector) });
@@ -181,11 +181,11 @@ describe('Provider: Feature Cell Resource', () => {
       await TestBed.inject(ApplicationRef).whenStable();
 
       // patch merges current data with new resource array
-      expect(vault.state.data()).toEqual([
+      expect(vault.state.value()).toEqual([
         { id: 1, name: 'Ada' },
         { id: 2, name: 'Grace' }
       ]);
-      expect(vault.state.loading()).toBeFalse();
+      expect(vault.state.isLoading()).toBeFalse();
       expect(vault.state.error()).toBeNull();
     });
 
@@ -205,13 +205,13 @@ describe('Provider: Feature Cell Resource', () => {
       await TestBed.inject(ApplicationRef).whenStable();
 
       // object merge should replace only changed fields
-      expect(objVault.state.data()).toEqual({ id: 1, name: 'Grace' });
+      expect(objVault.state.value()).toEqual({ id: 1, name: 'Grace' });
       expect(objVault.state.error()).toBeNull();
-      expect(objVault.state.loading()).toBeFalse();
+      expect(objVault.state.isLoading()).toBeFalse();
     });
 
     it('should preserve data and set error when HttpResourceRef request fails', async () => {
-      vault.setState({ data: [{ id: 9, name: 'Existing' }], loading: false, error: null });
+      vault.setState({ value: [{ id: 9, name: 'Existing' }], loading: false, error: null });
 
       const mockBackend = TestBed.inject(HttpTestingController);
       const response = httpResource<TestModel[]>(() => '/patch-fail', { injector: TestBed.inject(Injector) });
@@ -233,8 +233,8 @@ describe('Provider: Feature Cell Resource', () => {
       );
 
       // data should remain unchanged after error
-      expect(vault.state.data()).toEqual([{ id: 9, name: 'Existing' }]);
-      expect(vault.state.loading()).toBeFalse();
+      expect(vault.state.value()).toEqual([{ id: 9, name: 'Existing' }]);
+      expect(vault.state.isLoading()).toBeFalse();
     });
 
     it('should reset vault state when patchState(null) is called after HttpResourceRef', async () => {
@@ -247,12 +247,12 @@ describe('Provider: Feature Cell Resource', () => {
       mockBackend.expectOne('/patch-reset').flush([{ id: 1, name: 'Ada' }]);
       await TestBed.inject(ApplicationRef).whenStable();
 
-      expect(vault.state.data()).toEqual([{ id: 1, name: 'Ada' }]);
+      expect(vault.state.value()).toEqual([{ id: 1, name: 'Ada' }]);
 
       vault.patchState(null);
 
-      expect(vault.state.data()).toBeNull();
-      expect(vault.state.loading()).toBeFalse();
+      expect(vault.state.value()).toBeNull();
+      expect(vault.state.isLoading()).toBeFalse();
       expect(vault.state.error()).toBeNull();
     });
 
@@ -266,16 +266,16 @@ describe('Provider: Feature Cell Resource', () => {
       TestBed.tick();
 
       // Before response arrives, value() throws → _data should remain undefined
-      expect(vault.state.data()).toEqual([]);
-      expect(vault.state.loading()).toBeTrue();
+      expect(vault.state.value()).toEqual([]);
+      expect(vault.state.isLoading()).toBeTrue();
 
       // Simulate backend returning a primitive (final else case)
       mockBackend.expectOne('/primitive').flush(42);
       await TestBed.inject(ApplicationRef).whenStable();
 
       // After flush, final else executes (`_data.set(next as VaultDataType<T>)`)
-      expect(vault.state.data()).toBe(42);
-      expect(vault.state.loading()).toBeFalse();
+      expect(vault.state.value()).toBe(42);
+      expect(vault.state.isLoading()).toBeFalse();
       expect(vault.state.error()).toBeNull();
 
       // Trigger reload → should still follow same "primitive replace" path
@@ -284,9 +284,9 @@ describe('Provider: Feature Cell Resource', () => {
       mockBackend.expectOne('/primitive').flush(7);
       await TestBed.inject(ApplicationRef).whenStable();
 
-      expect(vault.state.data()).toBe(7);
+      expect(vault.state.value()).toBe(7);
       expect(vault.state.error()).toBeNull();
-      expect(vault.state.loading()).toBeFalse();
+      expect(vault.state.isLoading()).toBeFalse();
     });
   });
 });

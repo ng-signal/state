@@ -1,5 +1,5 @@
 import { Signal } from '@angular/core';
-import { ResourceSignal } from '@ngvault/core';
+import { VaultSignalRef } from '@ngvault/core';
 import { UserModel } from '../../models/user.model';
 
 /**
@@ -8,7 +8,7 @@ import { UserModel } from '../../models/user.model';
  */
 export interface ExampleServiceInterface {
   /** Returns the reactive resource state (data, loading, error) */
-  users(): ResourceSignal<UserModel[]>;
+  users(): VaultSignalRef<UserModel[]>;
 
   /** Reactive computed selector that transforms or derives data */
   usersWithNames: Signal<UserModel[]>;

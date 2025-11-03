@@ -1,6 +1,6 @@
 import { HttpClient } from '@angular/common/http';
 import { computed, inject, Injectable } from '@angular/core';
-import { FeatureCell, injectVault, ResourceSignal } from '@ngvault/core';
+import { FeatureCell, injectVault, VaultSignalRef } from '@ngvault/core';
 import { map } from 'rxjs';
 import { UserModel } from '../../../models/user.model';
 
@@ -13,7 +13,7 @@ export class UserCellNoCacheService {
 
   private readonly http = inject(HttpClient);
 
-  users(): ResourceSignal<UserModel[]> {
+  users(): VaultSignalRef<UserModel[]> {
     this.loadUsers();
 
     return this.vault.state;
@@ -21,7 +21,7 @@ export class UserCellNoCacheService {
 
   /** Computed selector that reverses first/last names reactively */
   readonly usersWithNames = computed(() => {
-    const users = this.vault.state.data();
+    const users = this.vault.state.value();
     if (!users) return [];
 
     return users.map((u) => {
@@ -37,7 +37,7 @@ export class UserCellNoCacheService {
   loadUsers(): void {
     const state = this.vault.state;
 
-    if (!state.data() && !state.loading()) {
+    if (!state.value() && !state.isLoading()) {
       const source$ = this.http.get<UserModel[]>('/api/users').pipe(map((list: UserModel[]) => list));
       // TODO
       // this.vault.loadListFrom!(source$);

@@ -1,6 +1,6 @@
 import { HttpClient } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
-import { FeatureCell, injectVault, ResourceSignal } from '@ngvault/core';
+import { FeatureCell, injectVault, VaultSignalRef } from '@ngvault/core';
 import { map, take } from 'rxjs';
 import { CarModel } from '../../models/car.model';
 
@@ -13,7 +13,7 @@ export class CarService {
 
   private readonly http = inject(HttpClient);
 
-  cars(): ResourceSignal<CarModel[]> {
+  cars(): VaultSignalRef<CarModel[]> {
     this.loadCars();
 
     return this.vault.state;
@@ -22,7 +22,7 @@ export class CarService {
   loadCars(): void {
     const state = this.vault.state;
 
-    if (!state.data() && !state.loading()) {
+    if (!state.value() && !state.isLoading()) {
       this.vault.setState({
         loading: true,
         error: null
@@ -31,10 +31,10 @@ export class CarService {
       this.vault.fromObservable!(source$)
         .pipe(take(1))
         .subscribe({
-          next: (state: ResourceSignal<CarModel[]>) => {
+          next: (state: VaultSignalRef<CarModel[]>) => {
             this.vault.setState({
               loading: false,
-              data: state.data(),
+              value: state.value(),
               error: null
             });
           },

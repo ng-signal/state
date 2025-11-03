@@ -1,5 +1,5 @@
 import { computed, effect, inject, Injectable, signal } from '@angular/core';
-import { ResourceSignal, ResourceStateError } from '@ngvault/core';
+import { ResourceStateError, VaultSignalRef } from '@ngvault/core';
 import { CarService } from '../cars/services/car.service';
 import { CarModel } from '../models/car.model';
 import { UserModel } from '../models/user.model';
@@ -25,9 +25,9 @@ export class UserCarFacadeService {
   private readonly _error = signal<ResourceStateError | null>(null);
   private readonly _data = signal<UserWithCarModel[]>([]);
 
-  readonly usersWithCars: ResourceSignal<UserWithCarModel[]> = {
-    loading: this._loading.asReadonly(),
-    data: this._data.asReadonly(),
+  readonly usersWithCars: VaultSignalRef<UserWithCarModel[]> = {
+    isLoading: this._loading.asReadonly(),
+    value: this._data.asReadonly(),
     error: this._error.asReadonly()
   };
 
@@ -50,9 +50,9 @@ export class UserCarFacadeService {
 
   constructor() {
     effect(() => {
-      const users = this.userState.users().data();
-      const cars = this.carState.cars().data();
-      const loading = this.userState.users().loading() || this.carState.cars().loading();
+      const users = this.userState.users().value();
+      const cars = this.carState.cars().value();
+      const loading = this.userState.users().isLoading() || this.carState.cars().isLoading();
       const error = this.userState.users().error() || this.carState.cars().error();
 
       this._loading.set(loading);

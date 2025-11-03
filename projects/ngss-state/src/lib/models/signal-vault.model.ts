@@ -1,5 +1,5 @@
-import { ResourceSignal } from './resource-signal.model';
+import { VaultSignalRef } from './vault-signal.ref';
 
 export interface SignalVaultModel<T> {
-  readonly state: ResourceSignal<T>;
+  readonly state: VaultSignalRef<T>;
 }

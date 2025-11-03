@@ -4,9 +4,9 @@ import { Observable, take } from 'rxjs';
 import { NGVAULT_EXPERIMENTAL_HTTP_RESOURCE } from './constants/experimental-flag.constant';
 import { FEATURE_CELL_REGISTRY } from './constants/feature-cell-registry.constant';
 import { FeatureCellDescriptorModel } from './models/feature-cell-descriptor.model';
-import { ResourceSignal } from './models/resource-signal.model';
 import { ResourceStateError } from './models/resource-state-error.model';
 import { ResourceVaultModel } from './models/resource-vault.model';
+import { VaultSignalRef } from './models/vault-signal.ref';
 import { getOrCreateFeatureCellToken } from './tokens/feature-cell-token-registry';
 import { VaultDataType } from './types/vault-data.type';
 import { VaultStateType } from './types/vault-state.type';
@@ -23,7 +23,7 @@ export function provideFeatureCell<Svc, T>(
   const featureCellProvider: Provider = {
     provide: token,
     useFactory: (): ResourceVaultModel<T> => {
-      const _loading = signal(false);
+      const _isLoading = signal(false);
       const _error = signal<ResourceStateError | null>(null);
       const _injector = inject(Injector);
 
@@ -42,7 +42,7 @@ export function provideFeatureCell<Svc, T>(
         );
       }
 
-      const _data = signal<VaultDataType<T>>(
+      const _value = signal<VaultDataType<T>>(
         featureCellDescriptorModel.initial === null || featureCellDescriptorModel.initial === undefined
           ? null
           : (featureCellDescriptorModel.initial as T)
@@ -54,9 +54,9 @@ export function provideFeatureCell<Svc, T>(
        */
       const _set = (next: VaultStateType<T> | HttpResourceRef<T> | null): void => {
         if (next === null) {
-          _loading.set(false);
+          _isLoading.set(false);
           _error.set(null);
-          _data.set(null);
+          _value.set(null);
           return;
         }
 
@@ -66,9 +66,9 @@ export function provideFeatureCell<Svc, T>(
 
           runInInjectionContext(_injector, () => {
             effect(() => {
-              _loading.set(resource.isLoading());
+              _isLoading.set(resource.isLoading());
               try {
-                _data.set(resource.value());
+                _value.set(resource.value());
               } catch {
                 _error.set(resourceError(resource.error()));
               }
@@ -82,19 +82,19 @@ export function provideFeatureCell<Svc, T>(
         if (next && typeof next === 'object' && !isHttpResource<T>(next)) {
           const patch = next as VaultStateType<T>;
 
-          if (patch.loading !== undefined) _loading.set(patch.loading);
+          if (patch.loading !== undefined) _isLoading.set(patch.loading);
           if (patch.error !== undefined) _error.set(patch.error);
 
-          if (patch.data !== undefined) {
-            const val = patch.data;
+          if (patch.value !== undefined) {
+            const val = patch.value;
 
             // Handle arrays, objects, and primitives generically
             if (Array.isArray(val)) {
-              _data.set([...val] as VaultDataType<T>);
+              _value.set([...val] as VaultDataType<T>);
             } else if (val && typeof val === 'object') {
-              _data.set({ ...val } as VaultDataType<T>);
+              _value.set({ ...val } as VaultDataType<T>);
             } else {
-              _data.set(val as VaultDataType<T>);
+              _value.set(val as VaultDataType<T>);
             }
           }
         }
@@ -102,9 +102,9 @@ export function provideFeatureCell<Svc, T>(
 
       const _patch = (partial: VaultStateType<T> | HttpResourceRef<T> | null): void => {
         if (partial === null) {
-          _loading.set(false);
+          _isLoading.set(false);
           _error.set(null);
-          _data.set(null);
+          _value.set(null);
           return;
         }
 
@@ -114,18 +114,18 @@ export function provideFeatureCell<Svc, T>(
 
           runInInjectionContext(_injector, () => {
             effect(() => {
-              _loading.set(resource.isLoading());
+              _isLoading.set(resource.isLoading());
 
               // Use queueMicrotask to avoid signal reentrancy
               queueMicrotask(() => {
                 try {
                   const next = resource.value();
-                  const curr = _data();
+                  const curr = _value();
 
                   if (next == null) return;
 
                   if (Array.isArray(curr) && Array.isArray(next)) {
-                    _data.set([...curr, ...next] as VaultDataType<T>);
+                    _value.set([...curr, ...next] as VaultDataType<T>);
                   } else if (
                     curr &&
                     next &&
@@ -134,9 +134,9 @@ export function provideFeatureCell<Svc, T>(
                     !Array.isArray(curr) &&
                     !Array.isArray(next)
                   ) {
-                    _data.set({ ...curr, ...next } as VaultDataType<T>);
+                    _value.set({ ...curr, ...next } as VaultDataType<T>);
                   } else {
-                    _data.set(next as VaultDataType<T>);
+                    _value.set(next as VaultDataType<T>);
                   }
 
                   _error.set(null);
@@ -154,15 +154,15 @@ export function provideFeatureCell<Svc, T>(
         if (partial && typeof partial === 'object' && !isHttpResource<T>(partial)) {
           const patch = partial as VaultStateType<T>;
 
-          if (patch.loading !== undefined) _loading.set(patch.loading);
+          if (patch.loading !== undefined) _isLoading.set(patch.loading);
           if (patch.error !== undefined) _error.set(patch.error);
 
-          if (patch.data !== undefined) {
-            const curr = _data();
-            const next = patch.data;
+          if (patch.value !== undefined) {
+            const curr = _value();
+            const next = patch.value;
 
             if (Array.isArray(curr) && Array.isArray(next)) {
-              _data.set([...curr, ...next] as VaultDataType<T>);
+              _value.set([...curr, ...next] as VaultDataType<T>);
             } else if (
               curr &&
               next &&
@@ -171,16 +171,16 @@ export function provideFeatureCell<Svc, T>(
               !Array.isArray(curr) &&
               !Array.isArray(next)
             ) {
-              _data.set({ ...curr, ...next } as VaultDataType<T>);
+              _value.set({ ...curr, ...next } as VaultDataType<T>);
             } else {
-              _data.set(next as VaultDataType<T>);
+              _value.set(next as VaultDataType<T>);
             }
           }
         }
       };
 
-      const _fromObservable = (source$: Observable<T>): Observable<ResourceSignal<T>> => {
-        return new Observable<ResourceSignal<T>>((observer) => {
+      const _fromObservable = (source$: Observable<T>): Observable<VaultSignalRef<T>> => {
+        return new Observable<VaultSignalRef<T>>((observer) => {
           const _loadingSignal = signal(true);
           const _errorSignal = signal<ResourceStateError | null>(null);
           const _dataSignal = signal<VaultDataType<T>>(null);
@@ -190,8 +190,8 @@ export function provideFeatureCell<Svc, T>(
               _dataSignal.set(value);
               _loadingSignal.set(false);
               observer.next({
-                loading: _loadingSignal.asReadonly(),
-                data: _dataSignal.asReadonly(),
+                isLoading: _loadingSignal.asReadonly(),
+                value: _dataSignal.asReadonly(),
                 error: _errorSignal.asReadonly()
               });
               observer.complete();
@@ -210,8 +210,8 @@ export function provideFeatureCell<Svc, T>(
       // Create vault first so we can reference it inside loadListFrom
       const vault: ResourceVaultModel<T> = {
         state: {
-          loading: _loading.asReadonly(),
-          data: _data.asReadonly(),
+          isLoading: _isLoading.asReadonly(),
+          value: _value.asReadonly(),
           error: _error.asReadonly()
         },
         setState: _set,

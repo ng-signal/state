@@ -26,10 +26,6 @@ describe('Provider: Feature Cell (core vault functionality)', () => {
     providers = provideFeatureCell(class TestService {}, { key: 'http', initial: [] });
   });
 
-  // ──────────────────────────────────────────────
-  // Provider registration
-  // ──────────────────────────────────────────────
-
   it('should return an array with two providers', () => {
     expect(Array.isArray(providers)).toBeTrue();
     expect(providers.length).toBe(3);
@@ -89,13 +85,13 @@ describe('Provider: Feature Cell (core vault functionality)', () => {
     };
 
     const nullVault = makeVault(null);
-    expect(nullVault.state.data()).toBeNull();
-    expect(nullVault.state.loading()).toBeFalse();
+    expect(nullVault.state.value()).toBeNull();
+    expect(nullVault.state.isLoading()).toBeFalse();
     expect(nullVault.state.error()).toBeNull();
 
     const undefinedVault = makeVault(undefined);
-    expect(undefinedVault.state.data()).toBeNull();
-    expect(undefinedVault.state.loading()).toBeFalse();
+    expect(undefinedVault.state.value()).toBeNull();
+    expect(undefinedVault.state.isLoading()).toBeFalse();
     expect(undefinedVault.state.error()).toBeNull();
   });
 
@@ -108,21 +104,21 @@ describe('Provider: Feature Cell (core vault functionality)', () => {
       vault = (provider as any).useFactory();
     });
 
-    vault.setState({ loading: true, error: { message: 'fail' }, data: [1, 2, 3] });
-    expect(vault.state.loading()).toBeTrue();
+    vault.setState({ loading: true, error: { message: 'fail' }, value: [1, 2, 3] });
+    expect(vault.state.isLoading()).toBeTrue();
     expect(vault.state.error()).toEqual({ message: 'fail' });
-    expect(vault.state.data()).toEqual([1, 2, 3]);
+    expect(vault.state.value()).toEqual([1, 2, 3]);
 
     vault.setState(null);
-    expect(vault.state.loading()).toBeFalse();
+    expect(vault.state.isLoading()).toBeFalse();
     expect(vault.state.error()).toBeNull();
-    expect(vault.state.data()).toBeNull();
+    expect(vault.state.value()).toBeNull();
 
-    vault.patchState({ loading: true, data: [4, 5] });
+    vault.patchState({ loading: true, value: [4, 5] });
     vault.patchState(null);
-    expect(vault.state.loading()).toBeFalse();
+    expect(vault.state.isLoading()).toBeFalse();
     expect(vault.state.error()).toBeNull();
-    expect(vault.state.data()).toBeNull();
+    expect(vault.state.value()).toBeNull();
   });
 
   it('should merge arrays and objects correctly using patchState()', () => {
@@ -134,13 +130,13 @@ describe('Provider: Feature Cell (core vault functionality)', () => {
       vault = (provider as any).useFactory();
     });
 
-    vault.setState({ data: [1, 2] });
-    vault.patchState({ data: [3, 4] });
-    expect(vault.state.data()).toEqual([1, 2, 3, 4]);
+    vault.setState({ value: [1, 2] });
+    vault.patchState({ value: [3, 4] });
+    expect(vault.state.value()).toEqual([1, 2, 3, 4]);
 
-    vault.setState({ data: { name: 'Alice', age: 30 } });
-    vault.patchState({ data: { age: 31 } });
-    expect(vault.state.data()).toEqual({ name: 'Alice', age: 31 });
+    vault.setState({ value: { name: 'Alice', age: 30 } });
+    vault.patchState({ value: { age: 31 } });
+    expect(vault.state.value()).toEqual({ name: 'Alice', age: 31 });
   });
 
   it('should replace data completely when type differs between current and next', () => {
@@ -152,8 +148,8 @@ describe('Provider: Feature Cell (core vault functionality)', () => {
       vault = (provider as any).useFactory();
     });
 
-    vault.patchState({ data: { user: 'Alice' } });
-    expect(vault.state.data()).toEqual({ user: 'Alice' });
+    vault.patchState({ value: { user: 'Alice' } });
+    expect(vault.state.value()).toEqual({ user: 'Alice' });
   });
 
   it('should correctly propagate loading and error updates', () => {
@@ -166,10 +162,10 @@ describe('Provider: Feature Cell (core vault functionality)', () => {
     });
 
     vault.setState({ loading: true });
-    expect(vault.state.loading()).toBeTrue();
+    expect(vault.state.isLoading()).toBeTrue();
 
     vault.patchState({ loading: false, error: { message: 'timeout' } });
-    expect(vault.state.loading()).toBeFalse();
+    expect(vault.state.isLoading()).toBeFalse();
     expect(vault.state.error()).toEqual({ message: 'timeout' });
   });
 
@@ -184,30 +180,30 @@ describe('Provider: Feature Cell (core vault functionality)', () => {
     });
 
     // Initial state
-    expect(vault.state.data()).toBe(0);
-    expect(vault.state.loading()).toBeFalse();
+    expect(vault.state.value()).toBe(0);
+    expect(vault.state.isLoading()).toBeFalse();
     expect(vault.state.error()).toBeNull();
 
     // Set a new primitive (string)
-    vault.setState({ data: 'new-value' });
-    expect(vault.state.data()).toBe('new-value');
-    expect(vault.state.loading()).toBeFalse();
+    vault.setState({ value: 'new-value' });
+    expect(vault.state.value()).toBe('new-value');
+    expect(vault.state.isLoading()).toBeFalse();
     expect(vault.state.error()).toBeNull();
 
     // Set a different primitive (boolean)
-    vault.setState({ data: true });
-    expect(vault.state.data()).toBeTrue();
+    vault.setState({ value: true });
+    expect(vault.state.value()).toBeTrue();
 
     // Set same primitive value (should not throw or rewrap)
-    vault.setState({ data: true });
-    expect(vault.state.data()).toBeTrue();
+    vault.setState({ value: true });
+    expect(vault.state.value()).toBeTrue();
 
     // Set null (reset to null state)
-    vault.setState({ data: null });
-    expect(vault.state.data()).toBeNull();
+    vault.setState({ value: null });
+    expect(vault.state.value()).toBeNull();
 
     // Set a number again after null (rehydrate)
-    vault.setState({ data: 42 });
-    expect(vault.state.data()).toBe(42);
+    vault.setState({ value: 42 });
+    expect(vault.state.value()).toBe(42);
   });
 });

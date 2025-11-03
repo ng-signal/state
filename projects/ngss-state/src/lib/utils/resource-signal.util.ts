@@ -1,7 +1,7 @@
 import { signal } from '@angular/core';
 import { Observable } from 'rxjs';
-import { ResourceSignal } from '../models/resource-signal.model';
 import { ResourceStateError } from '../models/resource-state-error.model';
+import { VaultSignalRef } from '../models/vault-signal.ref';
 import { resourceError } from './resource-error.util';
 
 /**
@@ -12,7 +12,7 @@ import { resourceError } from './resource-error.util';
  * - Does not alter the source observable.
  * - Updates signals on `next`, `error`, and `complete`.
  */
-export function createResourceSignal<T>(source$: Observable<T>): ResourceSignal<T> {
+export function createResourceSignal<T>(source$: Observable<T>): VaultSignalRef<T> {
   const loading = signal(false);
   const data = signal<T | null>(null);
   const error = signal<ResourceStateError | null>(null);
@@ -36,8 +36,8 @@ export function createResourceSignal<T>(source$: Observable<T>): ResourceSignal<
   });
 
   return {
-    loading: loading.asReadonly(),
-    data: data.asReadonly(),
+    isLoading: loading.asReadonly(),
+    value: data.asReadonly(),
     error: error.asReadonly()
   };
 }

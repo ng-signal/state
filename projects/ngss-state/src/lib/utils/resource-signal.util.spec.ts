@@ -6,8 +6,8 @@ describe('createResourceSignal', () => {
     const subject = new Subject<number>();
     const resource = createResourceSignal(subject.asObservable());
 
-    expect(resource.loading()).toBeTrue();
-    expect(resource.data()).toBeNull();
+    expect(resource.isLoading()).toBeTrue();
+    expect(resource.value()).toBeNull();
     expect(resource.error()).toBeNull();
   });
 
@@ -17,9 +17,9 @@ describe('createResourceSignal', () => {
 
     subject.next(42);
 
-    expect(resource.data()).toBe(42);
+    expect(resource.value()).toBe(42);
     expect(resource.error()).toBeNull();
-    expect(resource.loading()).toBeTrue(); // still true until complete
+    expect(resource.isLoading()).toBeTrue(); // still true until complete
   });
 
   describe('errors', () => {
@@ -31,8 +31,8 @@ describe('createResourceSignal', () => {
       subject.error(new Error(errorMsg));
 
       expect(resource.error()?.message).toBe(errorMsg);
-      expect(resource.data()).toBeNull();
-      expect(resource.loading()).toBeFalse();
+      expect(resource.value()).toBeNull();
+      expect(resource.isLoading()).toBeFalse();
     });
   });
 
@@ -43,8 +43,8 @@ describe('createResourceSignal', () => {
     subject.next(123);
     subject.complete();
 
-    expect(resource.data()).toBe(123);
-    expect(resource.loading()).toBeFalse();
+    expect(resource.value()).toBe(123);
+    expect(resource.isLoading()).toBeFalse();
     expect(resource.error()).toBeNull();
   });
 
@@ -56,30 +56,30 @@ describe('createResourceSignal', () => {
     subject.next('second');
     subject.complete();
 
-    expect(resource.data()).toBe('second');
+    expect(resource.value()).toBe('second');
     expect(resource.error()).toBeNull();
-    expect(resource.loading()).toBeFalse();
+    expect(resource.isLoading()).toBeFalse();
   });
 
   it('should handle an observable that completes immediately', () => {
     const resource = createResourceSignal(of('done'));
 
-    expect(resource.data()).toBe('done');
+    expect(resource.value()).toBe('done');
     expect(resource.error()).toBeNull();
-    expect(resource.loading()).toBeFalse();
+    expect(resource.isLoading()).toBeFalse();
   });
 
   it('should maintain correct readonly signal structure', () => {
     const resource = createResourceSignal(of(1));
 
     // Verify they are signals
-    expect(typeof resource.data).toBe('function');
-    expect(typeof resource.loading).toBe('function');
+    expect(typeof resource.value).toBe('function');
+    expect(typeof resource.isLoading).toBe('function');
     expect(typeof resource.error).toBe('function');
 
     // Verify readonly nature (should not have set)
-    expect((resource.data as any).set).toBeUndefined();
-    expect((resource.loading as any).set).toBeUndefined();
+    expect((resource.value as any).set).toBeUndefined();
+    expect((resource.isLoading as any).set).toBeUndefined();
     expect((resource.error as any).set).toBeUndefined();
   });
 
@@ -91,7 +91,7 @@ describe('createResourceSignal', () => {
     subject.next(1);
     subject.complete();
 
-    expect(resource.data()).toBe(1);
-    expect(resource.loading()).toBeFalse();
+    expect(resource.value()).toBe(1);
+    expect(resource.isLoading()).toBeFalse();
   });
 });

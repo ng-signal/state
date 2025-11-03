@@ -67,8 +67,8 @@ describe('Util: Resource Error', () => {
     const err = resource.error()!;
     expect(err.message).toContain('Unexpected error');
     expect(err.details).toEqual(weirdError);
-    expect(resource.data()).toBeNull();
-    expect(resource.loading()).toBeFalse();
+    expect(resource.value()).toBeNull();
+    expect(resource.isLoading()).toBeFalse();
   });
 
   it('should use statusText when HttpErrorResponse.message is empty', () => {

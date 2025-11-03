@@ -1,5 +1,5 @@
 import { Directive, inject, Signal } from '@angular/core';
-import { ResourceSignal } from '@ngvault/core';
+import { VaultSignalRef } from '@ngvault/core';
 import { CarService } from '../../cars/services/car.service';
 import { UserCarFacadeService } from '../../facades/car-user.service';
 import { UserModel } from '../../models/user.model';
@@ -17,7 +17,7 @@ export abstract class UserListDirective {
    */
   protected readonly userCellService!: ExampleServiceInterface;
 
-  readonly userList: ResourceSignal<UserModel[]>;
+  readonly userList: VaultSignalRef<UserModel[]>;
 
   readonly usersWithName: Signal<UserModel[]>;
 
