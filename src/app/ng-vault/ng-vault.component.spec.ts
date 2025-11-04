@@ -1,4 +1,4 @@
-import { TestBed } from '@angular/core/testing';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { ThemeService } from '../theme/theme.service';
 import { NgVaultComponent } from './ng-vault.component';
 
@@ -11,6 +11,8 @@ import { LoadingSpinnerComponent } from '../spinner/loading-spinner.component';
 import { ToolbarComponent } from '../toolbar/toolbar.component';
 
 describe('Component: NgVault', () => {
+  let fixture: ComponentFixture<NgVaultComponent>;
+  let component: NgVaultComponent;
   let themeService: ThemeService;
 
   beforeEach(async () => {
@@ -21,6 +23,13 @@ describe('Component: NgVault', () => {
 
     themeService = TestBed.inject(ThemeService);
     spyOn(themeService, 'restorePreferences'); // 👈 Spy before component creation
+
+    fixture = TestBed.createComponent(NgVaultComponent);
+    component = fixture.componentInstance;
+  });
+
+  it('should be truthy', () => {
+    expect(component).toBeTruthy();
   });
 
   it('should call ThemeService.restorePreferences once on initialization', () => {
