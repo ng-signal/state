@@ -167,3 +167,20 @@ html[data-theme='dark'] {
     }
   }
 }
+
+.mat-mdc-list-item:hover::before,
+.mat-mdc-list-item:focus::before,
+.mat-mdc-list-item.mat-mdc-list-item-interactive::before {
+  background-color: transparent !important;
+  opacity: 0 !important;
+}
+
+/* Your custom hover background (light + dark friendly) */
+.mat-mdc-list-item:hover {
+  background-color: color-mix(in srgb, var(--ngvault-primary, #1976d2) 25%, transparent) !important;
+}
+
+/* Optional: active (routerLinkActive) state to match hover feel */
+.mat-mdc-list-item.active {
+  background-color: color-mix(in srgb, var(--ngvault-primary, #1976d2) 18%, transparent) !important;
+}
