@@ -1,0 +1,159 @@
+@use 'global' as global;
+
+// Generic theme mixin — consistent with ngVault naming
+@mixin ngvault-theme($bg, $text, $border) {
+  background-color: $bg;
+  color: $text;
+  border-color: $border;
+}
+
+// Root fallback — use ngVault dark surface and text vars
+:root {
+  @include ngvault-theme(global.$ngvault-surface-dark, global.$ngvault-text-primary, global.$ngvault-surface-outline);
+}
+
+html[data-theme='light'] {
+  @include ngvault-theme(global.$ngvault-surface-light, global.$ngvault-text-inverse, global.$ngvault-surface-outline);
+
+  .toolbar {
+    background-color: global.$ngvault-primary-light;
+    color: global.$ngvault-text-inverse; // darker text for light surface
+    border-bottom: 1px solid global.$ngvault-surface-outline;
+  }
+
+  a {
+    @include global.a-link(
+      $color: global.$ngvault-primary-base,
+      $hover: global.$ngvault-accent-base,
+      $visited: global.$ngvault-primary-dark
+    );
+  }
+
+  .header-container {
+    background-color: global.$ngvault-primary-base;
+
+    .site-title {
+      color: global.$ngvault-text-white;
+    }
+  }
+
+  .hamburger-menu {
+    border: 1px solid global.$ngvault-surface-outline;
+    background-color: global.$ngvault-surface-light;
+
+    .hamburger-menu-button {
+      &:hover,
+      &:focus {
+        background-color: global.$ngvault-primary-light;
+        color: global.$ngvault-text-inverse;
+      }
+    }
+  }
+
+  .hamburger-button {
+    color: global.$ngvault-text-white;
+
+    &:hover,
+    &:focus {
+      color: global.$ngvault-accent-light;
+    }
+  }
+
+  .navigation-container {
+    background-color: global.$ngvault-surface-light;
+    border-bottom: 1px solid global.$ngvault-surface-outline;
+    color: global.$ngvault-text-inverse;
+  }
+
+  .footer-container {
+    background: linear-gradient(to right, global.$ngvault-primary-base, global.$ngvault-primary-dark);
+    color: global.$ngvault-text-white;
+  }
+
+  .logo-light {
+    display: block;
+  }
+
+  .logo-dark {
+    display: none;
+  }
+}
+
+html[data-theme='dark'] {
+  @include ngvault-theme(global.$ngvault-surface-darker, global.$ngvault-text-primary, global.$ngvault-surface-outline);
+
+  .toolbar {
+    background-color: global.$ngvault-primary-dark;
+    color: global.$ngvault-text-primary; // light text for dark background
+    border-bottom: 1px solid global.$ngvault-surface-outline;
+  }
+
+  .ngvault-sidenav {
+    border-right: 1px solid rgba(255, 255, 255, 0.1);
+  }
+
+  .ngvault-sidenav-toggle {
+    background-color: global.$ngvault-primary-dark;
+
+    &:hover {
+      background-color: global.$ngvault-primary-base;
+    }
+  }
+
+  a {
+    @include global.a-link(
+      $color: global.$ngvault-primary-light,
+      $hover: global.$ngvault-accent-light,
+      $visited: global.$ngvault-primary-light
+    );
+  }
+
+  .header-container {
+    background-color: global.$ngvault-primary-dark;
+
+    .site-title {
+      color: global.$ngvault-text-white;
+    }
+  }
+
+  .hamburger-menu {
+    border: 1px solid global.$ngvault-surface-outline;
+    background-color: global.$ngvault-surface-dark;
+
+    .hamburger-menu-button {
+      &:hover,
+      &:focus {
+        color: global.$ngvault-text-primary;
+        background-color: global.$ngvault-surface-light;
+      }
+    }
+  }
+
+  .navigation-container {
+    background-color: global.$ngvault-surface-dark;
+    border-bottom: 1px solid global.$ngvault-surface-outline;
+    color: global.$ngvault-text-secondary;
+  }
+
+  .hamburger-button {
+    color: global.$ngvault-text-primary;
+
+    &:hover,
+    &:focus {
+      color: global.$ngvault-primary-light;
+    }
+  }
+
+  .footer-container {
+    background: linear-gradient(to right, global.$ngvault-primary-dark, global.$ngvault-surface-darker);
+    color: global.$ngvault-text-secondary;
+  }
+
+  .logo-light {
+    display: none;
+  }
+
+  .logo-dark {
+    display: block;
+  }
+}

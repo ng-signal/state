@@ -1,0 +1,42 @@
+<div class="navigation-container">
+  <mat-sidenav-container class="sidenav-container">
+    <mat-sidenav #sidenav mode="side" [(opened)]="isExpanded" class="sidenav">
+      <div class="sidenav-content">
+        <mat-toolbar color="primary" class="sidenav-header">
+          <mat-icon>menu_book</mat-icon>
+          <span class="ml-2">Examples</span>
+        </mat-toolbar>
+
+        <mat-nav-list class="navigation-list">
+          <a mat-list-item routerLink="/users/manual" routerLinkActive="active">
+            <div class="menu-content">
+              <mat-icon>group</mat-icon> <span>Users <span class="type">(Manual)</span></span>
+            </div>
+          </a>
+          <a mat-list-item routerLink="/users/no-cache" routerLinkActive="active">
+            <div class="menu-content">
+              <mat-icon>group</mat-icon> <span>Users <span class="type">(No Cache)</span></span>
+            </div>
+          </a>
+          <a mat-list-item routerLink="/dev-tools" routerLinkActive="active">
+            <div class="menu-content"><mat-icon>settings</mat-icon> <span>Dev tools</span></div>
+          </a>
+          <a mat-list-item routerLink="/about" routerLinkActive="active">
+            <div class="menu-content"><mat-icon>info</mat-icon> - <span>About</span></div>
+          </a>
+        </mat-nav-list>
+      </div>
+    </mat-sidenav>
+
+    <mat-sidenav-content cdkScrollable class="router-container">
+      <router-outlet></router-outlet>
+    </mat-sidenav-content>
+  </mat-sidenav-container>
+  <div class="bottom-left-box" (click)="sidenav.toggle()">
+    @if (isExpanded()) {
+      <mat-icon>arrow_back_ios_new</mat-icon>
+    } @else {
+      <mat-icon>arrow_forward_ios_new</mat-icon>
+    }
+  </div>
+</div>

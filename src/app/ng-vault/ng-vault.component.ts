@@ -1,15 +1,13 @@
 import { Component } from '@angular/core';
-import { MatButtonModule } from '@angular/material/button';
-import { MatIconModule } from '@angular/material/icon';
-import { MatListModule } from '@angular/material/list';
-import { MatSidenavModule } from '@angular/material/sidenav';
-import { MatToolbarModule } from '@angular/material/toolbar';
-import { RouterModule } from '@angular/router';
+import { FooterComponent } from '../footer/footer.component';
+import { NavigationComponent } from '../navigation/navigation.component';
+import { LoadingSpinnerComponent } from '../spinner/loading-spinner.component';
+import { ToolbarComponent } from '../toolbar/toolbar.component';
 
 @Component({
   selector: 'ngvault-root',
   standalone: true,
-  imports: [RouterModule, MatToolbarModule, MatSidenavModule, MatListModule, MatIconModule, MatButtonModule],
+  imports: [ToolbarComponent, NavigationComponent, FooterComponent, LoadingSpinnerComponent],
   templateUrl: './ng-vault.component.html',
   styleUrls: ['./ng-vault.component.scss']
 })

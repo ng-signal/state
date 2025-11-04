@@ -1,0 +1,27 @@
+@use 'global' as global;
+
+/**
+ * Spacer Utility Classes
+ * - `.ngvault-spacer-{size}`: Creates width-based spacers (1px - 50px)
+ * - `.ngvault-vspacer-{size}`: Creates height-based spacers (1px - 50px)
+ */
+.ngvault-container-spacer {
+  flex: 1 1 auto;
+  text-align: center;
+}
+
+// Generate width-based spacers (1px - 50px)
+@for $i from 1 through 50 {
+  .ngvault-spacer-#{$i} {
+    text-align: center;
+    @include global.spacer($i, width);
+  }
+}
+
+// Generate height-based spacers (1px - 50px)
+@for $i from 1 through 50 {
+  .ngvault-vspacer-#{$i} {
+    text-align: center;
+    @include global.spacer($i, height);
+  }
+}

@@ -1,51 +1,7 @@
-<mat-sidenav-container class="container">
-  <mat-sidenav #sidenav mode="side" [(opened)]="opened" class="sidenav">
-    <mat-toolbar color="primary" class="sidenav-header">
-      <mat-icon>menu_book</mat-icon>
-      <span class="ml-2">Examples</span>
-    </mat-toolbar>
+<ngvault-toolbar />
+<div class="navigation-container">
+  <ngvault-navigation />
+</div>
+<ngvault-footer />
 
-    <mat-nav-list class="navigation-list">
-      <a mat-list-item routerLink="/users/manual" routerLinkActive="active">
-        <div class="menu-content">
-          <mat-icon>group</mat-icon>
-          <span>Users <span class="type">(Manual)</span></span>
-        </div>
-      </a>
-
-      <a mat-list-item routerLink="/users/no-cache" routerLinkActive="active">
-        <div class="menu-content">
-          <mat-icon>group</mat-icon>
-          <span>Users <span class="type">(No Cache)</span></span>
-        </div>
-      </a>
-
-      <a mat-list-item routerLink="/dev-tools" routerLinkActive="active">
-        <div class="menu-content">
-          <mat-icon>settings</mat-icon>
-          <span>Dev tools</span>
-        </div>
-      </a>
-
-      <a mat-list-item routerLink="/about" routerLinkActive="active">
-        <div class="menu-content">
-          <mat-icon>info</mat-icon>
-          <span>About</span>
-        </div>
-      </a>
-    </mat-nav-list>
-  </mat-sidenav>
-
-  <mat-sidenav-content>
-    <mat-toolbar color="primary" class="toolbar">
-      <button mat-icon-button (click)="sidenav.toggle()" class="hide-desktop">
-        <mat-icon>menu</mat-icon>
-      </button>
-      <span>{{ title }}</span>
-    </mat-toolbar>
-
-    <main class="content">
-      <router-outlet></router-outlet>
-    </main>
-  </mat-sidenav-content>
-</mat-sidenav-container>
+<ngvault-loading-spinner />

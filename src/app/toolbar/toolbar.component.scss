@@ -1,0 +1,32 @@
+@use 'global' as global;
+
+.toolbar {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+
+  // ✅ Updated to ngVault palette
+  background-color: global.$ngvault-primary-light;
+  color: global.$ngvault-text-white;
+
+  width: 100%;
+  height: global.$toolbar-height;
+  padding: 0 global.$spacing-md;
+
+  box-shadow: global.$ngvault-shadow-base;
+  border-bottom: 1px solid global.$ngvault-surface-outline;
+
+  .title-container {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    width: 300px;
+    @include global.ngvault-font-body;
+
+    .title {
+      @include global.ngvault-font-logo;
+      margin-right: global.$spacing-md;
+    }
+  }
+}

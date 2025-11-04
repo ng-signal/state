@@ -12,7 +12,9 @@
       "@ngvault/core": ["projects/ngss-state/src/public-api"],
       "@ngvault/core/*": ["projects/ngss-state/src/lib/*"],
       "@ngvault/dev-tools": ["projects/dev-tools/src/public-api"],
-      "@ngvault/dev-tools/*": ["projects/dev-tools/src/lib/*"]
+      "@ngvault/dev-tools/*": ["projects/dev-tools/src/lib/*"],
+      "@ngvault/styles": ["projects/styles/src/lib"],
+      "@ngvault/styles/*": ["projects/styles/src/lib/*"]
     },
     "noFallthroughCasesInSwitch": true,
     "skipLibCheck": true,
@@ -48,6 +50,12 @@
     },
     {
       "path": "./projects/dev-tools/tsconfig.spec.json"
+    },
+    {
+      "path": "./projects/styles/tsconfig.lib.json"
+    },
+    {
+      "path": "./projects/styles/tsconfig.spec.json"
     }
   ]
 }

@@ -1,0 +1,15 @@
+@use 'global' as global;
+
+.footer {
+  position: relative;
+  height: global.$footer-height;
+  left: 0;
+  right: 0;
+  bottom: 0;
+
+  border-top: 1px solid global.$ngvault-surface-outline; // subtle separator
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: global.$font-size-sm;
+}

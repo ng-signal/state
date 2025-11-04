@@ -1,0 +1,81 @@
+@use 'global' as global;
+
+/**
+ * Global Button Style
+ * - Provides a default button style.
+ */
+.button-global {
+  @include global.button-base(global.$ngvault-warn-light, global.$ngvault-text-secondary, global.$ngvault-warn-light);
+}
+
+/**
+ * Admin Button Styles
+ * - Standard admin button with primary theme.
+ */
+.ngvault-button {
+  @include global.button-base(global.$ngvault-text-white, global.$ngvault-primary-base, global.$ngvault-primary-base);
+}
+
+/**
+ * Admin Button Styles
+ * - Standard admin button with primary theme.
+ */
+.ngvault-button-toggle {
+  @include global.button-base(global.$ngvault-text-white, global.$ngvault-primary-light, global.$ngvault-primary-base);
+  min-width: 30px !important;
+  padding: 0;
+}
+
+/**
+ * Admin Button - Inactive
+ * - Uses the same background and border for consistency.
+ */
+.ngvault-button-inactive {
+  @include global.button-base(global.$ngvault-text-white, global.$ngvault-primary-dark, global.$ngvault-primary-dark);
+}
+
+/**
+ * Admin Button - Disabled
+ * - Uses a muted background and disallows interaction.
+ */
+.ngvault-button-disabled {
+  @include global.button-base(
+    global.$ngvault-text-disabled,
+    global.$ngvault-surface-light,
+    global.$ngvault-surface-outline
+  );
+
+  cursor: not-allowed;
+}
+
+/**
+ * Admin Button - Caution
+ * - Uses a high-contrast amber background for better visibility.
+ */
+.ngvault-button-caution {
+  @include global.button-base(global.$ngvault-text-inverse, global.$ngvault-warn-base, global.$ngvault-warn-dark);
+}
+
+/**
+ * Admin Button - Caution Inactive
+ * - Uses a lighter amber tone.
+ */
+.ngvault-button-caution-inactive {
+  @include global.button-base(global.$ngvault-text-inverse, global.$ngvault-warn-light, global.$ngvault-warn-light);
+}
+
+/**
+ * Admin Button - Warning
+ * - Uses the accent red to indicate danger or delete.
+ */
+.ngvault-button-warn {
+  @include global.button-base(global.$ngvault-text-white, global.$ngvault-accent-base, global.$ngvault-accent-dark);
+}
+
+/**
+ * Admin Button - Warning Inactive
+ * - Uses a lighter red tone for disabled state.
+ */
+.ngvault-button-warn-inactive {
+  @include global.button-base(global.$ngvault-text-white, global.$ngvault-accent-light, global.$ngvault-accent-light);
+}

@@ -1,0 +1,17 @@
+<mat-toolbar class="toolbar">
+  <div class="title-container">
+    <div class="title">NgVault</div>
+    <mat-icon>bolt</mat-icon>
+    <div>Examples</div>
+  </div>
+  <div class="ngvault-container-spacer"></div>
+  <button mat-icon-button [matMenuTriggerFor]="menu" aria-label="Example icon-button with a menu">
+    <mat-icon>more_vert</mat-icon>
+  </button>
+  <mat-menu #menu="matMenu">
+    <button mat-menu-item>
+      <mat-icon>logout</mat-icon>
+      <span>Logout</span>
+    </button>
+  </mat-menu>
+</mat-toolbar>

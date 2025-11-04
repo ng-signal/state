@@ -1,0 +1,84 @@
+@use '@angular/material' as mat;
+@use 'global' as global;
+
+// ===========================================
+// ngVault Material Theme Integration
+// ===========================================
+
+:root {
+  @include mat.snack-bar-overrides(
+    (
+      // Updated to use ngVault theme tokens
+      container-color: global.$ngvault-surface-light,
+      supporting-text-color: global.$ngvault-text-primary,
+      action-color: global.$ngvault-accent-base
+    )
+  );
+}
+
+$ngvault-primary-palette: mat.define-palette(
+  (
+    50: global.$ngvault-primary-light,
+    500: global.$ngvault-primary-base,
+    700: global.$ngvault-primary-dark,
+    contrast: (
+      50: global.$ngvault-text-black,
+      500: global.$ngvault-text-white,
+      700: global.$ngvault-text-white
+    )
+  )
+);
+
+$ngvault-accent-palette: mat.define-palette(
+  (
+    50: global.$ngvault-accent-light,
+    500: global.$ngvault-accent-base,
+    700: global.$ngvault-accent-dark,
+    contrast: (
+      50: global.$ngvault-text-black,
+      500: global.$ngvault-text-white,
+      700: global.$ngvault-text-white
+    )
+  )
+);
+
+$ngvault-warn-palette: mat.define-palette(
+  (
+    50: global.$ngvault-warn-light,
+    500: global.$ngvault-warn-base,
+    700: global.$ngvault-warn-dark,
+    contrast: (
+      50: global.$ngvault-text-black,
+      500: global.$ngvault-text-black,
+      700: global.$ngvault-text-white
+    )
+  )
+);
+
+// Typography (matches Vault system font)
+$ngvault-typography: mat.define-typography-config(
+  (
+    font-family: global.$ngvault-font-family,
+    headline-6: (
+      font-weight: global.$ngvault-font-weight-bold
+    ),
+    body-1: (
+      font-weight: global.$ngvault-font-weight
+    )
+  )
+);
+
+// Apply global theme
+html {
+  @include mat.theme(
+    (
+      color: (
+        primary: $ngvault-primary-palette,
+        accent: $ngvault-accent-palette,
+        warn: $ngvault-warn-palette
+      ),
+      typography: $ngvault-typography,
+      density: 0
+    )
+  );
+}

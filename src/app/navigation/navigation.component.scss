@@ -1,0 +1,71 @@
+@use 'global' as global;
+
+.ngvault-nav-container {
+  width: 100%;
+  height: calc(100vh - #{global.$toolbar-height} - #{global.$footer-height});
+  display: flex;
+  background-color: var(--ngvault-surface);
+  color: var(--ngvault-text);
+  transition:
+    background-color 0.3s ease,
+    color 0.3s ease;
+}
+
+/* Sidenav */
+.ngvault-sidenav {
+  width: 240px;
+  background-color: var(--ngvault-surface);
+  border-right: 1px solid global.$ngvault-surface-outline;
+  color: var(--ngvault-text);
+  transition:
+    background-color 0.3s ease,
+    color 0.3s ease;
+
+  .mat-toolbar {
+    font-weight: global.$font-weight-semibold;
+    color: global.$ngvault-text-white;
+    background-color: var(--ngvault-primary);
+    gap: global.$spacing-xs;
+  }
+
+  .mat-nav-list {
+    a {
+      display: flex;
+      align-items: center;
+      gap: global.$spacing-xs;
+      color: inherit;
+      transition: background-color 0.2s ease;
+
+      &:hover {
+        background-color: rgba(global.$ngvault-primary-base, 0.08);
+      }
+
+      &.active {
+        background-color: rgba(global.$ngvault-primary-base, 0.15);
+        font-weight: global.$font-weight-medium;
+      }
+
+      .type {
+        font-size: global.$font-size-xs;
+        opacity: 0.7;
+      }
+    }
+  }
+
+  /* Toggle Button */
+  .ngvault-sidenav-toggle {
+    position: fixed;
+    bottom: calc(global.$footer-height + global.$spacing-sm);
+    left: global.$spacing-sm;
+    background-color: var(--ngvault-primary);
+    color: global.$ngvault-text-white;
+    border-radius: 50%;
+    box-shadow: global.$ngvault-shadow-base;
+    z-index: 1000;
+    transition: background-color 0.3s ease;
+
+    &:hover {
+      background-color: global.$ngvault-primary-dark;
+    }
+  }
+}

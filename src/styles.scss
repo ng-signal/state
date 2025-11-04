@@ -1,56 +1,108 @@
-// Include theming for Angular Material with `mat.theme()`.
-// This Sass mixin will define CSS variables that are used for styling Angular Material
-// components according to the Material 3 design spec.
-// Learn more about theming and how to use it for your application's
-// custom components at https://material.angular.dev/guide/theming
 @use '@angular/material' as mat;
+@use 'global' as ngVault;
 
-:root {
-  --app-toolbar-height: 64px; // default Material height for desktop
-}
-
-@media (max-width: 599px) {
-  :root {
-    --app-toolbar-height: 56px; // mobile height
-  }
-}
-
-html {
-  @include mat.theme(
-    (
-      color: (
-        primary: mat.$magenta-palette,
-        tertiary: mat.$violet-palette
-      ),
-      typography: Roboto,
-      density: 0
-    )
-  );
-}
+// ============================================
+// 🌐 Global Application Theme — ngVault + Material
+// ============================================
 
 body {
-  // Default the application to a light color theme. This can be changed to
-  // `dark` to enable the dark color theme, or to `light dark` to defer to the
-  // user's system settings.
-  color-scheme: light;
+  // Default: Light Mode
+  color-scheme: light dark;
 
-  // Set a default background, font and text colors for the application using
-  // Angular Material's system-level CSS variables. Learn more about these
-  // variables at https://material.angular.dev/guide/system-variables
-  background-color: var(--mat-sys-surface);
-  color: var(--mat-sys-on-surface);
-  font: var(--mat-sys-body-medium);
-
-  // Reset the user agent margin.
+  background-color: var(--ngvault-surface-light);
+  color: var(--ngvault-text-inverse);
+  font-family: ngVault.$ngvault-font-family;
+  font-weight: ngVault.$ngvault-font-weight;
+  font-size: ngVault.$font-size-md;
+  line-height: ngVault.$line-height;
   margin: 0;
+
+  // Smooth text rendering
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+
+  // 🧩 Material–Vault color variable mapping
+  --mat-sys-surface: var(--ngvault-surface-light);
+  --mat-sys-on-surface: var(--ngvault-text-inverse);
+  --mat-sys-primary: var(--ngvault-primary);
+  --mat-sys-on-primary: #{ngVault.$ngvault-text-white};
+  --mat-sys-error: var(--ngvault-warn);
+  --mat-sys-success: var(--ngvault-success);
+  --mat-sys-outline: #{ngVault.$ngvault-surface-outline};
+
+  transition:
+    background-color 0.3s ease,
+    color 0.3s ease;
 }
-/* You can add global styles to this file, and also import other style files */
+
+// ============================================
+// 🧱 Structural Layout Defaults
+// ============================================
+
+html {
+  scroll-behavior: smooth;
+  transition:
+    background-color 0.3s ease,
+    color 0.3s ease;
+}
 
 html,
 body {
   height: 100%;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background-color: var(--ngvault-surface-light);
 }
-body {
-  margin: 0;
-  font-family: Roboto, 'Helvetica Neue', sans-serif;
+
+main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  background-color: var(--ngvault-surface-light);
+  color: var(--ngvault-text-inverse);
+  padding: ngVault.$spacing-md;
+  transition:
+    background-color 0.3s ease,
+    color 0.3s ease;
+}
+
+footer {
+  height: var(--app-footer-height, 48px);
+  background-color: var(--ngvault-surface-light);
+  color: var(--ngvault-text-secondary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: ngVault.$font-size-sm;
+  border-top: 1px solid var(--ngvault-surface-outline);
+}
+
+// ============================================
+// 🌒 Dark Mode Overrides (System preference)
+// ============================================
+
+@media (prefers-color-scheme: dark) {
+  html {
+    color-scheme: dark;
+  }
+
+  body {
+    background-color: ngVault.$ngvault-surface-darker;
+    color: ngVault.$ngvault-text-primary;
+
+    --mat-sys-surface: #{ngVault.$ngvault-surface-darker};
+    --mat-sys-on-surface: #{ngVault.$ngvault-text-primary};
+  }
+
+  main {
+    background-color: ngVault.$ngvault-surface-dark;
+    color: ngVault.$ngvault-text-primary;
+  }
+
+  footer {
+    background-color: ngVault.$ngvault-surface-dark;
+    color: ngVault.$ngvault-text-secondary;
+  }
 }

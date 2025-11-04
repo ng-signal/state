@@ -1,0 +1,393 @@
+// ===========================================
+// ngVault Global Theme
+// ===========================================
+
+// ────────────────────────────────
+// Primary Palette — Vault Blue
+// ────────────────────────────────
+$ngvault-primary-base: #1976d2; // Vault Blue (core identity)
+$ngvault-primary-light: #63a4ff;
+$ngvault-primary-dark: #004ba0;
+$ngvault-primary-outline: #000000;
+
+// ────────────────────────────────
+// Accent Palette — Reactive Red
+// ────────────────────────────────
+$ngvault-accent-base: #d32f2f; // Strong red, energy/action
+$ngvault-accent-light: #ef5350;
+$ngvault-accent-dark: #b71c1c;
+$ngvault-accent-outline: #fff8dc; // Warm contrast (soft gold)
+
+// ────────────────────────────────
+// Caution Palette — Vault Amber
+// ────────────────────────────────
+$ngvault-warn-base: #fbc02d; // Vault Amber / warning
+$ngvault-warn-light: #fff263;
+$ngvault-warn-dark: #c49000;
+$ngvault-warn-outline: #212121; // Deep neutral border
+
+// ────────────────────────────────
+// Success Palette — Emerald Green
+// ────────────────────────────────
+$ngvault-success-base: #388e3c;
+$ngvault-success-dark: #1b5e20;
+$ngvault-success-light: #81c784;
+$ngvault-success-outline: #e8f5e9;
+
+// ────────────────────────────────
+// Neutral Palette — Text + Surfaces
+// ────────────────────────────────
+$ngvault-text-primary: #e2e8f0; // Light slate (main text on dark bg)
+$ngvault-text-secondary: #94a3b8; // Muted slate
+$ngvault-text-disabled: #64748b; // Cool grey
+$ngvault-text-inverse: #0f172a; // Deep navy
+$ngvault-text-white: #ffffff;
+$ngvault-text-black: #000000;
+
+$ngvault-surface-dark: #0f172a; // Vault UI background
+$ngvault-surface-darker: #0a0e1a;
+$ngvault-surface-light: #1e293b;
+$ngvault-surface-outline: rgba(255, 255, 255, 0.08);
+
+// ────────────────────────────────
+// Shadows / Elevation
+// ────────────────────────────────
+$ngvault-shadow-base: 0 1px 3px rgba(0, 0, 0, 0.25);
+$ngvault-shadow-hover: 0 2px 6px rgba(0, 0, 0, 0.35);
+$ngvault-shadow-active: 0 3px 10px rgba(0, 0, 0, 0.45);
+
+/**
+  * Border Radius
+  */
+$border-radius-xs: 0.25rem; // 4px
+$border-radius-sm: 0.3125rem; // 5px
+$border-radius-md: 0.5rem; // 8px
+$border-radius-lg: 0.75rem; // 12px
+
+/**
+  * Font Sizes
+  */
+$font-size-xs: 0.75rem; // 12px
+$font-size-sm: 0.875rem; // 14px
+$font-size-md: 1rem; // 16px
+$font-size-lg: 1.125rem; // 18px
+$font-size-xl: 1.25rem; // 20px
+$font-size-2xl: 1.5rem; // 24px
+$font-size-3xl: 1.875rem; // 30px
+$font-size-4xl: 2.25rem; // 36px
+$font-size-5xl: 3rem; // 48px
+
+// Font Weights
+$font-weight-regular: 400;
+$font-weight-medium: 500;
+$font-weight-semibold: 600;
+$font-weight-bold: 700;
+
+/**
+* Line height
+**/
+$line-height: 1.6;
+
+/**
+  * UI Element Dimensions
+*/
+$admin-toolbar-height: 64px;
+$admin-footer-height: 40px;
+$button-icon-size: 22px;
+$button-height: 30px;
+$module-container-min-width: 690px;
+
+/**
+  * Spacing
+*/
+$spacing-xs: 0.25rem; // 4px
+$spacing-sm: 0.5rem; // 8px
+$spacing-md: 1rem; // 16px
+$spacing-lg: 1.5rem; // 24px
+$spacing-xl: 2rem; // 32px
+$spacing-xxl: 3rem; // 48px
+$spacing-xxxl: 4rem; // 64px (optional future-proofing)
+
+/**
+* Layout 
+*/
+$toolbar-height: 64px;
+$footer-height: 40px;
+
+// ────────────────────────────────
+// Typography
+// ────────────────────────────────
+$ngvault-font-family: 'Inter', system-ui, sans-serif !default;
+$ngvault-font-weight: 400 !default;
+$ngvault-font-weight-medium: 500;
+$ngvault-font-weight-bold: 600;
+$ngvault-font-size: $font-size-md !default;
+$ngvault-font-color: $ngvault-text-primary !default;
+
+// In your _global.scss
+$ngvault-font-logo: 'Rajdhani', 'Inter', system-ui, sans-serif !default;
+
+// ────────────────────────────────
+// Utilities
+// ────────────────────────────────
+:root {
+  // Core Brand Tokens
+  --ngvault-primary: #{$ngvault-primary-base};
+  --ngvault-accent: #{$ngvault-accent-base};
+  --ngvault-warn: #{$ngvault-warn-base};
+  --ngvault-success: #{$ngvault-success-base};
+
+  // Surface + Text
+  --ngvault-bg-dark: #{$ngvault-surface-dark};
+  --ngvault-bg-light: #{$ngvault-surface-light};
+  --ngvault-text: #{$ngvault-text-primary};
+  --ngvault-text-secondary: #{$ngvault-text-secondary};
+
+  // Elevation & Borders
+  --ngvault-border-color: #{$ngvault-surface-outline};
+  --ngvault-shadow: #{$ngvault-shadow-base};
+
+  // Layout Tokens
+  --app-toolbar-height: 64px; // Default Material height (desktop)
+  --app-footer-height: 40px;
+}
+
+@media (max-width: 599px) {
+  :root {
+    --app-toolbar-height: 56px; // Responsive height for mobile
+  }
+}
+
+.pointer {
+  cursor: pointer;
+}
+
+// ────────────────────────────────
+// Mixins
+// ────────────────────────────────
+@mixin ngvault-elevate($level: base) {
+  @if $level == base {
+    box-shadow: $ngvault-shadow-base;
+  } @else if $level == hover {
+    box-shadow: $ngvault-shadow-hover;
+  } @else if $level == active {
+    box-shadow: $ngvault-shadow-active;
+  }
+}
+
+@mixin ngvault-text($color: $ngvault-text-primary, $weight: $ngvault-font-weight) {
+  color: $color;
+  font-weight: $weight;
+  font-family: $ngvault-font-family;
+}
+
+@mixin ngvault-surface($color: $ngvault-surface-dark) {
+  background-color: $color;
+  border: 1px solid $ngvault-surface-outline;
+}
+
+/**
+  * Typography Mixins
+  */
+@mixin label {
+  font-size: $font-size-md;
+  font-weight: bold;
+}
+
+@mixin color-black {
+  color: $color-text-black;
+}
+
+@mixin h-element {
+  display: block;
+  margin-left: 0;
+  margin-right: 0;
+  font-weight: $font-weight-bold;
+}
+
+@mixin h1-element {
+  font-size: $font-size-3xl; // 2.5rem
+  margin-top: $spacing-md; // 1rem
+  margin-bottom: $spacing-md;
+  @include h-element;
+}
+
+@mixin h2-element {
+  font-size: $font-size-2xl; // 2rem
+  margin-top: $spacing-md; // 1rem
+  margin-bottom: $spacing-md;
+  @include h-element;
+}
+
+@mixin h3-element {
+  font-size: $font-size-xl; // 1.25rem
+  margin-top: $spacing-xs; // 0.25rem
+  margin-bottom: $spacing-lg; // 1.5rem
+  @include h-element;
+}
+
+@mixin h4-element {
+  font-size: $font-size-md; // 1rem
+  margin-top: $spacing-xs; // 0.25rem
+  margin-bottom: $spacing-md; // 1rem
+  @include h-element;
+}
+
+@mixin h5-element {
+  font-size: $font-size-sm; // 0.875rem
+  margin-top: $spacing-xs;
+  margin-bottom: $spacing-sm; // 0.5rem
+  @include h-element;
+}
+
+@mixin h6-element {
+  font-size: $font-size-xs; // 0.75rem
+  margin-top: $spacing-xs;
+  margin-bottom: $spacing-xs;
+  @include h-element;
+}
+
+@mixin ngvault-font-body($size: $ngvault-font-size, $weight: $ngvault-font-weight, $color: $ngvault-font-color) {
+  font-family: var(--ngvault-font-body, #{$ngvault-font-family});
+  font-weight: var(--ngvault-font-body-weight, #{$weight});
+  font-size: var(--ngvault-font-body-size, #{$size});
+  color: var(--ngvault-font-body-color, #{$color});
+  line-height: $line-height;
+  font-style: normal;
+}
+
+@mixin ngvault-font-logo {
+  font-family: var(--ngvault-font-logo, #{$ngvault-font-logo});
+  font-weight: var(--ngvault-font-logo-weight, 600);
+  letter-spacing: 0.02em;
+  color: $ngvault-text-primary;
+}
+
+/**
+ * Link Styles
+ */
+@mixin a-link($color, $hover: null, $visited: null) {
+  cursor: pointer;
+  text-decoration: none;
+  color: $color;
+
+  @if $hover {
+    &:hover {
+      color: $hover;
+      text-decoration: underline;
+    }
+  }
+
+  @if $visited {
+    &:visited {
+      color: $visited;
+    }
+  }
+
+  &:focus {
+    outline: 2px solid $ngvault-accent-base;
+    outline-offset: 2px;
+  }
+}
+
+// Usage Examples
+@mixin a-link-primary {
+  @include a-link($ngvault-primary-base, $ngvault-text-inverse);
+}
+
+/* visited link */
+@mixin a-link-visited {
+  text-decoration: none;
+}
+
+// Visited primary link
+@mixin a-link-visited-primary {
+  color: $ngvault-primary-base;
+  @include a-link-visited;
+}
+
+// Hover underline only
+@mixin a-link-hover {
+  text-decoration: underline;
+}
+
+// Hover primary link
+@mixin a-link-hover-primary {
+  color: $ngvault-text-inverse; // better contrast on hover
+  @include a-link-hover;
+}
+
+/* active link */
+@mixin a-link-active {
+  text-decoration: underline;
+}
+
+@mixin a-link-active-primary {
+  color: $ngvault-accent-base;
+  text-decoration: underline;
+}
+
+/**
+ * Spacer Utility Classes
+ * Dynamically generates `.ngvault-spacer-{size}` & `.ngvault-vspacer-{size}`
+ */
+@mixin spacer($size, $type: width) {
+  #{$type}: #{$size}px;
+}
+
+/**
+ * Generic Button Styles
+ * @param {string} $color Text color
+ * @param {string} $background Background color
+ * @param {string} $border Border color
+ * @param {number} $radius Border radius
+ */
+
+@mixin button-base(
+  $color,
+  $background,
+  $border,
+  $font-size: $font-size-sm,
+  $padding: $spacing-sm,
+  $radius: $border-radius-sm
+) {
+  height: $button-height !important;
+  min-width: 90px !important;
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+  color: $color !important;
+  background-color: $background !important;
+  border: 1px solid $border !important;
+  border-radius: $radius !important;
+  font-size: $font-size !important;
+  padding: $padding;
+  gap: $spacing-xs;
+
+  .mat-icon {
+    transform: scale(0.75);
+  }
+
+  cursor: pointer;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+
+  .button-text {
+    height: $button-height;
+  }
+
+  .mat-icon {
+    width: $button-icon-size !important;
+    height: $button-icon-size !important;
+    position: relative;
+    padding-left: $spacing-xs;
+    padding-right: $spacing-xs;
+    gap: $spacing-xs; // Ensures uniform spacing
+  }
+
+  &:focus {
+    outline: none;
+  }
+}

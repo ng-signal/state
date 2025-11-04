@@ -26,7 +26,10 @@
                 "input": "public"
               }
             ],
-            "styles": ["src/styles.scss"]
+            "styles": ["src/styles.scss"],
+            "stylePreprocessorOptions": {
+              "includePaths": ["projects/styles/src/lib"]
+            }
           },
           "configurations": {
             "production": {
@@ -110,7 +113,7 @@
             "karmaConfig": "projects/ngss-state/karma.conf.js",
             "inlineStyleLanguage": "scss",
             "stylePreprocessorOptions": {
-              "includePaths": ["dist/scss/"]
+              "includePaths": ["projects/styles/src/lib"]
             },
             "codeCoverageExclude": ["**/ng-vault.config.ts", "**/helpers/testing-environment.helper.ts"],
             "scripts": []
@@ -143,10 +146,36 @@
             "karmaConfig": "projects/dev-tools/karma.conf.js",
             "inlineStyleLanguage": "scss",
             "stylePreprocessorOptions": {
-              "includePaths": ["dist/scss/"]
+              "includePaths": ["projects/styles/src/lib"]
             },
             "codeCoverageExclude": [],
             "scripts": []
+          }
+        }
+      }
+    },
+    "styles": {
+      "projectType": "library",
+      "root": "projects/styles",
+      "sourceRoot": "projects/styles/src",
+      "prefix": "lib",
+      "architect": {
+        "build": {
+          "builder": "@angular/build:ng-packagr",
+          "configurations": {
+            "production": {
+              "tsConfig": "projects/styles/tsconfig.lib.prod.json"
+            },
+            "development": {
+              "tsConfig": "projects/styles/tsconfig.lib.json"
+            }
+          },
+          "defaultConfiguration": "production"
+        },
+        "test": {
+          "builder": "@angular/build:karma",
+          "options": {
+            "tsConfig": "projects/styles/tsconfig.spec.json"
           }
         }
       }
