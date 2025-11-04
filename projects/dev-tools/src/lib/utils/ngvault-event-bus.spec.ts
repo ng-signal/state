@@ -17,7 +17,7 @@ describe('VaultEventBus', () => {
       key: 'test',
       type: 'set',
       timestamp: Date.now(),
-      payload: { id: 1 }
+      state: { id: 1 }
     });
   });
 });

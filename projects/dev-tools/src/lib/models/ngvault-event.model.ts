@@ -8,7 +8,7 @@ export interface NgVaultEventModel<T = any> {
   type: VaultEventType;
   source?: VaultEventSource;
   timestamp: number;
-  payload?: Partial<T>;
+  state?: Partial<T>;
   // eslint-disable-next-line
   error?: any;
 }

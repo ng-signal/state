@@ -406,7 +406,7 @@ describe('Provider: Feature Cell (core vault functionality)', () => {
           type: 'init',
           timestamp: jasmine.any(Number),
           source: 'system',
-          payload: Object({ isLoading: false, value: [], error: null, hasValue: true })
+          state: Object({ isLoading: false, value: [], error: null, hasValue: true })
         })
       ]);
     });
@@ -432,7 +432,7 @@ describe('Provider: Feature Cell (core vault functionality)', () => {
           type: 'init',
           timestamp: jasmine.any(Number),
           source: 'system',
-          payload: Object({ isLoading: false, value: [], error: null, hasValue: true })
+          state: Object({ isLoading: false, value: [], error: null, hasValue: true })
         })
       ]);
     });
@@ -466,7 +466,7 @@ describe('Provider: Feature Cell (core vault functionality)', () => {
           type: 'init',
           timestamp: jasmine.any(Number),
           source: 'system',
-          payload: Object({ isLoading: false, value: [], error: null, hasValue: true })
+          state: Object({ isLoading: false, value: [], error: null, hasValue: true })
         }),
         Object({
           id: jasmine.any(String),
@@ -474,7 +474,7 @@ describe('Provider: Feature Cell (core vault functionality)', () => {
           type: 'set',
           timestamp: jasmine.any(Number),
           source: 'manual',
-          payload: Object({ isLoading: true, value: [1, 2, 3], error: Object({ message: 'fail' }), hasValue: true })
+          state: Object({ isLoading: true, value: [1, 2, 3], error: Object({ message: 'fail' }), hasValue: true })
         }),
         Object({
           id: jasmine.any(String),
@@ -482,7 +482,7 @@ describe('Provider: Feature Cell (core vault functionality)', () => {
           type: 'reset',
           timestamp: jasmine.any(Number),
           source: 'manual',
-          payload: Object({ isLoading: false, value: undefined, error: null, hasValue: false })
+          state: Object({ isLoading: false, value: undefined, error: null, hasValue: false })
         }),
         Object({
           id: jasmine.any(String),
@@ -490,7 +490,7 @@ describe('Provider: Feature Cell (core vault functionality)', () => {
           type: 'patch',
           timestamp: jasmine.any(Number),
           source: 'manual',
-          payload: Object({ isLoading: true, value: [4, 5, 6], error: Object({ message: 'fail' }), hasValue: true })
+          state: Object({ isLoading: true, value: [4, 5, 6], error: Object({ message: 'fail' }), hasValue: true })
         }),
         Object({
           id: jasmine.any(String),
@@ -498,7 +498,7 @@ describe('Provider: Feature Cell (core vault functionality)', () => {
           type: 'reset',
           timestamp: jasmine.any(Number),
           source: 'manual',
-          payload: Object({ isLoading: false, value: undefined, error: null, hasValue: false })
+          state: Object({ isLoading: false, value: undefined, error: null, hasValue: false })
         }),
         Object({
           id: jasmine.any(String),
@@ -506,7 +506,7 @@ describe('Provider: Feature Cell (core vault functionality)', () => {
           type: 'set',
           timestamp: jasmine.any(Number),
           source: 'manual',
-          payload: Object({ isLoading: true, value: [1, 2, 3], error: Object({ message: 'fail' }), hasValue: true })
+          state: Object({ isLoading: true, value: [1, 2, 3], error: Object({ message: 'fail' }), hasValue: true })
         }),
         Object({
           id: jasmine.any(String),
@@ -514,7 +514,7 @@ describe('Provider: Feature Cell (core vault functionality)', () => {
           type: 'reset',
           timestamp: jasmine.any(Number),
           source: 'manual',
-          payload: Object({ isLoading: false, value: undefined, error: null, hasValue: false })
+          state: Object({ isLoading: false, value: undefined, error: null, hasValue: false })
         })
       ]);
     });

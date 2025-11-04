@@ -166,7 +166,7 @@ describe('ResourceVaultModel (setState, patchState, fromObservable)', () => {
             type: 'load',
             timestamp: jasmine.any(Number),
             source: 'observable',
-            payload: Object({ isLoading: false, value: [], error: null, hasValue: true })
+            state: Object({ isLoading: false, value: [], error: null, hasValue: true })
           }),
           Object({
             id: jasmine.any(String),
@@ -174,7 +174,7 @@ describe('ResourceVaultModel (setState, patchState, fromObservable)', () => {
             type: 'set',
             timestamp: jasmine.any(Number),
             source: 'observable',
-            payload: Object({
+            state: Object({
               isLoading: false,
               value: [],
               error: null,

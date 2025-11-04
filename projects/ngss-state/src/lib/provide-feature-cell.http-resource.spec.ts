@@ -202,7 +202,7 @@ describe('Provider: Feature Cell Resource', () => {
           key: 'http',
           type: 'set',
           timestamp: jasmine.any(Number),
-          payload: Object({ isLoading: true, value: undefined, error: null, hasValue: false }),
+          state: Object({ isLoading: true, value: undefined, error: null, hasValue: false }),
           source: 'http'
         }),
         Object({
@@ -210,7 +210,7 @@ describe('Provider: Feature Cell Resource', () => {
           key: 'http',
           type: 'set',
           timestamp: jasmine.any(Number),
-          payload: Object({ isLoading: false, value: [Object({ id: 1, name: 'Ada' })], error: null, hasValue: true }),
+          state: Object({ isLoading: false, value: [Object({ id: 1, name: 'Ada' })], error: null, hasValue: true }),
           source: 'http'
         }),
         Object({
@@ -218,7 +218,7 @@ describe('Provider: Feature Cell Resource', () => {
           key: 'http',
           type: 'reset',
           timestamp: jasmine.any(Number),
-          payload: Object({ isLoading: false, value: undefined, error: null, hasValue: false }),
+          state: Object({ isLoading: false, value: undefined, error: null, hasValue: false }),
           source: 'manual'
         })
       ]);
@@ -403,7 +403,7 @@ describe('Provider: Feature Cell Resource', () => {
           key: 'http',
           type: 'patch',
           timestamp: jasmine.any(Number),
-          payload: Object({ isLoading: false, value: 42, error: null, hasValue: true }),
+          state: Object({ isLoading: false, value: 42, error: null, hasValue: true }),
           source: 'http'
         }),
         Object({
@@ -411,7 +411,7 @@ describe('Provider: Feature Cell Resource', () => {
           key: 'http',
           type: 'patch',
           timestamp: jasmine.any(Number),
-          payload: Object({ isLoading: true, value: 42, error: null, hasValue: true }),
+          state: Object({ isLoading: true, value: 42, error: null, hasValue: true }),
           source: 'http'
         }),
         Object({
@@ -419,7 +419,7 @@ describe('Provider: Feature Cell Resource', () => {
           key: 'http',
           type: 'patch',
           timestamp: jasmine.any(Number),
-          payload: Object({ isLoading: false, value: 7, error: null, hasValue: true }),
+          state: Object({ isLoading: false, value: 7, error: null, hasValue: true }),
           source: 'http'
         })
       ]);

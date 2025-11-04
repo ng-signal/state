@@ -12,7 +12,7 @@ export class NgVaultDevtoolsService {
   readonly events = signal<NgVaultEventModel[]>([]);
 
   /** Current snapshot of all active vaults */
-  readonly vaults = signal<Record<string, NgVaultEventModel['payload']>>({});
+  readonly vaults = signal<Record<string, NgVaultEventModel['state']>>({});
 
   constructor() {
     NgVaultEventBus.asObservable()
@@ -26,10 +26,10 @@ export class NgVaultDevtoolsService {
           this.events.update((prev) => [event, ...prev].slice(0, 200));
 
           // Maintain latest vault state per key
-          if (event.key && event.payload) {
+          if (event.key && event.state) {
             this.vaults.update((map) => ({
               ...map,
-              [event.key]: event.payload
+              [event.key]: event.state
             }));
           }
         }

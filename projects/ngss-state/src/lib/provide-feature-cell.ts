@@ -282,7 +282,7 @@ export function provideFeatureCell<Svc, T>(
             key: featureCellDescriptor.key,
             type,
             timestamp: Date.now(),
-            payload: {
+            state: {
               isLoading: _isLoading(),
               value: _value(),
               error: _error(),

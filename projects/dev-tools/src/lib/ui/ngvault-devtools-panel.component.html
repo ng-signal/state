@@ -23,7 +23,7 @@
             <span class="text-slate-500 ml-2 text-xs">
               {{ event.timestamp | date: 'mediumTime' }}
             </span>
-            <pre class="text-xs text-slate-300 mt-1">{{ event.payload | json }}</pre>
+            <pre class="text-xs text-slate-300 mt-1">{{ event.state | json }}</pre>
           </div>
         }
       </div>

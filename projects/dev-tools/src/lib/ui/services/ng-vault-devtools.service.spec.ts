@@ -28,7 +28,7 @@ describe('NgVaultDevtoolsService (integration)', () => {
       type: 'set',
       source: 'manual',
       timestamp: Date.now(),
-      payload: { value: { id: 1 } }
+      state: { value: { id: 1 } }
     };
 
     NgVaultEventBus.next(base);
@@ -46,7 +46,7 @@ describe('NgVaultDevtoolsService (integration)', () => {
         type: 'patch',
         source: 'system',
         timestamp: Date.now(),
-        payload: { value: i }
+        state: { value: i }
       });
     }
 
@@ -64,7 +64,7 @@ describe('NgVaultDevtoolsService (integration)', () => {
       type: 'set',
       source: 'manual',
       timestamp: Date.now(),
-      payload: { value: 1 }
+      state: { value: 1 }
     });
 
     expect(service.events().length).toBeGreaterThan(0);
