@@ -1,71 +1,72 @@
 @use 'global' as global;
 
-.ngvault-nav-container {
-  width: 100%;
-  height: calc(100vh - #{global.$toolbar-height} - #{global.$footer-height});
-  display: flex;
-  background-color: var(--ngvault-surface);
-  color: var(--ngvault-text);
-  transition:
-    background-color 0.3s ease,
-    color 0.3s ease;
-}
+.navigation-container {
+  height: calc(100vh - #{global.$footer-height} - #{global.$toolbar-height});
 
-/* Sidenav */
-.ngvault-sidenav {
-  width: 240px;
-  background-color: var(--ngvault-surface);
-  border-right: 1px solid global.$ngvault-surface-outline;
-  color: var(--ngvault-text);
-  transition:
-    background-color 0.3s ease,
-    color 0.3s ease;
+  .sidenav-container {
+    width: 100%;
+    height: 100vh;
+    display: flex;
+    background-color: white;
 
-  .mat-toolbar {
-    font-weight: global.$font-weight-semibold;
-    color: global.$ngvault-text-white;
-    background-color: var(--ngvault-primary);
-    gap: global.$spacing-xs;
-  }
+    .router-container {
+      width: 100%;
+    }
 
-  .mat-nav-list {
-    a {
-      display: flex;
-      align-items: center;
-      gap: global.$spacing-xs;
-      color: inherit;
-      transition: background-color 0.2s ease;
+    .sidenav {
+      width: 240px;
+      height: calc(100vh - #{global.$footer-height} - #{global.$toolbar-height});
+      background: #fafafa;
+      border-right: 1px solid #e0e0e0;
 
-      &:hover {
-        background-color: rgba(global.$ngvault-primary-base, 0.08);
+      .sidenav-content {
+        margin-top: 10px;
+        width: 250px;
+        color: black;
+        overflow-x: hidden;
+
+        .sidenav-header {
+          font-weight: 600;
+          color: black;
+          gap: 0.25em;
+        }
       }
+    }
 
-      &.active {
-        background-color: rgba(global.$ngvault-primary-base, 0.15);
-        font-weight: global.$font-weight-medium;
-      }
+    .mat-nav-list a.active {
+      background-color: rgba(0, 0, 0, 0.08);
+    }
 
-      .type {
-        font-size: global.$font-size-xs;
-        opacity: 0.7;
+    .content {
+      padding: 1.5rem;
+    }
+
+    .navigation-list {
+      width: 100%;
+
+      .menu-content {
+        display: flex;
+        align-items: center;
+        gap: 0.25rem;
+
+        .type {
+          font-size: 0.75rem;
+        }
       }
     }
   }
 
-  /* Toggle Button */
-  .ngvault-sidenav-toggle {
+  .bottom-left-box {
     position: fixed;
-    bottom: calc(global.$footer-height + global.$spacing-sm);
-    left: global.$spacing-sm;
-    background-color: var(--ngvault-primary);
-    color: global.$ngvault-text-white;
-    border-radius: 50%;
-    box-shadow: global.$ngvault-shadow-base;
-    z-index: 1000;
-    transition: background-color 0.3s ease;
-
-    &:hover {
-      background-color: global.$ngvault-primary-dark;
-    }
+    bottom: 38px;
+    left: 1px;
+    width: 48px;
+    height: 48px;
+    color: black;
+    z-index: 999; /* Ensures it stays on top */
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
   }
 }
