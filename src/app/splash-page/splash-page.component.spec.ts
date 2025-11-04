@@ -21,6 +21,6 @@ describe('Component: Splash Page', () => {
   });
 
   it('should have appName defined and correct', () => {
-    expect(component.appName).toBe('NG Signal Store');
+    expect(component.appName).toBe('NgVault');
   });
 });
