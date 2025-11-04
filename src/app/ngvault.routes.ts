@@ -36,5 +36,6 @@ export const routes: Routes = [
   { path: 'users/manual', component: UserListManualComponent },
   { path: 'dev-tools', component: DevToolsComponent },
   { path: '', component: SplashPageComponent },
+  { path: 'about', component: SplashPageComponent },
   { path: '**', redirectTo: '' }
 ];

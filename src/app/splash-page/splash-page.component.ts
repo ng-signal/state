@@ -13,5 +13,5 @@ export class SplashPageComponent {
   /**
    * The app name
    */
-  readonly appName = 'NG Signal Store';
+  readonly appName = 'NgVault';
 }
