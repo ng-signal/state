@@ -3,7 +3,7 @@
     <h3>{{ title }}</h3>
   </div>
   <!-- LOADING -->
-  @if (userList.loading()) {
+  @if (userList.isLoading()) {
     <div class="loading-state">
       <mat-spinner diameter="50"></mat-spinner>
       <p>Loading users ({{ spinnerTitle }}) ...</p>
@@ -27,7 +27,7 @@
         <mat-panel-description>Fetched from User Store</mat-panel-description>
       </mat-expansion-panel-header>
 
-      @for (user of userList.data(); track user.id) {
+      @for (user of userList.value(); track user.id) {
         <mat-card class="item-card">
           <mat-card-header>
             <mat-icon mat-card-avatar>person</mat-icon>
@@ -63,7 +63,7 @@
         <mat-panel-description>Fetched from Car Store</mat-panel-description>
       </mat-expansion-panel-header>
 
-      @for (car of cars.data(); track car.id) {
+      @for (car of cars.value(); track car.id) {
         <mat-card class="item-card">
           <mat-card-header>
             <mat-icon mat-card-avatar>directions_car</mat-icon>

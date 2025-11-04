@@ -3,7 +3,7 @@
     <h3>{{ title }}</h3>
   </div>
   <!-- LOADING -->
-  @if (userList.loading()) {
+  @if (userList.isLoading()) {
     <div class="loading-state">
       <mat-spinner diameter="50"></mat-spinner>
       <p>Loading users ({{ spinnerTitle }}) ...</p>
@@ -21,7 +21,7 @@
 
   <!-- DATA -->
   <div class="item-container">
-    @for (user of userList.data(); track user.id) {
+    @for (user of userList.value(); track user.id) {
       <mat-card class="item-card">
         <mat-card-header>
           <mat-icon mat-card-avatar>person</mat-icon>

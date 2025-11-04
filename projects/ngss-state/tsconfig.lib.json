@@ -8,7 +8,11 @@
     "declarationMap": true,
     "inlineSourceMap": true,
     "inlineSources": true,
-    "types": []
+    "types": [],
+    "paths": {
+      "@ngvault/dev-tools": ["dist/dev-tools/public-api"],
+      "@ngvault/dev-tools/*": ["dist/dev-tools"]
+    }
   },
   "include": ["src/**/*.ts"],
   "exclude": ["**/*.spec.ts"]
