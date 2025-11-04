@@ -139,7 +139,14 @@
         "test": {
           "builder": "@angular/build:karma",
           "options": {
-            "tsConfig": "projects/dev-tools/tsconfig.spec.json"
+            "tsConfig": "projects/dev-tools/tsconfig.spec.json",
+            "karmaConfig": "projects/dev-tools/karma.conf.js",
+            "inlineStyleLanguage": "scss",
+            "stylePreprocessorOptions": {
+              "includePaths": ["dist/scss/"]
+            },
+            "codeCoverageExclude": [],
+            "scripts": []
           }
         }
       }

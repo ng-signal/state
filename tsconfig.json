@@ -9,10 +9,10 @@
     "noPropertyAccessFromIndexSignature": true,
     "noImplicitReturns": true,
     "paths": {
-      "@ngvault/core": ["dist/ngss-state/public-api"],
-      "@ngvault/core/*": ["dist/ngss-state"],
-      "@ngvault/dev-tools": ["dist/dev-tools/public-api"],
-      "@ngvault/dev-tools/*": ["dist/dev-tools"]
+      "@ngvault/core": ["projects/ngss-state/src/public-api"],
+      "@ngvault/core/*": ["projects/ngss-state/src/lib/*"],
+      "@ngvault/dev-tools": ["projects/dev-tools/src/public-api"],
+      "@ngvault/dev-tools/*": ["projects/dev-tools/src/lib/*"]
     },
     "noFallthroughCasesInSwitch": true,
     "skipLibCheck": true,

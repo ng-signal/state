@@ -20,7 +20,7 @@ module.exports = function (config) {
     },
     coverageReporter: {
       dir: require('path').join(__dirname, '..', '..', 'coverage'),
-      subdir: 'core',
+      subdir: 'dev-tools',
       reports: ['html', 'lcovonly'],
       fixWebpackSourcePaths: true,
       watermarks: {
