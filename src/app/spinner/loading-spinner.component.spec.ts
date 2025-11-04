@@ -1,3 +1,4 @@
+import { provideZonelessChangeDetection } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { LoadingSpinnerComponent } from './loading-spinner.component';
@@ -10,7 +11,7 @@ describe('Component: Loading Spinner', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [LoadingSpinnerComponent, MatProgressSpinnerModule],
-      providers: [LoadingSpinnerService]
+      providers: [LoadingSpinnerService, provideZonelessChangeDetection()]
     }).compileComponents();
 
     fixture = TestBed.createComponent(LoadingSpinnerComponent);

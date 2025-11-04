@@ -46,8 +46,8 @@ $ngvault-text-black: #000000;
 
 $ngvault-surface-dark: #0f172a; // Vault UI background
 $ngvault-surface-darker: #0a0e1a;
-$ngvault-surface-light: #1e293b;
-$ngvault-surface-outline: rgba(255, 255, 255, 0.08);
+$ngvault-surface-light: #ffffff; // Base for light mode
+$ngvault-surface-outline: $ngvault-primary-light; // Neutral outline tone
 
 // ────────────────────────────────
 // Shadows / Elevation
@@ -112,6 +112,7 @@ $spacing-xxxl: 4rem; // 64px (optional future-proofing)
 * Layout 
 */
 $toolbar-height: 64px;
+$sidenav-width: 250px;
 $footer-height: 40px;
 
 // ────────────────────────────────
@@ -126,37 +127,6 @@ $ngvault-font-color: $ngvault-text-primary !default;
 
 // In your _global.scss
 $ngvault-font-logo: 'Rajdhani', 'Inter', system-ui, sans-serif !default;
-
-// ────────────────────────────────
-// Utilities
-// ────────────────────────────────
-:root {
-  // Core Brand Tokens
-  --ngvault-primary: #{$ngvault-primary-base};
-  --ngvault-accent: #{$ngvault-accent-base};
-  --ngvault-warn: #{$ngvault-warn-base};
-  --ngvault-success: #{$ngvault-success-base};
-
-  // Surface + Text
-  --ngvault-bg-dark: #{$ngvault-surface-dark};
-  --ngvault-bg-light: #{$ngvault-surface-light};
-  --ngvault-text: #{$ngvault-text-primary};
-  --ngvault-text-secondary: #{$ngvault-text-secondary};
-
-  // Elevation & Borders
-  --ngvault-border-color: #{$ngvault-surface-outline};
-  --ngvault-shadow: #{$ngvault-shadow-base};
-
-  // Layout Tokens
-  --app-toolbar-height: 64px; // Default Material height (desktop)
-  --app-footer-height: 40px;
-}
-
-@media (max-width: 599px) {
-  :root {
-    --app-toolbar-height: 56px; // Responsive height for mobile
-  }
-}
 
 .pointer {
   cursor: pointer;
@@ -260,6 +230,7 @@ $ngvault-font-logo: 'Rajdhani', 'Inter', system-ui, sans-serif !default;
   font-family: var(--ngvault-font-logo, #{$ngvault-font-logo});
   font-weight: var(--ngvault-font-logo-weight, 600);
   letter-spacing: 0.02em;
+  font-size: $font-size-2xl;
   color: $ngvault-text-primary;
 }
 
@@ -390,4 +361,11 @@ $ngvault-font-logo: 'Rajdhani', 'Inter', system-ui, sans-serif !default;
   &:focus {
     outline: none;
   }
+}
+
+// Generic theme mixin — consistent with ngVault naming
+@mixin ngvault-theme($bg, $text, $border) {
+  background-color: $bg;
+  color: $text;
+  border-color: $border;
 }

@@ -1,108 +1,169 @@
 @use '@angular/material' as mat;
-@use 'global' as ngVault;
+@use 'global' as global;
 
 // ============================================
-// 🌐 Global Application Theme — ngVault + Material
+// Global Application Theme — global + Material
 // ============================================
 
 body {
   // Default: Light Mode
-  color-scheme: light dark;
+  color-scheme: light;
 
   background-color: var(--ngvault-surface-light);
   color: var(--ngvault-text-inverse);
-  font-family: ngVault.$ngvault-font-family;
-  font-weight: ngVault.$ngvault-font-weight;
-  font-size: ngVault.$font-size-md;
-  line-height: ngVault.$line-height;
-  margin: 0;
+  font-family: global.$ngvault-font-family;
+  font-weight: global.$ngvault-font-weight;
+  font-size: global.$font-size-md;
+  line-height: global.$line-height;
 
   // Smooth text rendering
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   text-rendering: optimizeLegibility;
 
-  // 🧩 Material–Vault color variable mapping
+  // Material–Vault variable mapping
   --mat-sys-surface: var(--ngvault-surface-light);
   --mat-sys-on-surface: var(--ngvault-text-inverse);
   --mat-sys-primary: var(--ngvault-primary);
-  --mat-sys-on-primary: #{ngVault.$ngvault-text-white};
+  --mat-sys-on-primary: #{global.$ngvault-text-white};
   --mat-sys-error: var(--ngvault-warn);
   --mat-sys-success: var(--ngvault-success);
-  --mat-sys-outline: #{ngVault.$ngvault-surface-outline};
-
-  transition:
-    background-color 0.3s ease,
-    color 0.3s ease;
+  --mat-sys-outline: #{global.$ngvault-surface-outline};
 }
-
-// ============================================
-// 🧱 Structural Layout Defaults
-// ============================================
 
 html {
-  scroll-behavior: smooth;
-  transition:
-    background-color 0.3s ease,
-    color 0.3s ease;
-}
-
-html,
-body {
   height: 100%;
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
-  background-color: var(--ngvault-surface-light);
+  scroll-behavior: smooth;
 }
 
-main {
-  flex: 1;
+body {
+  height: 100vh;
   display: flex;
   flex-direction: column;
-  background-color: var(--ngvault-surface-light);
-  color: var(--ngvault-text-inverse);
-  padding: ngVault.$spacing-md;
-  transition:
-    background-color 0.3s ease,
-    color 0.3s ease;
+  margin: 0;
+  overflow-x: hidden;
+  background-color: var(--surface-bg);
+  color: var(--text-color);
 }
 
-footer {
-  height: var(--app-footer-height, 48px);
-  background-color: var(--ngvault-surface-light);
-  color: var(--ngvault-text-secondary);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: ngVault.$font-size-sm;
-  border-top: 1px solid var(--ngvault-surface-outline);
+:root {
+  color-scheme: light;
+
+  --ngvault-primary: #{global.$ngvault-primary-base};
+  --ngvault-accent: #{global.$ngvault-accent-base};
+  --ngvault-warn: #{global.$ngvault-warn-base};
+  --ngvault-success: #{global.$ngvault-success-base};
+
+  // Surface / Background Defaults
+  --ngvault-bg: #{global.$ngvault-surface-light}; // default = light theme
+  --ngvault-bg-dark: #{global.$ngvault-surface-dark};
+  --ngvault-bg-light: #{global.$ngvault-surface-light};
+
+  //  Text Colors
+  --ngvault-text-primary: #{global.$ngvault-text-primary};
+  --ngvault-text-secondary: #{global.$ngvault-text-secondary};
+  --ngvault-text-inverse: #{global.$ngvault-text-inverse};
+  --ngvault-text-default: var(--ngvault-text-inverse); // safe default
+
+  // Borders, Shadows, Layout
+  --ngvault-border-color: #{global.$ngvault-surface-outline};
+  --ngvault-shadow: #{global.$ngvault-shadow-base};
+  --app-toolbar-height: #{global.$toolbar-height};
+  --app-footer-height: #{global.$footer-height};
+
+  // Body & surfaces
+  --surface-bg: #{global.$ngvault-surface-light};
+  --surface-text: #{global.$ngvault-text-inverse};
+  --surface-outline: #{global.$ngvault-surface-outline};
+
+  // Toolbar
+  --toolbar-bg: #{global.$ngvault-primary-base};
+  --toolbar-text: #{global.$ngvault-text-white};
+  --toolbar-border: #{global.$ngvault-surface-outline};
+
+  // Sidenav & Navigation
+  --sidenav-bg: #{global.$ngvault-primary-base};
+  --sidenav-text: #{global.$ngvault-text-white};
+
+  // Footer & floating box
+  --footer-border: #{global.$ngvault-primary-base};
+
+  // Link colors
+  --link-color: #{global.$ngvault-primary-base};
+  --link-hover: #{global.$ngvault-accent-base};
+  --link-visited: #{global.$ngvault-primary-dark};
+
+  // Angular Material bridge
+  --mat-sys-surface: #{global.$ngvault-surface-light};
+  --mat-sys-on-surface: #{global.$ngvault-text-inverse};
+  --mat-sys-primary: #{global.$ngvault-primary-base};
+  --mat-sys-on-primary: #{global.$ngvault-text-white};
 }
 
 // ============================================
-// 🌒 Dark Mode Overrides (System preference)
+// Light Theme (Default Root)
 // ============================================
 
-@media (prefers-color-scheme: dark) {
-  html {
-    color-scheme: dark;
+html[data-theme='dark'] {
+  color-scheme: dark;
+
+  // Toolbar
+  --toolbar-bg: #{global.$ngvault-surface-dark};
+  --toolbar-text: #{global.$ngvault-text-primary};
+  --toolbar-border: #{global.$ngvault-surface-outline};
+
+  // Body & Surfaces
+  --surface-bg: #{global.$ngvault-surface-dark};
+  --surface-text: #{global.$ngvault-text-primary};
+  --surface-outline: #{global.$ngvault-surface-outline};
+
+  // Sidenav
+  --sidenav-bg: #{global.$ngvault-primary-light};
+  --sidenav-text: #{global.$ngvault-text-primary};
+
+  // Main
+  --main-bg: #{global.$ngvault-surface-dark};
+  --main-text: #{global.$ngvault-text-primary};
+
+  // Footer & Floating box
+  --footer-border: #{global.$ngvault-primary-light};
+
+  // Links
+  --link-color: #{global.$ngvault-primary-light};
+  --link-hover: #{global.$ngvault-accent-light};
+  --link-visited: #{global.$ngvault-primary-light};
+
+  // Angular Material bridge
+  --mat-sys-surface: #{global.$ngvault-surface-darker};
+  --mat-sys-on-surface: #{global.$ngvault-text-primary};
+  --mat-sys-primary: #{global.$ngvault-primary-dark};
+  --mat-sys-on-primary: #{global.$ngvault-text-white};
+
+  .mat-mdc-menu-panel {
+    background-color: #1e293b !important; // slightly lighter than surface-dark
+    color: #e2e8f0 !important; // light slate text
   }
 
-  body {
-    background-color: ngVault.$ngvault-surface-darker;
-    color: ngVault.$ngvault-text-primary;
+  // Ensure menu items are visible and highlighted on hover
+  .mat-mdc-menu-item {
+    color: #e2e8f0 !important;
 
-    --mat-sys-surface: #{ngVault.$ngvault-surface-darker};
-    --mat-sys-on-surface: #{ngVault.$ngvault-text-primary};
+    &:hover {
+      background-color: rgba(255, 255, 255, 0.08) !important;
+    }
+
+    .mat-icon {
+      color: #e2e8f0 !important;
+    }
   }
 
-  main {
-    background-color: ngVault.$ngvault-surface-dark;
-    color: ngVault.$ngvault-text-primary;
-  }
+  // Toolbar buttons/icons
+  .mat-mdc-icon-button {
+    color: #e2e8f0 !important;
 
-  footer {
-    background-color: ngVault.$ngvault-surface-dark;
-    color: ngVault.$ngvault-text-secondary;
+    &:hover {
+      color: #ffffff !important;
+      background-color: rgba(255, 255, 255, 0.08);
+    }
   }
 }

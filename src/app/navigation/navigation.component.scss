@@ -1,72 +1,75 @@
 @use 'global' as global;
 
-.navigation-container {
-  height: calc(100vh - #{global.$footer-height} - #{global.$toolbar-height});
+.sidenav-container {
+  width: 100%;
+  height: calc(100vh - #{global.$footer-height} - #{global.$toolbar-height} - 5px);
+  height: 100vh;
+  display: flex;
+  background-color: var(--surface-bg);
 
-  .sidenav-container {
+  .router-container {
     width: 100%;
-    height: 100vh;
-    display: flex;
-    background-color: white;
+  }
 
-    .router-container {
+  .sidenav {
+    width: calc(global.$sidenav-width - 2px);
+    height: calc(100vh - #{global.$footer-height} - #{global.$toolbar-height} - 5px);
+    background-color: var(--surface-bg);
+    border-right: 1px solid var(--surface-outline);
+    color: var(--surface-text);
+
+    .sidenav-content {
+      margin-top: 10px;
       width: 100%;
-    }
+      color: global.$ngvault-text-primary; // replaced black
+      overflow-x: hidden;
 
-    .sidenav {
-      width: 240px;
-      height: calc(100vh - #{global.$footer-height} - #{global.$toolbar-height});
-      background: #fafafa;
-      border-right: 1px solid #e0e0e0;
-
-      .sidenav-content {
-        margin-top: 10px;
-        width: 250px;
-        color: black;
-        overflow-x: hidden;
-
-        .sidenav-header {
-          font-weight: 600;
-          color: black;
-          gap: 0.25em;
-        }
+      .sidenav-header {
+        font-weight: global.$font-weight-semibold;
+        color: var(--sidenav-text);
+        gap: global.$spacing-xs;
+        background-color: var(--sidenav-bg); // added contextual color
       }
-    }
 
-    .mat-nav-list a.active {
-      background-color: rgba(0, 0, 0, 0.08);
-    }
+      .navigation-list {
+        width: 100%;
 
-    .content {
-      padding: 1.5rem;
-    }
+        .active {
+          background-color: rgba(global.$ngvault-primary-base, 0.15); // replaced rgba(0, 0, 0, 0.08)
+        }
 
-    .navigation-list {
-      width: 100%;
+        .menu-content {
+          display: flex;
+          align-items: center;
+          gap: global.$spacing-xs;
+          color: var(--surface-text);
 
-      .menu-content {
-        display: flex;
-        align-items: center;
-        gap: 0.25rem;
-
-        .type {
-          font-size: 0.75rem;
+          .type {
+            font-size: global.$font-size-xs;
+          }
         }
       }
     }
   }
+}
 
-  .bottom-left-box {
-    position: fixed;
-    bottom: 38px;
-    left: 1px;
-    width: 48px;
-    height: 48px;
-    color: black;
-    z-index: 999; /* Ensures it stays on top */
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
+.bottom-left-box {
+  position: fixed;
+  bottom: calc(global.$footer-height + 10px);
+  left: 10px;
+  width: 48px;
+  height: 48px;
+  color: global.$ngvault-text-white; // replaced black
+  background-color: global.$ngvault-primary-base; // added theme consistency
+  z-index: 999; /* Ensures it stays on top */
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  box-shadow: global.$ngvault-shadow-base;
+
+  &:hover {
+    background-color: global.$ngvault-primary-dark;
   }
 }

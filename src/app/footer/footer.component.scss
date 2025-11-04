@@ -6,8 +6,10 @@
   left: 0;
   right: 0;
   bottom: 0;
+  color: var(--surface-text);
+  background-color: var(--surface-color);
 
-  border-top: 1px solid global.$ngvault-surface-outline; // subtle separator
+  border-top: 1px solid var(--surface-outline);
   display: flex;
   align-items: center;
   justify-content: center;

@@ -1,17 +1,25 @@
 <mat-toolbar class="toolbar">
   <div class="title-container">
-    <div class="title">NgVault</div>
     <mat-icon>bolt</mat-icon>
-    <div>Examples</div>
+    <span class="title">NgVault</span>
+    <span class="subtitle">Examples</span>
   </div>
-  <div class="ngvault-container-spacer"></div>
-  <button mat-icon-button [matMenuTriggerFor]="menu" aria-label="Example icon-button with a menu">
+
+  <span class="ngvault-container-spacer"></span>
+
+  <button mat-icon-button [matMenuTriggerFor]="menu" aria-label="Toolbar settings menu" class="menu-trigger">
     <mat-icon>more_vert</mat-icon>
   </button>
+
   <mat-menu #menu="matMenu">
-    <button mat-menu-item>
-      <mat-icon>logout</mat-icon>
-      <span>Logout</span>
+    <button mat-menu-item (click)="toggleTheme()">
+      <mat-icon>{{ themeIcon() }}</mat-icon>
+      <span>{{ themeLabel() }}</span>
+    </button>
+
+    <button mat-menu-item (click)="toggleDirection()">
+      <mat-icon>{{ dirIcon() }}</mat-icon>
+      <span>{{ dirLabel() }}</span>
     </button>
   </mat-menu>
 </mat-toolbar>

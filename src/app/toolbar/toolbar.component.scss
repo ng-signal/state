@@ -5,17 +5,19 @@
   flex-direction: row;
   align-items: center;
   justify-content: space-between;
-
-  // ✅ Updated to ngVault palette
-  background-color: global.$ngvault-primary-light;
-  color: global.$ngvault-text-white;
-
   width: 100%;
   height: global.$toolbar-height;
   padding: 0 global.$spacing-md;
 
-  box-shadow: global.$ngvault-shadow-base;
-  border-bottom: 1px solid global.$ngvault-surface-outline;
+  color: var(--toolbar-text);
+  border-bottom: 1px solid var(--toolbar-border);
+  background-color: var(--toolbar-bg);
+  box-shadow: global.$ngvault-shadow-hover;
+
+  button.mat-icon-button {
+    min-width: 40px;
+    min-height: 40px;
+  }
 
   .title-container {
     display: flex;
@@ -28,5 +30,13 @@
       @include global.ngvault-font-logo;
       margin-right: global.$spacing-md;
     }
+
+    mat-icon {
+      color: global.$ngvault-accent-base;
+    }
+  }
+
+  .menu-trigger mat-icon {
+    color: global.$ngvault-text-white;
   }
 }
