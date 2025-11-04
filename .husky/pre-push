@@ -12,4 +12,9 @@ npm run test:coverage:core || {
   exit 1
 }
 
+npm run test:coverage:dev-tools || {
+  printf "\n\nERROR: Test Coverage issues were found in the 'dev-tools' committed files. Please address them before proceeding.\n\n\n\n"
+  exit 1
+}
+
 echo "Pre-push checks complete."
