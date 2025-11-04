@@ -91,7 +91,7 @@ describe('NgVaultDevtoolsPanelComponent', () => {
         type: 'patch',
         source: 'manual',
         timestamp: Date.now(),
-        payload: { id: 2, name: 'Grace' }
+        state: { id: 2, name: 'Grace' }
       } as any
     ]);
 
