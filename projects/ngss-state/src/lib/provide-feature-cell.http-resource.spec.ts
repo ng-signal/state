@@ -198,6 +198,7 @@ describe('Provider: Feature Cell Resource', () => {
 
       expect(spy).toEqual([
         Object({
+          id: jasmine.any(String),
           key: 'http',
           type: 'set',
           timestamp: jasmine.any(Number),
@@ -205,6 +206,7 @@ describe('Provider: Feature Cell Resource', () => {
           source: 'http'
         }),
         Object({
+          id: jasmine.any(String),
           key: 'http',
           type: 'set',
           timestamp: jasmine.any(Number),
@@ -212,6 +214,7 @@ describe('Provider: Feature Cell Resource', () => {
           source: 'http'
         }),
         Object({
+          id: jasmine.any(String),
           key: 'http',
           type: 'reset',
           timestamp: jasmine.any(Number),
@@ -396,6 +399,7 @@ describe('Provider: Feature Cell Resource', () => {
 
       expect(spy).toEqual([
         Object({
+          id: jasmine.any(String),
           key: 'http',
           type: 'patch',
           timestamp: jasmine.any(Number),
@@ -403,6 +407,7 @@ describe('Provider: Feature Cell Resource', () => {
           source: 'http'
         }),
         Object({
+          id: jasmine.any(String),
           key: 'http',
           type: 'patch',
           timestamp: jasmine.any(Number),
@@ -410,6 +415,7 @@ describe('Provider: Feature Cell Resource', () => {
           source: 'http'
         }),
         Object({
+          id: jasmine.any(String),
           key: 'http',
           type: 'patch',
           timestamp: jasmine.any(Number),

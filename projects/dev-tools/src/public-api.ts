@@ -11,3 +11,5 @@ export * from './lib/types/event-vault.type';
 export * from './lib/utils/ngvault-debugger-hook';
 export * from './lib/utils/ngvault-event-bus';
 export * from './lib/utils/ngvault-registry';
+
+export * from './lib/ui/ngvault-devtools-panel.component';

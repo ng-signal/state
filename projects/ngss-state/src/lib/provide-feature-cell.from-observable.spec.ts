@@ -161,6 +161,7 @@ describe('ResourceVaultModel (setState, patchState, fromObservable)', () => {
 
         expect(spy).toEqual([
           Object({
+            id: jasmine.any(String),
             key: 'http',
             type: 'load',
             timestamp: jasmine.any(Number),
@@ -168,6 +169,7 @@ describe('ResourceVaultModel (setState, patchState, fromObservable)', () => {
             payload: Object({ isLoading: false, value: [], error: null, hasValue: true })
           }),
           Object({
+            id: jasmine.any(String),
             key: 'http',
             type: 'set',
             timestamp: jasmine.any(Number),

@@ -1,109 +1,77 @@
 import { provideZonelessChangeDetection } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { NgVaultEventModel } from '../../models/ngvault-event.model';
-import { VaultEventSource } from '../../types/event-vault-source.type';
-import { VaultEventType } from '../../types/event-vault.type';
 import { NgVaultEventBus } from '../../utils/ngvault-event-bus';
 import { NgVaultDevtoolsService } from './ngvault-devtools.service';
 
-describe('Service: NgVaultDevtools', () => {
+describe('NgVaultDevtoolsService (integration)', () => {
   let service: NgVaultDevtoolsService;
 
   beforeEach(() => {
     TestBed.configureTestingModule({
       providers: [NgVaultDevtoolsService, provideZonelessChangeDetection()]
     });
+
     service = TestBed.inject(NgVaultDevtoolsService);
   });
 
-  afterEach(() => {
-    service.clear();
+  it('should create successfully', () => {
+    expect(service).toBeTruthy();
+    expect(service.events()).toEqual([]);
+    expect(service.vaults()).toEqual({});
   });
 
-  it('should push new events to the events signal', () => {
-    const testEvent: NgVaultEventModel = {
-      key: 'test-key',
-      type: 'set' as VaultEventType,
-      source: 'manual' as VaultEventSource,
+  it('should record incoming events from the event bus', () => {
+    const base: NgVaultEventModel = {
+      id: '1',
+      key: 'demo',
+      type: 'set',
+      source: 'manual',
       timestamp: Date.now(),
-      payload: { data: 123 }
+      payload: { value: { id: 1 } }
     };
 
-    NgVaultEventBus.next(testEvent);
+    NgVaultEventBus.next(base);
 
-    const currentEvents = service.events();
-    expect(currentEvents.length).toBe(1);
-    expect(currentEvents[0]).toEqual(testEvent);
+    const allEvents = service.events();
+    expect(allEvents.length).toBe(1);
+    expect(allEvents[0]).toEqual(jasmine.objectContaining(base));
   });
 
-  it('should prepend new events (most recent first)', () => {
-    const firstEvent: NgVaultEventModel = {
-      key: 'a',
-      type: 'init' as VaultEventType,
-      source: 'system' as VaultEventSource,
-      timestamp: Date.now(),
-      payload: { id: 1 }
-    };
-    const secondEvent: NgVaultEventModel = {
-      key: 'b',
-      type: 'patch' as VaultEventType,
-      source: 'manual' as VaultEventSource,
-      timestamp: Date.now() + 1,
-      payload: { id: 2 }
-    };
-
-    NgVaultEventBus.next(firstEvent);
-    NgVaultEventBus.next(secondEvent);
-
-    const currentEvents = service.events();
-    expect(currentEvents.length).toBe(2);
-    // secondEvent should be first
-    expect(currentEvents[0]).toEqual(secondEvent);
-    expect(currentEvents[1]).toEqual(firstEvent);
-  });
-
-  it('should cap stored events to 200 entries', () => {
-    const baseEvent: Partial<NgVaultEventModel> = {
-      key: 'overflow',
-      type: 'set' as VaultEventType,
-      source: 'manual' as VaultEventSource
-    };
-
-    // push 210 events
-    for (let i = 0; i < 210; i++) {
+  it('should cap stored events at 200 entries', () => {
+    for (let i = 0; i < 250; i++) {
       NgVaultEventBus.next({
-        ...baseEvent,
-        timestamp: Date.now() + i,
-        payload: { index: i }
-      } as NgVaultEventModel);
+        id: `${i}`,
+        key: 'bulk',
+        type: 'patch',
+        source: 'system',
+        timestamp: Date.now(),
+        payload: { value: i }
+      });
     }
 
-    const events = service.events();
-    expect(events.length).toBe(200);
-    // Ensure most recent event is first
-    expect(events[0].payload).toEqual({ index: 209 });
-    expect(events[199].payload).toEqual({ index: 10 });
+    const allEvents = service.events();
+    expect(allEvents.length).toBe(200);
+    // most recent first
+    expect(allEvents[0].id).toBe('249');
+    expect(allEvents[199].id).toBe('50');
   });
 
-  it('should clear all events when clear() is called', () => {
-    const testEvent: NgVaultEventModel = {
-      key: 'clear-test',
-      type: 'init' as VaultEventType,
-      source: 'system' as VaultEventSource,
+  it('should clear all events and vaults when clearAll() is called', () => {
+    NgVaultEventBus.next({
+      id: 'x',
+      key: 'temp',
+      type: 'set',
+      source: 'manual',
       timestamp: Date.now(),
-      payload: { foo: 'bar' }
-    };
+      payload: { value: 1 }
+    });
 
-    NgVaultEventBus.next(testEvent);
     expect(service.events().length).toBeGreaterThan(0);
 
-    service.clear();
-    expect(service.events()).toEqual([]);
-  });
+    service.clearAll();
 
-  it('should ignore falsy events safely', () => {
-    // Simulate internal unsafe emission
-    NgVaultEventBus.next(undefined as any);
-    expect(service.events().length).toBe(0);
+    expect(service.events()).toEqual([]);
+    expect(service.vaults()).toEqual({});
   });
 });

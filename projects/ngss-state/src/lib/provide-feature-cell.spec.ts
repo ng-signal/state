@@ -401,6 +401,7 @@ describe('Provider: Feature Cell (core vault functionality)', () => {
 
       expect(spy).toEqual([
         Object({
+          id: jasmine.any(String),
           key: 'devtools-test',
           type: 'init',
           timestamp: jasmine.any(Number),
@@ -426,6 +427,7 @@ describe('Provider: Feature Cell (core vault functionality)', () => {
 
       expect(spy).toEqual([
         Object({
+          id: jasmine.any(String),
           key: 'devtools-test',
           type: 'init',
           timestamp: jasmine.any(Number),
@@ -459,6 +461,7 @@ describe('Provider: Feature Cell (core vault functionality)', () => {
 
       expect(spy).toEqual([
         Object({
+          id: jasmine.any(String),
           key: 'devtools-test',
           type: 'init',
           timestamp: jasmine.any(Number),
@@ -466,6 +469,7 @@ describe('Provider: Feature Cell (core vault functionality)', () => {
           payload: Object({ isLoading: false, value: [], error: null, hasValue: true })
         }),
         Object({
+          id: jasmine.any(String),
           key: 'devtools-test',
           type: 'set',
           timestamp: jasmine.any(Number),
@@ -473,6 +477,7 @@ describe('Provider: Feature Cell (core vault functionality)', () => {
           payload: Object({ isLoading: true, value: [1, 2, 3], error: Object({ message: 'fail' }), hasValue: true })
         }),
         Object({
+          id: jasmine.any(String),
           key: 'devtools-test',
           type: 'reset',
           timestamp: jasmine.any(Number),
@@ -480,6 +485,7 @@ describe('Provider: Feature Cell (core vault functionality)', () => {
           payload: Object({ isLoading: false, value: undefined, error: null, hasValue: false })
         }),
         Object({
+          id: jasmine.any(String),
           key: 'devtools-test',
           type: 'patch',
           timestamp: jasmine.any(Number),
@@ -487,6 +493,7 @@ describe('Provider: Feature Cell (core vault functionality)', () => {
           payload: Object({ isLoading: true, value: [4, 5, 6], error: Object({ message: 'fail' }), hasValue: true })
         }),
         Object({
+          id: jasmine.any(String),
           key: 'devtools-test',
           type: 'reset',
           timestamp: jasmine.any(Number),
@@ -494,6 +501,7 @@ describe('Provider: Feature Cell (core vault functionality)', () => {
           payload: Object({ isLoading: false, value: undefined, error: null, hasValue: false })
         }),
         Object({
+          id: jasmine.any(String),
           key: 'devtools-test',
           type: 'set',
           timestamp: jasmine.any(Number),
@@ -501,6 +509,7 @@ describe('Provider: Feature Cell (core vault functionality)', () => {
           payload: Object({ isLoading: true, value: [1, 2, 3], error: Object({ message: 'fail' }), hasValue: true })
         }),
         Object({
+          id: jasmine.any(String),
           key: 'devtools-test',
           type: 'reset',
           timestamp: jasmine.any(Number),
