@@ -1,7 +1,7 @@
-import { VaultEventModel } from './vault-event.model';
+import { NgVaultEventModel } from './ngvault-event.model';
 
 export interface NgVaultDevToolsHookModel {
-  emit(event: VaultEventModel): void;
+  emit(event: NgVaultEventModel): void;
   // eslint-disable-next-line
   snapshot?(): Record<string, any>;
 }

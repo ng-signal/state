@@ -1,4 +1,4 @@
-export interface VaultRegistryItem {
+export interface NgVaultRegistryItem {
   key: string;
   service: string;
   // eslint-disable-next-line

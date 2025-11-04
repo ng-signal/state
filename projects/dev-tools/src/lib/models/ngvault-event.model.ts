@@ -2,7 +2,7 @@ import { VaultEventSource } from '../types/event-vault-source.type';
 import { VaultEventType } from '../types/event-vault.type';
 
 // eslint-disable-next-line
-export interface VaultEventModel<T = any> {
+export interface NgVaultEventModel<T = any> {
   key: string;
   type: VaultEventType;
   source?: VaultEventSource;

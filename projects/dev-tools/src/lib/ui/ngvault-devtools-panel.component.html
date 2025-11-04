@@ -1,0 +1,17 @@
+<div class="p-3 bg-slate-900 text-slate-100 font-mono h-full overflow-auto">
+  @for (event of events(); track event.timestamp) {
+    <div>
+      <strong
+        [class.text-green-400]="event.type === 'init'"
+        [class.text-yellow-400]="event.type === 'patch'"
+        [class.text-red-400]="event.type === 'error'">
+        {{ event.type.toUpperCase() }}
+      </strong>
+      <span class="text-slate-400 ml-2">{{ event.key }}</span>
+      <span class="text-slate-500 ml-2 text-xs">
+        {{ event.timestamp | date: 'mediumTime' }}
+      </span>
+      <pre class="text-xs text-slate-300 mt-1">{{ event.payload | json }}</pre>
+    </div>
+  }
+</div>
