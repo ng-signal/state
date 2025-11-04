@@ -1,8 +1,8 @@
 import { Subject } from 'rxjs';
 import { IS_DEV_MODE } from '../constants/env.constants';
-import { VaultEventModel } from './models/vault-event.model';
+import { VaultEventModel } from '../models/vault-event.model';
 
-class DevVaultEventBus {
+class DevNgVaultEventBus {
   private _bus = new Subject<VaultEventModel>();
 
   next(event: VaultEventModel): void {
@@ -16,4 +16,4 @@ class DevVaultEventBus {
   }
 }
 
-export const VaultEventBus = new DevVaultEventBus();
+export const NgVaultEventBus = new DevNgVaultEventBus();

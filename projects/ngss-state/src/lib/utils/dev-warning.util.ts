@@ -1,4 +1,4 @@
-import { IS_DEV_MODE } from '../constants/env.constants';
+import { IS_DEV_MODE } from '@ngvault/dev-tools/constants/env.constants';
 
 let warned = false;
 

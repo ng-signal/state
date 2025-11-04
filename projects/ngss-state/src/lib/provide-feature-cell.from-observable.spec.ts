@@ -2,10 +2,10 @@ import { provideHttpClient } from '@angular/common/http';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { Injector, provideZonelessChangeDetection, runInInjectionContext, signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
-import { VaultSignalRef } from '@ngvault/core';
+import { NgVaultEventBus } from '@ngvault/dev-tools/utils/ngvault-event-bus';
 import { Subject } from 'rxjs';
-import { VaultEventBus } from './devtools/vault-event-bus';
 import { ResourceVaultModel } from './models/resource-vault.model';
+import { VaultSignalRef } from './models/vault-signal.ref';
 import { provideFeatureCell } from './provide-feature-cell';
 
 interface TestModel {
@@ -144,7 +144,7 @@ describe('ResourceVaultModel (setState, patchState, fromObservable)', () => {
 
   it('should emit events for fromObservable lifecycle', (done) => {
     const spy: any[] = [];
-    VaultEventBus.asObservable().subscribe((event) => spy.push(event));
+    NgVaultEventBus.asObservable().subscribe((event) => spy.push(event));
 
     // 🔹 Simulate an observable source that emits and completes
     const subject = new Subject<any>();

@@ -2,7 +2,7 @@ import { httpResource, provideHttpClient } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { ApplicationRef, Injector, provideZonelessChangeDetection, runInInjectionContext, signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
-import { VaultEventBus } from './devtools/vault-event-bus';
+import { NgVaultEventBus } from '@ngvault/dev-tools/utils/ngvault-event-bus';
 import { ResourceVaultModel } from './models/resource-vault.model';
 import { provideFeatureCell } from './provide-feature-cell';
 
@@ -176,7 +176,7 @@ describe('Provider: Feature Cell Resource', () => {
 
     it('should emit events from the httpResource lifecycle', async () => {
       const spy: any[] = [];
-      VaultEventBus.asObservable().subscribe((event) => spy.push(event));
+      NgVaultEventBus.asObservable().subscribe((event) => spy.push(event));
 
       const mockBackend = TestBed.inject(HttpTestingController);
       const response = httpResource<TestModel[]>(() => '/data', { injector: TestBed.inject(Injector) });
@@ -358,7 +358,7 @@ describe('Provider: Feature Cell Resource', () => {
 
     it('should emit events from the httpResource lifecycle', async () => {
       const spy: any[] = [];
-      VaultEventBus.asObservable().subscribe((event) => spy.push(event));
+      NgVaultEventBus.asObservable().subscribe((event) => spy.push(event));
 
       // Arrange
       const mockBackend = TestBed.inject(HttpTestingController);

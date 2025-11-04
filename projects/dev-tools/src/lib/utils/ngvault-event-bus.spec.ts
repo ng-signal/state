@@ -1,11 +1,11 @@
 import { take } from 'rxjs/operators';
-import { VaultEventBus } from './vault-event-bus';
+import { NgVaultEventBus } from './ngvault-event-bus';
 
 describe('VaultEventBus', () => {
   it('should emit and complete properly in dev mode', (done) => {
     (globalThis as any).ngDevMode = true;
 
-    VaultEventBus.asObservable()
+    NgVaultEventBus.asObservable()
       .pipe(take(1))
       .subscribe((event) => {
         expect(event.key).toBe('test');
@@ -13,7 +13,7 @@ describe('VaultEventBus', () => {
         done();
       });
 
-    VaultEventBus.next({
+    NgVaultEventBus.next({
       key: 'test',
       type: 'set',
       timestamp: Date.now(),

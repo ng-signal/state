@@ -22,7 +22,8 @@
   ],
   "scripts": {
     "build": "ng build",
-    "build:lib": "ng build ngss-state",
+    "build:core": "ng build ngss-state",
+    "build:dev-tools": "ng build dev-tools",
     "clean": "rimraf dist .angular cache coverage",
     "docs": "./node_modules/.bin/compodoc -p tsconfig.docs.json --name '@NGSS Documentation' --theme 'laravel'",
     "docs:coverage": "./node_modules/.bin/compodoc -p tsconfig.docs.json --coverageTest 100 --coverageMinimumPerFile 100 --coverageTestThresholdFail true",
@@ -33,7 +34,7 @@
     "lint": "eslint .",
     "ng": "ng",
     "prepare": "husky",
-    "release": "npm run clean && npm run build:lib && npm pack dist/ngss-state",
+    "release": "npm run clean && npm run build:core && npm pack dist/ngss-state",
     "start": "ng serve",
     "test:app": "ng test ngss",
     "test:core": "ng test ngss-state",

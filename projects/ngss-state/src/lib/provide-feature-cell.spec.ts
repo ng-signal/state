@@ -8,9 +8,9 @@ import {
   runInInjectionContext
 } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
+import { NgVaultEventBus } from '@ngvault/dev-tools/utils/ngvault-event-bus';
 import { take } from 'rxjs/operators';
 import { FEATURE_CELL_REGISTRY } from './constants/feature-cell-registry.constant';
-import { VaultEventBus } from './devtools/vault-event-bus';
 import { ResourceVaultModel } from './models/resource-vault.model';
 import { provideFeatureCell } from './provide-feature-cell';
 
@@ -391,7 +391,7 @@ describe('Provider: Feature Cell (core vault functionality)', () => {
     it('should emit an "init" event when a vault is created', () => {
       const spy: any[] = [];
 
-      VaultEventBus.asObservable()
+      NgVaultEventBus.asObservable()
         .pipe(take(1))
         .subscribe((event) => {
           spy.push(event);
@@ -412,7 +412,7 @@ describe('Provider: Feature Cell (core vault functionality)', () => {
 
     it('should emit a "dispose" event when vault.destroy() is called', () => {
       const spy: any[] = [];
-      VaultEventBus.asObservable()
+      NgVaultEventBus.asObservable()
         .pipe(take(1))
         .subscribe((event) => {
           spy.push(event);
@@ -438,7 +438,7 @@ describe('Provider: Feature Cell (core vault functionality)', () => {
     it('should emit on all the calls', () => {
       const spy: any[] = [];
 
-      VaultEventBus.asObservable().subscribe((event) => {
+      NgVaultEventBus.asObservable().subscribe((event) => {
         spy.push(event);
       });
 

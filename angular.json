@@ -117,6 +117,32 @@
           }
         }
       }
+    },
+    "dev-tools": {
+      "projectType": "library",
+      "root": "projects/dev-tools",
+      "sourceRoot": "projects/dev-tools/src",
+      "prefix": "ngvault",
+      "architect": {
+        "build": {
+          "builder": "@angular/build:ng-packagr",
+          "configurations": {
+            "production": {
+              "tsConfig": "projects/dev-tools/tsconfig.lib.prod.json"
+            },
+            "development": {
+              "tsConfig": "projects/dev-tools/tsconfig.lib.json"
+            }
+          },
+          "defaultConfiguration": "production"
+        },
+        "test": {
+          "builder": "@angular/build:karma",
+          "options": {
+            "tsConfig": "projects/dev-tools/tsconfig.spec.json"
+          }
+        }
+      }
     }
   }
 }

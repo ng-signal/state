@@ -10,14 +10,14 @@ import {
   runInInjectionContext,
   signal
 } from '@angular/core';
+import { IS_DEV_MODE } from '@ngvault/dev-tools/constants/env.constants';
+import { VaultEventSource } from '@ngvault/dev-tools/types/event-vault-source.type';
+import { VaultEventType } from '@ngvault/dev-tools/types/event-vault.type';
+import { NgVaultEventBus } from '@ngvault/dev-tools/utils/ngvault-event-bus';
+import { registerNgVault, unregisterNgVault } from '@ngvault/dev-tools/utils/ngvault-registry';
 import { Observable, Subject, take } from 'rxjs';
-import { IS_DEV_MODE } from './constants/env.constants';
 import { NGVAULT_EXPERIMENTAL_HTTP_RESOURCE } from './constants/experimental-flag.constant';
 import { FEATURE_CELL_REGISTRY } from './constants/feature-cell-registry.constant';
-import { VaultEventSource } from './devtools/types/event-vault-source.type';
-import { VaultEventType } from './devtools/types/event-vault.type';
-import { VaultEventBus } from './devtools/vault-event-bus';
-import { registerVault, unregisterVault } from './devtools/vault-registry';
 import { FeatureCellDescriptorModel } from './models/feature-cell-descriptor.model';
 import { ResourceStateError } from './models/resource-state-error.model';
 import { ResourceVaultModel } from './models/resource-vault.model';
@@ -72,7 +72,7 @@ export function provideFeatureCell<Svc, T>(
       });
 
       if (IS_DEV_MODE) {
-        registerVault({
+        registerNgVault({
           key: featureCellDescriptor.key,
           service: service.name,
           state: {
@@ -95,8 +95,8 @@ export function provideFeatureCell<Svc, T>(
 
       const _destroy = (): void => {
         if (IS_DEV_MODE) {
-          VaultEventBus.next({ key: featureCellDescriptor.key, type: 'dispose', timestamp: Date.now() });
-          unregisterVault(featureCellDescriptor.key);
+          NgVaultEventBus.next({ key: featureCellDescriptor.key, type: 'dispose', timestamp: Date.now() });
+          unregisterNgVault(featureCellDescriptor.key);
         }
         _reset('system');
         _destroyed$.next();
@@ -278,7 +278,7 @@ export function provideFeatureCell<Svc, T>(
 
       function emitEvent(type: VaultEventType, source: VaultEventSource) {
         if (IS_DEV_MODE) {
-          VaultEventBus.next({
+          NgVaultEventBus.next({
             key: featureCellDescriptor.key,
             type,
             timestamp: Date.now(),

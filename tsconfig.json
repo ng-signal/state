@@ -9,8 +9,10 @@
     "noPropertyAccessFromIndexSignature": true,
     "noImplicitReturns": true,
     "paths": {
-      "@ngvault/core": ["projects/ngss-state/src/public-api"],
-      "@ngvault/core/*": ["projects/ngss-state/src/lib/*"]
+      "@ngvault/core": ["dist/ngss-state/public-api"],
+      "@ngvault/core/*": ["dist/ngss-state"],
+      "@ngvault/dev-tools": ["dist/dev-tools/public-api"],
+      "@ngvault/dev-tools/*": ["dist/dev-tools"]
     },
     "noFallthroughCasesInSwitch": true,
     "skipLibCheck": true,
@@ -40,6 +42,12 @@
     },
     {
       "path": "./projects/ngss-state/tsconfig.spec.json"
+    },
+    {
+      "path": "./projects/dev-tools/tsconfig.lib.json"
+    },
+    {
+      "path": "./projects/dev-tools/tsconfig.spec.json"
     }
   ]
 }

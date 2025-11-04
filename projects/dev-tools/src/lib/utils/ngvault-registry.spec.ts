@@ -1,13 +1,13 @@
-import { VaultEventBus } from './vault-event-bus';
-import { listVaults, registerVault, unregisterVault, VaultRegistry } from './vault-registry';
+import { NgVaultEventBus } from './ngvault-event-bus';
+import { listNgVaults, NgVaultRegistry, registerNgVault, unregisterNgVault } from './ngvault-registry';
 
 describe('DevTools Hooks', () => {
   it('should register and unregister vaults', () => {
     const entry = { key: 'user', service: 'UserService', state: {} as any };
-    registerVault(entry);
-    expect(VaultRegistry.has('user')).toBeTrue();
-    unregisterVault('user');
-    expect(VaultRegistry.has('user')).toBeFalse();
+    registerNgVault(entry);
+    expect(NgVaultRegistry.has('user')).toBeTrue();
+    unregisterNgVault('user');
+    expect(NgVaultRegistry.has('user')).toBeFalse();
   });
 
   it('should emit events in dev mode', (done) => {
@@ -21,21 +21,21 @@ describe('DevTools Hooks', () => {
       payload: { id: 1 }
     } as const;
 
-    const sub = VaultEventBus.asObservable().subscribe((e) => {
+    const sub = NgVaultEventBus.asObservable().subscribe((e) => {
       expect(e.key).toBe('user');
       expect(e.type).toBe('set');
       sub.unsubscribe();
       done();
     });
 
-    VaultEventBus.next(event);
+    NgVaultEventBus.next(event);
   });
 
   it('should allow listing vaults', () => {
     const entry = { key: 'abc', service: 'MockService', state: {} as any };
-    registerVault(entry);
-    const result = listVaults();
+    registerNgVault(entry);
+    const result = listNgVaults();
     expect(result.length).toBeGreaterThan(0);
-    unregisterVault('abc');
+    unregisterNgVault('abc');
   });
 });
