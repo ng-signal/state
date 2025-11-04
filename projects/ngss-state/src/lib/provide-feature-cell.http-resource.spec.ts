@@ -2,6 +2,7 @@ import { httpResource, provideHttpClient } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { ApplicationRef, Injector, provideZonelessChangeDetection, runInInjectionContext, signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
+import { VaultEventBus } from './devtools/vault-event-bus';
 import { ResourceVaultModel } from './models/resource-vault.model';
 import { provideFeatureCell } from './provide-feature-cell';
 
@@ -172,6 +173,53 @@ describe('Provider: Feature Cell Resource', () => {
       expect(vault.state.error()).toBeNull();
       expect(vault.state.hasValue()).toBeFalse();
     });
+
+    it('should emit events from the httpResource lifecycle', async () => {
+      const spy: any[] = [];
+      VaultEventBus.asObservable().subscribe((event) => spy.push(event));
+
+      const mockBackend = TestBed.inject(HttpTestingController);
+      const response = httpResource<TestModel[]>(() => '/data', { injector: TestBed.inject(Injector) });
+
+      vault.setState(response);
+      TestBed.tick();
+
+      mockBackend.expectOne('/data').flush([{ id: 1, name: 'Ada' }]);
+      await TestBed.inject(ApplicationRef).whenStable();
+
+      expect(vault.state.value()).toEqual([{ id: 1, name: 'Ada' }]);
+
+      vault.setState(undefined);
+
+      expect(vault.state.value()).toBeUndefined();
+      expect(vault.state.isLoading()).toBeFalse();
+      expect(vault.state.error()).toBeNull();
+      expect(vault.state.hasValue()).toBeFalse();
+
+      expect(spy).toEqual([
+        Object({
+          key: 'http',
+          type: 'set',
+          timestamp: jasmine.any(Number),
+          payload: Object({ isLoading: true, value: undefined, error: null, hasValue: false }),
+          source: 'http'
+        }),
+        Object({
+          key: 'http',
+          type: 'set',
+          timestamp: jasmine.any(Number),
+          payload: Object({ isLoading: false, value: [Object({ id: 1, name: 'Ada' })], error: null, hasValue: true }),
+          source: 'http'
+        }),
+        Object({
+          key: 'http',
+          type: 'reset',
+          timestamp: jasmine.any(Number),
+          payload: Object({ isLoading: false, value: undefined, error: null, hasValue: false }),
+          source: 'manual'
+        })
+      ]);
+    });
   });
 
   describe('patchState', () => {
@@ -306,6 +354,69 @@ describe('Provider: Feature Cell Resource', () => {
       expect(vault.state.error()).toBeNull();
       expect(vault.state.isLoading()).toBeFalse();
       expect(vault.state.hasValue()).toBeTrue();
+    });
+
+    it('should emit events from the httpResource lifecycle', async () => {
+      const spy: any[] = [];
+      VaultEventBus.asObservable().subscribe((event) => spy.push(event));
+
+      // Arrange
+      const mockBackend = TestBed.inject(HttpTestingController);
+      const response = httpResource<number>(() => '/primitive', { injector: TestBed.inject(Injector) });
+
+      // Use patchState to go through the experimental HttpResourceRef branch
+      vault.patchState(response);
+      TestBed.tick();
+
+      // Before response arrives, value() throws → _data should remain undefined
+      expect(vault.state.value()).toEqual([]);
+      expect(vault.state.isLoading()).toBeTrue();
+      expect(vault.state.hasValue()).toBeTrue();
+
+      // Simulate backend returning a primitive (final else case)
+      mockBackend.expectOne('/primitive').flush(42);
+      await TestBed.inject(ApplicationRef).whenStable();
+
+      // After flush, final else executes (`_data.set(next as VaultDataType<T>)`)
+      expect(vault.state.value()).toBe(42);
+      expect(vault.state.isLoading()).toBeFalse();
+      expect(vault.state.error()).toBeNull();
+      expect(vault.state.hasValue()).toBeTrue();
+
+      // Trigger reload → should still follow same "primitive replace" path
+      response.reload();
+      TestBed.tick();
+      mockBackend.expectOne('/primitive').flush(7);
+      await TestBed.inject(ApplicationRef).whenStable();
+
+      expect(vault.state.value()).toBe(7);
+      expect(vault.state.error()).toBeNull();
+      expect(vault.state.isLoading()).toBeFalse();
+      expect(vault.state.hasValue()).toBeTrue();
+
+      expect(spy).toEqual([
+        Object({
+          key: 'http',
+          type: 'patch',
+          timestamp: jasmine.any(Number),
+          payload: Object({ isLoading: false, value: 42, error: null, hasValue: true }),
+          source: 'http'
+        }),
+        Object({
+          key: 'http',
+          type: 'patch',
+          timestamp: jasmine.any(Number),
+          payload: Object({ isLoading: true, value: 42, error: null, hasValue: true }),
+          source: 'http'
+        }),
+        Object({
+          key: 'http',
+          type: 'patch',
+          timestamp: jasmine.any(Number),
+          payload: Object({ isLoading: false, value: 7, error: null, hasValue: true }),
+          source: 'http'
+        })
+      ]);
     });
   });
 });

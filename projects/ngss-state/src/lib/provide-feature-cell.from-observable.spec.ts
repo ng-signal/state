@@ -4,6 +4,7 @@ import { Injector, provideZonelessChangeDetection, runInInjectionContext, signal
 import { TestBed } from '@angular/core/testing';
 import { VaultSignalRef } from '@ngvault/core';
 import { Subject } from 'rxjs';
+import { VaultEventBus } from './devtools/vault-event-bus';
 import { ResourceVaultModel } from './models/resource-vault.model';
 import { provideFeatureCell } from './provide-feature-cell';
 
@@ -139,5 +140,53 @@ describe('ResourceVaultModel (setState, patchState, fromObservable)', () => {
     expect(resource.loading()).toBeFalse();
     expect(resource.value()).toBeNull();
     expect(resource.error()!.message).toContain('Network failure');
+  });
+
+  it('should emit events for fromObservable lifecycle', (done) => {
+    const spy: any[] = [];
+    VaultEventBus.asObservable().subscribe((event) => spy.push(event));
+
+    // 🔹 Simulate an observable source that emits and completes
+    const subject = new Subject<any>();
+
+    // 🔹 Track state updates from fromObservable()
+    let lastRef!: VaultSignalRef<any>;
+    vault.fromObservable!(subject.asObservable()).subscribe({
+      next: (result) => (lastRef = result),
+      complete: () => {
+        // Wait until after emission completes
+        expect(lastRef.isLoading()).toBeFalse();
+        expect(lastRef.value()).toEqual({ id: 1, name: 'Ada' });
+        expect(lastRef.error()).toBeNull();
+
+        expect(spy).toEqual([
+          Object({
+            key: 'http',
+            type: 'load',
+            timestamp: jasmine.any(Number),
+            source: 'observable',
+            payload: Object({ isLoading: false, value: [], error: null, hasValue: true })
+          }),
+          Object({
+            key: 'http',
+            type: 'set',
+            timestamp: jasmine.any(Number),
+            source: 'observable',
+            payload: Object({
+              isLoading: false,
+              value: [],
+              error: null,
+              hasValue: true
+            })
+          })
+        ]);
+
+        done();
+      }
+    });
+
+    // 🔹 Simulate loading → data emission → complete
+    subject.next({ id: 1, name: 'Ada' });
+    subject.complete();
   });
 });

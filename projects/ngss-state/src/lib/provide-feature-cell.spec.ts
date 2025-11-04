@@ -8,7 +8,9 @@ import {
   runInInjectionContext
 } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
+import { take } from 'rxjs/operators';
 import { FEATURE_CELL_REGISTRY } from './constants/feature-cell-registry.constant';
+import { VaultEventBus } from './devtools/vault-event-bus';
 import { ResourceVaultModel } from './models/resource-vault.model';
 import { provideFeatureCell } from './provide-feature-cell';
 
@@ -372,6 +374,140 @@ describe('Provider: Feature Cell (core vault functionality)', () => {
       let completed = false;
       vault.destroyed$?.subscribe({ complete: () => (completed = true) });
       expect(completed).toBeTrue();
+    });
+  });
+
+  describe('Devtools hooks', () => {
+    let factory: any;
+    beforeEach(() => {
+      // create a vault inside Angular DI
+      const providers = provideFeatureCell(class TestService {}, {
+        key: 'devtools-test',
+        initial: []
+      });
+      factory = (providers[0] as any).useFactory;
+    });
+
+    it('should emit an "init" event when a vault is created', () => {
+      const spy: any[] = [];
+
+      VaultEventBus.asObservable()
+        .pipe(take(1))
+        .subscribe((event) => {
+          spy.push(event);
+        });
+
+      runInInjectionContext(TestBed.inject(Injector), () => factory());
+
+      expect(spy).toEqual([
+        Object({
+          key: 'devtools-test',
+          type: 'init',
+          timestamp: jasmine.any(Number),
+          source: 'system',
+          payload: Object({ isLoading: false, value: [], error: null, hasValue: true })
+        })
+      ]);
+    });
+
+    it('should emit a "dispose" event when vault.destroy() is called', () => {
+      const spy: any[] = [];
+      VaultEventBus.asObservable()
+        .pipe(take(1))
+        .subscribe((event) => {
+          spy.push(event);
+        });
+
+      let vault: ResourceVaultModel<any>;
+      runInInjectionContext(TestBed.inject(Injector), () => {
+        vault = factory();
+        vault.destroy();
+      });
+
+      expect(spy).toEqual([
+        Object({
+          key: 'devtools-test',
+          type: 'init',
+          timestamp: jasmine.any(Number),
+          source: 'system',
+          payload: Object({ isLoading: false, value: [], error: null, hasValue: true })
+        })
+      ]);
+    });
+
+    it('should emit on all the calls', () => {
+      const spy: any[] = [];
+
+      VaultEventBus.asObservable().subscribe((event) => {
+        spy.push(event);
+      });
+
+      let vault!: ResourceVaultModel<any>;
+
+      // Create vault inside DI context (this emits "init")
+      runInInjectionContext(TestBed.inject(Injector), () => {
+        vault = factory();
+      });
+
+      // Trigger a reset (should emit "reset")
+      vault.setState({ loading: true, error: { message: 'fail' }, value: [1, 2, 3] });
+      vault.reset();
+      vault.patchState({ loading: true, error: { message: 'fail' }, value: [4, 5, 6] });
+      vault.patchState(undefined);
+      vault.setState({ loading: true, error: { message: 'fail' }, value: [1, 2, 3] });
+      vault.setState(undefined);
+
+      expect(spy).toEqual([
+        Object({
+          key: 'devtools-test',
+          type: 'init',
+          timestamp: jasmine.any(Number),
+          source: 'system',
+          payload: Object({ isLoading: false, value: [], error: null, hasValue: true })
+        }),
+        Object({
+          key: 'devtools-test',
+          type: 'set',
+          timestamp: jasmine.any(Number),
+          source: 'manual',
+          payload: Object({ isLoading: true, value: [1, 2, 3], error: Object({ message: 'fail' }), hasValue: true })
+        }),
+        Object({
+          key: 'devtools-test',
+          type: 'reset',
+          timestamp: jasmine.any(Number),
+          source: 'manual',
+          payload: Object({ isLoading: false, value: undefined, error: null, hasValue: false })
+        }),
+        Object({
+          key: 'devtools-test',
+          type: 'patch',
+          timestamp: jasmine.any(Number),
+          source: 'manual',
+          payload: Object({ isLoading: true, value: [4, 5, 6], error: Object({ message: 'fail' }), hasValue: true })
+        }),
+        Object({
+          key: 'devtools-test',
+          type: 'reset',
+          timestamp: jasmine.any(Number),
+          source: 'manual',
+          payload: Object({ isLoading: false, value: undefined, error: null, hasValue: false })
+        }),
+        Object({
+          key: 'devtools-test',
+          type: 'set',
+          timestamp: jasmine.any(Number),
+          source: 'manual',
+          payload: Object({ isLoading: true, value: [1, 2, 3], error: Object({ message: 'fail' }), hasValue: true })
+        }),
+        Object({
+          key: 'devtools-test',
+          type: 'reset',
+          timestamp: jasmine.any(Number),
+          source: 'manual',
+          payload: Object({ isLoading: false, value: undefined, error: null, hasValue: false })
+        })
+      ]);
     });
   });
 });

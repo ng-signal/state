@@ -11,8 +11,13 @@ import {
   signal
 } from '@angular/core';
 import { Observable, Subject, take } from 'rxjs';
+import { IS_DEV_MODE } from './constants/env.constants';
 import { NGVAULT_EXPERIMENTAL_HTTP_RESOURCE } from './constants/experimental-flag.constant';
 import { FEATURE_CELL_REGISTRY } from './constants/feature-cell-registry.constant';
+import { VaultEventSource } from './devtools/types/event-vault-source.type';
+import { VaultEventType } from './devtools/types/event-vault.type';
+import { VaultEventBus } from './devtools/vault-event-bus';
+import { registerVault, unregisterVault } from './devtools/vault-registry';
 import { FeatureCellDescriptorModel } from './models/feature-cell-descriptor.model';
 import { ResourceStateError } from './models/resource-state-error.model';
 import { ResourceVaultModel } from './models/resource-vault.model';
@@ -27,9 +32,9 @@ import { resourceError } from './utils/resource-error.util';
 
 export function provideFeatureCell<Svc, T>(
   service: Type<Svc>,
-  featureCellDescriptorModel: FeatureCellDescriptorModel<T>
+  featureCellDescriptor: FeatureCellDescriptorModel<T>
 ): Provider[] {
-  const token = getOrCreateFeatureCellToken<T>(featureCellDescriptorModel.key, false);
+  const token = getOrCreateFeatureCellToken<T>(featureCellDescriptor.key, false);
 
   const featureCellProvider: Provider = {
     provide: token,
@@ -43,22 +48,22 @@ export function provideFeatureCell<Svc, T>(
       // Prevent incorrect initialization (e.g., passing a resource object)
 
       if (
-        typeof featureCellDescriptorModel.initial === 'object' &&
-        featureCellDescriptorModel.initial !== null &&
+        typeof featureCellDescriptor.initial === 'object' &&
+        featureCellDescriptor.initial !== null &&
         // eslint-disable-next-line
-        'data' in (featureCellDescriptorModel.initial as any)
+        'data' in (featureCellDescriptor.initial as any)
       ) {
         throw new Error(
-          `[NgVault] Invalid FeatureCellDescriptorModel.initial for feature "${featureCellDescriptorModel.key}". ` +
+          `[NgVault] Invalid FeatureCellDescriptorModel.initial for feature "${featureCellDescriptor.key}". ` +
             `Expected raw data (e.g., [] or {}), but received an object with resource fields { loading, data, error }. ` +
             `Pass plain data to avoid double-wrapping.`
         );
       }
 
       const _value = signal<VaultDataType<T>>(
-        featureCellDescriptorModel.initial === null || featureCellDescriptorModel.initial === undefined
+        featureCellDescriptor.initial === null || featureCellDescriptor.initial === undefined
           ? undefined
-          : (featureCellDescriptorModel.initial as T)
+          : (featureCellDescriptor.initial as T)
       );
 
       const _hasValue = computed(() => {
@@ -66,14 +71,34 @@ export function provideFeatureCell<Svc, T>(
         return val !== null && val !== undefined;
       });
 
-      const _reset = (): void => {
+      if (IS_DEV_MODE) {
+        registerVault({
+          key: featureCellDescriptor.key,
+          service: service.name,
+          state: {
+            isLoading: _isLoading.asReadonly(),
+            value: _value.asReadonly(),
+            error: _error.asReadonly(),
+            hasValue: _hasValue
+          }
+        });
+
+        emitEvent('init', 'system');
+      }
+
+      const _reset = (source: VaultEventSource = 'manual'): void => {
         _isLoading.set(false);
         _error.set(null);
         _value.set(undefined);
+        emitEvent('reset', source);
       };
 
       const _destroy = (): void => {
-        _reset();
+        if (IS_DEV_MODE) {
+          VaultEventBus.next({ key: featureCellDescriptor.key, type: 'dispose', timestamp: Date.now() });
+          unregisterVault(featureCellDescriptor.key);
+        }
+        _reset('system');
         _destroyed$.next();
         _destroyed$.complete();
       };
@@ -87,9 +112,7 @@ export function provideFeatureCell<Svc, T>(
        */
       const _set = (next: VaultStateInput<T>): void => {
         if (next == null) {
-          _isLoading.set(false);
-          _error.set(null);
-          _value.set(undefined);
+          _reset();
           return;
         }
 
@@ -102,8 +125,10 @@ export function provideFeatureCell<Svc, T>(
               _isLoading.set(resource.isLoading());
               try {
                 _value.set(resource.value());
+                emitEvent('set', 'http');
               } catch {
                 _error.set(resourceError(resource.error()));
+                emitEvent('error', 'http');
               }
             });
           });
@@ -129,15 +154,14 @@ export function provideFeatureCell<Svc, T>(
             } else {
               _value.set(val as VaultDataType<T>);
             }
+            emitEvent('set', 'manual');
           }
         }
       };
 
       const _patch = (partial: VaultStateInput<T>): void => {
         if (partial == null) {
-          _isLoading.set(false);
-          _error.set(null);
-          _value.set(undefined);
+          _reset();
           return;
         }
 
@@ -173,8 +197,10 @@ export function provideFeatureCell<Svc, T>(
                   }
 
                   _error.set(null);
+                  emitEvent('patch', 'http');
                 } catch {
                   _error.set(resourceError(resource.error()));
+                  emitEvent('error', 'http');
                 }
               });
             });
@@ -208,6 +234,8 @@ export function provideFeatureCell<Svc, T>(
             } else {
               _value.set(next as VaultDataType<T>);
             }
+
+            emitEvent('patch', 'manual');
           }
         }
       };
@@ -218,10 +246,15 @@ export function provideFeatureCell<Svc, T>(
           const _errorSignal = signal<ResourceStateError | null>(null);
           const _valueSignal = signal<VaultDataType<T>>(undefined);
 
+          emitEvent('load', 'observable');
+
           source$.pipe(take(1)).subscribe({
             next: (value) => {
               _valueSignal.set(value);
               _loadingSignal.set(false);
+
+              emitEvent('set', 'observable');
+
               observer.next({
                 isLoading: _loadingSignal.asReadonly(),
                 value: _valueSignal.asReadonly(),
@@ -232,14 +265,33 @@ export function provideFeatureCell<Svc, T>(
             },
             error: (err) => {
               observer.error(resourceError(err));
+              emitEvent('error', 'observable');
             },
             complete: () => {
               _loadingSignal.set(false);
+              emitEvent('dispose', 'observable');
               observer.complete();
             }
           });
         });
       };
+
+      function emitEvent(type: VaultEventType, source: VaultEventSource) {
+        if (IS_DEV_MODE) {
+          VaultEventBus.next({
+            key: featureCellDescriptor.key,
+            type,
+            timestamp: Date.now(),
+            payload: {
+              isLoading: _isLoading(),
+              value: _value(),
+              error: _error(),
+              hasValue: _hasValue()
+            },
+            source
+          });
+        }
+      }
 
       // Create vault first so we can reference it inside loadListFrom
       const vault: ResourceVaultModel<T> = {
@@ -264,7 +316,7 @@ export function provideFeatureCell<Svc, T>(
   const registryProvider: Provider = {
     provide: FEATURE_CELL_REGISTRY,
     multi: true,
-    useValue: { key: featureCellDescriptorModel.key, token: service }
+    useValue: { key: featureCellDescriptor.key, token: service }
   };
 
   return [featureCellProvider, service, registryProvider];

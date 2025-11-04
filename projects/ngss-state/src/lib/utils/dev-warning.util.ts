@@ -1,7 +1,9 @@
+import { IS_DEV_MODE } from '../constants/env.constants';
+
 let warned = false;
 
 export function devWarnExperimentalHttpResource(): void {
-  if (warned || typeof ngDevMode === 'undefined' || !ngDevMode) return;
+  if (warned || !IS_DEV_MODE) return;
   // eslint-disable-next-line
   console.warn('[NgVault] Experimental HttpResource support enabled — may change in Angular 21+.');
   warned = true;
