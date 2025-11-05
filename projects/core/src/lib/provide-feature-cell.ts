@@ -14,7 +14,6 @@ import {
   ResourceStateError,
   ResourceVaultModel,
   VaultBehavior,
-  VaultBehaviorFactory,
   VaultBehaviorFactoryContext,
   VaultSignalRef,
   VaultStateSnapshot
@@ -28,6 +27,7 @@ import { FEATURE_CELL_REGISTRY } from './constants/feature-cell-registry.constan
 import { FeatureCellDescriptorModel } from './models/feature-cell-descriptor.model';
 import { getOrCreateFeatureCellToken } from './tokens/feature-cell-token-registry';
 import { devWarnExperimentalHttpResource } from './utils/dev-warning.util';
+import { initializeBehaviors } from './utils/initialize-behaviors.util';
 import { isHttpResource } from './utils/is-http-resource.util';
 import { resourceError } from './utils/resource-error.util';
 
@@ -63,19 +63,7 @@ export function provideFeatureCell<Service, T>(
 
       // 👇 Initialize array to hold active, instantiated behaviors
 
-      let activeBehaviors = behaviors
-        .map((factory: VaultBehaviorFactory) => {
-          try {
-            const instance = factory({ injector: _injector });
-            if (!instance || typeof instance !== 'object') {
-              throw new Error('[NgVault] Behavior factory did not return a valid object.');
-            }
-            return instance;
-          } catch {
-            return null;
-          }
-        })
-        .filter(Boolean) as VaultBehavior[];
+      let activeBehaviors = initializeBehaviors(_injector, behaviors);
 
       const _value = signal<VaultDataType<T>>(
         featureCellDescriptor.initial === null || featureCellDescriptor.initial === undefined
