@@ -8,9 +8,8 @@ import {
   runInInjectionContext
 } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
-import { NgVaultEventBus, withDevtoolsBehavior } from '@ngvault/dev-tools';
+import { NgVaultDebuggerService, withDevtoolsBehavior } from '@ngvault/dev-tools';
 import { ResourceVaultModel } from '@ngvault/shared-models';
-import { take } from 'rxjs/operators';
 import { FEATURE_CELL_REGISTRY } from './constants/feature-cell-registry.constant';
 import { provideFeatureCell } from './provide-feature-cell';
 
@@ -379,8 +378,11 @@ describe('Provider: Feature Cell (core vault functionality)', () => {
 
   describe('Devtools hooks', () => {
     let factory: any;
+    let stopListening: any;
+    const events: any[] = [];
 
     beforeEach(() => {
+      events.length = 0;
       // create a vault inside Angular DI
       const providers = provideFeatureCell(
         class TestService {},
@@ -391,20 +393,19 @@ describe('Provider: Feature Cell (core vault functionality)', () => {
         [withDevtoolsBehavior]
       );
       factory = (providers[0] as any).useFactory;
+
+      const bus = TestBed.inject(NgVaultDebuggerService);
+      stopListening = bus.listen((event) => events.push(event));
+    });
+
+    afterEach(() => {
+      stopListening();
     });
 
     it('should emit an "init" event when a vault is created', () => {
-      const spy: any[] = [];
-
-      NgVaultEventBus.asObservable()
-        .pipe(take(1))
-        .subscribe((event) => {
-          spy.push(event);
-        });
-
       runInInjectionContext(TestBed.inject(Injector), () => factory());
 
-      expect(spy).toEqual([
+      expect(events).toEqual([
         Object({
           id: jasmine.any(String),
           key: 'devtools-test',
@@ -416,37 +417,38 @@ describe('Provider: Feature Cell (core vault functionality)', () => {
     });
 
     it('should emit a "dispose" event when vault.destroy() is called', () => {
-      const spy: any[] = [];
-      NgVaultEventBus.asObservable()
-        .pipe(take(1))
-        .subscribe((event) => {
-          spy.push(event);
-        });
-
       let vault: ResourceVaultModel<any>;
       runInInjectionContext(TestBed.inject(Injector), () => {
         vault = factory();
         vault.destroy();
       });
 
-      expect(spy).toEqual([
+      expect(events).toEqual([
         Object({
           id: jasmine.any(String),
           key: 'devtools-test',
           type: 'init',
           timestamp: jasmine.any(Number),
           state: Object({ isLoading: false, value: [], error: null, hasValue: true })
+        }),
+        Object({
+          id: jasmine.any(String),
+          key: 'devtools-test',
+          type: 'reset',
+          timestamp: jasmine.any(Number),
+          state: Object({ isLoading: false, value: undefined, error: null, hasValue: false })
+        }),
+        Object({
+          id: jasmine.any(String),
+          key: 'devtools-test',
+          type: 'dispose',
+          timestamp: jasmine.any(Number),
+          state: Object({ isLoading: false, value: undefined, error: null, hasValue: false })
         })
       ]);
     });
 
     it('should emit on all the calls', () => {
-      const spy: any[] = [];
-
-      NgVaultEventBus.asObservable().subscribe((event) => {
-        spy.push(event);
-      });
-
       let vault!: ResourceVaultModel<any>;
 
       // Create vault inside DI context (this emits "init")
@@ -462,7 +464,7 @@ describe('Provider: Feature Cell (core vault functionality)', () => {
       vault.setState({ loading: true, error: { message: 'fail' }, value: [1, 2, 3] });
       vault.setState(undefined);
 
-      expect(spy).toEqual([
+      expect(events).toEqual([
         Object({
           id: jasmine.any(String),
           key: 'devtools-test',

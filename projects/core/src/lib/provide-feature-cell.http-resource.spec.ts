@@ -2,8 +2,7 @@ import { httpResource, provideHttpClient } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { ApplicationRef, Injector, provideZonelessChangeDetection, runInInjectionContext, signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
-import { withDevtoolsBehavior } from '@ngvault/dev-tools';
-import { NgVaultEventBus } from '@ngvault/dev-tools/utils/ngvault-event-bus';
+import { NgVaultDebuggerService, withDevtoolsBehavior } from '@ngvault/dev-tools';
 import { ResourceVaultModel } from '@ngvault/shared-models';
 import { provideFeatureCell } from './provide-feature-cell';
 
@@ -14,17 +13,35 @@ interface TestModel {
 
 describe('Provider: Feature Cell Resource', () => {
   let vault: ResourceVaultModel<TestModel[] | TestModel | number | undefined>;
+  const events: any[] = [];
+  let stopListening: any;
 
   beforeEach(() => {
+    events.length = 0;
     TestBed.configureTestingModule({
-      providers: [provideHttpClient(), provideHttpClientTesting(), provideZonelessChangeDetection()]
+      providers: [
+        provideHttpClient(),
+        provideHttpClientTesting(),
+        provideZonelessChangeDetection(),
+        NgVaultDebuggerService
+      ]
     });
-    const providers = provideFeatureCell(class TestService {}, { key: 'http', initial: [] }, [withDevtoolsBehavior]);
 
+    const injector = TestBed.inject(Injector);
+
+    const bus = TestBed.inject(NgVaultDebuggerService);
+    stopListening = bus.listen((event) => events.push(event));
+
+    const providers = provideFeatureCell(class TestService {}, { key: 'http', initial: [] }, [withDevtoolsBehavior]);
     const vaultFactory = (providers[0] as any).useFactory;
-    runInInjectionContext(TestBed.inject(Injector), () => {
+
+    runInInjectionContext(injector, () => {
       vault = vaultFactory();
     });
+  });
+
+  afterEach(() => {
+    stopListening();
   });
 
   describe('setState', () => {
@@ -180,9 +197,6 @@ describe('Provider: Feature Cell Resource', () => {
     });
 
     it('should emit events from the httpResource lifecycle', async () => {
-      const spy: any[] = [];
-      NgVaultEventBus.asObservable().subscribe((event) => spy.push(event));
-
       const mockBackend = TestBed.inject(HttpTestingController);
       const response = httpResource<TestModel[]>(() => '/data', { injector: TestBed.inject(Injector) });
 
@@ -201,7 +215,14 @@ describe('Provider: Feature Cell Resource', () => {
       expect(vault.state.error()).toBeNull();
       expect(vault.state.hasValue()).toBeFalse();
 
-      expect(spy).toEqual([
+      expect(events).toEqual([
+        Object({
+          id: jasmine.any(String),
+          key: 'http',
+          type: 'init',
+          timestamp: jasmine.any(Number),
+          state: Object({ isLoading: false, value: [], error: null, hasValue: true })
+        }),
         Object({
           id: jasmine.any(String),
           key: 'http',
@@ -362,9 +383,6 @@ describe('Provider: Feature Cell Resource', () => {
     });
 
     it('should emit events from the httpResource lifecycle', async () => {
-      const spy: any[] = [];
-      NgVaultEventBus.asObservable().subscribe((event) => spy.push(event));
-
       // Arrange
       const mockBackend = TestBed.inject(HttpTestingController);
       const response = httpResource<number>(() => '/primitive', { injector: TestBed.inject(Injector) });
@@ -399,7 +417,14 @@ describe('Provider: Feature Cell Resource', () => {
       expect(vault.state.isLoading()).toBeFalse();
       expect(vault.state.hasValue()).toBeTrue();
 
-      expect(spy).toEqual([
+      expect(events).toEqual([
+        Object({
+          id: jasmine.any(String),
+          key: 'http',
+          type: 'init',
+          timestamp: jasmine.any(Number),
+          state: Object({ isLoading: false, value: [], error: null, hasValue: true })
+        }),
         Object({
           id: jasmine.any(String),
           key: 'http',
