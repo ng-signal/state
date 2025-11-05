@@ -4,7 +4,7 @@ import { ApplicationRef, Injector, provideZonelessChangeDetection, runInInjectio
 import { TestBed } from '@angular/core/testing';
 import { withDevtoolsLoggingBehavior } from '@ngvault/dev-tools';
 import { NgVaultEventBus } from '@ngvault/dev-tools/utils/ngvault-event-bus';
-import { ResourceVaultModel } from './models/resource-vault.model';
+import { ResourceVaultModel } from '@ngvault/shared-models';
 import { provideFeatureCell } from './provide-feature-cell';
 
 interface TestModel {
@@ -31,6 +31,7 @@ describe('Provider: Feature Cell Resource', () => {
 
   describe('setState', () => {
     it('should reactively mirror HttpResourceRef signals via setState()', async () => {
+      const consoleSpy = spyOn(console, 'warn');
       vault.setState({ loading: false, value: [{ id: 1, name: 'Ada' }], error: null });
 
       // initial snapshot
@@ -103,6 +104,9 @@ describe('Provider: Feature Cell Resource', () => {
       expect(vault.state.isLoading()).toBeFalse();
       expect(vault.state.value()).toEqual([Object({ id: 3, name: 'Brian' })]);
       expect(vault.state.hasValue()).toBeTrue();
+      expect(consoleSpy).toHaveBeenCalledWith(
+        '[NgVault] Experimental HttpResource support enabled — may change in Angular 21+.'
+      );
     });
 
     it('should react when underlying HttpResourceRef signals reloads', async () => {

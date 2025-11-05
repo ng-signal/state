@@ -1,19 +1,22 @@
 // projects/dev-tools/src/lib/behaviors/with-devtools.behavior.ts
-import { VaultStateSnapshot } from '@ngvault/shared-models';
+import { Injector } from '@angular/core';
+import { VaultBehavior, VaultBehaviorFactoryContext, VaultStateSnapshot } from '@ngvault/shared-models';
 import { IS_DEV_MODE } from '../constants/env.constants';
 import { VaultEventType } from '../types/event-vault.type';
 import { NgVaultEventBus } from '../utils/ngvault-event-bus';
 import { registerNgVault, unregisterNgVault } from '../utils/ngvault-registry';
 
-class DevtoolsBehavior {
+class DevtoolsBehavior implements VaultBehavior {
   #registered = new Set<string>();
 
-  #isProdMode(): boolean {
-    return !IS_DEV_MODE;
+  constructor(private readonly _injector: VaultBehaviorFactoryContext['injector']) {}
+
+  #isDevMode(): boolean {
+    return IS_DEV_MODE;
   }
 
   onInit<T>(vaultKey: string, serviceName: string, ctx: Readonly<VaultStateSnapshot<T>>): void {
-    if (this.#isProdMode() || this.#registered.has(vaultKey)) return;
+    if (!this.#isDevMode() || this.#registered.has(vaultKey)) return;
     this.#registered.add(vaultKey);
 
     registerNgVault({ key: vaultKey, service: serviceName, state: ctx });
@@ -44,7 +47,7 @@ class DevtoolsBehavior {
   }
 
   #emitEvent<T>(key: string, ctx: Readonly<VaultStateSnapshot<T>>, type: VaultEventType): void {
-    if (this.#isProdMode()) return;
+    if (!this.#isDevMode()) return;
 
     NgVaultEventBus.next({
       key,
@@ -55,6 +58,6 @@ class DevtoolsBehavior {
   }
 }
 
-export function withDevtoolsLoggingBehavior() {
-  return new DevtoolsBehavior();
+export function withDevtoolsLoggingBehavior(injector: Injector): VaultBehavior {
+  return new DevtoolsBehavior(injector);
 }

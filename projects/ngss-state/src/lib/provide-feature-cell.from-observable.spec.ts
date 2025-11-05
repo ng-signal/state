@@ -4,9 +4,8 @@ import { Injector, provideZonelessChangeDetection, runInInjectionContext, signal
 import { TestBed } from '@angular/core/testing';
 import { withDevtoolsLoggingBehavior } from '@ngvault/dev-tools';
 import { NgVaultEventBus } from '@ngvault/dev-tools/utils/ngvault-event-bus';
+import { ResourceVaultModel, VaultSignalRef } from '@ngvault/shared-models';
 import { Subject } from 'rxjs';
-import { ResourceVaultModel } from './models/resource-vault.model';
-import { VaultSignalRef } from './models/vault-signal.ref';
 import { provideFeatureCell } from './provide-feature-cell';
 
 interface TestModel {

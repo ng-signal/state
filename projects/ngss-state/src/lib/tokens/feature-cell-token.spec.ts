@@ -1,5 +1,5 @@
 import { InjectionToken } from '@angular/core';
-import { ResourceVaultModel } from '../models/resource-vault.model';
+import { ResourceVaultModel } from '@ngvault/shared-models';
 import { FEATURE_CELL_TOKEN } from './feature-cell-token';
 
 describe('Token: Feature Cell', () => {

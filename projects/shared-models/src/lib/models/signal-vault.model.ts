@@ -1,4 +1,4 @@
-import { VaultSignalRef } from './vault-signal.ref';
+import { VaultSignalRef } from '../references/vault-signal.reference';
 
 export interface SignalVaultModel<T> {
   readonly state: VaultSignalRef<T>;

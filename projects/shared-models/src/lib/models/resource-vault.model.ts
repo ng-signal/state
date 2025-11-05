@@ -1,13 +1,13 @@
 import { Observable } from 'rxjs';
-import { VaultStateInput } from '../types/vault-state-input.type';
+import { VaultSignalRef } from '../references/vault-signal.reference';
+import { VaultStateInputType } from '../types/vault-state-input.type';
 import { SignalVaultModel } from './signal-vault.model';
-import { VaultSignalRef } from './vault-signal.ref';
 
 export interface ResourceVaultModel<T> extends SignalVaultModel<T> {
   state: VaultSignalRef<T>;
-  setState(next: Partial<VaultStateInput<T>>): void;
+  setState(next: Partial<VaultStateInputType<T>>): void;
 
-  patchState(partial: Partial<VaultStateInput<T>>): void;
+  patchState(partial: Partial<VaultStateInputType<T>>): void;
 
   fromObservable?(source$: Observable<T>): Observable<VaultSignalRef<T>>;
 

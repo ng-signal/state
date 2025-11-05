@@ -10,24 +10,27 @@ import {
   runInInjectionContext,
   signal
 } from '@angular/core';
-import { VaultBehavior, VaultStateSnapshot } from '@ngvault/shared-models';
+import {
+  ResourceStateError,
+  ResourceVaultModel,
+  VaultBehavior,
+  VaultSignalRef,
+  VaultStateSnapshot
+} from '@ngvault/shared-models';
+import { VaultDataType } from '@ngvault/shared-models/types/vault-data.type';
+import { VaultStateInputType } from '@ngvault/shared-models/types/vault-state-input.type';
+import { VaultStateType } from '@ngvault/shared-models/types/vault-state.type';
 import { Observable, Subject, take } from 'rxjs';
 import { NGVAULT_EXPERIMENTAL_HTTP_RESOURCE } from './constants/experimental-flag.constant';
 import { FEATURE_CELL_REGISTRY } from './constants/feature-cell-registry.constant';
 import { FeatureCellDescriptorModel } from './models/feature-cell-descriptor.model';
-import { ResourceStateError } from './models/resource-state-error.model';
-import { ResourceVaultModel } from './models/resource-vault.model';
-import { VaultSignalRef } from './models/vault-signal.ref';
 import { getOrCreateFeatureCellToken } from './tokens/feature-cell-token-registry';
-import { VaultDataType } from './types/vault-data.type';
-import { VaultStateInput } from './types/vault-state-input.type';
-import { VaultStateType } from './types/vault-state.type';
 import { devWarnExperimentalHttpResource } from './utils/dev-warning.util';
 import { isHttpResource } from './utils/is-http-resource.util';
 import { resourceError } from './utils/resource-error.util';
 
-export function provideFeatureCell<Svc, T>(
-  service: Type<Svc>,
+export function provideFeatureCell<Service, T>(
+  service: Type<Service>,
   featureCellDescriptor: FeatureCellDescriptorModel<T>,
   behaviors: Array<VaultBehavior> = []
 ): Provider[] {
@@ -43,7 +46,6 @@ export function provideFeatureCell<Svc, T>(
       const _destroyed$ = new Subject<void>();
 
       // Prevent incorrect initialization (e.g., passing a resource object)
-
       if (
         typeof featureCellDescriptor.initial === 'object' &&
         featureCellDescriptor.initial !== null &&
@@ -56,6 +58,8 @@ export function provideFeatureCell<Svc, T>(
             `Pass plain data to avoid double-wrapping.`
         );
       }
+
+      // 👇 Initialize array to hold active, instantiated behaviors
 
       const _value = signal<VaultDataType<T>>(
         featureCellDescriptor.initial === null || featureCellDescriptor.initial === undefined
@@ -103,7 +107,7 @@ export function provideFeatureCell<Svc, T>(
        * Updates the vault’s state reactively.
        * Supports partial updates, full resets, or Angular HttpResourceRef<T>.
        */
-      const _set = (next: VaultStateInput<T>): void => {
+      const _set = (next: VaultStateInputType<T>): void => {
         if (next == null) {
           _reset();
           return;
@@ -152,7 +156,7 @@ export function provideFeatureCell<Svc, T>(
         }
       };
 
-      const _patch = (partial: VaultStateInput<T>): void => {
+      const _patch = (partial: VaultStateInputType<T>): void => {
         if (partial == null) {
           _reset();
           return;

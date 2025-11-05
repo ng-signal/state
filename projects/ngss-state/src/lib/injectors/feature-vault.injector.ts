@@ -1,6 +1,6 @@
 import { inject } from '@angular/core';
+import { ResourceVaultModel } from '@ngvault/shared-models';
 import { NGVAULT_METADATA_KEYS } from '../constants/metadata-keys.constant';
-import { ResourceVaultModel } from '../models/resource-vault.model';
 import { getOrCreateFeatureCellToken } from '../tokens/feature-cell-token-registry';
 
 export function injectVault<T>(featureCellClass?: abstract new (...args: unknown[]) => object): ResourceVaultModel<T> {

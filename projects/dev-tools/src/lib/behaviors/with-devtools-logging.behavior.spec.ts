@@ -1,14 +1,16 @@
+import { Injector } from '@angular/core';
 import { createNgVaultDebuggerHook } from '@ngvault/dev-tools';
-import { VaultStateSnapshot } from '@ngvault/shared-models';
+import { VaultBehavior, VaultStateSnapshot } from '@ngvault/shared-models';
 import { withDevtoolsLoggingBehavior } from './with-devtools-logging.behavior';
 
 describe('withDevtoolsLoggingBehavior', () => {
-  let behavior: ReturnType<typeof withDevtoolsLoggingBehavior>;
+  let behavior: VaultBehavior;
   const emitted: any[] = [];
   let stopListening: any;
   let ctx: VaultStateSnapshot<string>;
 
   beforeEach(() => {
+    const injector = Injector.create({ providers: [] });
     ctx = {
       isLoading: true,
       value: 'hello',
@@ -17,7 +19,7 @@ describe('withDevtoolsLoggingBehavior', () => {
     };
 
     emitted.length = 0;
-    behavior = withDevtoolsLoggingBehavior();
+    behavior = withDevtoolsLoggingBehavior(injector);
     // Subscribe to all vault events via the official hook
     stopListening = createNgVaultDebuggerHook((event) => emitted.push(event));
   });
@@ -27,7 +29,7 @@ describe('withDevtoolsLoggingBehavior', () => {
   });
 
   it('should register, emit init and prevent double registration', () => {
-    behavior.onInit('vault1', 'TestService', ctx);
+    behavior.onInit?.('vault1', 'TestService', ctx);
 
     expect(emitted).toEqual([
       Object({
@@ -41,7 +43,7 @@ describe('withDevtoolsLoggingBehavior', () => {
 
     // Second call should be ignored (already registered)
 
-    behavior.onInit('vault1', 'TestService', ctx);
+    behavior.onInit?.('vault1', 'TestService', ctx);
 
     expect(emitted).toEqual([
       Object({
@@ -53,11 +55,11 @@ describe('withDevtoolsLoggingBehavior', () => {
       })
     ]);
 
-    behavior.onLoad('vault1', ctx);
-    behavior.onPatch('vault1', ctx);
-    behavior.onReset('vault1', ctx);
-    behavior.onSet('vault1', ctx);
-    behavior.onDestroy('vault1', ctx);
+    behavior.onLoad?.('vault1', ctx);
+    behavior.onPatch?.('vault1', ctx);
+    behavior.onReset?.('vault1', ctx);
+    behavior.onSet?.('vault1', ctx);
+    behavior.onDestroy?.('vault1', ctx);
 
     expect(emitted).toEqual([
       Object({
@@ -106,8 +108,8 @@ describe('withDevtoolsLoggingBehavior', () => {
   });
 
   it('should handle multiple vaults independently', () => {
-    behavior.onInit('vault1', 'TestService', ctx);
-    behavior.onInit('vault2', 'TestService', ctx);
+    behavior.onInit?.('vault1', 'TestService', ctx);
+    behavior.onInit?.('vault2', 'TestService', ctx);
 
     expect(emitted).toEqual([
       Object({
@@ -126,7 +128,7 @@ describe('withDevtoolsLoggingBehavior', () => {
       })
     ]);
 
-    behavior.onDestroy('A', ctx);
+    behavior.onDestroy?.('A', ctx);
 
     expect(emitted).toEqual([
       Object({
