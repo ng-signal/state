@@ -2,7 +2,8 @@
  * Public API Surface of shared-models
  */
 
-export * from './lib/interfaces/vault-behavior-factory-context.interface';
+export * from './lib/contexts/vault-behavior-factory.context';
+export * from './lib/contexts/vault-behavior.context';
 export * from './lib/interfaces/vault-behavior.interface';
 export * from './lib/models/resource-state-error.model';
 export * from './lib/models/resource-vault.model';

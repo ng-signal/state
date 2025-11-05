@@ -1,12 +1,13 @@
-import { VaultStateSnapshot } from '../models/vault-state-snapshot.model';
+import { VaultBehaviorContext } from '../contexts/vault-behavior.context';
 
 export interface VaultBehavior<T = unknown> {
-  onInit?(key: string, service: string, state: Readonly<VaultStateSnapshot<T>>): void;
-  onLoad?(key: string, state: Readonly<VaultStateSnapshot<T>>): void;
-  onSet?(key: string, state: Readonly<VaultStateSnapshot<T>>): void;
-  onPatch?(key: string, state: Readonly<VaultStateSnapshot<T>>): void;
-  onReset?(key: string, state: Readonly<VaultStateSnapshot<T>>): void;
-  onError?(key: string, state: Readonly<VaultStateSnapshot<T>>): void;
-  onDestroy?(key: string, state: Readonly<VaultStateSnapshot<T>>): void;
-  onDispose?(key: string, state: Readonly<VaultStateSnapshot<T>>): void;
+  critical?: boolean;
+  onInit?(key: string, service: string, ctx: VaultBehaviorContext<T>): void;
+  onLoad?(key: string, ctx: VaultBehaviorContext<T>): void;
+  onSet?(key: string, ctx: VaultBehaviorContext<T>): void;
+  onPatch?(key: string, ctx: VaultBehaviorContext<T>): void;
+  onReset?(key: string, ctx: VaultBehaviorContext<T>): void;
+  onError?(key: string, ctx: VaultBehaviorContext<T>): void;
+  onDestroy?(key: string, ctx: VaultBehaviorContext<T>): void;
+  onDispose?(key: string, ctx: VaultBehaviorContext<T>): void;
 }

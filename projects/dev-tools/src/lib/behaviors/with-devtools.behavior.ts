@@ -2,6 +2,7 @@ import { inject } from '@angular/core';
 import {
   NgVaultDevModeService,
   VaultBehavior,
+  VaultBehaviorContext,
   VaultBehaviorFactoryContext,
   VaultStateSnapshot
 } from '@ngvault/shared-models';
@@ -17,34 +18,34 @@ class DevtoolsBehavior implements VaultBehavior {
 
   constructor(private readonly _injector: VaultBehaviorFactoryContext['injector']) {}
 
-  onInit<T>(vaultKey: string, serviceName: string, ctx: Readonly<VaultStateSnapshot<T>>): void {
+  onInit<T>(vaultKey: string, serviceName: string, ctx: Readonly<VaultBehaviorContext<T>>): void {
     if (!this.#devModeService.isDevMode || this.#registered.has(vaultKey)) return;
     this.#registered.add(vaultKey);
 
     this.#initialized.add(vaultKey);
 
     registerNgVault({ key: vaultKey, service: serviceName, state: ctx });
-    this.#emitEvent(vaultKey, ctx, 'init');
+    this.#emitEvent(vaultKey, ctx.state, 'init');
   }
 
-  onLoad<T>(key: string, ctx: Readonly<VaultStateSnapshot<T>>): void {
-    this.#emitEvent(key, ctx, 'load');
+  onLoad<T>(key: string, ctx: Readonly<VaultBehaviorContext<T>>): void {
+    this.#emitEvent(key, ctx.state, 'load');
   }
 
-  onPatch<T>(key: string, ctx: Readonly<VaultStateSnapshot<T>>): void {
-    this.#emitEvent(key, ctx, 'patch');
+  onPatch<T>(key: string, ctx: Readonly<VaultBehaviorContext<T>>): void {
+    this.#emitEvent(key, ctx.state, 'patch');
   }
 
-  onReset<T>(key: string, ctx: Readonly<VaultStateSnapshot<T>>): void {
-    this.#emitEvent(key, ctx, 'reset');
+  onReset<T>(key: string, ctx: Readonly<VaultBehaviorContext<T>>): void {
+    this.#emitEvent(key, ctx.state, 'reset');
   }
 
-  onSet<T>(key: string, ctx: Readonly<VaultStateSnapshot<T>>): void {
-    this.#emitEvent(key, ctx, 'set');
+  onSet<T>(key: string, ctx: Readonly<VaultBehaviorContext<T>>): void {
+    this.#emitEvent(key, ctx.state, 'set');
   }
 
-  onDestroy<T>(key: string, ctx: Readonly<VaultStateSnapshot<T>>): void {
-    this.#emitEvent(key, ctx, 'dispose');
+  onDestroy<T>(key: string, ctx: Readonly<VaultBehaviorContext<T>>): void {
+    this.#emitEvent(key, ctx.state, 'dispose');
     if (this.#registered.has(key)) {
       unregisterNgVault(key);
     }

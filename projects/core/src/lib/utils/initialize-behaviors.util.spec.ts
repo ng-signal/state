@@ -14,6 +14,14 @@ describe('Behavior Factory Instantiation (no mocks)', () => {
     spyOn(console, 'warn');
   });
 
+  it('handles no behaviors', () => {
+    expect(initializeBehaviors(injector, [])).toEqual([]);
+    expect(initializeBehaviors(injector, undefined as any)).toEqual([]);
+
+    // eslint-disable-next-line
+    expect(console.warn).not.toHaveBeenCalled();
+  });
+
   it('creates valid behaviors from factory functions', () => {
     const callOrder: string[] = [];
 

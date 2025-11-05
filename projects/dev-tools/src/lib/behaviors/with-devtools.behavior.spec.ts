@@ -1,6 +1,6 @@
 import { Injector, provideZonelessChangeDetection, runInInjectionContext } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
-import { NgVaultDevModeService, VaultBehavior, VaultStateSnapshot } from '@ngvault/shared-models';
+import { NgVaultDevModeService, VaultBehavior } from '@ngvault/shared-models';
 import { NgVaultDebuggerService } from '../services/ngvault-debugger.service';
 import { withDevtoolsBehavior } from './with-devtools.behavior';
 
@@ -8,16 +8,18 @@ describe('Behavior: withDevtools', () => {
   let behavior: VaultBehavior;
   const emitted: any[] = [];
   let stopListening: any;
-  let ctx: VaultStateSnapshot<string>;
+  let ctx: any;
 
   describe('development', () => {
     beforeEach(() => {
       ctx = {
-        isLoading: true,
-        value: 'hello',
-        error: null,
-        hasValue: false
-      };
+        state: {
+          isLoading: true,
+          value: 'hello',
+          error: null,
+          hasValue: false
+        }
+      } as any;
 
       TestBed.configureTestingModule({
         providers: [NgVaultDebuggerService, provideZonelessChangeDetection()]
