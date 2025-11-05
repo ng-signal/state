@@ -1,12 +1,12 @@
 import { DestroyRef, inject, Injectable, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { createNgVaultDebuggerHook, NgVaultEventModel } from '@ngvault/dev-tools';
+import { NgVaultDebuggerService, NgVaultEventModel } from '@ngvault/dev-tools';
 import { filter } from 'rxjs/operators';
 
 @Injectable({ providedIn: 'root' })
 export class NgVaultDevtoolsService {
   private readonly destroyRef = inject(DestroyRef);
-  private readonly bus = inject(createNgVaultDebuggerHook);
+  private readonly bus = inject(NgVaultDebuggerService);
 
   /** Rolling event history (max 200 entries) */
   readonly events = signal<NgVaultEventModel[]>([]);
@@ -15,7 +15,8 @@ export class NgVaultDevtoolsService {
   readonly vaults = signal<Record<string, NgVaultEventModel['state']>>({});
 
   constructor() {
-    this.bus()
+    this.bus
+      .listen$()
       .pipe(
         filter((e) => !!e),
         takeUntilDestroyed(this.destroyRef)

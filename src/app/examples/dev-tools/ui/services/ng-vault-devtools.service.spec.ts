@@ -1,11 +1,11 @@
 import { provideZonelessChangeDetection } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
-import { NgVaultEventModel } from '../../models/ngvault-event.model';
-import { NgVaultEventBus } from '../../utils/ngvault-event-bus';
+import { NgVaultEventBus, NgVaultEventModel } from '@ngvault/dev-tools';
 import { NgVaultDevtoolsService } from './ngvault-devtools.service';
 
-describe('NgVaultDevtoolsService (integration)', () => {
+describe('Service NgVaultDevtools', () => {
   let service: NgVaultDevtoolsService;
+  let bus: NgVaultEventBus;
 
   beforeEach(() => {
     TestBed.configureTestingModule({
@@ -13,6 +13,8 @@ describe('NgVaultDevtoolsService (integration)', () => {
     });
 
     service = TestBed.inject(NgVaultDevtoolsService);
+
+    bus = TestBed.inject(NgVaultEventBus);
   });
 
   it('should create successfully', () => {
@@ -30,7 +32,7 @@ describe('NgVaultDevtoolsService (integration)', () => {
       state: { value: { id: 1 } }
     };
 
-    NgVaultEventBus.next(base);
+    bus.next(base);
 
     const allEvents = service.events();
     expect(allEvents.length).toBe(1);
@@ -39,7 +41,7 @@ describe('NgVaultDevtoolsService (integration)', () => {
 
   it('should cap stored events at 200 entries', () => {
     for (let i = 0; i < 250; i++) {
-      NgVaultEventBus.next({
+      bus.next({
         id: `${i}`,
         key: 'bulk',
         type: 'patch',
@@ -56,7 +58,7 @@ describe('NgVaultDevtoolsService (integration)', () => {
   });
 
   it('should clear all events and vaults when clearAll() is called', () => {
-    NgVaultEventBus.next({
+    bus.next({
       id: 'x',
       key: 'temp',
       type: 'set',
