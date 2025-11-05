@@ -2,6 +2,7 @@ import { httpResource, provideHttpClient } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { ApplicationRef, Injector, provideZonelessChangeDetection, runInInjectionContext, signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
+import { withDevtoolsLoggingBehavior } from '@ngvault/dev-tools';
 import { NgVaultEventBus } from '@ngvault/dev-tools/utils/ngvault-event-bus';
 import { ResourceVaultModel } from './models/resource-vault.model';
 import { provideFeatureCell } from './provide-feature-cell';
@@ -18,7 +19,9 @@ describe('Provider: Feature Cell Resource', () => {
     TestBed.configureTestingModule({
       providers: [provideHttpClient(), provideHttpClientTesting(), provideZonelessChangeDetection()]
     });
-    const providers = provideFeatureCell(class TestService {}, { key: 'http', initial: [] });
+    const providers = provideFeatureCell(class TestService {}, { key: 'http', initial: [] }, [
+      withDevtoolsLoggingBehavior()
+    ]);
 
     const vaultFactory = (providers[0] as any).useFactory;
     runInInjectionContext(TestBed.inject(Injector), () => {
@@ -202,24 +205,21 @@ describe('Provider: Feature Cell Resource', () => {
           key: 'http',
           type: 'set',
           timestamp: jasmine.any(Number),
-          state: Object({ isLoading: true, value: undefined, error: null, hasValue: false }),
-          source: 'http'
+          state: Object({ isLoading: true, value: undefined, error: null, hasValue: false })
         }),
         Object({
           id: jasmine.any(String),
           key: 'http',
           type: 'set',
           timestamp: jasmine.any(Number),
-          state: Object({ isLoading: false, value: [Object({ id: 1, name: 'Ada' })], error: null, hasValue: true }),
-          source: 'http'
+          state: Object({ isLoading: false, value: [Object({ id: 1, name: 'Ada' })], error: null, hasValue: true })
         }),
         Object({
           id: jasmine.any(String),
           key: 'http',
           type: 'reset',
           timestamp: jasmine.any(Number),
-          state: Object({ isLoading: false, value: undefined, error: null, hasValue: false }),
-          source: 'manual'
+          state: Object({ isLoading: false, value: undefined, error: null, hasValue: false })
         })
       ]);
     });
@@ -403,24 +403,21 @@ describe('Provider: Feature Cell Resource', () => {
           key: 'http',
           type: 'patch',
           timestamp: jasmine.any(Number),
-          state: Object({ isLoading: false, value: 42, error: null, hasValue: true }),
-          source: 'http'
+          state: Object({ isLoading: false, value: 42, error: null, hasValue: true })
         }),
         Object({
           id: jasmine.any(String),
           key: 'http',
           type: 'patch',
           timestamp: jasmine.any(Number),
-          state: Object({ isLoading: true, value: 42, error: null, hasValue: true }),
-          source: 'http'
+          state: Object({ isLoading: true, value: 42, error: null, hasValue: true })
         }),
         Object({
           id: jasmine.any(String),
           key: 'http',
           type: 'patch',
           timestamp: jasmine.any(Number),
-          state: Object({ isLoading: false, value: 7, error: null, hasValue: true }),
-          source: 'http'
+          state: Object({ isLoading: false, value: 7, error: null, hasValue: true })
         })
       ]);
     });

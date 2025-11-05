@@ -10,11 +10,7 @@ import {
   runInInjectionContext,
   signal
 } from '@angular/core';
-import { IS_DEV_MODE } from '@ngvault/dev-tools/constants/env.constants';
-import { VaultEventSource } from '@ngvault/dev-tools/types/event-vault-source.type';
-import { VaultEventType } from '@ngvault/dev-tools/types/event-vault.type';
-import { NgVaultEventBus } from '@ngvault/dev-tools/utils/ngvault-event-bus';
-import { registerNgVault, unregisterNgVault } from '@ngvault/dev-tools/utils/ngvault-registry';
+import { VaultBehavior, VaultStateSnapshot } from '@ngvault/shared-models';
 import { Observable, Subject, take } from 'rxjs';
 import { NGVAULT_EXPERIMENTAL_HTTP_RESOURCE } from './constants/experimental-flag.constant';
 import { FEATURE_CELL_REGISTRY } from './constants/feature-cell-registry.constant';
@@ -32,7 +28,8 @@ import { resourceError } from './utils/resource-error.util';
 
 export function provideFeatureCell<Svc, T>(
   service: Type<Svc>,
-  featureCellDescriptor: FeatureCellDescriptorModel<T>
+  featureCellDescriptor: FeatureCellDescriptorModel<T>,
+  behaviors: Array<VaultBehavior> = []
 ): Provider[] {
   const token = getOrCreateFeatureCellToken<T>(featureCellDescriptor.key, false);
 
@@ -71,36 +68,32 @@ export function provideFeatureCell<Svc, T>(
         return val !== null && val !== undefined;
       });
 
-      if (IS_DEV_MODE) {
-        registerNgVault({
-          key: featureCellDescriptor.key,
-          service: service.name,
-          state: {
-            isLoading: _isLoading.asReadonly(),
-            value: _value.asReadonly(),
-            error: _error.asReadonly(),
-            hasValue: _hasValue
-          }
-        });
+      const _state = (): VaultStateSnapshot<T> => {
+        return {
+          isLoading: _isLoading(),
+          value: _value(),
+          error: _error(),
+          hasValue: _hasValue()
+        };
+      };
 
-        emitEvent('init', 'system');
-      }
+      // Run the onInit behaviors
+      behaviors.forEach((b) => b.onInit?.(featureCellDescriptor.key, service.name, _state()));
 
-      const _reset = (source: VaultEventSource = 'manual'): void => {
+      const _reset = (): void => {
         _isLoading.set(false);
         _error.set(null);
         _value.set(undefined);
-        emitEvent('reset', source);
+        behaviors.forEach((b) => b.onReset?.(featureCellDescriptor.key, _state()));
       };
 
       const _destroy = (): void => {
-        if (IS_DEV_MODE) {
-          NgVaultEventBus.next({ key: featureCellDescriptor.key, type: 'dispose', timestamp: Date.now() });
-          unregisterNgVault(featureCellDescriptor.key);
-        }
-        _reset('system');
         _destroyed$.next();
         _destroyed$.complete();
+
+        _reset();
+
+        behaviors.forEach((b) => b.onDestroy?.(featureCellDescriptor.key, _state()));
       };
 
       // Angular DI teardown
@@ -125,10 +118,10 @@ export function provideFeatureCell<Svc, T>(
               _isLoading.set(resource.isLoading());
               try {
                 _value.set(resource.value());
-                emitEvent('set', 'http');
+                behaviors.forEach((b) => b.onSet?.(featureCellDescriptor.key, _state()));
               } catch {
                 _error.set(resourceError(resource.error()));
-                emitEvent('error', 'http');
+                behaviors.forEach((b) => b.onError?.(featureCellDescriptor.key, _state()));
               }
             });
           });
@@ -154,7 +147,7 @@ export function provideFeatureCell<Svc, T>(
             } else {
               _value.set(val as VaultDataType<T>);
             }
-            emitEvent('set', 'manual');
+            behaviors.forEach((b) => b.onSet?.(featureCellDescriptor.key, _state()));
           }
         }
       };
@@ -197,10 +190,10 @@ export function provideFeatureCell<Svc, T>(
                   }
 
                   _error.set(null);
-                  emitEvent('patch', 'http');
+                  behaviors.forEach((b) => b.onPatch?.(featureCellDescriptor.key, _state()));
                 } catch {
                   _error.set(resourceError(resource.error()));
-                  emitEvent('error', 'http');
+                  behaviors.forEach((b) => b.onError?.(featureCellDescriptor.key, _state()));
                 }
               });
             });
@@ -235,7 +228,7 @@ export function provideFeatureCell<Svc, T>(
               _value.set(next as VaultDataType<T>);
             }
 
-            emitEvent('patch', 'manual');
+            behaviors.forEach((b) => b.onPatch?.(featureCellDescriptor.key, _state()));
           }
         }
       };
@@ -246,14 +239,14 @@ export function provideFeatureCell<Svc, T>(
           const _errorSignal = signal<ResourceStateError | null>(null);
           const _valueSignal = signal<VaultDataType<T>>(undefined);
 
-          emitEvent('load', 'observable');
+          behaviors.forEach((b) => b.onLoad?.(featureCellDescriptor.key, _state()));
 
           source$.pipe(take(1)).subscribe({
             next: (value) => {
               _valueSignal.set(value);
               _loadingSignal.set(false);
 
-              emitEvent('set', 'observable');
+              behaviors.forEach((b) => b.onSet?.(featureCellDescriptor.key, _state()));
 
               observer.next({
                 isLoading: _loadingSignal.asReadonly(),
@@ -265,33 +258,16 @@ export function provideFeatureCell<Svc, T>(
             },
             error: (err) => {
               observer.error(resourceError(err));
-              emitEvent('error', 'observable');
+              behaviors.forEach((b) => b.onError?.(featureCellDescriptor.key, _state()));
             },
             complete: () => {
               _loadingSignal.set(false);
-              emitEvent('dispose', 'observable');
+              behaviors.forEach((b) => b.onDispose?.(featureCellDescriptor.key, _state()));
               observer.complete();
             }
           });
         });
       };
-
-      function emitEvent(type: VaultEventType, source: VaultEventSource) {
-        if (IS_DEV_MODE) {
-          NgVaultEventBus.next({
-            key: featureCellDescriptor.key,
-            type,
-            timestamp: Date.now(),
-            state: {
-              isLoading: _isLoading(),
-              value: _value(),
-              error: _error(),
-              hasValue: _hasValue()
-            },
-            source
-          });
-        }
-      }
 
       // Create vault first so we can reference it inside loadListFrom
       const vault: ResourceVaultModel<T> = {

@@ -182,6 +182,32 @@
           }
         }
       }
+    },
+    "shared-models": {
+      "projectType": "library",
+      "root": "projects/shared-models",
+      "sourceRoot": "projects/shared-models/src",
+      "prefix": "ngvault",
+      "architect": {
+        "build": {
+          "builder": "@angular/build:ng-packagr",
+          "configurations": {
+            "production": {
+              "tsConfig": "projects/shared-models/tsconfig.lib.prod.json"
+            },
+            "development": {
+              "tsConfig": "projects/shared-models/tsconfig.lib.json"
+            }
+          },
+          "defaultConfiguration": "production"
+        },
+        "test": {
+          "builder": "@angular/build:karma",
+          "options": {
+            "tsConfig": "projects/shared-models/tsconfig.spec.json"
+          }
+        }
+      }
     }
   }
 }

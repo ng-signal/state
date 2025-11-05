@@ -14,7 +14,9 @@
       "@ngvault/dev-tools": ["projects/dev-tools/src/public-api"],
       "@ngvault/dev-tools/*": ["projects/dev-tools/src/lib/*"],
       "@ngvault/styles": ["projects/styles/src/lib"],
-      "@ngvault/styles/*": ["projects/styles/src/lib/*"]
+      "@ngvault/styles/*": ["projects/styles/src/lib/*"],
+      "@ngvault/shared-models": ["projects/shared-models/src/public-api"],
+      "@ngvault/shared-models/*": ["projects/shared-models/src/lib/*"]
     },
     "noFallthroughCasesInSwitch": true,
     "skipLibCheck": true,
@@ -33,6 +35,10 @@
   },
   "files": [],
   "references": [
+    { "path": "projects/ngss-state" },
+    { "path": "projects/dev-tools" },
+    { "path": "projects/styles" },
+    { "path": "projects/shared-models" },
     {
       "path": "./tsconfig.app.json"
     },
@@ -56,6 +62,12 @@
     },
     {
       "path": "./projects/styles/tsconfig.spec.json"
+    },
+    {
+      "path": "./projects/shared-models/tsconfig.lib.json"
+    },
+    {
+      "path": "./projects/shared-models/tsconfig.spec.json"
     }
   ]
 }

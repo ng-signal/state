@@ -8,7 +8,7 @@ import {
   runInInjectionContext
 } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
-import { NgVaultEventBus } from '@ngvault/dev-tools/utils/ngvault-event-bus';
+import { NgVaultEventBus, withDevtoolsLoggingBehavior } from '@ngvault/dev-tools';
 import { take } from 'rxjs/operators';
 import { FEATURE_CELL_REGISTRY } from './constants/feature-cell-registry.constant';
 import { ResourceVaultModel } from './models/resource-vault.model';
@@ -381,10 +381,14 @@ describe('Provider: Feature Cell (core vault functionality)', () => {
     let factory: any;
     beforeEach(() => {
       // create a vault inside Angular DI
-      const providers = provideFeatureCell(class TestService {}, {
-        key: 'devtools-test',
-        initial: []
-      });
+      const providers = provideFeatureCell(
+        class TestService {},
+        {
+          key: 'devtools-test',
+          initial: []
+        },
+        [withDevtoolsLoggingBehavior()]
+      );
       factory = (providers[0] as any).useFactory;
     });
 
@@ -405,7 +409,6 @@ describe('Provider: Feature Cell (core vault functionality)', () => {
           key: 'devtools-test',
           type: 'init',
           timestamp: jasmine.any(Number),
-          source: 'system',
           state: Object({ isLoading: false, value: [], error: null, hasValue: true })
         })
       ]);
@@ -431,7 +434,6 @@ describe('Provider: Feature Cell (core vault functionality)', () => {
           key: 'devtools-test',
           type: 'init',
           timestamp: jasmine.any(Number),
-          source: 'system',
           state: Object({ isLoading: false, value: [], error: null, hasValue: true })
         })
       ]);
@@ -465,7 +467,6 @@ describe('Provider: Feature Cell (core vault functionality)', () => {
           key: 'devtools-test',
           type: 'init',
           timestamp: jasmine.any(Number),
-          source: 'system',
           state: Object({ isLoading: false, value: [], error: null, hasValue: true })
         }),
         Object({
@@ -473,7 +474,6 @@ describe('Provider: Feature Cell (core vault functionality)', () => {
           key: 'devtools-test',
           type: 'set',
           timestamp: jasmine.any(Number),
-          source: 'manual',
           state: Object({ isLoading: true, value: [1, 2, 3], error: Object({ message: 'fail' }), hasValue: true })
         }),
         Object({
@@ -481,7 +481,6 @@ describe('Provider: Feature Cell (core vault functionality)', () => {
           key: 'devtools-test',
           type: 'reset',
           timestamp: jasmine.any(Number),
-          source: 'manual',
           state: Object({ isLoading: false, value: undefined, error: null, hasValue: false })
         }),
         Object({
@@ -489,7 +488,6 @@ describe('Provider: Feature Cell (core vault functionality)', () => {
           key: 'devtools-test',
           type: 'patch',
           timestamp: jasmine.any(Number),
-          source: 'manual',
           state: Object({ isLoading: true, value: [4, 5, 6], error: Object({ message: 'fail' }), hasValue: true })
         }),
         Object({
@@ -497,7 +495,6 @@ describe('Provider: Feature Cell (core vault functionality)', () => {
           key: 'devtools-test',
           type: 'reset',
           timestamp: jasmine.any(Number),
-          source: 'manual',
           state: Object({ isLoading: false, value: undefined, error: null, hasValue: false })
         }),
         Object({
@@ -505,7 +502,6 @@ describe('Provider: Feature Cell (core vault functionality)', () => {
           key: 'devtools-test',
           type: 'set',
           timestamp: jasmine.any(Number),
-          source: 'manual',
           state: Object({ isLoading: true, value: [1, 2, 3], error: Object({ message: 'fail' }), hasValue: true })
         }),
         Object({
@@ -513,7 +509,6 @@ describe('Provider: Feature Cell (core vault functionality)', () => {
           key: 'devtools-test',
           type: 'reset',
           timestamp: jasmine.any(Number),
-          source: 'manual',
           state: Object({ isLoading: false, value: undefined, error: null, hasValue: false })
         })
       ]);

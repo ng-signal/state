@@ -2,6 +2,7 @@ import { provideHttpClient } from '@angular/common/http';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { Injector, provideZonelessChangeDetection, runInInjectionContext, signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
+import { withDevtoolsLoggingBehavior } from '@ngvault/dev-tools';
 import { NgVaultEventBus } from '@ngvault/dev-tools/utils/ngvault-event-bus';
 import { Subject } from 'rxjs';
 import { ResourceVaultModel } from './models/resource-vault.model';
@@ -23,7 +24,9 @@ describe('ResourceVaultModel (setState, patchState, fromObservable)', () => {
     TestBed.configureTestingModule({
       providers: [provideHttpClient(), provideHttpClientTesting(), provideZonelessChangeDetection()]
     });
-    const providers = provideFeatureCell(class TestService {}, { key: 'http', initial: [] });
+    const providers = provideFeatureCell(class TestService {}, { key: 'http', initial: [] }, [
+      withDevtoolsLoggingBehavior()
+    ]);
 
     const vaultFactory = (providers[0] as any).useFactory;
     runInInjectionContext(TestBed.inject(Injector), () => {
@@ -165,7 +168,6 @@ describe('ResourceVaultModel (setState, patchState, fromObservable)', () => {
             key: 'http',
             type: 'load',
             timestamp: jasmine.any(Number),
-            source: 'observable',
             state: Object({ isLoading: false, value: [], error: null, hasValue: true })
           }),
           Object({
@@ -173,7 +175,6 @@ describe('ResourceVaultModel (setState, patchState, fromObservable)', () => {
             key: 'http',
             type: 'set',
             timestamp: jasmine.any(Number),
-            source: 'observable',
             state: Object({
               isLoading: false,
               value: [],

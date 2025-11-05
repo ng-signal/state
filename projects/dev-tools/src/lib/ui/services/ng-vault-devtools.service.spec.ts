@@ -26,7 +26,6 @@ describe('NgVaultDevtoolsService (integration)', () => {
       id: '1',
       key: 'demo',
       type: 'set',
-      source: 'manual',
       timestamp: Date.now(),
       state: { value: { id: 1 } }
     };
@@ -44,7 +43,6 @@ describe('NgVaultDevtoolsService (integration)', () => {
         id: `${i}`,
         key: 'bulk',
         type: 'patch',
-        source: 'system',
         timestamp: Date.now(),
         state: { value: i }
       });
@@ -62,7 +60,6 @@ describe('NgVaultDevtoolsService (integration)', () => {
       id: 'x',
       key: 'temp',
       type: 'set',
-      source: 'manual',
       timestamp: Date.now(),
       state: { value: 1 }
     });
