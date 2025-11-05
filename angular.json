@@ -3,7 +3,7 @@
   "version": 1,
   "newProjectRoot": "projects",
   "projects": {
-    "ngss": {
+    "ngvault": {
       "projectType": "application",
       "schematics": {
         "@schematics/angular:component": {
@@ -59,10 +59,10 @@
           "builder": "@angular/build:dev-server",
           "configurations": {
             "production": {
-              "buildTarget": "ngss:build:production"
+              "buildTarget": "ngvault:build:production"
             },
             "development": {
-              "buildTarget": "ngss:build:development"
+              "buildTarget": "ngvault:build:development"
             }
           },
           "defaultConfiguration": "development"
@@ -91,20 +91,20 @@
         }
       }
     },
-    "ngss-state": {
+    "core": {
       "projectType": "library",
-      "root": "projects/ngss-state",
-      "sourceRoot": "projects/ngss-state/src",
+      "root": "projects/core",
+      "sourceRoot": "projects/core/src",
       "prefix": "state",
       "architect": {
         "build": {
           "builder": "@angular/build:ng-packagr",
           "configurations": {
             "production": {
-              "tsConfig": "projects/ngss-state/tsconfig.lib.prod.json"
+              "tsConfig": "projects/core/tsconfig.lib.prod.json"
             },
             "development": {
-              "tsConfig": "projects/ngss-state/tsconfig.lib.json"
+              "tsConfig": "projects/core/tsconfig.lib.json"
             }
           },
           "defaultConfiguration": "production"
@@ -112,8 +112,8 @@
         "test": {
           "builder": "@angular/build:karma",
           "options": {
-            "tsConfig": "projects/ngss-state/tsconfig.spec.json",
-            "karmaConfig": "projects/ngss-state/karma.conf.js",
+            "tsConfig": "projects/core/tsconfig.spec.json",
+            "karmaConfig": "projects/core/karma.conf.js",
             "inlineStyleLanguage": "scss",
             "stylePreprocessorOptions": {
               "includePaths": ["projects/styles/src/lib"]

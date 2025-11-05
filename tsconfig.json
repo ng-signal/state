@@ -9,8 +9,8 @@
     "noPropertyAccessFromIndexSignature": true,
     "noImplicitReturns": true,
     "paths": {
-      "@ngvault/core": ["projects/ngss-state/src/public-api"],
-      "@ngvault/core/*": ["projects/ngss-state/src/lib/*"],
+      "@ngvault/core": ["projects/core/src/public-api"],
+      "@ngvault/core/*": ["projects/core/src/lib/*"],
       "@ngvault/dev-tools": ["projects/dev-tools/src/public-api"],
       "@ngvault/dev-tools/*": ["projects/dev-tools/src/lib/*"],
       "@ngvault/styles": ["projects/styles/src/lib"],
@@ -35,7 +35,7 @@
   },
   "files": [],
   "references": [
-    { "path": "projects/ngss-state" },
+    { "path": "projects/core" },
     { "path": "projects/dev-tools" },
     { "path": "projects/styles" },
     { "path": "projects/shared-models" },
@@ -46,10 +46,10 @@
       "path": "./tsconfig.spec.json"
     },
     {
-      "path": "./projects/ngss-state/tsconfig.lib.json"
+      "path": "./projects/core/tsconfig.lib.json"
     },
     {
-      "path": "./projects/ngss-state/tsconfig.spec.json"
+      "path": "./projects/core/tsconfig.spec.json"
     },
     {
       "path": "./projects/dev-tools/tsconfig.lib.json"
