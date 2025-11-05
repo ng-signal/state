@@ -1,6 +1,7 @@
 import { HttpClient } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
-import { FeatureCell, injectVault, VaultSignalRef } from '@ngvault/core';
+import { FeatureCell, injectVault } from '@ngvault/core';
+import { VaultSignalRef } from '@ngvault/shared-models';
 import { map, take } from 'rxjs';
 import { CarModel } from '../../models/car.model';
 

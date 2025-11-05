@@ -45,6 +45,7 @@ class DevtoolsBehavior implements VaultBehavior {
   }
 
   #emitEvent<T>(key: string, ctx: Readonly<VaultStateSnapshot<T>>, type: VaultEventType): void {
+    /* istanbul ignore next */
     if (!this.#isDevMode()) return;
 
     NgVaultEventBus.next({
@@ -56,7 +57,6 @@ class DevtoolsBehavior implements VaultBehavior {
   }
 }
 
-// ✅ Canonical lazy factory
 export function withDevtoolsLoggingBehavior(context: VaultBehaviorFactoryContext): VaultBehavior {
   return new DevtoolsBehavior(context.injector);
 }

@@ -1,5 +1,5 @@
 import { computed, effect, inject, Injectable, signal } from '@angular/core';
-import { ResourceStateError, VaultSignalRef } from '@ngvault/core';
+import { ResourceStateError, VaultSignalRef } from '@ngvault/shared-models';
 import { CarService } from '../cars/services/car.service';
 import { CarModel } from '../models/car.model';
 import { UserModel } from '../models/user.model';
@@ -71,7 +71,7 @@ export class UserCarFacadeService {
 
       const merged = users.map((user) => ({
         ...user,
-        car: cars.find((car) => String(car.id) === String(user.carId)) || null
+        car: cars.find((car: CarModel) => String(car.id) === String(user.carId)) || null
       }));
 
       this._value.set(merged);
