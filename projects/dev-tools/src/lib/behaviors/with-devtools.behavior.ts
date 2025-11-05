@@ -10,15 +10,18 @@ import { NgVaultEventBus } from '../utils/ngvault-event-bus';
 import { registerNgVault, unregisterNgVault } from '../utils/ngvault-registry';
 
 class DevtoolsBehavior implements VaultBehavior {
-  #isDevMode = inject(NgVaultDevModeService);
+  #devModeService = inject(NgVaultDevModeService);
   #registered = new Set<string>();
   #eventBus = inject(NgVaultEventBus);
+  #initialized = new Set<string>();
 
   constructor(private readonly _injector: VaultBehaviorFactoryContext['injector']) {}
 
   onInit<T>(vaultKey: string, serviceName: string, ctx: Readonly<VaultStateSnapshot<T>>): void {
-    if (!this.#isDevMode || this.#registered.has(vaultKey)) return;
+    if (!this.#devModeService.isDevMode || this.#registered.has(vaultKey)) return;
     this.#registered.add(vaultKey);
+
+    this.#initialized.add(vaultKey);
 
     registerNgVault({ key: vaultKey, service: serviceName, state: ctx });
     this.#emitEvent(vaultKey, ctx, 'init');
@@ -48,7 +51,9 @@ class DevtoolsBehavior implements VaultBehavior {
   }
 
   #emitEvent<T>(key: string, ctx: Readonly<VaultStateSnapshot<T>>, type: VaultEventType): void {
-    if (!this.#isDevMode) return;
+    if (!this.#initialized.has(key)) {
+      throw new Error(`[NgVault] Behavior "${this.constructor.name}" used before onInit() for "${key}".`);
+    }
 
     this.#eventBus.next({
       key,

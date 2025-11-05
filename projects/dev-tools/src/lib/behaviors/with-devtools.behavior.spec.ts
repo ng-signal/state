@@ -1,6 +1,6 @@
 import { Injector, provideZonelessChangeDetection, runInInjectionContext } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
-import { VaultBehavior, VaultStateSnapshot } from '@ngvault/shared-models';
+import { NgVaultDevModeService, VaultBehavior, VaultStateSnapshot } from '@ngvault/shared-models';
 import { NgVaultDebuggerService } from '../services/ngvault-debugger.service';
 import { withDevtoolsBehavior } from './with-devtools.behavior';
 
@@ -10,159 +10,210 @@ describe('Behavior: withDevtools', () => {
   let stopListening: any;
   let ctx: VaultStateSnapshot<string>;
 
-  beforeEach(() => {
-    ctx = {
-      isLoading: true,
-      value: 'hello',
-      error: null,
-      hasValue: false
-    };
+  describe('development', () => {
+    beforeEach(() => {
+      ctx = {
+        isLoading: true,
+        value: 'hello',
+        error: null,
+        hasValue: false
+      };
 
-    TestBed.configureTestingModule({
-      providers: [NgVaultDebuggerService, provideZonelessChangeDetection()]
+      TestBed.configureTestingModule({
+        providers: [NgVaultDebuggerService, provideZonelessChangeDetection()]
+      }).overrideProvider(NgVaultDevModeService, {
+        useValue: { isDevMode: true }
+      });
+
+      const injector = TestBed.inject(Injector);
+
+      emitted.length = 0;
+
+      // Subscribe to all vault events via the official hook
+      const debuggerService = TestBed.inject(NgVaultDebuggerService);
+      stopListening = debuggerService.listen((event) => emitted.push(event));
+
+      runInInjectionContext(injector, () => {
+        behavior = withDevtoolsBehavior({ injector });
+      });
     });
 
-    const injector = TestBed.inject(Injector);
+    afterEach(() => {
+      stopListening();
+    });
 
-    emitted.length = 0;
+    it('should register, emit init and prevent double registration', () => {
+      behavior.onInit?.('vault1', 'TestService', ctx);
 
-    // Subscribe to all vault events via the official hook
-    const debuggerService = TestBed.inject(NgVaultDebuggerService);
-    stopListening = debuggerService.listen((event) => emitted.push(event));
+      expect(emitted).toEqual([
+        Object({
+          id: jasmine.any(String),
+          key: 'vault1',
+          type: 'init',
+          timestamp: jasmine.any(Number),
+          state: Object({ isLoading: true, value: 'hello', error: null, hasValue: false })
+        })
+      ]);
 
-    runInInjectionContext(injector, () => {
-      behavior = withDevtoolsBehavior({ injector });
+      // Second call should be ignored (already registered)
+
+      behavior.onInit?.('vault1', 'TestService', ctx);
+
+      expect(emitted).toEqual([
+        Object({
+          id: jasmine.any(String),
+          key: 'vault1',
+          type: 'init',
+          timestamp: jasmine.any(Number),
+          state: Object({ isLoading: true, value: 'hello', error: null, hasValue: false })
+        })
+      ]);
+
+      behavior.onLoad?.('vault1', ctx);
+      behavior.onPatch?.('vault1', ctx);
+      behavior.onReset?.('vault1', ctx);
+      behavior.onSet?.('vault1', ctx);
+      behavior.onDestroy?.('vault1', ctx);
+
+      expect(emitted).toEqual([
+        Object({
+          id: jasmine.any(String),
+          key: 'vault1',
+          type: 'init',
+          timestamp: jasmine.any(Number),
+          state: Object({ isLoading: true, value: 'hello', error: null, hasValue: false })
+        }),
+        Object({
+          id: jasmine.any(String),
+          key: 'vault1',
+          type: 'load',
+          timestamp: jasmine.any(Number),
+          state: Object({ isLoading: true, value: 'hello', error: null, hasValue: false })
+        }),
+        Object({
+          id: jasmine.any(String),
+          key: 'vault1',
+          type: 'patch',
+          timestamp: jasmine.any(Number),
+          state: Object({ isLoading: true, value: 'hello', error: null, hasValue: false })
+        }),
+        Object({
+          id: jasmine.any(String),
+          key: 'vault1',
+          type: 'reset',
+          timestamp: jasmine.any(Number),
+          state: Object({ isLoading: true, value: 'hello', error: null, hasValue: false })
+        }),
+        Object({
+          id: jasmine.any(String),
+          key: 'vault1',
+          type: 'set',
+          timestamp: jasmine.any(Number),
+          state: Object({ isLoading: true, value: 'hello', error: null, hasValue: false })
+        }),
+        Object({
+          id: jasmine.any(String),
+          key: 'vault1',
+          type: 'dispose',
+          timestamp: jasmine.any(Number),
+          state: Object({ isLoading: true, value: 'hello', error: null, hasValue: false })
+        })
+      ]);
+    });
+
+    it('should handle multiple vaults independently', () => {
+      behavior.onInit?.('vault1', 'TestService', ctx);
+      behavior.onInit?.('vault2', 'TestService', ctx);
+
+      expect(emitted).toEqual([
+        Object({
+          id: jasmine.any(String),
+          key: 'vault1',
+          type: 'init',
+          timestamp: jasmine.any(Number),
+          state: Object({ isLoading: true, value: 'hello', error: null, hasValue: false })
+        }),
+        Object({
+          id: jasmine.any(String),
+          key: 'vault2',
+          type: 'init',
+          timestamp: jasmine.any(Number),
+          state: Object({ isLoading: true, value: 'hello', error: null, hasValue: false })
+        })
+      ]);
+
+      try {
+        behavior.onDestroy?.('A', ctx);
+        expect('this is an error').toBe('fix me');
+      } catch (error) {
+        expect((error as any).message).toBe('[NgVault] Behavior "DevtoolsBehavior" used before onInit() for "A".');
+      }
+
+      behavior.onDestroy?.('vault1', ctx);
+
+      expect(emitted).toEqual([
+        Object({
+          id: jasmine.any(String),
+          key: 'vault1',
+          type: 'init',
+          timestamp: jasmine.any(Number),
+          state: Object({ isLoading: true, value: 'hello', error: null, hasValue: false })
+        }),
+        Object({
+          id: jasmine.any(String),
+          key: 'vault2',
+          type: 'init',
+          timestamp: jasmine.any(Number),
+          state: Object({ isLoading: true, value: 'hello', error: null, hasValue: false })
+        }),
+        Object({
+          id: jasmine.any(String),
+          key: 'vault1',
+          type: 'dispose',
+          timestamp: jasmine.any(Number),
+          state: Object({ isLoading: true, value: 'hello', error: null, hasValue: false })
+        })
+      ]);
     });
   });
 
-  afterEach(() => {
-    stopListening();
-  });
+  describe('development', () => {
+    beforeEach(() => {
+      ctx = {
+        isLoading: true,
+        value: 'hello',
+        error: null,
+        hasValue: false
+      };
 
-  it('should register, emit init and prevent double registration', () => {
-    behavior.onInit?.('vault1', 'TestService', ctx);
+      TestBed.configureTestingModule({
+        providers: [NgVaultDebuggerService, provideZonelessChangeDetection()]
+      }).overrideProvider(NgVaultDevModeService, {
+        useValue: { isDevMode: false }
+      });
 
-    expect(emitted).toEqual([
-      Object({
-        id: jasmine.any(String),
-        key: 'vault1',
-        type: 'init',
-        timestamp: jasmine.any(Number),
-        state: Object({ isLoading: true, value: 'hello', error: null, hasValue: false })
-      })
-    ]);
+      const injector = TestBed.inject(Injector);
 
-    // Second call should be ignored (already registered)
+      emitted.length = 0;
 
-    behavior.onInit?.('vault1', 'TestService', ctx);
+      // Subscribe to all vault events via the official hook
+      const debuggerService = TestBed.inject(NgVaultDebuggerService);
+      stopListening = debuggerService.listen((event) => emitted.push(event));
 
-    expect(emitted).toEqual([
-      Object({
-        id: jasmine.any(String),
-        key: 'vault1',
-        type: 'init',
-        timestamp: jasmine.any(Number),
-        state: Object({ isLoading: true, value: 'hello', error: null, hasValue: false })
-      })
-    ]);
+      runInInjectionContext(injector, () => {
+        behavior = withDevtoolsBehavior({ injector });
+      });
+    });
 
-    behavior.onLoad?.('vault1', ctx);
-    behavior.onPatch?.('vault1', ctx);
-    behavior.onReset?.('vault1', ctx);
-    behavior.onSet?.('vault1', ctx);
-    behavior.onDestroy?.('vault1', ctx);
+    afterEach(() => {
+      stopListening();
+    });
 
-    expect(emitted).toEqual([
-      Object({
-        id: jasmine.any(String),
-        key: 'vault1',
-        type: 'init',
-        timestamp: jasmine.any(Number),
-        state: Object({ isLoading: true, value: 'hello', error: null, hasValue: false })
-      }),
-      Object({
-        id: jasmine.any(String),
-        key: 'vault1',
-        type: 'load',
-        timestamp: jasmine.any(Number),
-        state: Object({ isLoading: true, value: 'hello', error: null, hasValue: false })
-      }),
-      Object({
-        id: jasmine.any(String),
-        key: 'vault1',
-        type: 'patch',
-        timestamp: jasmine.any(Number),
-        state: Object({ isLoading: true, value: 'hello', error: null, hasValue: false })
-      }),
-      Object({
-        id: jasmine.any(String),
-        key: 'vault1',
-        type: 'reset',
-        timestamp: jasmine.any(Number),
-        state: Object({ isLoading: true, value: 'hello', error: null, hasValue: false })
-      }),
-      Object({
-        id: jasmine.any(String),
-        key: 'vault1',
-        type: 'set',
-        timestamp: jasmine.any(Number),
-        state: Object({ isLoading: true, value: 'hello', error: null, hasValue: false })
-      }),
-      Object({
-        id: jasmine.any(String),
-        key: 'vault1',
-        type: 'dispose',
-        timestamp: jasmine.any(Number),
-        state: Object({ isLoading: true, value: 'hello', error: null, hasValue: false })
-      })
-    ]);
-  });
+    it('should not register', () => {
+      behavior.onInit?.('vault1', 'TestService', ctx);
+      behavior.onInit?.('vault2', 'TestService', ctx);
 
-  it('should handle multiple vaults independently', () => {
-    behavior.onInit?.('vault1', 'TestService', ctx);
-    behavior.onInit?.('vault2', 'TestService', ctx);
-
-    expect(emitted).toEqual([
-      Object({
-        id: jasmine.any(String),
-        key: 'vault1',
-        type: 'init',
-        timestamp: jasmine.any(Number),
-        state: Object({ isLoading: true, value: 'hello', error: null, hasValue: false })
-      }),
-      Object({
-        id: jasmine.any(String),
-        key: 'vault2',
-        type: 'init',
-        timestamp: jasmine.any(Number),
-        state: Object({ isLoading: true, value: 'hello', error: null, hasValue: false })
-      })
-    ]);
-
-    behavior.onDestroy?.('A', ctx);
-
-    expect(emitted).toEqual([
-      Object({
-        id: jasmine.any(String),
-        key: 'vault1',
-        type: 'init',
-        timestamp: jasmine.any(Number),
-        state: Object({ isLoading: true, value: 'hello', error: null, hasValue: false })
-      }),
-      Object({
-        id: jasmine.any(String),
-        key: 'vault2',
-        type: 'init',
-        timestamp: jasmine.any(Number),
-        state: Object({ isLoading: true, value: 'hello', error: null, hasValue: false })
-      }),
-      Object({
-        id: jasmine.any(String),
-        key: 'A',
-        type: 'dispose',
-        timestamp: jasmine.any(Number),
-        state: Object({ isLoading: true, value: 'hello', error: null, hasValue: false })
-      })
-    ]);
+      expect(emitted).toEqual([]);
+    });
   });
 });
