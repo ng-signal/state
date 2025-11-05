@@ -1,9 +1,13 @@
+// projects/dev-tools/src/lib/utils/ngvault-event-bus.ts
+import { inject, Injectable } from '@angular/core';
+import { NgVaultDevModeService } from '@ngvault/shared-models';
 import { Subject } from 'rxjs';
-import { IS_DEV_MODE } from '../constants/env.constants';
 import { NgVaultEventModel } from '../models/ngvault-event.model';
 
-class DevNgVaultEventBus {
-  private _bus = new Subject<NgVaultEventModel>();
+@Injectable({ providedIn: 'root' })
+export class NgVaultEventBus {
+  #bus = new Subject<NgVaultEventModel>();
+  #devModeService = inject(NgVaultDevModeService);
 
   #generateGuid(): string {
     return 'xxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, (c) => {
@@ -14,14 +18,11 @@ class DevNgVaultEventBus {
   }
 
   next(event: NgVaultEventModel): void {
-    if (IS_DEV_MODE && event) {
-      this._bus.next({ id: this.#generateGuid(), ...event });
-    }
+    if (!this.#devModeService.isDevMode || !event) return;
+    this.#bus.next({ id: this.#generateGuid(), ...event });
   }
 
   asObservable() {
-    return this._bus.asObservable();
+    return this.#bus.asObservable();
   }
 }
-
-export const NgVaultEventBus = new DevNgVaultEventBus();

@@ -3,7 +3,7 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { NgVaultDevtoolsPanelComponent } from './ngvault-devtools-panel.component';
 import { NgVaultDevtoolsService } from './services/ngvault-devtools.service';
 
-describe('NgVaultDevtoolsPanelComponent', () => {
+describe('Component: NgVaultDevtoolsPanel', () => {
   let fixture: ComponentFixture<NgVaultDevtoolsPanelComponent>;
   let component: NgVaultDevtoolsPanelComponent;
   let service: NgVaultDevtoolsService;

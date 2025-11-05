@@ -1,8 +1,8 @@
 import { Component } from '@angular/core';
-import { NgVaultDevtoolsPanelComponent } from '@ngvault/dev-tools';
+import { NgVaultDevtoolsPanelComponent } from './ui/ngvault-devtools-panel.component';
 
 @Component({
-  selector: 'ngvault-dev-tools',
+  selector: 'ngvault-devtools',
   standalone: true,
   imports: [NgVaultDevtoolsPanelComponent],
   template: ` <ngvault-devtools-panel /> `

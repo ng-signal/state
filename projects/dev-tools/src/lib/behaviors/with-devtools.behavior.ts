@@ -1,77 +1,64 @@
-// projects/dev-tools/src/lib/behaviors/with-devtools.behavior.ts
-import { IS_DEV_MODE } from '../constants/env.constants';
+import { inject } from '@angular/core';
+import {
+  NgVaultDevModeService,
+  VaultBehavior,
+  VaultBehaviorFactoryContext,
+  VaultStateSnapshot
+} from '@ngvault/shared-models';
 import { VaultEventType } from '../types/event-vault.type';
 import { NgVaultEventBus } from '../utils/ngvault-event-bus';
+import { registerNgVault, unregisterNgVault } from '../utils/ngvault-registry';
 
-/**
- * A simple devtools behavior that emits lifecycle events
- * when a feature cell or vault service is created or destroyed.
- */
-export function withDevtoolsBehavior() {
-  return {
-    onInit: (key: string) => emitEvent(key, 'init'),
-    onLoad: (key: string) => emitEvent(key, 'load'),
-    onDestroy: (key: string) => emitEvent(key, 'dispose')
-  };
-}
+class DevtoolsBehavior implements VaultBehavior {
+  #isDevMode = inject(NgVaultDevModeService);
+  #registered = new Set<string>();
+  #eventBus = inject(NgVaultEventBus);
 
-function emitEvent(key: string, type: VaultEventType) {
-  if (!IS_DEV_MODE) return;
-  NgVaultEventBus.next({ key, type, timestamp: Date.now() });
-}
+  constructor(private readonly _injector: VaultBehaviorFactoryContext['injector']) {}
 
-/*
-Example 1
+  onInit<T>(vaultKey: string, serviceName: string, ctx: Readonly<VaultStateSnapshot<T>>): void {
+    if (!this.#isDevMode || this.#registered.has(vaultKey)) return;
+    this.#registered.add(vaultKey);
 
-import { withDevtoolsBehavior } from '@ngvault/dev-tools/behaviors/with-devtools.behavior';
+    registerNgVault({ key: vaultKey, service: serviceName, state: ctx });
+    this.#emitEvent(vaultKey, ctx, 'init');
+  }
 
-export function provideFeatureCell<Svc, T>(
-  service: Type<Svc>,
-  featureCellDescriptor: FeatureCellDescriptorModel<T>
-): Provider[] {
-  const devtools = withDevtoolsBehavior();
+  onLoad<T>(key: string, ctx: Readonly<VaultStateSnapshot<T>>): void {
+    this.#emitEvent(key, ctx, 'load');
+  }
 
-  const featureCellProvider: Provider = {
-    provide: token,
-    useFactory: (): ResourceVaultModel<T> => {
-      devtools.onInit(featureCellDescriptor.key);
+  onPatch<T>(key: string, ctx: Readonly<VaultStateSnapshot<T>>): void {
+    this.#emitEvent(key, ctx, 'patch');
+  }
 
-      const vault = createVaultInstance(service, featureCellDescriptor);
+  onReset<T>(key: string, ctx: Readonly<VaultStateSnapshot<T>>): void {
+    this.#emitEvent(key, ctx, 'reset');
+  }
 
-      // Hook into destroy
-      const destroyRef = inject(DestroyRef);
-      destroyRef.onDestroy(() => devtools.onDestroy(featureCellDescriptor.key));
+  onSet<T>(key: string, ctx: Readonly<VaultStateSnapshot<T>>): void {
+    this.#emitEvent(key, ctx, 'set');
+  }
 
-      return vault;
+  onDestroy<T>(key: string, ctx: Readonly<VaultStateSnapshot<T>>): void {
+    this.#emitEvent(key, ctx, 'dispose');
+    if (this.#registered.has(key)) {
+      unregisterNgVault(key);
     }
-  };
-
-  return [featureCellProvider, service];
-}
-*/
-
-/*
-Example 2
-
-import { Injectable, OnDestroy } from '@angular/core';
-import { withDevtoolsBehavior } from '@ngvault/dev-tools/behaviors/with-devtools.behavior';
-
-@Injectable({ providedIn: 'root' })
-export class UserVaultService implements OnDestroy {
-  private readonly devtools = withDevtoolsBehavior();
-  private readonly key = 'user-vault';
-
-  constructor() {
-    this.devtools.onInit(this.key);
   }
 
-  loadUsers() {
-    this.devtools.onLoad(this.key);
-    // ... load users logic
-  }
+  #emitEvent<T>(key: string, ctx: Readonly<VaultStateSnapshot<T>>, type: VaultEventType): void {
+    if (!this.#isDevMode) return;
 
-  ngOnDestroy() {
-    this.devtools.onDestroy(this.key);
+    this.#eventBus.next({
+      key,
+      type,
+      timestamp: Date.now(),
+      state: ctx
+    });
   }
 }
-  */
+
+export function withDevtoolsBehavior(context: VaultBehaviorFactoryContext): VaultBehavior {
+  return new DevtoolsBehavior(context.injector);
+}

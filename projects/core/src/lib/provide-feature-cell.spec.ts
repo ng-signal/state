@@ -8,7 +8,7 @@ import {
   runInInjectionContext
 } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
-import { NgVaultEventBus, withDevtoolsLoggingBehavior } from '@ngvault/dev-tools';
+import { NgVaultEventBus, withDevtoolsBehavior } from '@ngvault/dev-tools';
 import { ResourceVaultModel } from '@ngvault/shared-models';
 import { take } from 'rxjs/operators';
 import { FEATURE_CELL_REGISTRY } from './constants/feature-cell-registry.constant';
@@ -388,7 +388,7 @@ describe('Provider: Feature Cell (core vault functionality)', () => {
           key: 'devtools-test',
           initial: []
         },
-        [withDevtoolsLoggingBehavior]
+        [withDevtoolsBehavior]
       );
       factory = (providers[0] as any).useFactory;
     });

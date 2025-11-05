@@ -2,7 +2,7 @@ import { provideHttpClient } from '@angular/common/http';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { Injector, provideZonelessChangeDetection, runInInjectionContext, signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
-import { withDevtoolsLoggingBehavior } from '@ngvault/dev-tools';
+import { withDevtoolsBehavior } from '@ngvault/dev-tools';
 import { NgVaultEventBus } from '@ngvault/dev-tools/utils/ngvault-event-bus';
 import { ResourceVaultModel, VaultSignalRef } from '@ngvault/shared-models';
 import { Subject } from 'rxjs';
@@ -23,9 +23,7 @@ describe('ResourceVaultModel (setState, patchState, fromObservable)', () => {
     TestBed.configureTestingModule({
       providers: [provideHttpClient(), provideHttpClientTesting(), provideZonelessChangeDetection()]
     });
-    const providers = provideFeatureCell(class TestService {}, { key: 'http', initial: [] }, [
-      withDevtoolsLoggingBehavior
-    ]);
+    const providers = provideFeatureCell(class TestService {}, { key: 'http', initial: [] }, [withDevtoolsBehavior]);
 
     const vaultFactory = (providers[0] as any).useFactory;
     runInInjectionContext(TestBed.inject(Injector), () => {

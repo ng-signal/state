@@ -1,16 +1,16 @@
-import { Injector } from '@angular/core';
-import { createNgVaultDebuggerHook } from '@ngvault/dev-tools';
+import { Injector, provideZonelessChangeDetection, runInInjectionContext } from '@angular/core';
+import { TestBed } from '@angular/core/testing';
 import { VaultBehavior, VaultStateSnapshot } from '@ngvault/shared-models';
-import { withDevtoolsLoggingBehavior } from './with-devtools-logging.behavior';
+import { NgVaultDebuggerService } from '../services/ngvault-debugger.service';
+import { withDevtoolsBehavior } from './with-devtools.behavior';
 
-describe('withDevtoolsLoggingBehavior', () => {
+describe('Behavior: withDevtools', () => {
   let behavior: VaultBehavior;
   const emitted: any[] = [];
   let stopListening: any;
   let ctx: VaultStateSnapshot<string>;
 
   beforeEach(() => {
-    const injector = Injector.create({ providers: [] });
     ctx = {
       isLoading: true,
       value: 'hello',
@@ -18,10 +18,21 @@ describe('withDevtoolsLoggingBehavior', () => {
       hasValue: false
     };
 
+    TestBed.configureTestingModule({
+      providers: [NgVaultDebuggerService, provideZonelessChangeDetection()]
+    });
+
+    const injector = TestBed.inject(Injector);
+
     emitted.length = 0;
-    behavior = withDevtoolsLoggingBehavior({ injector });
+
     // Subscribe to all vault events via the official hook
-    stopListening = createNgVaultDebuggerHook((event) => emitted.push(event));
+    const debuggerService = TestBed.inject(NgVaultDebuggerService);
+    stopListening = debuggerService.listen((event) => emitted.push(event));
+
+    runInInjectionContext(injector, () => {
+      behavior = withDevtoolsBehavior({ injector });
+    });
   });
 
   afterEach(() => {

@@ -35,10 +35,6 @@
   },
   "files": [],
   "references": [
-    { "path": "projects/core" },
-    { "path": "projects/dev-tools" },
-    { "path": "projects/styles" },
-    { "path": "projects/shared-models" },
     {
       "path": "./tsconfig.app.json"
     },
