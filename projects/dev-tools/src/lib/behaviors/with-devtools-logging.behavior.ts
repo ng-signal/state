@@ -1,5 +1,3 @@
-// projects/dev-tools/src/lib/behaviors/with-devtools.behavior.ts
-import { Injector } from '@angular/core';
 import { VaultBehavior, VaultBehaviorFactoryContext, VaultStateSnapshot } from '@ngvault/shared-models';
 import { IS_DEV_MODE } from '../constants/env.constants';
 import { VaultEventType } from '../types/event-vault.type';
@@ -58,6 +56,7 @@ class DevtoolsBehavior implements VaultBehavior {
   }
 }
 
-export function withDevtoolsLoggingBehavior(injector: Injector): VaultBehavior {
-  return new DevtoolsBehavior(injector);
+// ✅ Canonical lazy factory
+export function withDevtoolsLoggingBehavior(context: VaultBehaviorFactoryContext): VaultBehavior {
+  return new DevtoolsBehavior(context.injector);
 }

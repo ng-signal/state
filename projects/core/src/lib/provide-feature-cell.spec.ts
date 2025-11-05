@@ -379,6 +379,7 @@ describe('Provider: Feature Cell (core vault functionality)', () => {
 
   describe('Devtools hooks', () => {
     let factory: any;
+
     beforeEach(() => {
       // create a vault inside Angular DI
       const providers = provideFeatureCell(
@@ -387,7 +388,7 @@ describe('Provider: Feature Cell (core vault functionality)', () => {
           key: 'devtools-test',
           initial: []
         },
-        [withDevtoolsLoggingBehavior()]
+        [withDevtoolsLoggingBehavior]
       );
       factory = (providers[0] as any).useFactory;
     });
@@ -512,6 +513,116 @@ describe('Provider: Feature Cell (core vault functionality)', () => {
           state: Object({ isLoading: false, value: undefined, error: null, hasValue: false })
         })
       ]);
+    });
+  });
+
+  describe('Behavior Factory Instantiation (no mocks)', () => {
+    let injector: Injector;
+
+    beforeEach(() => {
+      injector = TestBed.inject(Injector);
+    });
+
+    it('creates valid behaviors from factory functions', () => {
+      const callOrder: string[] = [];
+
+      // A real, minimal behavior implementation
+      function simpleBehaviorFactory() {
+        callOrder.push('factory-called');
+        return {
+          onInit(key: string) {
+            callOrder.push(`onInit:${key}`);
+          },
+          onSet(key: string) {
+            callOrder.push(`onSet:${key}`);
+          }
+        };
+      }
+
+      const providers = provideFeatureCell(class ExampleService {}, { key: 'cell-a', initial: [1, 2, 3] }, [
+        simpleBehaviorFactory
+      ]);
+
+      const provider = providers.find((p: any) => typeof p.useFactory === 'function');
+
+      runInInjectionContext(injector, () => {
+        const vault = (provider as any).useFactory();
+
+        vault.setState({ value: [4, 5, 6] });
+        vault.reset();
+      });
+
+      expect(callOrder[0]).toBe('factory-called');
+      expect(callOrder.some((c) => c.startsWith('onInit'))).toBeTrue();
+    });
+
+    it('handles factory returning non-object gracefully', () => {
+      const badBehaviorFactory = () => undefined as any;
+
+      const providers = provideFeatureCell(class ExampleService {}, { key: 'cell-bad', initial: [] }, [
+        badBehaviorFactory
+      ]);
+
+      const provider = providers.find((p: any) => typeof p.useFactory === 'function');
+      const run = () =>
+        runInInjectionContext(injector, () => {
+          (provider as any).useFactory();
+        });
+
+      expect(run).not.toThrow();
+    });
+
+    it('continues execution when a factory throws', () => {
+      const throwingFactory = () => {
+        throw new Error('boom');
+      };
+      const workingFactory = () => ({
+        onInit() {},
+        onDestroy() {}
+      });
+
+      const providers = provideFeatureCell(class ExampleService {}, { key: 'cell-throw', initial: [] }, [
+        throwingFactory,
+        workingFactory
+      ]);
+
+      const provider = providers.find((p: any) => typeof p.useFactory === 'function');
+
+      runInInjectionContext(injector, () => {
+        const vault = (provider as any).useFactory();
+        expect(vault).toBeTruthy();
+      });
+    });
+
+    it('ignores invalid non-function behaviors', () => {
+      const invalidBehavior: any = 42;
+
+      const providers = provideFeatureCell(class ExampleService {}, { key: 'cell-invalid', initial: [] }, [
+        invalidBehavior
+      ]);
+
+      const provider = providers.find((p: any) => typeof p.useFactory === 'function');
+      const result = runInInjectionContext(injector, () => (provider as any).useFactory());
+      expect(result).toBeTruthy(); // should still create vault
+    });
+
+    it('filters null and undefined factories but retains valid ones', () => {
+      const nullFactory = () => null as any;
+      const undefinedFactory = () => undefined as any;
+      const validFactory = () => ({
+        onSet() {}
+      });
+
+      const providers = provideFeatureCell(class ExampleService {}, { key: 'cell-filter', initial: [] }, [
+        nullFactory,
+        undefinedFactory,
+        validFactory
+      ]);
+
+      const provider = providers.find((p: any) => typeof p.useFactory === 'function');
+
+      const vault = runInInjectionContext(injector, () => (provider as any).useFactory());
+      expect(vault).toBeDefined();
     });
   });
 });

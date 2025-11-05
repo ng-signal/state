@@ -19,7 +19,7 @@ describe('withDevtoolsLoggingBehavior', () => {
     };
 
     emitted.length = 0;
-    behavior = withDevtoolsLoggingBehavior(injector);
+    behavior = withDevtoolsLoggingBehavior({ injector });
     // Subscribe to all vault events via the official hook
     stopListening = createNgVaultDebuggerHook((event) => emitted.push(event));
   });

@@ -95,7 +95,7 @@
       "projectType": "library",
       "root": "projects/core",
       "sourceRoot": "projects/core/src",
-      "prefix": "state",
+      "prefix": "core",
       "architect": {
         "build": {
           "builder": "@angular/build:ng-packagr",

@@ -52,7 +52,7 @@ describe('Decorator: Feature Cell', () => {
     expect(key).toBe('profile');
   });
 
-  it('should store the key under the correct NGSS metadata constant', () => {
+  it('should store the key under the correct NgVault metadata constant', () => {
     FeatureCell<MockState>('audit')(MockFeatureService);
 
     // Ensure metadata exists for the expected constant key

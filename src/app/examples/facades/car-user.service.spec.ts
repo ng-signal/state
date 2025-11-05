@@ -13,7 +13,7 @@ describe('UserCarFacadeService (integration)', () => {
   let service: UserCarFacadeService;
   let http: HttpTestingController;
 
-  const NGSS_STATES = [
+  const NgVault_STATES = [
     provideFeatureCell(UserCellManualService, { key: 'userManual', initial: null }),
     provideFeatureCell(CarService, { key: 'cars', initial: null })
   ];
@@ -28,7 +28,7 @@ describe('UserCarFacadeService (integration)', () => {
         UserCarFacadeService,
         CarService,
         UserCellManualService,
-        ...NGSS_STATES
+        ...NgVault_STATES
       ]
     });
 

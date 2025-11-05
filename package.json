@@ -1,7 +1,7 @@
 {
   "name": "@ngvault/app",
   "version": "0.0.1",
-  "description": "NGSS — Angular Signal Store: a zoneless, service-first state management library for Angular 20+",
+  "description": "NgVault — Angular Signal Store: a zoneless, service-first state management library for Angular 20+",
   "author": "Brian Pilati <brianpilati@gmail.com>",
   "repository": {
     "type": "git",

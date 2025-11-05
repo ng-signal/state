@@ -1,9 +1,9 @@
 import { Signal } from '@angular/core';
-import { VaultSignalRef } from '@ngvault/core';
+import { VaultSignalRef } from '@ngvault/shared-models';
 import { UserModel } from '../../models/user.model';
 
 /**
- * Defines the standard shape of an NGSS feature service
+ * Defines the standard shape of an ngVault feature service
  * so base directives and components can be generically typed.
  */
 export interface ExampleServiceInterface {

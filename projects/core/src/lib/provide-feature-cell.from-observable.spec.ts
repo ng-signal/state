@@ -24,7 +24,7 @@ describe('ResourceVaultModel (setState, patchState, fromObservable)', () => {
       providers: [provideHttpClient(), provideHttpClientTesting(), provideZonelessChangeDetection()]
     });
     const providers = provideFeatureCell(class TestService {}, { key: 'http', initial: [] }, [
-      withDevtoolsLoggingBehavior()
+      withDevtoolsLoggingBehavior
     ]);
 
     const vaultFactory = (providers[0] as any).useFactory;

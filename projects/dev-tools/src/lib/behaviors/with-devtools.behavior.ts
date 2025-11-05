@@ -1,5 +1,5 @@
 // projects/dev-tools/src/lib/behaviors/with-devtools.behavior.ts
-import { IS_DEV_MODE } from '@ngvault/dev-tools/constants/env.constants';
+import { IS_DEV_MODE } from '../constants/env.constants';
 import { VaultEventType } from '../types/event-vault.type';
 import { NgVaultEventBus } from '../utils/ngvault-event-bus';
 

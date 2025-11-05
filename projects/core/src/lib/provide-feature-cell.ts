@@ -14,6 +14,8 @@ import {
   ResourceStateError,
   ResourceVaultModel,
   VaultBehavior,
+  VaultBehaviorFactory,
+  VaultBehaviorFactoryContext,
   VaultSignalRef,
   VaultStateSnapshot
 } from '@ngvault/shared-models';
@@ -32,7 +34,7 @@ import { resourceError } from './utils/resource-error.util';
 export function provideFeatureCell<Service, T>(
   service: Type<Service>,
   featureCellDescriptor: FeatureCellDescriptorModel<T>,
-  behaviors: Array<VaultBehavior> = []
+  behaviors: Array<(context: VaultBehaviorFactoryContext) => VaultBehavior<T>> = []
 ): Provider[] {
   const token = getOrCreateFeatureCellToken<T>(featureCellDescriptor.key, false);
 
@@ -61,6 +63,20 @@ export function provideFeatureCell<Service, T>(
 
       // 👇 Initialize array to hold active, instantiated behaviors
 
+      let activeBehaviors = behaviors
+        .map((factory: VaultBehaviorFactory) => {
+          try {
+            const instance = factory({ injector: _injector });
+            if (!instance || typeof instance !== 'object') {
+              throw new Error('[NgVault] Behavior factory did not return a valid object.');
+            }
+            return instance;
+          } catch {
+            return null;
+          }
+        })
+        .filter(Boolean) as VaultBehavior[];
+
       const _value = signal<VaultDataType<T>>(
         featureCellDescriptor.initial === null || featureCellDescriptor.initial === undefined
           ? undefined
@@ -82,13 +98,13 @@ export function provideFeatureCell<Service, T>(
       };
 
       // Run the onInit behaviors
-      behaviors.forEach((b) => b.onInit?.(featureCellDescriptor.key, service.name, _state()));
+      activeBehaviors.forEach((b) => b.onInit?.(featureCellDescriptor.key, service.name, _state()));
 
       const _reset = (): void => {
         _isLoading.set(false);
         _error.set(null);
         _value.set(undefined);
-        behaviors.forEach((b) => b.onReset?.(featureCellDescriptor.key, _state()));
+        activeBehaviors.forEach((b) => b.onReset?.(featureCellDescriptor.key, _state()));
       };
 
       const _destroy = (): void => {
@@ -97,7 +113,7 @@ export function provideFeatureCell<Service, T>(
 
         _reset();
 
-        behaviors.forEach((b) => b.onDestroy?.(featureCellDescriptor.key, _state()));
+        activeBehaviors.forEach((b) => b.onDestroy?.(featureCellDescriptor.key, _state()));
       };
 
       // Angular DI teardown
@@ -122,10 +138,10 @@ export function provideFeatureCell<Service, T>(
               _isLoading.set(resource.isLoading());
               try {
                 _value.set(resource.value());
-                behaviors.forEach((b) => b.onSet?.(featureCellDescriptor.key, _state()));
+                activeBehaviors.forEach((b) => b.onSet?.(featureCellDescriptor.key, _state()));
               } catch {
                 _error.set(resourceError(resource.error()));
-                behaviors.forEach((b) => b.onError?.(featureCellDescriptor.key, _state()));
+                activeBehaviors.forEach((b) => b.onError?.(featureCellDescriptor.key, _state()));
               }
             });
           });
@@ -151,7 +167,7 @@ export function provideFeatureCell<Service, T>(
             } else {
               _value.set(val as VaultDataType<T>);
             }
-            behaviors.forEach((b) => b.onSet?.(featureCellDescriptor.key, _state()));
+            activeBehaviors.forEach((b) => b.onSet?.(featureCellDescriptor.key, _state()));
           }
         }
       };
@@ -194,10 +210,10 @@ export function provideFeatureCell<Service, T>(
                   }
 
                   _error.set(null);
-                  behaviors.forEach((b) => b.onPatch?.(featureCellDescriptor.key, _state()));
+                  activeBehaviors.forEach((b) => b.onPatch?.(featureCellDescriptor.key, _state()));
                 } catch {
                   _error.set(resourceError(resource.error()));
-                  behaviors.forEach((b) => b.onError?.(featureCellDescriptor.key, _state()));
+                  activeBehaviors.forEach((b) => b.onError?.(featureCellDescriptor.key, _state()));
                 }
               });
             });
@@ -232,7 +248,7 @@ export function provideFeatureCell<Service, T>(
               _value.set(next as VaultDataType<T>);
             }
 
-            behaviors.forEach((b) => b.onPatch?.(featureCellDescriptor.key, _state()));
+            activeBehaviors.forEach((b) => b.onPatch?.(featureCellDescriptor.key, _state()));
           }
         }
       };
@@ -243,14 +259,14 @@ export function provideFeatureCell<Service, T>(
           const _errorSignal = signal<ResourceStateError | null>(null);
           const _valueSignal = signal<VaultDataType<T>>(undefined);
 
-          behaviors.forEach((b) => b.onLoad?.(featureCellDescriptor.key, _state()));
+          activeBehaviors.forEach((b) => b.onLoad?.(featureCellDescriptor.key, _state()));
 
           source$.pipe(take(1)).subscribe({
             next: (value) => {
               _valueSignal.set(value);
               _loadingSignal.set(false);
 
-              behaviors.forEach((b) => b.onSet?.(featureCellDescriptor.key, _state()));
+              activeBehaviors.forEach((b) => b.onSet?.(featureCellDescriptor.key, _state()));
 
               observer.next({
                 isLoading: _loadingSignal.asReadonly(),
@@ -262,11 +278,11 @@ export function provideFeatureCell<Service, T>(
             },
             error: (err) => {
               observer.error(resourceError(err));
-              behaviors.forEach((b) => b.onError?.(featureCellDescriptor.key, _state()));
+              activeBehaviors.forEach((b) => b.onError?.(featureCellDescriptor.key, _state()));
             },
             complete: () => {
               _loadingSignal.set(false);
-              behaviors.forEach((b) => b.onDispose?.(featureCellDescriptor.key, _state()));
+              activeBehaviors.forEach((b) => b.onDispose?.(featureCellDescriptor.key, _state()));
               observer.complete();
             }
           });
