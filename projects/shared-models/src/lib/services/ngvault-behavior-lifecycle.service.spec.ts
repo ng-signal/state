@@ -18,14 +18,14 @@ describe('VaultBehaviorLifecycleService', () => {
       Object.defineProperty(behavior, 'behaviorId', {
         value: behaviorId,
         enumerable: false,
-        writable: false
+        writable: true
       });
 
       if (type) {
         Object.defineProperty(behavior, 'type', {
           value: type,
           enumerable: true,
-          writable: false
+          writable: true
         });
       }
 
@@ -37,6 +37,7 @@ describe('VaultBehaviorLifecycleService', () => {
 
     return wrappedFactory as any;
   }
+
   function createParenttBehaviorFactory(): any {
     return createTestBehaviorFactory(() => {
       return {
@@ -62,8 +63,10 @@ describe('VaultBehaviorLifecycleService', () => {
       providers: [NgVaultBehaviorLifecycleService, provideZonelessChangeDetection()]
     });
 
-    vaultRunner = NgVaultBehaviorLifecycleService();
     injector = TestBed.inject(Injector);
+
+    vaultRunner = NgVaultBehaviorLifecycleService();
+    vaultRunner.initialize();
 
     // minimal fake context
     ctx = {
@@ -81,7 +84,9 @@ describe('VaultBehaviorLifecycleService', () => {
   });
 
   describe('onInit', () => {
-    it('should call onInit on a single behavior', () => {
+    it('should call onInit on the non-core behavior', () => {
+      vaultRunner = NgVaultBehaviorLifecycleService();
+      const coreId = vaultRunner.initialize();
       const parentBehavior = createParenttBehaviorFactory();
       const childBehavior = createTestBehaviorFactory(() => {
         return {
@@ -93,10 +98,29 @@ describe('VaultBehaviorLifecycleService', () => {
 
       const providers = vaultRunner.initializeBehaviors(injector, [parentBehavior, childBehavior]);
       const provider = providers[0] as any;
+      provider.behaviorId = coreId;
+      provider.type = 'core';
 
       vaultRunner.onInit(provider.behaviorId, 'vault1', 'service-name', ctx, providers);
 
       expect(calls).toEqual(['parentOnInit:vault1', 'onInit:vault1']);
+    });
+
+    it('should call onInit on a single behavior', () => {
+      const parentBehavior = createParenttBehaviorFactory();
+      const childBehavior = createTestBehaviorFactory(() => {
+        return {
+          onInit(key: string) {
+            calls.push(`onInit:${key}`);
+          }
+        };
+      }, 'state');
+
+      const providers = vaultRunner.initializeBehaviors(injector, [parentBehavior, childBehavior]);
+      const provider = providers.shift() || ({} as any);
+      vaultRunner.onInit(provider.behaviorId, 'vault1', 'service-name', ctx, providers);
+
+      expect(calls).toEqual(['onInit:vault1']);
     });
 
     describe('invalid ids', () => {
@@ -235,6 +259,29 @@ describe('VaultBehaviorLifecycleService', () => {
 
       expect(calls).toEqual([]);
     });
+
+    it('throws an error if a lifecycle hook is called before initialize', () => {
+      vaultRunner = NgVaultBehaviorLifecycleService();
+
+      //const parentBehavior = createParenttBehaviorFactory();
+
+      // const providers = vaultRunner.initializeBehaviors(injector, [parentBehavior]);
+      // const provider = providers[0] as any;
+
+      expect(() => vaultRunner.onInit('22', 'vault1', 'service-name', ctx, [])).toThrowError(
+        '[NgVault] VaultBehaviorRunner has not been initialized. Call initialize() before invoking lifecycle methods.'
+      );
+    });
+
+    it('throws an error if a initializeBehaviors is called before initialize', () => {
+      vaultRunner = NgVaultBehaviorLifecycleService();
+
+      const parentBehavior = createParenttBehaviorFactory();
+
+      expect(() => vaultRunner.initializeBehaviors(injector, [parentBehavior])).toThrowError(
+        '[NgVault] VaultBehaviorRunner has not been initialized. Call initialize() before invoking lifecycle methods.'
+      );
+    });
   });
 
   describe('All Other life cycles', () => {
@@ -263,9 +310,9 @@ describe('VaultBehaviorLifecycleService', () => {
     });
   });
 
-  describe('initialize behaviors', () => {
+  describe('initializeBehaviors', () => {
     it('should get id per run level with crypto', () => {
-      const ids = ['1', '2', '3', '4', '5'];
+      const ids = ['1', '2', '3', '4', '5', '6'];
       spyOn(crypto, 'randomUUID').and.callFake(() => ids.shift() as any);
 
       const parentBehavior = createParenttBehaviorFactory();
@@ -289,6 +336,7 @@ describe('VaultBehaviorLifecycleService', () => {
       }, 'encryption');
 
       vaultRunner = NgVaultBehaviorLifecycleService();
+      const coreId = vaultRunner.initialize();
 
       const providers = vaultRunner.initializeBehaviors(injector, [
         parentBehavior,
@@ -300,19 +348,22 @@ describe('VaultBehaviorLifecycleService', () => {
         encryption
       ]);
 
+      (providers[0] as any).behaviorId = coreId;
+      (providers[0] as any).type = 'core';
+
       expect(providers[0].behaviorId).toBe('3');
       expect(providers[1].behaviorId).toBe('1');
       expect(providers[2].behaviorId).toBe('2');
-      expect(providers[3].behaviorId).toBe('3');
-      expect(providers[4].behaviorId).toBe('3');
-      expect(providers[5].behaviorId).toBe('4');
-      expect(providers[6].behaviorId).toBe('5');
+      expect(providers[3].behaviorId).toBe('4');
+      expect(providers[4].behaviorId).toBe('4');
+      expect(providers[5].behaviorId).toBe('5');
+      expect(providers[6].behaviorId).toBe('6');
       expect(providers[7]).toBeUndefined();
     });
 
     it('should get id per run level without crypto', () => {
-      const math = ['1', '2', '3', '4', '5'];
-      const dates = ['a', 'b', 'c', 'd', 'e'];
+      const math = ['1', '2', '3', '4', '5', '6'];
+      const dates = ['a', 'b', 'c', 'd', 'e', 'f'];
       spyOn(Math, 'random').and.callFake(() => math.shift() as any);
       spyOn(Date, 'now').and.callFake(() => dates.shift() as any);
       crypto.randomUUID = undefined as any;
@@ -339,6 +390,9 @@ describe('VaultBehaviorLifecycleService', () => {
 
       vaultRunner = NgVaultBehaviorLifecycleService();
 
+      vaultRunner = NgVaultBehaviorLifecycleService();
+      const coreId = vaultRunner.initialize();
+
       const providers = vaultRunner.initializeBehaviors(injector, [
         parentBehavior,
         devTools,
@@ -349,13 +403,16 @@ describe('VaultBehaviorLifecycleService', () => {
         encryption
       ]);
 
+      (providers[0] as any).behaviorId = coreId;
+      (providers[0] as any).type = 'core';
+
       expect(providers[0].behaviorId).toBe('c');
       expect(providers[1].behaviorId).toBe('a');
       expect(providers[2].behaviorId).toBe('b');
-      expect(providers[3].behaviorId).toBe('c');
-      expect(providers[4].behaviorId).toBe('c');
-      expect(providers[5].behaviorId).toBe('d');
-      expect(providers[6].behaviorId).toBe('e');
+      expect(providers[3].behaviorId).toBe('d');
+      expect(providers[4].behaviorId).toBe('d');
+      expect(providers[5].behaviorId).toBe('e');
+      expect(providers[6].behaviorId).toBe('f');
       expect(providers[7]).toBeUndefined();
     });
 
@@ -489,6 +546,40 @@ describe('VaultBehaviorLifecycleService', () => {
       expect(() =>
         vaultRunner.initializeBehaviors(injector, [nullFactory, undefinedFactory, validFactory])
       ).toThrowError('[NgVault] Behavior did not return an object');
+    });
+  });
+
+  describe('initialize', () => {
+    let ids: any = [];
+    beforeEach(() => {
+      ids = ['1', '2', 'coreId', '4', '5', '6'];
+      spyOn(crypto, 'randomUUID').and.callFake(() => ids.shift() as any);
+    });
+
+    it('should get the core id', () => {
+      vaultRunner = NgVaultBehaviorLifecycleService();
+      const coreId = vaultRunner.initialize();
+
+      expect(coreId).toBe('coreId');
+    });
+
+    it('throws an error if the core id is not generated', () => {
+      ids = ['1', '2'];
+      vaultRunner = NgVaultBehaviorLifecycleService();
+
+      expect(() => vaultRunner.initialize()).toThrowError(
+        '[NgVault] Failed to obtain core behavior ID during initialization.'
+      );
+    });
+
+    it('throws an error if initialized is called twice', () => {
+      vaultRunner = NgVaultBehaviorLifecycleService();
+
+      vaultRunner.initialize();
+
+      expect(() => vaultRunner.initialize()).toThrowError(
+        '[NgVault] VaultBehaviorRunner already initialized — cannot reissue core behavior ID.'
+      );
     });
   });
 });

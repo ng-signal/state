@@ -5,12 +5,14 @@ import { VaultBehaviorContext } from '../contexts/vault-behavior.context';
 import { VaultBehaviorRunner } from '../interfaces/vault-behavior-runner.interface';
 import { VaultBehavior } from '../interfaces/vault-behavior.interface';
 import { VaultBehaviorFactory } from '../types/vault-behavior-factory.type';
+import { VaultBehaviorTypeOrder } from '../types/vault-behavior.type';
 
 class VaultBehaviorRunnerClass implements VaultBehaviorRunner {
-  readonly #typeOrder: VaultBehavior['type'][] = ['dev-tools', 'events', 'state', 'persistence', 'encryption'];
+  readonly #typeOrder = [...VaultBehaviorTypeOrder];
 
   readonly #behaviorIds = new Map<VaultBehavior['type'], string>();
   readonly #idToType = new Map<string, VaultBehavior['type']>();
+  #initialized = false;
 
   #initializeBehaviorIds(): void {
     const gen = () =>
@@ -45,8 +47,29 @@ class VaultBehaviorRunnerClass implements VaultBehaviorRunner {
   }
     */
 
-  constructor() {
+  initialize(): string {
+    if (this.#initialized) {
+      throw new Error('[NgVault] VaultBehaviorRunner already initialized — cannot reissue core behavior ID.');
+    }
     this.#initializeBehaviorIds();
+
+    const coreId = this.#behaviorIds.get('core');
+    if (!coreId) throw new Error('[NgVault] Failed to obtain core behavior ID during initialization.');
+
+    this.#initialized = true;
+    Object.freeze(this.#behaviorIds);
+    Object.freeze(this.#idToType);
+
+    return coreId;
+  }
+
+  #verifyInitialized(): void {
+    if (!this.#initialized) {
+      throw new Error(
+        '[NgVault] VaultBehaviorRunner has not been initialized. ' +
+          'Call initialize() before invoking lifecycle methods.'
+      );
+    }
   }
 
   #runLifecycle<T>(
@@ -57,6 +80,7 @@ class VaultBehaviorRunnerClass implements VaultBehaviorRunner {
     behaviors: VaultBehavior<T>[],
     serviceName?: string
   ): void {
+    this.#verifyInitialized();
     if (!(behaviors?.length && this.#isKnownBehaviorId(behaviorId))) return;
 
     for (const type of this.#typeOrder) {
@@ -86,6 +110,8 @@ class VaultBehaviorRunnerClass implements VaultBehaviorRunner {
   }
 
   initializeBehaviors<T>(injector: Injector, behaviors: Array<VaultBehaviorFactory<T>>): VaultBehavior<T>[] {
+    this.#verifyInitialized();
+
     if (!behaviors || behaviors.length === 0) return [];
 
     return behaviors
