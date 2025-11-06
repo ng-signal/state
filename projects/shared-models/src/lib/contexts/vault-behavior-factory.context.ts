@@ -5,5 +5,5 @@ import { VaultBehaviorType } from '../types/vault-behavior.type';
 export interface VaultBehaviorFactoryContext {
   injector: Injector;
   behaviorId: string;
-  readonly type?: VaultBehaviorType;
+  readonly type: VaultBehaviorType;
 }

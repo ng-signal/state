@@ -8,8 +8,8 @@ import {
   runInInjectionContext
 } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
-import { NgVaultDebuggerService, withDevtoolsBehavior } from '@ngvault/dev-tools';
-import { ResourceVaultModel } from '@ngvault/shared-models';
+import { ResourceVaultModel, VaultBehaviorFactory } from '@ngvault/shared-models';
+import { getTestBehavior, withTestBehavior } from '@ngvault/testing';
 import { FEATURE_CELL_REGISTRY } from './constants/feature-cell-registry.constant';
 import { provideFeatureCell } from './provide-feature-cell';
 
@@ -378,94 +378,43 @@ describe('Provider: Feature Cell (core vault functionality)', () => {
 
   describe('Devtools hooks', () => {
     let factory: any;
-    let stopListening: any;
-    const events: any[] = [];
+    let testBehavior: any;
+    let providers: any;
+    let vault: ResourceVaultModel<any>;
 
     beforeEach(() => {
-      events.length = 0;
-      // create a vault inside Angular DI
-      const providers = provideFeatureCell(
-        class TestService {},
-        {
-          key: 'devtools-test',
-          initial: []
-        },
-        [withDevtoolsBehavior]
-      );
+      testBehavior?.resetEvents();
+      providers = provideFeatureCell(class TestService {}, { key: 'devtools-test', initial: [] }, [withTestBehavior]);
       factory = (providers[0] as any).useFactory;
-
-      const bus = TestBed.inject(NgVaultDebuggerService);
-      stopListening = bus.listen((event) => events.push(event));
     });
 
-    afterEach(() => {
-      stopListening();
-    });
+    it('should emit an "init" event when onInit is called', () => {
+      runInInjectionContext(TestBed.inject(Injector), () => {
+        vault = factory();
+      });
 
-    it('should emit an "init" event when a vault is created', () => {
-      runInInjectionContext(TestBed.inject(Injector), () => factory());
+      testBehavior = getTestBehavior();
 
-      expect(events).toEqual([
-        Object({
-          id: jasmine.any(String),
-          key: 'devtools-test',
-          type: 'init',
-          timestamp: jasmine.any(Number),
-          state: Object({ isLoading: false, value: [], error: null, hasValue: true })
-        }),
-        Object({
-          id: jasmine.any(String),
-          key: 'NgVault::CoreSet::Behavior',
-          type: 'init',
-          timestamp: jasmine.any(Number),
-          state: Object({ isLoading: false, value: [], error: null, hasValue: true })
-        })
-      ]);
+      expect(testBehavior.getEvents()).toEqual(['onInit:devtools-test', 'onInit:NgVault::CoreSet']);
     });
 
     it('should emit a "dispose" event when vault.destroy() is called', () => {
-      let vault: ResourceVaultModel<any>;
       runInInjectionContext(TestBed.inject(Injector), () => {
         vault = factory();
         vault.destroy();
       });
 
-      expect(events).toEqual([
-        Object({
-          id: jasmine.any(String),
-          key: 'devtools-test',
-          type: 'init',
-          timestamp: jasmine.any(Number),
-          state: Object({ isLoading: false, value: [], error: null, hasValue: true })
-        }),
-        Object({
-          id: jasmine.any(String),
-          key: 'NgVault::CoreSet::Behavior',
-          type: 'init',
-          timestamp: jasmine.any(Number),
-          state: Object({ isLoading: false, value: [], error: null, hasValue: true })
-        }),
-        Object({
-          id: jasmine.any(String),
-          key: 'devtools-test',
-          type: 'reset',
-          timestamp: jasmine.any(Number),
-          state: Object({ isLoading: false, value: undefined, error: null, hasValue: false })
-        }),
-        Object({
-          id: jasmine.any(String),
-          key: 'devtools-test',
-          type: 'dispose',
-          timestamp: jasmine.any(Number),
-          state: Object({ isLoading: false, value: undefined, error: null, hasValue: false })
-        })
+      testBehavior = getTestBehavior();
+
+      expect(testBehavior.getEvents()).toEqual([
+        'onInit:devtools-test',
+        'onInit:NgVault::CoreSet',
+        'onReset:devtools-test',
+        'onDestroy:devtools-test'
       ]);
     });
 
     it('should emit on all the calls', () => {
-      let vault!: ResourceVaultModel<any>;
-
-      // Create vault inside DI context (this emits "init")
       runInInjectionContext(TestBed.inject(Injector), () => {
         vault = factory();
       });
@@ -478,77 +427,31 @@ describe('Provider: Feature Cell (core vault functionality)', () => {
       vault.setState({ loading: true, error: { message: 'fail' }, value: [1, 2, 3] });
       vault.setState(undefined);
 
-      expect(events).toEqual([
-        Object({
-          id: jasmine.any(String),
-          key: 'devtools-test',
-          type: 'init',
-          timestamp: jasmine.any(Number),
-          state: Object({ isLoading: false, value: [], error: null, hasValue: true })
-        }),
-        Object({
-          id: jasmine.any(String),
-          key: 'NgVault::CoreSet::Behavior',
-          type: 'init',
-          timestamp: jasmine.any(Number),
-          state: Object({ isLoading: false, value: [], error: null, hasValue: true })
-        }),
-        Object({
-          id: jasmine.any(String),
-          key: 'devtools-test',
-          type: 'set',
-          timestamp: jasmine.any(Number),
-          state: Object({ isLoading: false, value: [], error: null, hasValue: true })
-        }),
-        Object({
-          id: jasmine.any(String),
-          key: 'NgVault::CoreSet::Behavior',
-          type: 'set',
-          timestamp: jasmine.any(Number),
-          state: Object({ isLoading: true, value: [1, 2, 3], error: { message: 'fail' }, hasValue: true })
-        }),
-        Object({
-          id: jasmine.any(String),
-          key: 'devtools-test',
-          type: 'reset',
-          timestamp: jasmine.any(Number),
-          state: Object({ isLoading: false, value: undefined, error: null, hasValue: false })
-        }),
-        Object({
-          id: jasmine.any(String),
-          key: 'devtools-test',
-          type: 'patch',
-          timestamp: jasmine.any(Number),
-          state: Object({ isLoading: true, value: [4, 5, 6], error: Object({ message: 'fail' }), hasValue: true })
-        }),
-        Object({
-          id: jasmine.any(String),
-          key: 'devtools-test',
-          type: 'reset',
-          timestamp: jasmine.any(Number),
-          state: Object({ isLoading: false, value: undefined, error: null, hasValue: false })
-        }),
-        Object({
-          id: jasmine.any(String),
-          key: 'devtools-test',
-          type: 'set',
-          timestamp: jasmine.any(Number),
-          state: Object({ isLoading: false, value: undefined, error: null, hasValue: false })
-        }),
-        Object({
-          id: jasmine.any(String),
-          key: 'NgVault::CoreSet::Behavior',
-          type: 'set',
-          timestamp: jasmine.any(Number),
-          state: Object({ isLoading: true, value: [1, 2, 3], error: Object({ message: 'fail' }), hasValue: true })
-        }),
-        Object({
-          id: jasmine.any(String),
-          key: 'devtools-test',
-          type: 'reset',
-          timestamp: jasmine.any(Number),
-          state: Object({ isLoading: false, value: undefined, error: null, hasValue: false })
-        })
+      testBehavior = getTestBehavior();
+
+      expect(testBehavior.getEvents()).toEqual([
+        'onInit:devtools-test',
+        'onInit:NgVault::CoreSet',
+
+        'onSet:devtools-test',
+        'onSetState:devtools-test:{"isLoading":false,"value":[],"error":null,"hasValue":true}',
+
+        'onSet:NgVault::CoreSet',
+        'onSetState:NgVault::CoreSet:{"isLoading":true,"value":[1,2,3],"error":{"message":"fail"},"hasValue":true}',
+
+        'onReset:devtools-test',
+
+        'onPatch:devtools-test',
+
+        'onReset:devtools-test',
+
+        'onSet:devtools-test',
+        'onSetState:devtools-test:{"isLoading":false,"error":null,"hasValue":false}',
+
+        'onSet:NgVault::CoreSet',
+        'onSetState:NgVault::CoreSet:{"isLoading":true,"value":[1,2,3],"error":{"message":"fail"},"hasValue":true}',
+
+        'onReset:devtools-test'
       ]);
     });
   });
@@ -562,7 +465,8 @@ describe('Provider: Feature Cell (core vault functionality)', () => {
 
     it('filters null and undefined factories but retains valid ones', () => {
       spyOn(console, 'warn');
-      const nullFactory = () => null as any;
+      const nullFactory = (() => null as any) as unknown as VaultBehaviorFactory<any>;
+      nullFactory.type = 'state';
 
       const providers = provideFeatureCell(class ExampleService {}, { key: 'cell-filter', initial: [] }, [nullFactory]);
 

@@ -5,7 +5,7 @@ const angular = require('@angular-eslint/eslint-plugin');
 
 module.exports = [
   {
-    ignores: ['**/coverage/*']
+    ignores: ['**/coverage/*', '**/projects/testing/**']
   },
   {
     files: ['./src/**/*.ts', './projects/**/*.ts'],

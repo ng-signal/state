@@ -1,8 +1,8 @@
 // projects/core/src/lib/behaviors/with-core-set.behavior.ts
-import { Injector } from '@angular/core';
 import {
   VaultBehavior,
   VaultBehaviorContext,
+  VaultBehaviorFactory,
   VaultBehaviorFactoryContext,
   VaultBehaviorType,
   VaultDataType
@@ -15,10 +15,13 @@ import { isHttpResource } from '../utils/is-http-resource.util';
  */
 class CoreSetBehavior<T> implements VaultBehavior<T> {
   public readonly critical = true;
-  public readonly type: VaultBehaviorType = 'persistence';
-  public readonly key = 'NgVault::CoreSet::Behavior';
+  public readonly key = 'NgVault::CoreSet';
 
-  constructor(private readonly _injector: Injector) {}
+  constructor(
+    readonly behaviorId: string,
+    readonly type: VaultBehaviorType,
+    private readonly _injector: VaultBehaviorFactoryContext['injector']
+  ) {}
 
   onInit(key: string, service: string, ctx: VaultBehaviorContext<T>): void {
     ctx.devTools?.onInit?.(this.key, service, ctx);
@@ -49,6 +52,9 @@ class CoreSetBehavior<T> implements VaultBehavior<T> {
   }
 }
 
-export function withCoreSetBehavior(context: VaultBehaviorFactoryContext): VaultBehavior {
-  return new CoreSetBehavior(context.injector);
-}
+export const withCoreSetBehavior = ((context: VaultBehaviorFactoryContext): VaultBehavior => {
+  return new CoreSetBehavior(context.behaviorId, 'state', context.injector);
+}) as VaultBehaviorFactory;
+
+withCoreSetBehavior.type = 'state';
+withCoreSetBehavior.critical = true;

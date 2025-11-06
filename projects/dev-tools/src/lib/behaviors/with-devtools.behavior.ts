@@ -72,9 +72,9 @@ class DevtoolsBehavior implements VaultBehavior {
   }
 }
 
-export function withDevtoolsBehavior(context: VaultBehaviorFactoryContext): VaultBehavior {
-  return new DevtoolsBehavior(context.behaviorId, context.type!, context.injector);
-}
+export const withDevtoolsBehavior: VaultBehaviorFactory = (context: VaultBehaviorFactoryContext): VaultBehavior => {
+  return new DevtoolsBehavior(context.behaviorId, context.type, context.injector);
+};
 
-(withDevtoolsBehavior as VaultBehaviorFactory).type = 'dev-tools';
-(withDevtoolsBehavior as VaultBehaviorFactory).critical = true;
+withDevtoolsBehavior.type = 'dev-tools';
+withDevtoolsBehavior.critical = true;

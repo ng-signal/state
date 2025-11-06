@@ -16,7 +16,7 @@ import {
   ResourceVaultModel,
   VaultBehavior,
   VaultBehaviorContext,
-  VaultBehaviorFactoryContext,
+  VaultBehaviorFactory,
   VaultSignalRef,
   VaultStateSnapshot
 } from '@ngvault/shared-models';
@@ -30,14 +30,13 @@ import { FEATURE_CELL_REGISTRY } from './constants/feature-cell-registry.constan
 import { FeatureCellDescriptorModel } from './models/feature-cell-descriptor.model';
 import { getOrCreateFeatureCellToken } from './tokens/feature-cell-token-registry';
 import { devWarnExperimentalHttpResource } from './utils/dev-warning.util';
-import { initializeBehaviors } from './utils/initialize-behaviors.util';
 import { isHttpResource } from './utils/is-http-resource.util';
 import { resourceError } from './utils/resource-error.util';
 
 export function provideFeatureCell<Service, T>(
   service: Type<Service>,
   featureCellDescriptor: FeatureCellDescriptorModel<T>,
-  behaviors: Array<(context: VaultBehaviorFactoryContext) => VaultBehavior<T>> = []
+  behaviors: VaultBehaviorFactory<T>[] = []
 ): Provider[] {
   const token = getOrCreateFeatureCellToken<T>(featureCellDescriptor.key, false);
 
@@ -65,11 +64,10 @@ export function provideFeatureCell<Service, T>(
         );
       }
 
-      // 👇 Initialize array to hold active, instantiated behaviors
-
-      const defaultBehaviors = [withCoreSetBehavior];
-      const allBehaviors = [...defaultBehaviors, ...behaviors];
-      const activeBehaviors = initializeBehaviors(_injector, allBehaviors, _behaviorLifeCycle);
+      const defaultBehaviors: VaultBehaviorFactory<T>[] = [withCoreSetBehavior];
+      const allBehaviors: VaultBehaviorFactory<T>[] = [...defaultBehaviors, ...behaviors];
+      const coreId = _behaviorLifeCycle.initialize();
+      const activeBehaviors = _behaviorLifeCycle.initializeBehaviors(_injector, allBehaviors);
 
       const _value = signal<VaultDataType<T>>(
         featureCellDescriptor.initial === null || featureCellDescriptor.initial === undefined
@@ -100,7 +98,7 @@ export function provideFeatureCell<Service, T>(
         }
       } as VaultBehaviorContext<T>;
 
-      _behaviorLifeCycle.onInit(featureCellDescriptor.key, service.name, ctx, activeBehaviors);
+      _behaviorLifeCycle.onInit(coreId, featureCellDescriptor.key, service.name, ctx, activeBehaviors);
 
       const _reset = (): void => {
         _isLoading.set(false);
@@ -155,7 +153,7 @@ export function provideFeatureCell<Service, T>(
         }
 
         ctx.next = Object.freeze(next as VaultStateType<T>);
-        _behaviorLifeCycle.onSet(featureCellDescriptor.key, ctx, activeBehaviors);
+        _behaviorLifeCycle.onSet(coreId, featureCellDescriptor.key, ctx, activeBehaviors);
       };
 
       const _patch = (partial: VaultStateInputType<T>): void => {

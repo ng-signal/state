@@ -16,7 +16,9 @@
       "@ngvault/styles": ["projects/styles/src/lib"],
       "@ngvault/styles/*": ["projects/styles/src/lib/*"],
       "@ngvault/shared-models": ["projects/shared-models/src/public-api"],
-      "@ngvault/shared-models/*": ["projects/shared-models/src/lib/*"]
+      "@ngvault/shared-models/*": ["projects/shared-models/src/lib/*"],
+      "@ngvault/testing": ["projects/testing/src/public-api"],
+      "@ngvault/testing/*": ["projects/testing/src/lib/*"]
     },
     "noFallthroughCasesInSwitch": true,
     "skipLibCheck": true,
@@ -64,6 +66,12 @@
     },
     {
       "path": "./projects/shared-models/tsconfig.spec.json"
+    },
+    {
+      "path": "./projects/testing/tsconfig.lib.json"
+    },
+    {
+      "path": "./projects/testing/tsconfig.spec.json"
     }
   ]
 }

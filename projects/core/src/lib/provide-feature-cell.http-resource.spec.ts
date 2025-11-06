@@ -2,7 +2,6 @@ import { httpResource, provideHttpClient } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { ApplicationRef, Injector, provideZonelessChangeDetection, runInInjectionContext, signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
-import { NgVaultDebuggerService, withDevtoolsBehavior } from '@ngvault/dev-tools';
 import { ResourceVaultModel } from '@ngvault/shared-models';
 import { provideFeatureCell } from './provide-feature-cell';
 
@@ -14,25 +13,35 @@ interface TestModel {
 describe('Provider: Feature Cell Resource', () => {
   let vault: ResourceVaultModel<TestModel[] | TestModel | number | undefined>;
   const events: any[] = [];
-  let stopListening: any;
 
   beforeEach(() => {
     events.length = 0;
     TestBed.configureTestingModule({
-      providers: [
-        provideHttpClient(),
-        provideHttpClientTesting(),
-        provideZonelessChangeDetection(),
-        NgVaultDebuggerService
-      ]
+      providers: [provideHttpClient(), provideHttpClientTesting(), provideZonelessChangeDetection()]
     });
 
     const injector = TestBed.inject(Injector);
 
-    const bus = TestBed.inject(NgVaultDebuggerService);
-    stopListening = bus.listen((event) => events.push(event));
+    const withTestBehavior = () => {
+      return {
+        onInit(key: string) {
+          events.push(`onInit:${key}`);
+        },
+        onSet(key: string) {
+          events.push(`onSet:${key}`);
+        },
+        onPatch(key: string) {
+          events.push(`onPatch:${key}`);
+        },
+        onReset(key: string) {
+          events.push(`onReset:${key}`);
+        }
+      };
+    };
+    withTestBehavior.type = 'state';
+    withTestBehavior.critial = false;
 
-    const providers = provideFeatureCell(class TestService {}, { key: 'http', initial: [] }, [withDevtoolsBehavior]);
+    const providers = provideFeatureCell(class TestService {}, { key: 'http', initial: [] }, [withTestBehavior as any]);
     const vaultFactory = (providers[0] as any).useFactory;
 
     runInInjectionContext(injector, () => {
@@ -40,9 +49,7 @@ describe('Provider: Feature Cell Resource', () => {
     });
   });
 
-  afterEach(() => {
-    stopListening();
-  });
+  afterEach(() => {});
 
   describe('setState', () => {
     it('should reactively mirror HttpResourceRef signals via setState()', async () => {
@@ -215,43 +222,7 @@ describe('Provider: Feature Cell Resource', () => {
       expect(vault.state.error()).toBeNull();
       expect(vault.state.hasValue()).toBeFalse();
 
-      expect(events).toEqual([
-        Object({
-          id: jasmine.any(String),
-          key: 'http',
-          type: 'init',
-          timestamp: jasmine.any(Number),
-          state: Object({ isLoading: false, value: [], error: null, hasValue: true })
-        }),
-        Object({
-          id: jasmine.any(String),
-          key: 'NgVault::CoreSet::Behavior',
-          type: 'init',
-          timestamp: jasmine.any(Number),
-          state: Object({ isLoading: false, value: [], error: null, hasValue: true })
-        }),
-        Object({
-          id: jasmine.any(String),
-          key: 'http',
-          type: 'set',
-          timestamp: jasmine.any(Number),
-          state: Object({ isLoading: true, value: undefined, error: null, hasValue: false })
-        }),
-        Object({
-          id: jasmine.any(String),
-          key: 'http',
-          type: 'set',
-          timestamp: jasmine.any(Number),
-          state: Object({ isLoading: false, value: [Object({ id: 1, name: 'Ada' })], error: null, hasValue: true })
-        }),
-        Object({
-          id: jasmine.any(String),
-          key: 'http',
-          type: 'reset',
-          timestamp: jasmine.any(Number),
-          state: Object({ isLoading: false, value: undefined, error: null, hasValue: false })
-        })
-      ]);
+      expect(events).toEqual(['onSet:http', 'onSet:http', 'onReset:http']);
     });
   });
 
@@ -424,43 +395,7 @@ describe('Provider: Feature Cell Resource', () => {
       expect(vault.state.isLoading()).toBeFalse();
       expect(vault.state.hasValue()).toBeTrue();
 
-      expect(events).toEqual([
-        Object({
-          id: jasmine.any(String),
-          key: 'http',
-          type: 'init',
-          timestamp: jasmine.any(Number),
-          state: Object({ isLoading: false, value: [], error: null, hasValue: true })
-        }),
-        Object({
-          id: jasmine.any(String),
-          key: 'NgVault::CoreSet::Behavior',
-          type: 'init',
-          timestamp: jasmine.any(Number),
-          state: Object({ isLoading: false, value: [], error: null, hasValue: true })
-        }),
-        Object({
-          id: jasmine.any(String),
-          key: 'http',
-          type: 'patch',
-          timestamp: jasmine.any(Number),
-          state: Object({ isLoading: false, value: 42, error: null, hasValue: true })
-        }),
-        Object({
-          id: jasmine.any(String),
-          key: 'http',
-          type: 'patch',
-          timestamp: jasmine.any(Number),
-          state: Object({ isLoading: true, value: 42, error: null, hasValue: true })
-        }),
-        Object({
-          id: jasmine.any(String),
-          key: 'http',
-          type: 'patch',
-          timestamp: jasmine.any(Number),
-          state: Object({ isLoading: false, value: 7, error: null, hasValue: true })
-        })
-      ]);
+      expect(events).toEqual(['onPatch:http', 'onPatch:http', 'onPatch:http']);
     });
   });
 });

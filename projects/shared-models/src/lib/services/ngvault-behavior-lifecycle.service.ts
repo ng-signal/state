@@ -9,7 +9,8 @@ import { VaultBehaviorTypeOrder } from '../types/vault-behavior.type';
 
 class VaultBehaviorRunnerClass implements VaultBehaviorRunner {
   readonly #typeOrder = [...VaultBehaviorTypeOrder];
-
+  // eslint-disable-next-line
+  #behaviors: VaultBehavior<any>[] = [];
   readonly #behaviorIds = new Map<VaultBehavior['type'], string>();
   readonly #idToType = new Map<string, VaultBehavior['type']>();
   #initialized = false;
@@ -27,8 +28,8 @@ class VaultBehaviorRunnerClass implements VaultBehaviorRunner {
     });
   }
 
-  #isKnownBehaviorId(runLevelId: string): boolean {
-    return this.#idToType.has(runLevelId);
+  #isKnownBehaviorId(behaviorId: string): boolean {
+    return this.#idToType.has(behaviorId);
   }
 
   #getNextBehaviorFromId(behaviorId: string): { type: VaultBehavior['type']; id: string } | undefined {
@@ -100,13 +101,12 @@ class VaultBehaviorRunnerClass implements VaultBehaviorRunner {
     hook: keyof VaultBehavior<T>, // e.g., 'onInit', 'onSet', etc.
     vaultKey: string,
     ctx: VaultBehaviorContext<T>,
-    behaviors: VaultBehavior<T>[],
     serviceName?: string
   ): void {
     this.#verifyInitialized();
-    if (!(behaviors?.length && this.#isKnownBehaviorId(behaviorId))) return;
+    if (!(this.#behaviors?.length && this.#isKnownBehaviorId(behaviorId))) return;
 
-    const systemBehaviors = behaviors.filter((b) => {
+    const systemBehaviors = this.#behaviors.filter((b) => {
       return ['dev-tools', 'events'].includes(b.type);
     });
     this.#lifeCycle(hook, vaultKey, ctx, systemBehaviors, serviceName);
@@ -115,16 +115,16 @@ class VaultBehaviorRunnerClass implements VaultBehaviorRunner {
     if (!next) return; // End of the pipeline — nothing further to execute
 
     // 🔹 Retrieve and execute only that next run level
-    const nextBehaviors = behaviors.filter((b) => b.type === next.type);
+    const nextBehaviors = this.#behaviors.filter((b) => b.type === next.type);
     this.#lifeCycle(hook, vaultKey, ctx, nextBehaviors, serviceName);
   }
 
-  initializeBehaviors<T>(injector: Injector, behaviors: Array<VaultBehaviorFactory<T>>): VaultBehavior<T>[] {
+  initializeBehaviors<T>(injector: Injector, behaviors: Array<VaultBehaviorFactory<T>>): void {
     this.#verifyInitialized();
 
-    if (!behaviors || behaviors.length === 0) return [];
+    if (!behaviors || behaviors.length === 0) return;
 
-    return behaviors
+    this.#behaviors = behaviors
       .map((factory) => {
         let isCritical = false;
         try {
@@ -170,20 +170,12 @@ class VaultBehaviorRunnerClass implements VaultBehaviorRunner {
       .filter((b): b is VaultBehavior<T> => !!b);
   }
 
-  onInit<T>(
-    runLevelId: string,
-    vaultKey: string,
-    serviceName: string,
-    ctx: VaultBehaviorContext<T>,
-    behaviors: VaultBehavior<T>[]
-  ): void {
-    this.#runLifecycles(runLevelId, 'onInit', vaultKey, ctx, behaviors, serviceName);
+  onInit<T>(behaviorId: string, vaultKey: string, serviceName: string, ctx: VaultBehaviorContext<T>): void {
+    this.#runLifecycles(behaviorId, 'onInit', vaultKey, ctx, serviceName);
   }
 
-  onSet<T>(runLevelId: string, vaultKey: string, ctx: VaultBehaviorContext<T>, behaviors: VaultBehavior<T>[]): void {
-    if (!behaviors?.length) return;
-
-    this.#runLifecycles(runLevelId, 'onSet', vaultKey, ctx, behaviors);
+  onSet<T>(behaviorId: string, vaultKey: string, ctx: VaultBehaviorContext<T>): void {
+    this.#runLifecycles(behaviorId, 'onSet', vaultKey, ctx);
   }
 }
 

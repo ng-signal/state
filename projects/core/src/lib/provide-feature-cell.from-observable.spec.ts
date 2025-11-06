@@ -2,7 +2,6 @@ import { provideHttpClient } from '@angular/common/http';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { Injector, provideZonelessChangeDetection, runInInjectionContext, signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
-import { NgVaultDebuggerService, withDevtoolsBehavior } from '@ngvault/dev-tools';
 import { ResourceVaultModel, VaultSignalRef } from '@ngvault/shared-models';
 import { Subject } from 'rxjs';
 import { provideFeatureCell } from './provide-feature-cell';
@@ -15,14 +14,30 @@ interface TestModel {
 describe('ResourceVaultModel (setState, patchState, fromObservable)', () => {
   let vault: ResourceVaultModel<TestModel[] | TestModel>;
   let subject: Subject<TestModel[]>;
+  const calls: any = [];
 
   beforeEach(() => {
     subject = new Subject<TestModel[]>();
+    calls.length = 0;
 
     TestBed.configureTestingModule({
       providers: [provideHttpClient(), provideHttpClientTesting(), provideZonelessChangeDetection()]
     });
-    const providers = provideFeatureCell(class TestService {}, { key: 'http', initial: [] }, [withDevtoolsBehavior]);
+
+    const withTestBehavior = () => {
+      return {
+        onInit(key: string) {
+          calls.push(`onInit:${key}`);
+        },
+        onLoad(key: string) {
+          calls.push(`onLoad:${key}`);
+        }
+      };
+    };
+    withTestBehavior.type = 'state';
+    withTestBehavior.critial = false;
+
+    const providers = provideFeatureCell(class TestService {}, { key: 'http', initial: [] }, [withTestBehavior as any]);
 
     const vaultFactory = (providers[0] as any).useFactory;
     runInInjectionContext(TestBed.inject(Injector), () => {
@@ -141,53 +156,21 @@ describe('ResourceVaultModel (setState, patchState, fromObservable)', () => {
     expect(resource.error()!.message).toContain('Network failure');
   });
 
-  it('should emit events for fromObservable lifecycle', (done) => {
-    const spy: any[] = [];
-    const bus = TestBed.inject(NgVaultDebuggerService);
-    const stopListening = bus.listen((event) => spy.push(event));
-
-    // 🔹 Simulate an observable source that emits and completes
+  it('should emit events for fromObservable lifecycle', () => {
     const subject = new Subject<any>();
 
-    // 🔹 Track state updates from fromObservable()
     let lastRef!: VaultSignalRef<any>;
     vault.fromObservable!(subject.asObservable()).subscribe({
       next: (result) => (lastRef = result),
       complete: () => {
-        // Wait until after emission completes
         expect(lastRef.isLoading()).toBeFalse();
         expect(lastRef.value()).toEqual({ id: 1, name: 'Ada' });
         expect(lastRef.error()).toBeNull();
-
-        expect(spy).toEqual([
-          Object({
-            id: jasmine.any(String),
-            key: 'http',
-            type: 'load',
-            timestamp: jasmine.any(Number),
-            state: Object({ isLoading: false, value: [], error: null, hasValue: true })
-          }),
-          Object({
-            id: jasmine.any(String),
-            key: 'http',
-            type: 'set',
-            timestamp: jasmine.any(Number),
-            state: Object({
-              isLoading: false,
-              value: [],
-              error: null,
-              hasValue: true
-            })
-          })
-        ]);
-
-        stopListening();
-
-        done();
       }
     });
 
-    // 🔹 Simulate loading → data emission → complete
+    expect(calls).toEqual(['onLoad:http']);
+
     subject.next({ id: 1, name: 'Ada' });
     subject.complete();
   });
