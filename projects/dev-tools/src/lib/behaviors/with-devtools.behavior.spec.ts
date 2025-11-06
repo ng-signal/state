@@ -36,7 +36,7 @@ describe('Behavior: withDevtools', () => {
       stopListening = debuggerService.listen((event) => emitted.push(event));
 
       runInInjectionContext(injector, () => {
-        behavior = withDevtoolsBehavior({ injector, runLevelId: 'id' });
+        behavior = withDevtoolsBehavior({ injector, behaviorId: 'id' });
       });
     });
 
@@ -203,7 +203,7 @@ describe('Behavior: withDevtools', () => {
       stopListening = debuggerService.listen((event) => emitted.push(event));
 
       runInInjectionContext(injector, () => {
-        behavior = withDevtoolsBehavior({ injector, runLevelId: 'id' });
+        behavior = withDevtoolsBehavior({ injector, behaviorId: 'id' });
       });
     });
 

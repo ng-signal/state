@@ -1,15 +1,18 @@
 // projects/core/src/lib/services/vault-behavior-lifecycle.service.ts
+import { Injector } from '@angular/core';
+import { VaultBehaviorFactoryContext } from '../contexts/vault-behavior-factory.context';
 import { VaultBehaviorContext } from '../contexts/vault-behavior.context';
 import { VaultBehaviorRunner } from '../interfaces/vault-behavior-runner.interface';
 import { VaultBehavior } from '../interfaces/vault-behavior.interface';
+import { VaultBehaviorFactory } from '../types/vault-behavior-factory.type';
 
 class VaultBehaviorRunnerClass implements VaultBehaviorRunner {
   readonly #typeOrder: VaultBehavior['type'][] = ['dev-tools', 'events', 'state', 'persistence', 'encryption'];
 
-  readonly #runIds = new Map<VaultBehavior['type'], string>();
+  readonly #behaviorIds = new Map<VaultBehavior['type'], string>();
   readonly #idToType = new Map<string, VaultBehavior['type']>();
 
-  #initializeRunLevelIds(): void {
+  #initializeBehaviorIds(): void {
     const gen = () =>
       typeof crypto !== 'undefined' && crypto.randomUUID
         ? crypto.randomUUID()
@@ -17,12 +20,12 @@ class VaultBehaviorRunnerClass implements VaultBehaviorRunner {
 
     this.#typeOrder.forEach((type) => {
       const id = gen();
-      this.#runIds.set(type, id);
+      this.#behaviorIds.set(type, id);
       this.#idToType.set(id, type);
     });
   }
 
-  #isKnownRunLevelId(runLevelId: string): boolean {
+  #isKnownBehaviorId(runLevelId: string): boolean {
     return this.#idToType.has(runLevelId);
   }
 
@@ -43,25 +46,23 @@ class VaultBehaviorRunnerClass implements VaultBehaviorRunner {
     */
 
   constructor() {
-    this.#initializeRunLevelIds();
-  }
-
-  getRunLevelId(type: VaultBehavior['type']): string | undefined {
-    return this.#runIds.get(type);
+    this.#initializeBehaviorIds();
   }
 
   #runLifecycle<T>(
-    runLevelId: string,
+    behaviorId: string,
     hook: keyof VaultBehavior<T>, // e.g., 'onInit', 'onSet', etc.
     vaultKey: string,
     ctx: VaultBehaviorContext<T>,
     behaviors: VaultBehavior<T>[],
     serviceName?: string
   ): void {
-    if (!(behaviors?.length && this.#isKnownRunLevelId(runLevelId))) return;
+    if (!(behaviors?.length && this.#isKnownBehaviorId(behaviorId))) return;
 
     for (const type of this.#typeOrder) {
-      const filtered = behaviors.filter((b) => b.type === type);
+      const filtered = behaviors.filter((b) => {
+        return b.type === type;
+      });
       for (const behavior of filtered) {
         const fn = behavior[hook];
         if (typeof fn === 'function') {
@@ -82,6 +83,55 @@ class VaultBehaviorRunnerClass implements VaultBehaviorRunner {
         }
       }
     }
+  }
+
+  initializeBehaviors<T>(injector: Injector, behaviors: Array<VaultBehaviorFactory<T>>): VaultBehavior<T>[] {
+    if (!behaviors || behaviors.length === 0) return [];
+
+    return behaviors
+      .map((factory) => {
+        let isCritical = false;
+        try {
+          // Determine declared behavior type
+          // eslint-disable-next-line
+          const behaviorType = (factory as any)?.type as VaultBehavior['type'] | undefined;
+          if (!behaviorType) {
+            isCritical = true;
+            throw new Error(`[NgVault] Behavior factory missing type metadata.`);
+          }
+          // Create the instance with its signed ID
+          const behaviorId = this.#behaviorIds.get(behaviorType);
+          const instance = factory({
+            injector,
+            behaviorId
+          } as VaultBehaviorFactoryContext);
+
+          if (!instance || typeof instance !== 'object') {
+            const message = `[NgVault] Behavior did not return an object`;
+
+            // eslint-disable-next-line
+            if ((factory as any)?.critical === true) {
+              throw new Error(message);
+            }
+
+            // eslint-disable-next-line
+            console.warn(`[NgVault] Behavior initialization failed: ${message}`);
+            return null;
+          }
+
+          return instance;
+        } catch (err) {
+          // eslint-disable-next-line
+          if ((factory as any)?.critical === true || isCritical) {
+            throw err;
+          }
+
+          // eslint-disable-next-line
+          console.warn(`[NgVault] Non-critical behavior initialization failed: ${(err as any)?.message}`);
+          return null;
+        }
+      })
+      .filter((b): b is VaultBehavior<T> => !!b);
   }
 
   onInit<T>(

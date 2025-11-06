@@ -1,26 +1,69 @@
 // projects/core/src/lib/services/vault-behavior-lifecycle.service.spec.ts
-import { provideZonelessChangeDetection } from '@angular/core';
+import { Injector, provideZonelessChangeDetection } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
-import { VaultBehavior, VaultBehaviorContext, VaultBehaviorRunner } from '@ngvault/shared-models';
+import { VaultBehaviorContext, VaultBehaviorRunner } from '@ngvault/shared-models';
 import { NgVaultBehaviorLifecycleService } from './ngvault-behavior-lifecycle.service';
 
 describe('VaultBehaviorLifecycleService', () => {
-  let service: VaultBehaviorRunner;
+  function createTestBehaviorFactory(factory: (...args: any[]) => any, type?: string, critical: boolean = false): any {
+    const wrappedFactory = (context: any) => {
+      const behavior = factory(context);
+
+      if (!behavior || typeof behavior !== 'object') {
+        return behavior; // Let the runner handle the error path
+      }
+
+      const behaviorId = context.behaviorId;
+
+      Object.defineProperty(behavior, 'behaviorId', {
+        value: behaviorId,
+        enumerable: false,
+        writable: false
+      });
+
+      if (type) {
+        Object.defineProperty(behavior, 'type', {
+          value: type,
+          enumerable: true,
+          writable: false
+        });
+      }
+
+      return behavior;
+    };
+
+    (wrappedFactory as any).type = type;
+    (wrappedFactory as any).critical = critical;
+
+    return wrappedFactory as any;
+  }
+  function createParenttBehaviorFactory(): any {
+    return createTestBehaviorFactory(() => {
+      return {
+        onInit(key: string) {
+          calls.push(`parentOnInit:${key}`);
+        }
+      };
+    }, 'state');
+  }
+
+  let vaultRunner: VaultBehaviorRunner;
   let ctx: VaultBehaviorContext<any>;
   const calls: string[] = [];
   let randonUuid: any;
-  let devToolsId: string;
+  let injector: any;
 
   beforeEach(() => {
     calls.length = 0;
     randonUuid = crypto.randomUUID;
+    spyOn(console, 'warn');
 
     TestBed.configureTestingModule({
       providers: [NgVaultBehaviorLifecycleService, provideZonelessChangeDetection()]
     });
 
-    service = NgVaultBehaviorLifecycleService();
-    devToolsId = service.getRunLevelId('dev-tools') || '';
+    vaultRunner = NgVaultBehaviorLifecycleService();
+    injector = TestBed.inject(Injector);
 
     // minimal fake context
     ctx = {
@@ -39,176 +82,413 @@ describe('VaultBehaviorLifecycleService', () => {
 
   describe('onInit', () => {
     it('should call onInit on a single behavior', () => {
-      const behavior: VaultBehavior = {
-        type: 'dev-tools',
-        runLevelId: devToolsId,
-        onInit: (key, serviceName, ctx) => {
-          calls.push(`${key}:${serviceName}:${ctx.state.value}`);
-        }
-      };
+      const parentBehavior = createParenttBehaviorFactory();
+      const childBehavior = createTestBehaviorFactory(() => {
+        return {
+          onInit(key: string) {
+            calls.push(`onInit:${key}`);
+          }
+        };
+      }, 'state');
 
-      service.onInit(devToolsId!, 'vault1', 'TestService', ctx, [behavior]);
+      const providers = vaultRunner.initializeBehaviors(injector, [parentBehavior, childBehavior]);
+      const provider = providers[0] as any;
 
-      expect(calls).toEqual(['vault1:TestService:initial']);
+      vaultRunner.onInit(provider.behaviorId, 'vault1', 'service-name', ctx, providers);
+
+      expect(calls).toEqual(['parentOnInit:vault1', 'onInit:vault1']);
     });
 
     describe('invalid ids', () => {
       it('should not call onInit with a not equal id', () => {
-        const behavior: VaultBehavior = {
-          type: 'dev-tools',
-          runLevelId: devToolsId,
-          onInit: (key, serviceName, ctx) => {
-            calls.push(`${key}:${serviceName}:${ctx.state.value}`);
-          }
-        };
+        const parentBehavior = createParenttBehaviorFactory();
+        const childBehavior = createTestBehaviorFactory(() => {
+          return {
+            onInit(key: string) {
+              calls.push(`onInit:${key}`);
+            }
+          };
+        }, 'state');
 
-        service.onInit('22', 'vault1', 'TestService', ctx, [behavior]);
-
-        expect(calls).toEqual([]);
-      });
-
-      it('should not call onInit with a not defined behavior id', () => {
-        const behavior: VaultBehavior = {
-          type: 'dev-tools',
-          onInit: (key, serviceName, ctx) => {
-            calls.push(`${key}:${serviceName}:${ctx.state.value}`);
-          }
-        };
-
-        service.onInit('22', 'vault1', 'TestService', ctx, [behavior]);
+        const providers = vaultRunner.initializeBehaviors(injector, [parentBehavior, childBehavior]);
+        vaultRunner.onInit('22', 'vault1', 'service-name', ctx, providers);
 
         expect(calls).toEqual([]);
       });
 
       it('should not call onInit with a not defined caller id', () => {
-        const behavior: VaultBehavior = {
-          type: 'dev-tools',
-          runLevelId: '22',
-          onInit: (key, serviceName, ctx) => {
-            calls.push(`${key}:${serviceName}:${ctx.state.value}`);
-          }
-        };
+        const parentBehavior = createParenttBehaviorFactory();
+        const childBehavior = createTestBehaviorFactory(() => {
+          return {
+            onInit(key: string) {
+              calls.push(`onInit:${key}`);
+            }
+          };
+        }, 'state');
 
-        service.onInit(undefined as any, 'vault1', 'TestService', ctx, [behavior]);
+        const providers = vaultRunner.initializeBehaviors(injector, [parentBehavior, childBehavior]);
+        vaultRunner.onInit(undefined as any, 'vault1', 'service-name', ctx, providers);
 
         expect(calls).toEqual([]);
       });
     });
 
-    it('should not call onInit when a behavior does not have a type', () => {
-      const behavior: VaultBehavior = {
-        runLevelId: devToolsId,
-        onInit: (key, serviceName, ctx) => {
-          calls.push(`${key}:${serviceName}:${ctx.state.value}`);
-        }
-      };
-
-      service.onInit(devToolsId, 'vault1', 'TestService', ctx, [behavior]);
-
-      expect(calls).toEqual([]);
-    });
-
     it('should call onInit on all behavior types in deterministic order', () => {
-      const devToolsBehavior: VaultBehavior = {
-        runLevelId: devToolsId,
-        type: 'dev-tools',
-        onInit: () => calls.push('dev-tools')
-      };
+      const parentBehavior = createParenttBehaviorFactory();
 
-      const eventBehavior: VaultBehavior = {
-        type: 'events',
-        onInit: () => calls.push('events')
-      };
+      const devToolsBehavior = createTestBehaviorFactory(() => {
+        return {
+          onInit: () => calls.push('dev-tools')
+        };
+      }, 'dev-tools');
 
-      const stateBehavior: VaultBehavior = {
-        type: 'state',
-        onInit: () => calls.push('state')
-      };
+      const eventBehavior = createTestBehaviorFactory(() => {
+        return {
+          onInit: () => {
+            calls.push('events');
+          }
+        };
+      }, 'events');
 
-      const persistenceBehavior: VaultBehavior = {
-        type: 'persistence',
-        onInit: () => calls.push('persistence')
-      };
+      const stateBehavior = createTestBehaviorFactory(() => {
+        return {
+          onInit: () => calls.push('state')
+        };
+      }, 'state');
 
-      const encryptionBehavior: VaultBehavior = {
-        type: 'encryption',
-        onInit: () => calls.push('encryption')
-      };
+      const persistenceBehavior = createTestBehaviorFactory(() => {
+        return {
+          onInit: () => calls.push('persistence')
+        };
+      }, 'persistence');
 
-      // 🔀 Randomized input order (simulates non-deterministic registration)
-      const randomBehaviors = [encryptionBehavior, stateBehavior, devToolsBehavior, persistenceBehavior, eventBehavior];
+      const encryptionBehavior = createTestBehaviorFactory(() => {
+        return {
+          onInit: () => calls.push('encryption')
+        };
+      }, 'encryption');
 
-      service.onInit(devToolsId, 'vault-test', 'LifecycleService', ctx, randomBehaviors);
+      const unknownBehavior = createTestBehaviorFactory(() => {
+        return {
+          onInit: () => {
+            calls.push('unknown');
+          }
+        };
+      }, 'unknown');
 
-      // ✅ Expect deterministic output regardless of input order
+      const randomBehaviors = [
+        parentBehavior,
+        encryptionBehavior,
+        unknownBehavior,
+        stateBehavior,
+        devToolsBehavior,
+        persistenceBehavior,
+        eventBehavior
+      ];
+
+      const providers = vaultRunner.initializeBehaviors(injector, randomBehaviors);
+      const provider = providers[0] as any;
+
+      vaultRunner.onInit(provider.behaviorId, 'vault1', 'service-name', ctx, providers);
+
       expect(calls).toEqual([
         'dev-tools', // Priority 0
         'events', // Priority 1
+        'parentOnInit:vault1', // Priority 2
         'state', // Priority 2
         'persistence', // Priority 3
         'encryption' // Priority 4
       ]);
     });
 
-    it('should get id per run level with crypto', () => {
-      const ids = ['1', '2', '3', '4', '5'];
-      spyOn(crypto, 'randomUUID').and.callFake(() => ids.shift() as any);
-
-      service = NgVaultBehaviorLifecycleService();
-
-      expect(service.getRunLevelId('dev-tools')).toBe('1');
-      expect(service.getRunLevelId('events')).toBe('2');
-      expect(service.getRunLevelId('state')).toBe('3');
-      expect(service.getRunLevelId('persistence')).toBe('4');
-      expect(service.getRunLevelId('encryption')).toBe('5');
-    });
-
-    it('should get id per run level without crypto', () => {
-      const math = ['1', '2', '3', '4', '5'];
-      const dates = ['1', '2', '3', '4', '5'];
-      spyOn(Math, 'random').and.callFake(() => math.shift() as any);
-      spyOn(Date, 'now').and.callFake(() => dates.pop() as any);
-      crypto.randomUUID = undefined as any;
-
-      service = NgVaultBehaviorLifecycleService();
-
-      expect(service.getRunLevelId('dev-tools')).toBe('5');
-      expect(service.getRunLevelId('events')).toBe('4');
-      expect(service.getRunLevelId('state')).toBe('3');
-      expect(service.getRunLevelId('persistence')).toBe('2');
-      expect(service.getRunLevelId('encryption')).toBe('1');
-    });
-
     it('should handle behaviors without onInit gracefully', () => {
-      const behaviorWithoutOnInit: VaultBehavior = {};
-      expect(() => service.onInit(devToolsId, 'vault3', 'NoInitService', ctx, [behaviorWithoutOnInit])).not.toThrow();
+      const parentBehavior = createParenttBehaviorFactory();
+      const behaviorWithoutOnInit = createTestBehaviorFactory(() => {}, 'state');
+
+      const providers = vaultRunner.initializeBehaviors(injector, [parentBehavior, behaviorWithoutOnInit]);
+      const provider = providers[0] as any;
+
+      vaultRunner.onInit(provider.behaviorId, 'vault1', 'service-name', ctx, providers);
+
+      expect(calls).toEqual(['parentOnInit:vault1']);
     });
 
     it('should do nothing when behaviors array is empty', () => {
-      service.onInit(devToolsId, 'vault4', 'EmptyService', ctx, []);
-      expect(calls.length).toBe(0);
+      const parentBehavior = createParenttBehaviorFactory();
+
+      const providers = vaultRunner.initializeBehaviors(injector, [parentBehavior]);
+      const provider = providers[0] as any;
+
+      vaultRunner.onInit(provider.behaviorId, 'vault1', 'service-name', ctx, []);
+
+      expect(calls).toEqual([]);
     });
 
     it('should do nothing when behaviors is null or undefined', () => {
-      service.onInit(devToolsId, 'vault5', 'NullService', ctx, null as any);
-      service.onInit(devToolsId, 'vault6', 'UndefinedService', ctx, undefined as any);
-      expect(calls.length).toBe(0);
+      const parentBehavior = createParenttBehaviorFactory();
+
+      const providers = vaultRunner.initializeBehaviors(injector, [parentBehavior]);
+      const provider = providers[0] as any;
+
+      vaultRunner.onInit(provider.behaviorId, 'vault1', 'service-name', ctx, null as any);
+      vaultRunner.onInit(provider.behaviorId, 'vault1', 'service-name', ctx, undefined as any);
+
+      expect(calls).toEqual([]);
     });
   });
 
   describe('All Other life cycles', () => {
     it('should call onSet on a single behavior', () => {
-      const behavior: VaultBehavior = {
-        type: 'dev-tools',
-        runLevelId: devToolsId,
-        onSet: (key, ctx) => {
-          calls.push(`${key}:${ctx.state.value}`);
-        }
-      };
+      const parentBehavior = createParenttBehaviorFactory();
+      const simpleBehaviorFactory = createTestBehaviorFactory(() => {
+        return {
+          onSet(key: string) {
+            calls.push(`onSet:${key}`);
+          }
+        };
+      }, 'state');
 
-      service.onSet(devToolsId, 'vault1', ctx, [behavior]);
+      const providers = vaultRunner.initializeBehaviors(injector, [parentBehavior, simpleBehaviorFactory]);
+      const provider = providers[0] as any;
 
-      expect(calls).toEqual(['vault1:initial']);
+      vaultRunner.onSet(provider.behaviorId, 'vault1', ctx, providers);
+
+      expect(calls).toEqual(['onSet:vault1']);
+
+      calls.length = 0;
+
+      vaultRunner.onSet(provider.behaviorId, 'vault1', ctx, []);
+
+      expect(calls).toEqual([]);
+    });
+  });
+
+  describe('initialize behaviors', () => {
+    it('should get id per run level with crypto', () => {
+      const ids = ['1', '2', '3', '4', '5'];
+      spyOn(crypto, 'randomUUID').and.callFake(() => ids.shift() as any);
+
+      const parentBehavior = createParenttBehaviorFactory();
+      const devTools = createTestBehaviorFactory(() => {
+        return {};
+      }, 'dev-tools');
+      const events = createTestBehaviorFactory(() => {
+        return {};
+      }, 'events');
+      const state = createTestBehaviorFactory(() => {
+        return {};
+      }, 'state');
+      const state2 = createTestBehaviorFactory(() => {
+        return {};
+      }, 'state');
+      const persistence = createTestBehaviorFactory(() => {
+        return {};
+      }, 'persistence');
+      const encryption = createTestBehaviorFactory(() => {
+        return {};
+      }, 'encryption');
+
+      vaultRunner = NgVaultBehaviorLifecycleService();
+
+      const providers = vaultRunner.initializeBehaviors(injector, [
+        parentBehavior,
+        devTools,
+        events,
+        state,
+        state2,
+        persistence,
+        encryption
+      ]);
+
+      expect(providers[0].behaviorId).toBe('3');
+      expect(providers[1].behaviorId).toBe('1');
+      expect(providers[2].behaviorId).toBe('2');
+      expect(providers[3].behaviorId).toBe('3');
+      expect(providers[4].behaviorId).toBe('3');
+      expect(providers[5].behaviorId).toBe('4');
+      expect(providers[6].behaviorId).toBe('5');
+      expect(providers[7]).toBeUndefined();
+    });
+
+    it('should get id per run level without crypto', () => {
+      const math = ['1', '2', '3', '4', '5'];
+      const dates = ['a', 'b', 'c', 'd', 'e'];
+      spyOn(Math, 'random').and.callFake(() => math.shift() as any);
+      spyOn(Date, 'now').and.callFake(() => dates.shift() as any);
+      crypto.randomUUID = undefined as any;
+
+      const parentBehavior = createParenttBehaviorFactory();
+      const devTools = createTestBehaviorFactory(() => {
+        return {};
+      }, 'dev-tools');
+      const events = createTestBehaviorFactory(() => {
+        return {};
+      }, 'events');
+      const state = createTestBehaviorFactory(() => {
+        return {};
+      }, 'state');
+      const state2 = createTestBehaviorFactory(() => {
+        return {};
+      }, 'state');
+      const persistence = createTestBehaviorFactory(() => {
+        return {};
+      }, 'persistence');
+      const encryption = createTestBehaviorFactory(() => {
+        return {};
+      }, 'encryption');
+
+      vaultRunner = NgVaultBehaviorLifecycleService();
+
+      const providers = vaultRunner.initializeBehaviors(injector, [
+        parentBehavior,
+        devTools,
+        events,
+        state,
+        state2,
+        persistence,
+        encryption
+      ]);
+
+      expect(providers[0].behaviorId).toBe('c');
+      expect(providers[1].behaviorId).toBe('a');
+      expect(providers[2].behaviorId).toBe('b');
+      expect(providers[3].behaviorId).toBe('c');
+      expect(providers[4].behaviorId).toBe('c');
+      expect(providers[5].behaviorId).toBe('d');
+      expect(providers[6].behaviorId).toBe('e');
+      expect(providers[7]).toBeUndefined();
+    });
+
+    it('handles no behaviors', () => {
+      expect(vaultRunner.initializeBehaviors(injector, [])).toEqual([]);
+      expect(vaultRunner.initializeBehaviors(injector, undefined as any)).toEqual([]);
+
+      // eslint-disable-next-line
+      expect(console.warn).not.toHaveBeenCalled();
+    });
+
+    it('creates valid behaviors from factory functions', () => {
+      const callOrder: string[] = [];
+
+      // A real, minimal behavior implementation
+      const simpleBehaviorFactory = createTestBehaviorFactory(() => {
+        callOrder.push('factory-called');
+        return {
+          onInit(key: string) {
+            callOrder.push(`onInit:${key}`);
+          },
+          onSet(key: string) {
+            callOrder.push(`onSet:${key}`);
+          }
+        };
+      }, 'state');
+
+      const providers = vaultRunner.initializeBehaviors(injector, [simpleBehaviorFactory]);
+      const provider = providers.pop() as any;
+
+      provider?.onInit?.('key');
+      provider?.onSet?.('key');
+
+      expect(callOrder).toEqual(['factory-called', 'onInit:key', 'onSet:key']);
+    });
+
+    it('handles factory returning non-object gracefully', () => {
+      const badBehaviorFactory = createTestBehaviorFactory(() => undefined, 'state');
+
+      vaultRunner.initializeBehaviors(injector, [badBehaviorFactory]);
+
+      // eslint-disable-next-line
+      expect(console.warn).toHaveBeenCalledWith(
+        '[NgVault] Behavior initialization failed: [NgVault] Behavior did not return an object'
+      );
+    });
+
+    it('throws an error if a factory does not have a type', () => {
+      const badBehaviorFactory = createTestBehaviorFactory(() => undefined, undefined as any);
+
+      expect(() => vaultRunner.initializeBehaviors(injector, [badBehaviorFactory])).toThrowError(
+        '[NgVault] Behavior factory missing type metadata.'
+      );
+
+      // eslint-disable-next-line
+      expect(console.warn).not.toHaveBeenCalled();
+    });
+
+    it('throws an error if a critical factory returns a non-object', () => {
+      const badBehaviorFactory = createTestBehaviorFactory(() => undefined, 'state', true);
+
+      expect(() => vaultRunner.initializeBehaviors(injector, [badBehaviorFactory])).toThrowError(
+        '[NgVault] Behavior did not return an object'
+      );
+    });
+
+    it('continues execution when a factory throws', () => {
+      const throwingFactory = createTestBehaviorFactory(() => {
+        throw new Error('boom');
+      }, 'state');
+      const workingFactory = createTestBehaviorFactory(
+        () => ({
+          onInit() {},
+          onDestroy() {}
+        }),
+        'state'
+      );
+
+      vaultRunner.initializeBehaviors(injector, [throwingFactory, workingFactory]);
+
+      // eslint-disable-next-line
+      expect(console.warn).toHaveBeenCalledWith('[NgVault] Non-critical behavior initialization failed: boom');
+    });
+
+    it('ignores invalid non-function behaviors', () => {
+      const invalidBehavior: any = 42;
+
+      expect(() => vaultRunner.initializeBehaviors(injector, [invalidBehavior])).toThrowError(
+        '[NgVault] Behavior factory missing type metadata.'
+      );
+
+      // eslint-disable-next-line
+      expect(console.warn).not.toHaveBeenCalled();
+    });
+
+    it('filters null and undefined factories but retains valid ones', () => {
+      const nullFactory = createTestBehaviorFactory(() => null as any, 'state');
+      const undefinedFactory = createTestBehaviorFactory(() => undefined as any, 'state');
+      const validFactory = createTestBehaviorFactory(
+        () => ({
+          onInit() {},
+          onDestroy() {}
+        }),
+        'state'
+      );
+
+      vaultRunner.initializeBehaviors(injector, [nullFactory, undefinedFactory, validFactory]);
+
+      // eslint-disable-next-line
+      expect(console.warn).toHaveBeenCalledTimes(2);
+
+      // eslint-disable-next-line
+      const call1 = (console.warn as jasmine.Spy).calls.allArgs()[0];
+      // eslint-disable-next-line
+      const call2 = (console.warn as jasmine.Spy).calls.allArgs()[1];
+      expect(call1).toEqual(['[NgVault] Behavior initialization failed: [NgVault] Behavior did not return an object']);
+      expect(call2).toEqual(['[NgVault] Behavior initialization failed: [NgVault] Behavior did not return an object']);
+    });
+
+    it('throws an error if a critical factory returns a non-object', () => {
+      const nullFactory = createTestBehaviorFactory(() => null as any, 'state');
+      const undefinedFactory = createTestBehaviorFactory(() => undefined as any, 'state', true);
+      const validFactory = createTestBehaviorFactory(
+        () => ({
+          onInit() {},
+          onDestroy() {}
+        }),
+        'state'
+      );
+
+      expect(() =>
+        vaultRunner.initializeBehaviors(injector, [nullFactory, undefinedFactory, validFactory])
+      ).toThrowError('[NgVault] Behavior did not return an object');
     });
   });
 });

@@ -24,7 +24,7 @@ export function initializeBehaviors<T>(
 
         const runLevelId = behaviorType ? runner.getRunLevelId(behaviorType) : undefined;
 
-        const instance = factory({ injector, runLevelId } as VaultBehaviorFactoryContext);
+        const instance = factory({ injector, behaviorId: runLevelId } as VaultBehaviorFactoryContext);
 
         if (!instance || typeof instance !== 'object') {
           const message = `[NgVault] Behavior did not return an object`;
