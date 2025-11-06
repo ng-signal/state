@@ -65,31 +65,3 @@ export const withTestBehavior: any = (context: any): any => {
 export const getTestBehavior = () => {
   return testInstance;
 };
-
-/*
-    fit('should emit a "dispose" event when vault.destroy() is called', () => {
-      const providers = provideFeatureCell(class TestService {}, { key: 'devtools-test', initial: [] }, [
-        withTestBehavior
-      ]);
-
-      const factory = (providers[0] as any).useFactory;
-
-      /*
-      const runner = NgVaultBehaviorLifecycleService();
-      runner.initialize();
-
-      const injector = TestBed.inject(Injector);
-      const behaviors = runner.initializeBehaviors(injector, [withTestBehavior]);
-
-      testBehavior = behaviors.find((b: any) => b.type === 'dev-tools') as any;
-      * /
-
-      let vault: ResourceVaultModel<any>;
-      runInInjectionContext(TestBed.inject(Injector), () => {
-        vault = factory();
-        vault.destroy();
-      });
-
-      expect(testBehavior.getEvents()).toEqual(['onReset:devtools-test', 'onDestroy:devtools-test']);
-    });
-    */

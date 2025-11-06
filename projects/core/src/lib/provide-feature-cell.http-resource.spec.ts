@@ -3,6 +3,7 @@ import { HttpTestingController, provideHttpClientTesting } from '@angular/common
 import { ApplicationRef, Injector, provideZonelessChangeDetection, runInInjectionContext, signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { ResourceVaultModel } from '@ngvault/shared-models';
+import { getTestBehavior, withTestBehavior } from '@ngvault/testing';
 import { provideFeatureCell } from './provide-feature-cell';
 
 interface TestModel {
@@ -12,36 +13,14 @@ interface TestModel {
 
 describe('Provider: Feature Cell Resource', () => {
   let vault: ResourceVaultModel<TestModel[] | TestModel | number | undefined>;
-  const events: any[] = [];
 
   beforeEach(() => {
-    events.length = 0;
     TestBed.configureTestingModule({
       providers: [provideHttpClient(), provideHttpClientTesting(), provideZonelessChangeDetection()]
     });
 
     const injector = TestBed.inject(Injector);
-
-    const withTestBehavior = () => {
-      return {
-        onInit(key: string) {
-          events.push(`onInit:${key}`);
-        },
-        onSet(key: string) {
-          events.push(`onSet:${key}`);
-        },
-        onPatch(key: string) {
-          events.push(`onPatch:${key}`);
-        },
-        onReset(key: string) {
-          events.push(`onReset:${key}`);
-        }
-      };
-    };
-    withTestBehavior.type = 'state';
-    withTestBehavior.critial = false;
-
-    const providers = provideFeatureCell(class TestService {}, { key: 'http', initial: [] }, [withTestBehavior as any]);
+    const providers = provideFeatureCell(class TestService {}, { key: 'http', initial: [] }, [withTestBehavior]);
     const vaultFactory = (providers[0] as any).useFactory;
 
     runInInjectionContext(injector, () => {
@@ -222,7 +201,15 @@ describe('Provider: Feature Cell Resource', () => {
       expect(vault.state.error()).toBeNull();
       expect(vault.state.hasValue()).toBeFalse();
 
-      expect(events).toEqual(['onSet:http', 'onSet:http', 'onReset:http']);
+      expect(getTestBehavior().getEvents()).toEqual([
+        'onInit:http',
+        'onInit:NgVault::CoreSet',
+        'onSet:http',
+        'onSetState:http:{"isLoading":true,"error":null,"hasValue":false}',
+        'onSet:http',
+        'onSetState:http:{"isLoading":false,"value":[{"id":1,"name":"Ada"}],"error":null,"hasValue":true}',
+        'onReset:http'
+      ]);
     });
   });
 
@@ -395,7 +382,13 @@ describe('Provider: Feature Cell Resource', () => {
       expect(vault.state.isLoading()).toBeFalse();
       expect(vault.state.hasValue()).toBeTrue();
 
-      expect(events).toEqual(['onPatch:http', 'onPatch:http', 'onPatch:http']);
+      expect(getTestBehavior().getEvents()).toEqual([
+        'onInit:http',
+        'onInit:NgVault::CoreSet',
+        'onPatch:http',
+        'onPatch:http',
+        'onPatch:http'
+      ]);
     });
   });
 });

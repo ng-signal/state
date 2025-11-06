@@ -24,7 +24,7 @@ class CoreSetBehavior<T> implements VaultBehavior<T> {
   ) {}
 
   onInit(key: string, service: string, ctx: VaultBehaviorContext<T>): void {
-    ctx.devTools?.onInit?.(this.key, service, ctx);
+    ctx.behaviorRunner?.onInit?.(this.behaviorId, this.key, service, ctx);
   }
 
   onSet(key: string, ctx: VaultBehaviorContext<T>): void {
@@ -46,7 +46,7 @@ class CoreSetBehavior<T> implements VaultBehavior<T> {
           value?.set(val as VaultDataType<T>);
         }
 
-        ctx.devTools?.onSet?.(this.key, ctx);
+        ctx.behaviorRunner?.onSet?.(this.behaviorId, this.key, ctx);
       }
     }
   }

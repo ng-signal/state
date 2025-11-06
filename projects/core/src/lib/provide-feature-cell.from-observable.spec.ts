@@ -3,6 +3,7 @@ import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { Injector, provideZonelessChangeDetection, runInInjectionContext, signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { ResourceVaultModel, VaultSignalRef } from '@ngvault/shared-models';
+import { getTestBehavior, withTestBehavior } from '@ngvault/testing';
 import { Subject } from 'rxjs';
 import { provideFeatureCell } from './provide-feature-cell';
 
@@ -24,23 +25,11 @@ describe('ResourceVaultModel (setState, patchState, fromObservable)', () => {
       providers: [provideHttpClient(), provideHttpClientTesting(), provideZonelessChangeDetection()]
     });
 
-    const withTestBehavior = () => {
-      return {
-        onInit(key: string) {
-          calls.push(`onInit:${key}`);
-        },
-        onLoad(key: string) {
-          calls.push(`onLoad:${key}`);
-        }
-      };
-    };
-    withTestBehavior.type = 'state';
-    withTestBehavior.critial = false;
-
-    const providers = provideFeatureCell(class TestService {}, { key: 'http', initial: [] }, [withTestBehavior as any]);
-
+    const injector = TestBed.inject(Injector);
+    const providers = provideFeatureCell(class TestService {}, { key: 'http', initial: [] }, [withTestBehavior]);
     const vaultFactory = (providers[0] as any).useFactory;
-    runInInjectionContext(TestBed.inject(Injector), () => {
+
+    runInInjectionContext(injector, () => {
       vault = vaultFactory();
     });
   });
@@ -169,7 +158,7 @@ describe('ResourceVaultModel (setState, patchState, fromObservable)', () => {
       }
     });
 
-    expect(calls).toEqual(['onLoad:http']);
+    expect(getTestBehavior().getEvents()).toEqual(['onInit:http', 'onInit:NgVault::CoreSet', 'onLoad:http']);
 
     subject.next({ id: 1, name: 'Ada' });
     subject.complete();
