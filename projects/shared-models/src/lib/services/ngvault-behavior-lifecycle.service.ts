@@ -1,5 +1,6 @@
 // projects/core/src/lib/services/vault-behavior-lifecycle.service.ts
 import { Injector } from '@angular/core';
+import { validateNgVaultBehaviorKey } from '@ngvault/shared-models';
 import { VaultBehaviorFactoryContext } from '../contexts/vault-behavior-factory.context';
 import { VaultBehaviorContext } from '../contexts/vault-behavior.context';
 import { VaultBehaviorRunner } from '../interfaces/vault-behavior-runner.interface';
@@ -157,7 +158,7 @@ class VaultBehaviorRunnerClass implements VaultBehaviorRunner {
             return null;
           }
 
-          if (!instance.key) {
+          if (!(instance.key && validateNgVaultBehaviorKey(instance.key))) {
             isCritical = true;
             throw new Error(
               `[NgVault] Behavior missing key for type "${behaviorType}". Every behavior must define a unique "key".`

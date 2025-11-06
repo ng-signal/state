@@ -18,3 +18,4 @@ export * from './lib/types/vault-behavior.type';
 export * from './lib/types/vault-data.type';
 export * from './lib/types/vault-state-input.type';
 export * from './lib/types/vault-state.type';
+export * from './lib/utils/define-ngvault-behavior-key.util';

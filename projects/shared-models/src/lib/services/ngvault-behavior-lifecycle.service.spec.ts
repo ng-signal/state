@@ -1,7 +1,12 @@
 // projects/core/src/lib/services/vault-behavior-lifecycle.service.spec.ts
 import { Injector, provideZonelessChangeDetection } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
-import { createTestBehaviorFactory, getTestBehavior, withTestBehavior } from '@ngvault/testing';
+import {
+  createTestBehaviorFactory,
+  getTestBehavior,
+  resetTestBehaviorFactoryId,
+  withTestBehavior
+} from '@ngvault/testing';
 import { VaultBehaviorContext } from '../contexts/vault-behavior.context';
 import { VaultBehaviorRunner } from '../interfaces/vault-behavior-runner.interface';
 import { NgVaultBehaviorLifecycleService } from './ngvault-behavior-lifecycle.service';
@@ -33,6 +38,8 @@ describe('VaultBehaviorLifecycleService', () => {
     calls.length = 0;
     randonUuid = crypto.randomUUID;
     spyOn(console, 'warn');
+
+    resetTestBehaviorFactoryId();
 
     ids = ['dev-tools-id', 'events-id', 'core-id', 'state-id', 'persistence-id', 'encryption-id'];
     spyOn(crypto, 'randomUUID').and.callFake(() => ids.shift() as any);
@@ -303,26 +310,28 @@ describe('VaultBehaviorLifecycleService', () => {
   describe('initializeBehaviors', () => {
     it('should get id per run level without crypto', () => {
       const math = [
-        '1',
-        '2',
-        '3',
-        '4',
-        '5',
-        '6',
-        '111',
-        '222',
-        '333',
-        '444',
-        '555',
-        '666',
-        '111',
-        '222',
-        '333',
-        '444',
-        '555',
-        '666'
+        0.28, // → starts with 'a'
+        0.31, // → 'b'
+        0.333, // → 'c' (your fixed third value)
+        0.34, // → 'c'
+        0.4, // → 'e'
+        0.45, // → 'g'
+        0.55, // → 'j'
+        0.62, // → 'l'
+        0.73, // → 'p'
+        0.81, // → 'r'
+        0.88, // → 'v'
+        0.92, // → 'w'
+        0.96, // → 'y'
+        0.98, // → 'z'
+        0.99, // → 'z'
+        0.85, // → 't'
+        0.79, // → 's'
+        0.67 // → 'n'
       ];
-      const dates = ['a', 'b', 'c', 'd', 'e', 'f'];
+
+      const dates = [1000, 2000, 3000, 4000, 5000, 6000];
+
       spyOn(Math, 'random').and.callFake(() => math.shift() as any);
       spyOn(Date, 'now').and.callFake(() => dates.shift() as any);
       crypto.randomUUID = undefined as any;
@@ -356,6 +365,7 @@ describe('VaultBehaviorLifecycleService', () => {
         parentBehavior,
         devTools,
         events,
+        events,
         state,
         state2,
         persistence,
@@ -371,7 +381,7 @@ describe('VaultBehaviorLifecycleService', () => {
       }, 'state');
 
       vaultRunner.initializeBehaviors(injector, [parentBehavior, simpleBehaviorFactory]);
-      vaultRunner.onSet('c', 'vault1', ctx);
+      vaultRunner.onSet('bzkg4lvyuj52bc', 'vault1', ctx);
 
       expect(calls).toEqual(['onSet:vault1']);
     });
@@ -492,6 +502,29 @@ describe('VaultBehaviorLifecycleService', () => {
 
       // eslint-disable-next-line
       expect(console.warn).not.toHaveBeenCalled();
+    });
+
+    it('throws an error if a behavior has a bad key', () => {
+      const childBehavior = createTestBehaviorFactory(() => ({}), 'state', 'bad-gen');
+
+      expect(() => vaultRunner.initializeBehaviors(injector, [childBehavior])).toThrowError(
+        '[NgVault] Behavior missing key for type "state". Every behavior must define a unique "key".'
+      );
+
+      // eslint-disable-next-line
+      expect(console.warn).not.toHaveBeenCalled();
+    });
+
+    it('throws an error if a behavior has a duplicate key', () => {
+      const childBehavior = createTestBehaviorFactory(() => ({}), 'state', 'duplicate');
+      const childBehaviorDup = createTestBehaviorFactory(() => ({}), 'state', 'duplicate');
+
+      vaultRunner.initializeBehaviors(injector, [childBehavior, childBehaviorDup]);
+
+      // eslint-disable-next-line
+      expect(console.warn).toHaveBeenCalledWith(
+        '[NgVault] Skipping duplicate behavior with key "NgVault::Testing::Duplicate"'
+      );
     });
   });
 

@@ -1,7 +1,12 @@
+import { defineNgVaultBehaviorKey } from '@ngvault/shared-models';
+
 class TestBehavior {
   #events: any = [];
+  counter = 0;
 
-  key = Math.random().toString(36).slice(2, 6);
+  get key(): string {
+    return defineNgVaultBehaviorKey('testing', `id-${this.counter++}`);
+  }
 
   constructor(
     public behaviorId: string,
@@ -12,6 +17,7 @@ class TestBehavior {
   }
 
   resetEvents(): void {
+    this.counter = 0;
     this.#events.length = 0;
   }
 

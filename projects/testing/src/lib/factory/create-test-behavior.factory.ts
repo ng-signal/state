@@ -1,3 +1,7 @@
+import { defineNgVaultBehaviorKey } from '@ngvault/shared-models';
+
+let counter = 0;
+
 export function createTestBehaviorFactory(
   factory: (...args: any[]) => any,
   type?: string,
@@ -15,11 +19,19 @@ export function createTestBehaviorFactory(
     Object.defineProperty(behavior, 'behaviorId', {
       value: behaviorId,
       enumerable: false,
+
       writable: true
     });
 
     if (key !== 'no-gen') {
-      const value = Math.random().toString(36).slice(2, 6);
+      let value = defineNgVaultBehaviorKey('testing', `id-${counter++}`);
+
+      if (key === 'bad-gen') {
+        value = key;
+      } else if (key === 'duplicate') {
+        value = defineNgVaultBehaviorKey('testing', key);
+      }
+
       Object.defineProperty(behavior, 'key', {
         value,
         enumerable: false,
@@ -43,3 +55,7 @@ export function createTestBehaviorFactory(
 
   return wrappedFactory as any;
 }
+
+export const resetTestBehaviorFactoryId = () => {
+  counter = 0;
+};
