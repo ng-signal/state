@@ -1,5 +1,6 @@
 // projects/core/src/lib/behaviors/with-core-set.behavior.ts
 import {
+  defineNgVaultBehaviorKey,
   VaultBehavior,
   VaultBehaviorContext,
   VaultBehaviorFactory,
@@ -15,7 +16,7 @@ import { isHttpResource } from '../utils/is-http-resource.util';
  */
 class CoreSetBehavior<T> implements VaultBehavior<T> {
   public readonly critical = true;
-  public readonly key = 'NgVault::CoreSet';
+  public readonly key = defineNgVaultBehaviorKey('Core', 'Set');
 
   constructor(
     readonly behaviorId: string,

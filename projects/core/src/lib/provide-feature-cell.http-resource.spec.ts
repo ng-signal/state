@@ -203,7 +203,7 @@ describe('Provider: Feature Cell Resource', () => {
 
       expect(getTestBehavior().getEvents()).toEqual([
         'onInit:http',
-        'onInit:NgVault::CoreSet',
+        'onInit:NgVault::Core::Set',
         'onSet:http',
         'onSetState:http:{"isLoading":true,"error":null,"hasValue":false}',
         'onSet:http',
@@ -384,7 +384,7 @@ describe('Provider: Feature Cell Resource', () => {
 
       expect(getTestBehavior().getEvents()).toEqual([
         'onInit:http',
-        'onInit:NgVault::CoreSet',
+        'onInit:NgVault::Core::Set',
         'onPatch:http',
         'onPatch:http',
         'onPatch:http'

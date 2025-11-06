@@ -158,7 +158,7 @@ describe('ResourceVaultModel (setState, patchState, fromObservable)', () => {
       }
     });
 
-    expect(getTestBehavior().getEvents()).toEqual(['onInit:http', 'onInit:NgVault::CoreSet', 'onLoad:http']);
+    expect(getTestBehavior().getEvents()).toEqual(['onInit:http', 'onInit:NgVault::Core::Set', 'onLoad:http']);
 
     subject.next({ id: 1, name: 'Ada' });
     subject.complete();

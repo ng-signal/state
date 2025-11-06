@@ -395,7 +395,7 @@ describe('Provider: Feature Cell (core vault functionality)', () => {
 
       testBehavior = getTestBehavior();
 
-      expect(testBehavior.getEvents()).toEqual(['onInit:devtools-test', 'onInit:NgVault::CoreSet']);
+      expect(testBehavior.getEvents()).toEqual(['onInit:devtools-test', 'onInit:NgVault::Core::Set']);
     });
 
     it('should emit a "dispose" event when vault.destroy() is called', () => {
@@ -408,7 +408,7 @@ describe('Provider: Feature Cell (core vault functionality)', () => {
 
       expect(testBehavior.getEvents()).toEqual([
         'onInit:devtools-test',
-        'onInit:NgVault::CoreSet',
+        'onInit:NgVault::Core::Set',
         'onReset:devtools-test',
         'onDestroy:devtools-test'
       ]);
@@ -431,13 +431,13 @@ describe('Provider: Feature Cell (core vault functionality)', () => {
 
       expect(testBehavior.getEvents()).toEqual([
         'onInit:devtools-test',
-        'onInit:NgVault::CoreSet',
+        'onInit:NgVault::Core::Set',
 
         'onSet:devtools-test',
         'onSetState:devtools-test:{"isLoading":false,"value":[],"error":null,"hasValue":true}',
 
-        'onSet:NgVault::CoreSet',
-        'onSetState:NgVault::CoreSet:{"isLoading":true,"value":[1,2,3],"error":{"message":"fail"},"hasValue":true}',
+        'onSet:NgVault::Core::Set',
+        'onSetState:NgVault::Core::Set:{"isLoading":true,"value":[1,2,3],"error":{"message":"fail"},"hasValue":true}',
 
         'onReset:devtools-test',
 
@@ -448,8 +448,8 @@ describe('Provider: Feature Cell (core vault functionality)', () => {
         'onSet:devtools-test',
         'onSetState:devtools-test:{"isLoading":false,"error":null,"hasValue":false}',
 
-        'onSet:NgVault::CoreSet',
-        'onSetState:NgVault::CoreSet:{"isLoading":true,"value":[1,2,3],"error":{"message":"fail"},"hasValue":true}',
+        'onSet:NgVault::Core::Set',
+        'onSetState:NgVault::Core::Set:{"isLoading":true,"value":[1,2,3],"error":{"message":"fail"},"hasValue":true}',
 
         'onReset:devtools-test'
       ]);

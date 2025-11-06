@@ -1,5 +1,6 @@
 import { inject } from '@angular/core';
 import {
+  defineNgVaultBehaviorKey,
   NgVaultDevModeService,
   VaultBehavior,
   VaultBehaviorContext,
@@ -17,7 +18,7 @@ class DevtoolsBehavior implements VaultBehavior {
   #registered = new Set<string>();
   #eventBus = inject(NgVaultEventBus);
   #initialized = new Set<string>();
-  public readonly key = 'NgVault::DevTools::Behavior';
+  public readonly key = defineNgVaultBehaviorKey('DevTools', 'Telemetry');
 
   constructor(
     readonly behaviorId: string,
