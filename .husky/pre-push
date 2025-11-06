@@ -17,4 +17,9 @@ npm run test:coverage:dev-tools || {
   exit 1
 }
 
+npm run test:coverage:shared-models || {
+  printf "\n\nERROR: Test Coverage issues were found in the 'shared-models' committed files. Please address them before proceeding.\n\n\n\n"
+  exit 1
+}
+
 echo "Pre-push checks complete."

@@ -1,7 +1,11 @@
+import { VaultBehaviorType } from '@ngvault/shared-models';
 import { VaultBehaviorContext } from '../contexts/vault-behavior.context';
 
 export interface VaultBehavior<T = unknown> {
-  critical?: boolean;
+  readonly critical?: boolean;
+  readonly type?: VaultBehaviorType;
+  readonly key?: string;
+  readonly runLevelId?: string;
   onInit?(key: string, service: string, ctx: VaultBehaviorContext<T>): void;
   onLoad?(key: string, ctx: VaultBehaviorContext<T>): void;
   onSet?(key: string, ctx: VaultBehaviorContext<T>): void;

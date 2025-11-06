@@ -225,6 +225,13 @@ describe('Provider: Feature Cell Resource', () => {
         }),
         Object({
           id: jasmine.any(String),
+          key: 'NgVault::CoreSet::Behavior',
+          type: 'init',
+          timestamp: jasmine.any(Number),
+          state: Object({ isLoading: false, value: [], error: null, hasValue: true })
+        }),
+        Object({
+          id: jasmine.any(String),
           key: 'http',
           type: 'set',
           timestamp: jasmine.any(Number),
@@ -421,6 +428,13 @@ describe('Provider: Feature Cell Resource', () => {
         Object({
           id: jasmine.any(String),
           key: 'http',
+          type: 'init',
+          timestamp: jasmine.any(Number),
+          state: Object({ isLoading: false, value: [], error: null, hasValue: true })
+        }),
+        Object({
+          id: jasmine.any(String),
+          key: 'NgVault::CoreSet::Behavior',
           type: 'init',
           timestamp: jasmine.any(Number),
           state: Object({ isLoading: false, value: [], error: null, hasValue: true })

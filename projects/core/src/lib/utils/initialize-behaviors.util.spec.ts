@@ -1,9 +1,11 @@
 import { Injector, provideZonelessChangeDetection } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
+import { NgVaultBehaviorLifecycleService } from '@ngvault/shared-models';
 import { initializeBehaviors } from './initialize-behaviors.util';
 
 describe('Behavior Factory Instantiation (no mocks)', () => {
   let injector: Injector;
+  let runner: any;
 
   beforeEach(() => {
     TestBed.configureTestingModule({
@@ -12,11 +14,13 @@ describe('Behavior Factory Instantiation (no mocks)', () => {
 
     injector = TestBed.inject(Injector);
     spyOn(console, 'warn');
+
+    runner = NgVaultBehaviorLifecycleService();
   });
 
   it('handles no behaviors', () => {
-    expect(initializeBehaviors(injector, [])).toEqual([]);
-    expect(initializeBehaviors(injector, undefined as any)).toEqual([]);
+    expect(initializeBehaviors(injector, [], runner)).toEqual([]);
+    expect(initializeBehaviors(injector, undefined as any, runner)).toEqual([]);
 
     // eslint-disable-next-line
     expect(console.warn).not.toHaveBeenCalled();
@@ -39,7 +43,7 @@ describe('Behavior Factory Instantiation (no mocks)', () => {
       };
     }
 
-    const providers = initializeBehaviors(injector, [simpleBehaviorFactory]);
+    const providers = initializeBehaviors(injector, [simpleBehaviorFactory], runner);
     const provider = providers.pop() as any;
 
     provider?.onInit?.('key');
@@ -51,7 +55,7 @@ describe('Behavior Factory Instantiation (no mocks)', () => {
   it('handles factory returning non-object gracefully', () => {
     const badBehaviorFactory = () => undefined as any;
 
-    initializeBehaviors(injector, [badBehaviorFactory]);
+    initializeBehaviors(injector, [badBehaviorFactory], runner);
 
     // eslint-disable-next-line
     expect(console.warn).toHaveBeenCalledWith(
@@ -63,7 +67,7 @@ describe('Behavior Factory Instantiation (no mocks)', () => {
     const badBehaviorFactory = () => undefined as any;
     (badBehaviorFactory as any).critical = true;
 
-    expect(() => initializeBehaviors(injector, [badBehaviorFactory])).toThrowError(
+    expect(() => initializeBehaviors(injector, [badBehaviorFactory], runner)).toThrowError(
       '[NgVault] Behavior did not return an object'
     );
   });
@@ -77,7 +81,7 @@ describe('Behavior Factory Instantiation (no mocks)', () => {
       onDestroy() {}
     });
 
-    initializeBehaviors(injector, [throwingFactory, workingFactory]);
+    initializeBehaviors(injector, [throwingFactory, workingFactory], runner);
 
     // eslint-disable-next-line
     expect(console.warn).toHaveBeenCalledWith('[NgVault] Non-critical behavior initialization failed: boom');
@@ -86,7 +90,7 @@ describe('Behavior Factory Instantiation (no mocks)', () => {
   it('ignores invalid non-function behaviors', () => {
     const invalidBehavior: any = 42;
 
-    initializeBehaviors(injector, [invalidBehavior]);
+    initializeBehaviors(injector, [invalidBehavior], runner);
 
     // eslint-disable-next-line
     expect(console.warn).toHaveBeenCalledWith(
@@ -99,7 +103,7 @@ describe('Behavior Factory Instantiation (no mocks)', () => {
     const undefinedFactory = () => undefined as any;
     const validFactory = () => ({ onSet() {} });
 
-    initializeBehaviors(injector, [nullFactory, undefinedFactory, validFactory]);
+    initializeBehaviors(injector, [nullFactory, undefinedFactory, validFactory], runner);
 
     // eslint-disable-next-line
     expect(console.warn).toHaveBeenCalledTimes(2);
@@ -120,7 +124,7 @@ describe('Behavior Factory Instantiation (no mocks)', () => {
       onSet() {}
     });
 
-    expect(() => initializeBehaviors(injector, [nullFactory, undefinedFactory, validFactory])).toThrowError(
+    expect(() => initializeBehaviors(injector, [nullFactory, undefinedFactory, validFactory], runner)).toThrowError(
       '[NgVault] Behavior did not return an object'
     );
   });

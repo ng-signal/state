@@ -4,6 +4,7 @@ import {
   VaultBehavior,
   VaultBehaviorContext,
   VaultBehaviorFactoryContext,
+  VaultBehaviorType,
   VaultStateSnapshot
 } from '@ngvault/shared-models';
 import { VaultEventType } from '../types/event-vault.type';
@@ -15,8 +16,14 @@ class DevtoolsBehavior implements VaultBehavior {
   #registered = new Set<string>();
   #eventBus = inject(NgVaultEventBus);
   #initialized = new Set<string>();
+  public readonly critical = true;
+  public readonly type: VaultBehaviorType = 'dev-tools';
+  public readonly key = 'NgVault::DevTools::Behavior';
 
-  constructor(private readonly _injector: VaultBehaviorFactoryContext['injector']) {}
+  constructor(
+    readonly runLevelId: string,
+    private readonly _injector: VaultBehaviorFactoryContext['injector']
+  ) {}
 
   onInit<T>(vaultKey: string, serviceName: string, ctx: Readonly<VaultBehaviorContext<T>>): void {
     if (!this.#devModeService.isDevMode || this.#registered.has(vaultKey)) return;
@@ -66,5 +73,5 @@ class DevtoolsBehavior implements VaultBehavior {
 }
 
 export function withDevtoolsBehavior(context: VaultBehaviorFactoryContext): VaultBehavior {
-  return new DevtoolsBehavior(context.injector);
+  return new DevtoolsBehavior(context.runLevelId, context.injector);
 }

@@ -1,3 +1,4 @@
+import { provideZonelessChangeDetection } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { NgVaultDevModeService } from './ngvault-dev-mode.service';
 
@@ -6,7 +7,7 @@ describe('Service: NgVaultDevMode', () => {
 
   beforeEach(() => {
     TestBed.configureTestingModule({
-      providers: [NgVaultDevModeService]
+      providers: [NgVaultDevModeService, provideZonelessChangeDetection()]
     });
     service = TestBed.inject(NgVaultDevModeService);
   });

@@ -412,6 +412,13 @@ describe('Provider: Feature Cell (core vault functionality)', () => {
           type: 'init',
           timestamp: jasmine.any(Number),
           state: Object({ isLoading: false, value: [], error: null, hasValue: true })
+        }),
+        Object({
+          id: jasmine.any(String),
+          key: 'NgVault::CoreSet::Behavior',
+          type: 'init',
+          timestamp: jasmine.any(Number),
+          state: Object({ isLoading: false, value: [], error: null, hasValue: true })
         })
       ]);
     });
@@ -427,6 +434,13 @@ describe('Provider: Feature Cell (core vault functionality)', () => {
         Object({
           id: jasmine.any(String),
           key: 'devtools-test',
+          type: 'init',
+          timestamp: jasmine.any(Number),
+          state: Object({ isLoading: false, value: [], error: null, hasValue: true })
+        }),
+        Object({
+          id: jasmine.any(String),
+          key: 'NgVault::CoreSet::Behavior',
           type: 'init',
           timestamp: jasmine.any(Number),
           state: Object({ isLoading: false, value: [], error: null, hasValue: true })
@@ -474,10 +488,24 @@ describe('Provider: Feature Cell (core vault functionality)', () => {
         }),
         Object({
           id: jasmine.any(String),
+          key: 'NgVault::CoreSet::Behavior',
+          type: 'init',
+          timestamp: jasmine.any(Number),
+          state: Object({ isLoading: false, value: [], error: null, hasValue: true })
+        }),
+        Object({
+          id: jasmine.any(String),
           key: 'devtools-test',
           type: 'set',
           timestamp: jasmine.any(Number),
-          state: Object({ isLoading: true, value: [1, 2, 3], error: Object({ message: 'fail' }), hasValue: true })
+          state: Object({ isLoading: false, value: [], error: null, hasValue: true })
+        }),
+        Object({
+          id: jasmine.any(String),
+          key: 'NgVault::CoreSet::Behavior',
+          type: 'set',
+          timestamp: jasmine.any(Number),
+          state: Object({ isLoading: true, value: [1, 2, 3], error: { message: 'fail' }, hasValue: true })
         }),
         Object({
           id: jasmine.any(String),
@@ -503,6 +531,13 @@ describe('Provider: Feature Cell (core vault functionality)', () => {
         Object({
           id: jasmine.any(String),
           key: 'devtools-test',
+          type: 'set',
+          timestamp: jasmine.any(Number),
+          state: Object({ isLoading: false, value: undefined, error: null, hasValue: false })
+        }),
+        Object({
+          id: jasmine.any(String),
+          key: 'NgVault::CoreSet::Behavior',
           type: 'set',
           timestamp: jasmine.any(Number),
           state: Object({ isLoading: true, value: [1, 2, 3], error: Object({ message: 'fail' }), hasValue: true })

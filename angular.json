@@ -204,7 +204,14 @@
         "test": {
           "builder": "@angular/build:karma",
           "options": {
-            "tsConfig": "projects/shared-models/tsconfig.spec.json"
+            "tsConfig": "projects/shared-models/tsconfig.spec.json",
+            "karmaConfig": "projects/shared-models/karma.conf.js",
+            "inlineStyleLanguage": "scss",
+            "stylePreprocessorOptions": {
+              "includePaths": ["projects/styles/src/lib"]
+            },
+            "codeCoverageExclude": [],
+            "scripts": []
           }
         }
       }

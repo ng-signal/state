@@ -11,6 +11,7 @@ import {
   signal
 } from '@angular/core';
 import {
+  NgVaultBehaviorLifecycleService,
   ResourceStateError,
   ResourceVaultModel,
   VaultBehavior,
@@ -45,6 +46,7 @@ export function provideFeatureCell<Service, T>(
     useFactory: (): ResourceVaultModel<T> => {
       const _isLoading = signal(false);
       const _error = signal<ResourceStateError | null>(null);
+      const _behaviorLifeCycle = NgVaultBehaviorLifecycleService();
       const _injector = inject(Injector);
       const _destroyRef = inject(DestroyRef);
       const _destroyed$ = new Subject<void>();
@@ -67,7 +69,7 @@ export function provideFeatureCell<Service, T>(
 
       const defaultBehaviors = [withCoreSetBehavior];
       const allBehaviors = [...defaultBehaviors, ...behaviors];
-      const activeBehaviors = initializeBehaviors(_injector, allBehaviors);
+      const activeBehaviors = initializeBehaviors(_injector, allBehaviors, _behaviorLifeCycle);
 
       const _value = signal<VaultDataType<T>>(
         featureCellDescriptor.initial === null || featureCellDescriptor.initial === undefined
@@ -84,6 +86,9 @@ export function provideFeatureCell<Service, T>(
         isLoading: _isLoading,
         error: _error,
         value: _value,
+        devTools: activeBehaviors.find((behavior: VaultBehavior<T>) => behavior.type === 'dev-tools') as
+          | VaultBehavior<T>
+          | undefined,
 
         get state(): Readonly<VaultStateSnapshot<T>> {
           return {
@@ -95,8 +100,7 @@ export function provideFeatureCell<Service, T>(
         }
       } as VaultBehaviorContext<T>;
 
-      // Run the onInit behaviors
-      activeBehaviors.forEach((b) => b.onInit?.(featureCellDescriptor.key, service.name, ctx));
+      _behaviorLifeCycle.onInit(featureCellDescriptor.key, service.name, ctx, activeBehaviors);
 
       const _reset = (): void => {
         _isLoading.set(false);
@@ -151,7 +155,7 @@ export function provideFeatureCell<Service, T>(
         }
 
         ctx.next = Object.freeze(next as VaultStateType<T>);
-        activeBehaviors.forEach((b) => b.onSet?.(featureCellDescriptor.key, ctx));
+        _behaviorLifeCycle.onSet(featureCellDescriptor.key, ctx, activeBehaviors);
       };
 
       const _patch = (partial: VaultStateInputType<T>): void => {

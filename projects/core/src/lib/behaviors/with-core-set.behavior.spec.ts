@@ -17,7 +17,7 @@ describe('Behavior: withCoreSet', () => {
     };
 
     runInInjectionContext(injector, () => {
-      behavior = withCoreSetBehavior({ injector });
+      behavior = withCoreSetBehavior({ injector, runLevelId: 'id' });
     });
   });
 

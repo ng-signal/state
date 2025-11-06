@@ -1,19 +1,30 @@
 import { Injector } from '@angular/core';
-import { VaultBehavior, VaultBehaviorFactory, VaultBehaviorFactoryContext } from '@ngvault/shared-models';
+import {
+  VaultBehavior,
+  VaultBehaviorFactory,
+  VaultBehaviorFactoryContext,
+  VaultBehaviorRunner
+} from '@ngvault/shared-models';
 
 /**
  * Safely instantiate an array of VaultBehavior factories.
  */
 export function initializeBehaviors<T>(
   injector: Injector,
-  behaviors: Array<VaultBehaviorFactory<T>>
+  behaviors: Array<VaultBehaviorFactory<T>>,
+  runner: VaultBehaviorRunner
 ): VaultBehavior<T>[] {
   if (!behaviors || behaviors.length === 0) return [];
 
   return behaviors
     .map((factory) => {
       try {
-        const instance = factory({ injector } as VaultBehaviorFactoryContext);
+        // eslint-disable-next-line
+        const behaviorType = (factory as any)?.type as VaultBehavior['type'] | undefined;
+
+        const runLevelId = behaviorType ? runner.getRunLevelId(behaviorType) : undefined;
+
+        const instance = factory({ injector, runLevelId } as VaultBehaviorFactoryContext);
 
         if (!instance || typeof instance !== 'object') {
           const message = `[NgVault] Behavior did not return an object`;
