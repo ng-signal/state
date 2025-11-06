@@ -33,7 +33,7 @@
     "format:fix": "pretty-quick --staged",
     "format:check": "prettier --config ./.prettierrc --check \"projects/**/*.ts\" \"src/**/*.{ts,js,html,scss,json}\"",
     "format:all": "prettier --config ./.prettierrc --write .",
-    "lint": "eslint .",
+    "lint": "eslint . --no-warn-ignored",
     "ng": "ng",
     "prepare": "husky",
     "release": "npm run clean && npm run build:core && npm pack dist/core",

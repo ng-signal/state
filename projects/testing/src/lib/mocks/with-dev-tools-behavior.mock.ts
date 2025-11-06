@@ -1,6 +1,8 @@
 class TestBehavior {
   #events: any = [];
 
+  key = Math.random().toString(36).slice(2, 6);
+
   constructor(
     public behaviorId: string,
     public type: string,
@@ -19,6 +21,10 @@ class TestBehavior {
 
   onInit(key: string) {
     this.#events.push(`onInit:${key}`);
+  }
+
+  onError(key: string) {
+    this.#events.push(`onError:${key}`);
   }
 
   onReset(key: string) {

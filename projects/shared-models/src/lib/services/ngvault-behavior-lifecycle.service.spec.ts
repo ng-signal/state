@@ -1,43 +1,12 @@
 // projects/core/src/lib/services/vault-behavior-lifecycle.service.spec.ts
 import { Injector, provideZonelessChangeDetection } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
-import { VaultBehaviorContext, VaultBehaviorRunner } from '@ngvault/shared-models';
+import { createTestBehaviorFactory, getTestBehavior, withTestBehavior } from '@ngvault/testing';
+import { VaultBehaviorContext } from '../contexts/vault-behavior.context';
+import { VaultBehaviorRunner } from '../interfaces/vault-behavior-runner.interface';
 import { NgVaultBehaviorLifecycleService } from './ngvault-behavior-lifecycle.service';
 
 describe('VaultBehaviorLifecycleService', () => {
-  function createTestBehaviorFactory(factory: (...args: any[]) => any, type?: string, critical: boolean = false): any {
-    const wrappedFactory = (context: any) => {
-      const behavior = factory(context);
-
-      if (!behavior || typeof behavior !== 'object') {
-        return behavior; // Let the runner handle the error path
-      }
-
-      const behaviorId = context.behaviorId;
-
-      Object.defineProperty(behavior, 'behaviorId', {
-        value: behaviorId,
-        enumerable: false,
-        writable: true
-      });
-
-      if (type) {
-        Object.defineProperty(behavior, 'type', {
-          value: type,
-          enumerable: true,
-          writable: true
-        });
-      }
-
-      return behavior;
-    };
-
-    (wrappedFactory as any).type = type;
-    (wrappedFactory as any).critical = critical;
-
-    return wrappedFactory as any;
-  }
-
   function createParenttBehaviorFactory(): any {
     const coreBehavior = createTestBehaviorFactory(() => {
       return {
@@ -299,24 +268,60 @@ describe('VaultBehaviorLifecycleService', () => {
   describe('All Other life cycles', () => {
     it('should call onSet on a single behavior', () => {
       const parentBehavior = createParenttBehaviorFactory();
-      const simpleBehaviorFactory = createTestBehaviorFactory(() => {
-        return {
-          onSet(key: string) {
-            calls.push(`onSet:${key}`);
-          }
-        };
-      }, 'state');
 
-      vaultRunner.initializeBehaviors(injector, [parentBehavior, simpleBehaviorFactory]);
+      vaultRunner.initializeBehaviors(injector, [parentBehavior, withTestBehavior]);
       vaultRunner.onSet('core-id', 'vault1', ctx);
+      vaultRunner.onInit('core-id', 'vault1', 'service-name', ctx);
+      vaultRunner.onError('core-id', 'vault1', ctx);
+      vaultRunner.onReset('core-id', 'vault1', ctx);
+      vaultRunner.onDestroy('core-id', 'vault1', ctx);
+      vaultRunner.onPatch('core-id', 'vault1', ctx);
+      vaultRunner.onLoad('core-id', 'vault1', ctx);
+      vaultRunner.onDispose('core-id', 'vault1', ctx);
 
-      expect(calls).toEqual(['onSet:vault1']);
+      expect(getTestBehavior().getEvents()).toEqual([
+        'onSet:vault1',
+        'onSetState:vault1:{"isLoading":false,"value":"initial","error":null,"hasValue":true}',
+
+        'onInit:vault1',
+
+        'onError:vault1',
+
+        'onReset:vault1',
+
+        'onDestroy:vault1',
+
+        'onPatch:vault1',
+
+        'onLoad:vault1',
+
+        'onDispose:vault1'
+      ]);
     });
   });
 
   describe('initializeBehaviors', () => {
     it('should get id per run level without crypto', () => {
-      const math = ['1', '2', '3', '4', '5', '6'];
+      const math = [
+        '1',
+        '2',
+        '3',
+        '4',
+        '5',
+        '6',
+        '111',
+        '222',
+        '333',
+        '444',
+        '555',
+        '666',
+        '111',
+        '222',
+        '333',
+        '444',
+        '555',
+        '666'
+      ];
       const dates = ['a', 'b', 'c', 'd', 'e', 'f'];
       spyOn(Math, 'random').and.callFake(() => math.shift() as any);
       spyOn(Date, 'now').and.callFake(() => dates.shift() as any);
@@ -402,7 +407,7 @@ describe('VaultBehaviorLifecycleService', () => {
     });
 
     it('throws an error if a critical factory returns a non-object', () => {
-      const badBehaviorFactory = createTestBehaviorFactory(() => undefined, 'state', true);
+      const badBehaviorFactory = createTestBehaviorFactory(() => undefined, 'state', 'key', true);
 
       expect(() => vaultRunner.initializeBehaviors(injector, [badBehaviorFactory])).toThrowError(
         '[NgVault] Behavior did not return an object'
@@ -464,7 +469,7 @@ describe('VaultBehaviorLifecycleService', () => {
 
     it('throws an error if a critical factory returns a non-object', () => {
       const nullFactory = createTestBehaviorFactory(() => null as any, 'state');
-      const undefinedFactory = createTestBehaviorFactory(() => undefined as any, 'state', true);
+      const undefinedFactory = createTestBehaviorFactory(() => undefined as any, 'state', 'key', true);
       const validFactory = createTestBehaviorFactory(
         () => ({
           onInit() {},
@@ -476,6 +481,17 @@ describe('VaultBehaviorLifecycleService', () => {
       expect(() =>
         vaultRunner.initializeBehaviors(injector, [nullFactory, undefinedFactory, validFactory])
       ).toThrowError('[NgVault] Behavior did not return an object');
+    });
+
+    it('throws an error if a behavior has no key', () => {
+      const childBehavior = createTestBehaviorFactory(() => ({}), 'state', 'no-gen');
+
+      expect(() => vaultRunner.initializeBehaviors(injector, [childBehavior])).toThrowError(
+        '[NgVault] Behavior missing key for type "state". Every behavior must define a unique "key".'
+      );
+
+      // eslint-disable-next-line
+      expect(console.warn).not.toHaveBeenCalled();
     });
   });
 

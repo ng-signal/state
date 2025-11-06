@@ -14,7 +14,6 @@ import {
   NgVaultBehaviorLifecycleService,
   ResourceStateError,
   ResourceVaultModel,
-  VaultBehavior,
   VaultBehaviorContext,
   VaultBehaviorFactory,
   VaultSignalRef,
@@ -67,7 +66,7 @@ export function provideFeatureCell<Service, T>(
       const defaultBehaviors: VaultBehaviorFactory<T>[] = [withCoreSetBehavior];
       const allBehaviors: VaultBehaviorFactory<T>[] = [...defaultBehaviors, ...behaviors];
       const coreId = _behaviorLifeCycle.initialize();
-      const activeBehaviors = _behaviorLifeCycle.initializeBehaviors(_injector, allBehaviors);
+      _behaviorLifeCycle.initializeBehaviors(_injector, allBehaviors);
 
       const _value = signal<VaultDataType<T>>(
         featureCellDescriptor.initial === null || featureCellDescriptor.initial === undefined
@@ -84,9 +83,7 @@ export function provideFeatureCell<Service, T>(
         isLoading: _isLoading,
         error: _error,
         value: _value,
-        devTools: activeBehaviors.find((behavior: VaultBehavior<T>) => behavior.type === 'dev-tools') as
-          | VaultBehavior<T>
-          | undefined,
+        behaviorRunner: _behaviorLifeCycle,
 
         get state(): Readonly<VaultStateSnapshot<T>> {
           return {
@@ -98,13 +95,13 @@ export function provideFeatureCell<Service, T>(
         }
       } as VaultBehaviorContext<T>;
 
-      _behaviorLifeCycle.onInit(coreId, featureCellDescriptor.key, service.name, ctx, activeBehaviors);
+      _behaviorLifeCycle.onInit(coreId, featureCellDescriptor.key, service.name, ctx);
 
       const _reset = (): void => {
         _isLoading.set(false);
         _error.set(null);
         _value.set(undefined);
-        activeBehaviors.forEach((b) => b.onReset?.(featureCellDescriptor.key, ctx));
+        _behaviorLifeCycle.onReset(coreId, featureCellDescriptor.key, ctx);
       };
 
       const _destroy = (): void => {
@@ -113,7 +110,7 @@ export function provideFeatureCell<Service, T>(
 
         _reset();
 
-        activeBehaviors.forEach((b) => b.onDestroy?.(featureCellDescriptor.key, ctx));
+        _behaviorLifeCycle.onDestroy(coreId, featureCellDescriptor.key, ctx);
       };
 
       // Angular DI teardown
@@ -140,10 +137,11 @@ export function provideFeatureCell<Service, T>(
               _isLoading.set(resource.isLoading());
               try {
                 _value.set(resource.value());
-                activeBehaviors.forEach((b) => b.onSet?.(featureCellDescriptor.key, ctx));
+
+                _behaviorLifeCycle.onSet(coreId, featureCellDescriptor.key, ctx);
               } catch {
                 _error.set(resourceError(resource.error()));
-                activeBehaviors.forEach((b) => b.onError?.(featureCellDescriptor.key, ctx));
+                _behaviorLifeCycle.onError(coreId, featureCellDescriptor.key, ctx);
               }
             });
           });
@@ -153,7 +151,7 @@ export function provideFeatureCell<Service, T>(
         }
 
         ctx.next = Object.freeze(next as VaultStateType<T>);
-        _behaviorLifeCycle.onSet(coreId, featureCellDescriptor.key, ctx, activeBehaviors);
+        _behaviorLifeCycle.onSet(coreId, featureCellDescriptor.key, ctx);
       };
 
       const _patch = (partial: VaultStateInputType<T>): void => {
@@ -194,10 +192,10 @@ export function provideFeatureCell<Service, T>(
                   }
 
                   _error.set(null);
-                  activeBehaviors.forEach((b) => b.onPatch?.(featureCellDescriptor.key, ctx));
+                  _behaviorLifeCycle.onPatch(coreId, featureCellDescriptor.key, ctx);
                 } catch {
                   _error.set(resourceError(resource.error()));
-                  activeBehaviors.forEach((b) => b.onError?.(featureCellDescriptor.key, ctx));
+                  _behaviorLifeCycle.onError(coreId, featureCellDescriptor.key, ctx);
                 }
               });
             });
@@ -232,7 +230,7 @@ export function provideFeatureCell<Service, T>(
               _value.set(next as VaultDataType<T>);
             }
 
-            activeBehaviors.forEach((b) => b.onPatch?.(featureCellDescriptor.key, ctx));
+            _behaviorLifeCycle.onPatch(coreId, featureCellDescriptor.key, ctx);
           }
         }
       };
@@ -243,14 +241,14 @@ export function provideFeatureCell<Service, T>(
           const _errorSignal = signal<ResourceStateError | null>(null);
           const _valueSignal = signal<VaultDataType<T>>(undefined);
 
-          activeBehaviors.forEach((b) => b.onLoad?.(featureCellDescriptor.key, ctx));
+          _behaviorLifeCycle.onLoad(coreId, featureCellDescriptor.key, ctx);
 
           source$.pipe(take(1)).subscribe({
             next: (value) => {
               _valueSignal.set(value);
               _loadingSignal.set(false);
 
-              activeBehaviors.forEach((b) => b.onSet?.(featureCellDescriptor.key, ctx));
+              _behaviorLifeCycle.onSet(coreId, featureCellDescriptor.key, ctx);
 
               observer.next({
                 isLoading: _loadingSignal.asReadonly(),
@@ -262,11 +260,11 @@ export function provideFeatureCell<Service, T>(
             },
             error: (err) => {
               observer.error(resourceError(err));
-              activeBehaviors.forEach((b) => b.onError?.(featureCellDescriptor.key, ctx));
+              _behaviorLifeCycle.onError(coreId, featureCellDescriptor.key, ctx);
             },
             complete: () => {
               _loadingSignal.set(false);
-              activeBehaviors.forEach((b) => b.onDispose?.(featureCellDescriptor.key, ctx));
+              _behaviorLifeCycle.onDispose(coreId, featureCellDescriptor.key, ctx);
               observer.complete();
             }
           });

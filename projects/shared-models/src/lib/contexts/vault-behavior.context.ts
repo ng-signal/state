@@ -1,5 +1,5 @@
 import { Signal } from '@angular/core';
-import { VaultBehavior } from '@ngvault/shared-models';
+import { VaultBehaviorRunner } from '@ngvault/shared-models';
 import { ResourceStateError } from '../models/resource-state-error.model';
 import { VaultStateSnapshot } from '../models/vault-state-snapshot.model';
 import { VaultDataType } from '../types/vault-data.type';
@@ -13,6 +13,5 @@ export interface VaultBehaviorContext<T> {
   next?: Readonly<VaultStateType<T>> | null;
 
   state: Readonly<VaultStateSnapshot<T>>;
-
-  devTools?: VaultBehavior<T>;
+  behaviorRunner?: VaultBehaviorRunner<T>;
 }

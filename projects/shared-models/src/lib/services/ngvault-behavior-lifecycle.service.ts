@@ -124,6 +124,8 @@ class VaultBehaviorRunnerClass implements VaultBehaviorRunner {
 
     if (!behaviors || behaviors.length === 0) return;
 
+    const seenKeys = new Set<string>();
+
     this.#behaviors = behaviors
       .map((factory) => {
         let isCritical = false;
@@ -155,6 +157,21 @@ class VaultBehaviorRunnerClass implements VaultBehaviorRunner {
             return null;
           }
 
+          if (!instance.key) {
+            isCritical = true;
+            throw new Error(
+              `[NgVault] Behavior missing key for type "${behaviorType}". Every behavior must define a unique "key".`
+            );
+          }
+
+          if (instance.key && seenKeys.has(instance.key)) {
+            // eslint-disable-next-line
+            console.warn(`[NgVault] Skipping duplicate behavior with key "${instance.key}"`);
+            return null;
+          }
+
+          if (instance.key) seenKeys.add(instance.key);
+
           return instance;
         } catch (err) {
           // eslint-disable-next-line
@@ -174,8 +191,32 @@ class VaultBehaviorRunnerClass implements VaultBehaviorRunner {
     this.#runLifecycles(behaviorId, 'onInit', vaultKey, ctx, serviceName);
   }
 
+  onLoad<T>(behaviorId: string, vaultKey: string, ctx: VaultBehaviorContext<T>): void {
+    this.#runLifecycles(behaviorId, 'onLoad', vaultKey, ctx);
+  }
+
   onSet<T>(behaviorId: string, vaultKey: string, ctx: VaultBehaviorContext<T>): void {
     this.#runLifecycles(behaviorId, 'onSet', vaultKey, ctx);
+  }
+
+  onPatch<T>(behaviorId: string, vaultKey: string, ctx: VaultBehaviorContext<T>): void {
+    this.#runLifecycles(behaviorId, 'onPatch', vaultKey, ctx);
+  }
+
+  onError<T>(behaviorId: string, vaultKey: string, ctx: VaultBehaviorContext<T>): void {
+    this.#runLifecycles(behaviorId, 'onError', vaultKey, ctx);
+  }
+
+  onReset<T>(behaviorId: string, vaultKey: string, ctx: VaultBehaviorContext<T>): void {
+    this.#runLifecycles(behaviorId, 'onReset', vaultKey, ctx);
+  }
+
+  onDestroy<T>(behaviorId: string, vaultKey: string, ctx: VaultBehaviorContext<T>): void {
+    this.#runLifecycles(behaviorId, 'onDestroy', vaultKey, ctx);
+  }
+
+  onDispose<T>(behaviorId: string, vaultKey: string, ctx: VaultBehaviorContext<T>): void {
+    this.#runLifecycles(behaviorId, 'onDispose', vaultKey, ctx);
   }
 }
 
