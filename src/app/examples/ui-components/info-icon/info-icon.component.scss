@@ -1,0 +1,50 @@
+@use 'global' as global;
+
+:host {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 4px;
+}
+button {
+  transition: transform 0.15s ease;
+}
+
+button:hover {
+  transform: scale(1.2);
+}
+
+$font-size: 32px;
+
+.icon-class {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  &.overlay {
+    .base {
+      color: global.$ngvault-primary-base;
+    }
+  }
+
+  .base {
+    font-size: calc($font-size * 0.9);
+    color: global.$ngvault-primary-light;
+    line-height: 1;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .overlay {
+    position: absolute;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: calc($font-size * 0.8);
+    opacity: 0.5;
+    color: global.$ngvault-accent-base;
+    pointer-events: none;
+  }
+}

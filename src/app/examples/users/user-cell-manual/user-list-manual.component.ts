@@ -5,6 +5,7 @@ import { MatCardModule } from '@angular/material/card';
 import { MatExpansionModule } from '@angular/material/expansion';
 import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { InfoIconComponent } from '../../ui-components/info-icon/info-icon.component';
 import { UserListDirective } from '../directive/user-list-base.directive';
 import { UserCellManualService } from './services/user-cell-manual.service';
 
@@ -18,7 +19,15 @@ import { UserCellManualService } from './services/user-cell-manual.service';
 @Component({
   selector: 'ngvault-user-list-manual',
   standalone: true,
-  imports: [CommonModule, MatCardModule, MatButtonModule, MatIconModule, MatProgressSpinnerModule, MatExpansionModule],
+  imports: [
+    CommonModule,
+    MatCardModule,
+    MatButtonModule,
+    MatIconModule,
+    MatProgressSpinnerModule,
+    MatExpansionModule,
+    InfoIconComponent
+  ],
   templateUrl: './user-list-manual.component.html',
   styleUrls: ['../scss/example.scss']
 })

@@ -1,0 +1,6 @@
+<button mat-icon-button class="{{ displayClass() }}" (click)="open()">
+  <mat-icon class="base">{{ displayIcon() }}</mat-icon>
+  @if (displayOverlay()) {
+    <mat-icon class="overlay">cancel</mat-icon>
+  }
+</button>
