@@ -1,8 +1,8 @@
 import { runInInjectionContext, signal } from '@angular/core';
 import { VaultBehaviorFactoryContext } from '@ngvault/shared-models';
-import { withCorePatchBehavior } from './with-core-patch.behavior';
+import { withCoreStateBehavior } from './with-core-state.behavior';
 
-describe('Behavior: withCorePatch', () => {
+describe('Behavior: withCoreState: Set', () => {
   let behavior: any;
   let ctx: any;
 
@@ -17,7 +17,7 @@ describe('Behavior: withCorePatch', () => {
     };
 
     runInInjectionContext(injector, () => {
-      behavior = withCorePatchBehavior({ injector, behaviorId: 'id', type: 'state' });
+      behavior = withCoreStateBehavior({ injector, behaviorId: 'id', type: 'core' });
     });
   });
 
@@ -27,17 +27,17 @@ describe('Behavior: withCorePatch', () => {
 
   it('should safely return when patch is null or not an object', () => {
     ctx.next = null;
-    behavior.onPatch?.('vault', ctx);
+    behavior.onSet?.('vault', ctx);
     expect(ctx.value()).toBeUndefined();
 
     ctx.next = 42; // invalid
-    behavior.onPatch?.('vault', ctx);
+    behavior.onSet?.('vault', ctx);
     expect(ctx.value()).toBeUndefined();
   });
 
   it('should update loading and error when provided', () => {
     ctx.next = { loading: true, error: { message: 'fail' } };
-    behavior.onPatch?.('vault', ctx);
+    behavior.onSet?.('vault', ctx);
 
     expect(ctx.isLoading()).toBeTrue();
     expect(ctx.error()).toEqual({ message: 'fail' });
@@ -45,40 +45,31 @@ describe('Behavior: withCorePatch', () => {
 
   it('should set primitive value correctly', () => {
     ctx.next = { value: 123 };
-    behavior.onPatch?.('vault', ctx);
+    behavior.onSet?.('vault', ctx);
     expect(ctx.value()).toBe(123);
 
     ctx.next = { value: 'test' };
-    behavior.onPatch?.('vault', ctx);
+    behavior.onSet?.('vault', ctx);
     expect(ctx.value()).toBe('test');
 
     ctx.next = { value: true };
-    behavior.onPatch?.('vault', ctx);
+    behavior.onSet?.('vault', ctx);
     expect(ctx.value()).toBeTrue();
   });
 
-  it('should clone and patch arrays correctly', () => {
-    const setArgs = [1, 2, 3];
-    ctx.next = { value: setArgs };
-
+  it('should clone and set arrays correctly', () => {
+    const arr = [1, 2, 3];
+    ctx.next = { value: arr };
     behavior.onSet?.('vault', ctx);
 
-    const patchArgs = [1, 2, 6];
-    ctx.next = { value: patchArgs };
-    behavior.onPatch?.('vault', ctx);
-
-    expect(ctx.value()).toEqual([1, 2, 6]);
-    expect(ctx.value()).not.toEqual(setArgs); // ensure immutability
+    expect(ctx.value()).toEqual([1, 2, 3]);
+    expect(ctx.value()).not.toBe(arr); // ensure immutability
   });
 
-  it('should clone and patch plain objects correctly', () => {
+  it('should clone and set plain objects correctly', () => {
     const obj = { name: 'Alice', age: 30 };
     ctx.next = { value: obj };
     behavior.onSet?.('vault', ctx);
-
-    const patch = { name: 'Alice', age: 30 }; // simulate identical shape but new ref
-    ctx.next = { value: patch };
-    behavior.onPatch?.('vault', ctx);
 
     expect(ctx.value()).toEqual({ name: 'Alice', age: 30 });
     expect(ctx.value()).not.toBe(obj);
@@ -86,12 +77,12 @@ describe('Behavior: withCorePatch', () => {
 
   it('should handle multiple updates sequentially', () => {
     ctx.next = { loading: true, value: [1, 2] };
-    behavior.onPatch?.('vault', ctx);
+    behavior.onSet?.('vault', ctx);
     expect(ctx.isLoading()).toBeTrue();
     expect(ctx.value()).toEqual([1, 2]);
 
     ctx.next = { loading: false, error: { message: 'done' }, value: { status: 'ok' } };
-    behavior.onPatch?.('vault', ctx);
+    behavior.onSet?.('vault', ctx);
 
     expect(ctx.isLoading()).toBeFalse();
     expect(ctx.error()).toEqual({ message: 'done' });
@@ -107,44 +98,43 @@ describe('Behavior: withCorePatch', () => {
     };
 
     ctx.next = mockResource;
-    behavior.onPatch?.('vault', ctx);
+    behavior.onSet?.('vault', ctx);
 
     expect(ctx.value()).toBeUndefined();
     expect(ctx.isLoading()).toBeFalse();
     expect(ctx.error()).toBeNull();
   });
 
-  it('should trigger behaviorRunner.onPatch exactly once per valid patch', () => {
-    const spyRunner = jasmine.createSpyObj('runner', ['onPatch']);
+  it('should trigger behaviorRunner.onSet exactly once per valid patch', () => {
+    const spyRunner = jasmine.createSpyObj('runner', ['onSet']);
     ctx.behaviorRunner = spyRunner;
 
     ctx.next = { value: [42] };
-    behavior.onPatch?.('vault', ctx);
+    behavior.onSet?.('vault', ctx);
 
-    expect(spyRunner.onPatch).toHaveBeenCalledTimes(1);
-    expect(spyRunner.onPatch).toHaveBeenCalledWith('id', behavior.key, ctx);
+    expect(spyRunner.onSet).toHaveBeenCalledTimes(1);
+    expect(spyRunner.onSet).toHaveBeenCalledWith('id', behavior.key, ctx);
   });
 
-  it('should not trigger behaviorRunner.onPatch for invalid or HttpResourceRef patches', () => {
-    const spyRunner = jasmine.createSpyObj('runner', ['onPatch']);
+  it('should not trigger behaviorRunner.onSet for invalid or HttpResourceRef patches', () => {
+    const spyRunner = jasmine.createSpyObj('runner', ['onSet']);
     ctx.behaviorRunner = spyRunner;
 
     ctx.next = 42; // invalid
-    behavior.onPatch?.('vault', ctx);
+    behavior.onSet?.('vault', ctx);
 
-    expect(spyRunner.onPatch).not.toHaveBeenCalled();
+    expect(spyRunner.onSet).not.toHaveBeenCalled();
   });
 
   it('should shallow merge nested objects', () => {
     ctx.value.set({ profile: { name: 'Alice' }, meta: { age: 30 } });
     ctx.next = { value: { profile: { city: 'Paris' } } };
 
-    behavior.onPatch?.('vault', ctx);
+    behavior.onSet?.('vault', ctx);
 
     // Shallow merge: profile should be overwritten, not deeply merged
     expect(ctx.value()).toEqual({
-      profile: { city: 'Paris' },
-      meta: { age: 30 }
+      profile: { city: 'Paris' }
     });
   });
 });

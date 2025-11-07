@@ -2,8 +2,8 @@ import { defineNgVaultBehaviorKey, validateNgVaultBehaviorKey } from './define-n
 
 describe('defineVaultBehaviorKey', () => {
   it('should generate a valid key in the canonical format', () => {
-    const key = defineNgVaultBehaviorKey('Core', 'Set');
-    expect(key).toBe('NgVault::Core::Set');
+    const key = defineNgVaultBehaviorKey('Core', 'State');
+    expect(key).toBe('NgVault::Core::State');
   });
 
   it('should work with other domains and names', () => {
@@ -21,7 +21,7 @@ describe('defineVaultBehaviorKey', () => {
 describe('validateVaultBehaviorKey', () => {
   it('should accept valid NgVault keys', () => {
     const validKeys = [
-      'NgVault::Core::Set',
+      'NgVault::Core::State',
       'NgVault::Persistence::LocalStorage',
       'NgVault::DevTools::Telemetry',
       'NgVault::Encryption::AES256',
@@ -34,7 +34,7 @@ describe('validateVaultBehaviorKey', () => {
   });
 
   it('should reject keys missing the NgVault prefix', () => {
-    expect(validateNgVaultBehaviorKey('Vault::Core::Set')).toBeFalse();
+    expect(validateNgVaultBehaviorKey('Vault::Core::State')).toBeFalse();
   });
 
   it('should reject keys missing domain or behavior', () => {
@@ -43,9 +43,9 @@ describe('validateVaultBehaviorKey', () => {
   });
 
   it('should reject lowercase or malformed domain/behavior segments', () => {
-    expect(validateNgVaultBehaviorKey('NgVault::core::set')).toBeFalse();
-    expect(validateNgVaultBehaviorKey('NgVault::core::Set')).toBeFalse();
-    expect(validateNgVaultBehaviorKey('NgVault::Core::set')).toBeFalse();
+    expect(validateNgVaultBehaviorKey('NgVault::core::state')).toBeFalse();
+    expect(validateNgVaultBehaviorKey('NgVault::core::State')).toBeFalse();
+    expect(validateNgVaultBehaviorKey('NgVault::Core::state')).toBeFalse();
   });
 
   it('should reject non-string input', () => {

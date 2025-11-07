@@ -203,8 +203,7 @@ describe('Provider: Feature Cell Resource', () => {
 
       expect(getTestBehavior().getEvents()).toEqual([
         'onInit:http',
-        'onInit:NgVault::Core::Set',
-        'onInit:NgVault::Core::Patch',
+        'onInit:NgVault::Core::State',
         'onSet:http:{"isLoading":true,"error":null,"hasValue":false}',
         'onSet:http:{"isLoading":false,"value":[{"id":1,"name":"Ada"}],"error":null,"hasValue":true}',
         'onReset:http'
@@ -383,8 +382,7 @@ describe('Provider: Feature Cell Resource', () => {
 
       expect(getTestBehavior().getEvents()).toEqual([
         'onInit:http',
-        'onInit:NgVault::Core::Set',
-        'onInit:NgVault::Core::Patch'
+        'onInit:NgVault::Core::State'
         // 'onPatch:http:{"isLoading":false,"value":42,"error":null,"hasValue":true}',
         // 'onPatch:http:{"isLoading":true,"value":42,"error":null,"hasValue":true}',
         // 'onPatch:http:{"isLoading":false,"value":7,"error":null,"hasValue":true}'

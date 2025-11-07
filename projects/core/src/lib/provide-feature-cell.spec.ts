@@ -167,7 +167,7 @@ describe('Provider: Feature Cell (core vault functionality)', () => {
 
     vault.setState({ value: [1, 2] });
     vault.patchState({ value: [3, 4] });
-    expect(vault.state.value()).toEqual([1, 2, 3, 4]);
+    expect(vault.state.value()).toEqual([3, 4]);
     expect(vault.state.hasValue()).toBeTrue();
 
     vault.setState({ value: { name: 'Alice', age: 30 } });
@@ -264,10 +264,7 @@ describe('Provider: Feature Cell (core vault functionality)', () => {
     vault.setState({ value: [{ id: 1, name: 'Ada' }] });
     expect(vault.state.hasValue()).toBeTrue();
     vault.patchState({ value: [{ id: 2, name: 'Grace' }] });
-    expect(vault.state.value()).toEqual([
-      { id: 1, name: 'Ada' },
-      { id: 2, name: 'Grace' }
-    ]);
+    expect(vault.state.value()).toEqual([{ id: 2, name: 'Grace' }]);
     expect(vault.state.hasValue()).toBeTrue();
   });
 
@@ -395,11 +392,7 @@ describe('Provider: Feature Cell (core vault functionality)', () => {
 
       testBehavior = getTestBehavior();
 
-      expect(testBehavior.getEvents()).toEqual([
-        'onInit:devtools-test',
-        'onInit:NgVault::Core::Set',
-        'onInit:NgVault::Core::Patch'
-      ]);
+      expect(testBehavior.getEvents()).toEqual(['onInit:devtools-test', 'onInit:NgVault::Core::State']);
     });
 
     it('should emit a "dispose" event when vault.destroy() is called', () => {
@@ -412,8 +405,7 @@ describe('Provider: Feature Cell (core vault functionality)', () => {
 
       expect(testBehavior.getEvents()).toEqual([
         'onInit:devtools-test',
-        'onInit:NgVault::Core::Set',
-        'onInit:NgVault::Core::Patch',
+        'onInit:NgVault::Core::State',
         'onReset:devtools-test',
         'onDestroy:devtools-test'
       ]);
@@ -436,24 +428,22 @@ describe('Provider: Feature Cell (core vault functionality)', () => {
 
       expect(testBehavior.getEvents()).toEqual([
         'onInit:devtools-test',
-        'onInit:NgVault::Core::Set',
-
-        'onInit:NgVault::Core::Patch',
+        'onInit:NgVault::Core::State',
 
         'onSet:devtools-test:{"isLoading":false,"value":[],"error":null,"hasValue":true}',
 
-        'onSet:NgVault::Core::Set:{"isLoading":true,"value":[1,2,3],"error":{"message":"fail"},"hasValue":true}',
+        'onSet:NgVault::Core::State:{"isLoading":true,"value":[1,2,3],"error":{"message":"fail"},"hasValue":true}',
 
         'onReset:devtools-test',
 
         'onPatch:devtools-test:{"isLoading":false,"error":null,"hasValue":false}',
-        'onPatch:NgVault::Core::Patch:{"isLoading":true,"value":[4,5,6],"error":{"message":"fail"},"hasValue":true}',
+        'onPatch:NgVault::Core::State:{"isLoading":true,"value":[4,5,6],"error":{"message":"fail"},"hasValue":true}',
 
         'onReset:devtools-test',
 
         'onSet:devtools-test:{"isLoading":false,"error":null,"hasValue":false}',
 
-        'onSet:NgVault::Core::Set:{"isLoading":true,"value":[1,2,3],"error":{"message":"fail"},"hasValue":true}',
+        'onSet:NgVault::Core::State:{"isLoading":true,"value":[1,2,3],"error":{"message":"fail"},"hasValue":true}',
 
         'onReset:devtools-test'
       ]);

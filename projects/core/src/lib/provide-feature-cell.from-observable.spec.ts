@@ -53,14 +53,11 @@ describe('ResourceVaultModel (setState, patchState, fromObservable)', () => {
     expect(vault.state.hasValue()).toBeTrue();
   });
 
-  it('should append arrays when patchState() is called with array data', () => {
+  it('should replace array when patchState() is called with array data', () => {
     vault.setState({ value: [{ id: 1, name: 'Ada' }] });
     expect(vault.state.hasValue()).toBeTrue();
     vault.patchState({ value: [{ id: 2, name: 'Grace' }] });
-    expect(vault.state.value()).toEqual([
-      { id: 1, name: 'Ada' },
-      { id: 2, name: 'Grace' }
-    ]);
+    expect(vault.state.value()).toEqual([{ id: 2, name: 'Grace' }]);
     expect(vault.state.hasValue()).toBeTrue();
   });
 
@@ -158,12 +155,7 @@ describe('ResourceVaultModel (setState, patchState, fromObservable)', () => {
       }
     });
 
-    expect(getTestBehavior().getEvents()).toEqual([
-      'onInit:http',
-      'onInit:NgVault::Core::Set',
-      'onInit:NgVault::Core::Patch',
-      'onLoad:http'
-    ]);
+    expect(getTestBehavior().getEvents()).toEqual(['onInit:http', 'onInit:NgVault::Core::State', 'onLoad:http']);
 
     subject.next({ id: 1, name: 'Ada' });
     subject.complete();

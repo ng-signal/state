@@ -10,7 +10,7 @@ export function defineNgVaultBehaviorKey(domain: string, name: string): string {
 
 /**
  * Validates that a given key matches the canonical NgVault format.
- * Example of a valid key: NgVault::Core::Set
+ * Example of a valid key: NgVault::Core::State
  */
 export function validateNgVaultBehaviorKey(key: string): boolean {
   if (typeof key !== 'string') return false;

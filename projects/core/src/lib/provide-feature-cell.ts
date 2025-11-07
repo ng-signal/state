@@ -23,8 +23,7 @@ import { VaultDataType } from '@ngvault/shared-models/types/vault-data.type';
 import { VaultStateInputType } from '@ngvault/shared-models/types/vault-state-input.type';
 import { VaultStateType } from '@ngvault/shared-models/types/vault-state.type';
 import { Observable, Subject, take } from 'rxjs';
-import { withCorePatchBehavior } from './behaviors/with-core-patch.behavior';
-import { withCoreSetBehavior } from './behaviors/with-core-set.behavior';
+import { withCoreStateBehavior } from './behaviors/with-core-state.behavior';
 import { NGVAULT_EXPERIMENTAL_HTTP_RESOURCE } from './constants/experimental-flag.constant';
 import { FEATURE_CELL_REGISTRY } from './constants/feature-cell-registry.constant';
 import { FeatureCellDescriptorModel } from './models/feature-cell-descriptor.model';
@@ -64,7 +63,7 @@ export function provideFeatureCell<Service, T>(
         );
       }
 
-      const defaultBehaviors: VaultBehaviorFactory<T>[] = [withCoreSetBehavior, withCorePatchBehavior];
+      const defaultBehaviors: VaultBehaviorFactory<T>[] = [withCoreStateBehavior];
       const allBehaviors: VaultBehaviorFactory<T>[] = [...defaultBehaviors, ...behaviors];
       const coreId = _behaviorLifeCycle.initialize();
       _behaviorLifeCycle.initializeBehaviors(_injector, allBehaviors);

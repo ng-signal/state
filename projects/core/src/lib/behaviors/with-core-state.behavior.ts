@@ -15,9 +15,9 @@ import { isHttpResourceRef } from '../utils/is-http-resource.util';
  * Core behavior responsible for replacing state values.
  * No HTTP logic, no devtools hooks — pure synchronous state mutation.
  */
-class CorePatchBehavior<T> implements VaultBehavior<T> {
+class CoreSetBehavior<T> implements VaultBehavior<T> {
   public readonly critical = true;
-  public readonly key = defineNgVaultBehaviorKey('Core', 'Patch');
+  public readonly key = defineNgVaultBehaviorKey('Core', 'State');
 
   constructor(
     readonly behaviorId: string,
@@ -27,6 +27,30 @@ class CorePatchBehavior<T> implements VaultBehavior<T> {
 
   onInit(key: string, service: string, ctx: VaultBehaviorContext<T>): void {
     ctx.behaviorRunner?.onInit?.(this.behaviorId, this.key, service, ctx);
+  }
+
+  onSet(key: string, ctx: VaultBehaviorContext<T>): void {
+    if (ctx.next && typeof ctx.next === 'object' && !isHttpResourceRef<T>(ctx.next)) {
+      const { isLoading, error, value, next } = ctx;
+
+      // Update basic flags if provided
+      if (next.loading !== undefined) isLoading?.set(next.loading);
+      if (next.error !== undefined) error?.set(next.error);
+
+      if (next.value !== undefined) {
+        const val = next.value;
+
+        if (Array.isArray(val)) {
+          value?.set([...val] as VaultDataType<T>);
+        } else if (val && typeof val === 'object') {
+          value?.set({ ...val } as VaultDataType<T>);
+        } else {
+          value?.set(val as VaultDataType<T>);
+        }
+
+        ctx.behaviorRunner?.onSet?.(this.behaviorId, this.key, ctx);
+      }
+    }
   }
 
   onPatch(key: string, ctx: VaultBehaviorContext<T>): void {
@@ -42,7 +66,7 @@ class CorePatchBehavior<T> implements VaultBehavior<T> {
         const next = patch.value;
 
         if (Array.isArray(curr) && Array.isArray(next)) {
-          value?.set([...curr, ...next] as VaultDataType<T>);
+          value?.set([...next] as VaultDataType<T>);
         } else if (
           curr &&
           next &&
@@ -62,9 +86,9 @@ class CorePatchBehavior<T> implements VaultBehavior<T> {
   }
 }
 
-export const withCorePatchBehavior = ((context: VaultBehaviorFactoryContext): VaultBehavior => {
-  return new CorePatchBehavior(context.behaviorId, 'state', context.injector);
+export const withCoreStateBehavior = ((context: VaultBehaviorFactoryContext): VaultBehavior => {
+  return new CoreSetBehavior(context.behaviorId, 'state', context.injector);
 }) as VaultBehaviorFactory;
 
-withCorePatchBehavior.type = 'state';
-withCorePatchBehavior.critical = true;
+withCoreStateBehavior.type = 'state';
+withCoreStateBehavior.critical = true;
