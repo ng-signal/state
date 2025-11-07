@@ -1,5 +1,6 @@
-import { VaultBehaviorType } from '@ngvault/shared-models';
 import { VaultBehaviorContext } from '../contexts/vault-behavior.context';
+import { FeatureCell } from '../models/feature-cell.model';
+import { VaultBehaviorType } from '../types/vault-behavior.type';
 
 export interface VaultBehavior<T = unknown> {
   readonly type: VaultBehaviorType;
@@ -13,4 +14,7 @@ export interface VaultBehavior<T = unknown> {
   onError?(key: string, ctx: VaultBehaviorContext<T>): void;
   onDestroy?(key: string, ctx: VaultBehaviorContext<T>): void;
   onDispose?(key: string, ctx: VaultBehaviorContext<T>): void;
+
+  // eslint-disable-next-line
+  extendCellAPI?(cell: FeatureCell<T>): void | Record<string, (...args: any[]) => unknown>;
 }

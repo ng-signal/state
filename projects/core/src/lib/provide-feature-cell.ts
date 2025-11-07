@@ -1,8 +1,8 @@
 import { DestroyRef, Injector, Provider, Type, computed, inject, signal } from '@angular/core';
 import {
+  FeatureCell,
   NgVaultBehaviorLifecycleService,
   ResourceStateError,
-  ResourceVaultModel,
   VaultBehaviorContext,
   VaultBehaviorFactory,
   VaultSignalRef,
@@ -28,7 +28,7 @@ export function provideFeatureCell<Service, T>(
 
   const featureCellProvider: Provider = {
     provide: token,
-    useFactory: (): ResourceVaultModel<T> => {
+    useFactory: (): FeatureCell<T> => {
       const _isLoading = signal(false);
       const _error = signal<ResourceStateError | null>(null);
       const _behaviorRunner = NgVaultBehaviorLifecycleService();
@@ -50,10 +50,9 @@ export function provideFeatureCell<Service, T>(
         );
       }
 
-      const defaultBehaviors: VaultBehaviorFactory<T>[] = [withCoreStateBehavior, withCoreHttpResourceStateBehavior];
-      const allBehaviors: VaultBehaviorFactory<T>[] = [...defaultBehaviors, ...behaviors];
-      const coreId = _behaviorRunner.initialize();
-      _behaviorRunner.initializeBehaviors(_injector, allBehaviors);
+      const _defaultBehaviors: VaultBehaviorFactory<T>[] = [withCoreStateBehavior, withCoreHttpResourceStateBehavior];
+      const _allBehaviors: VaultBehaviorFactory<T>[] = [..._defaultBehaviors, ...behaviors];
+      const _coreId = _behaviorRunner.initializeBehaviors(_injector, _allBehaviors)!;
 
       const _value = signal<VaultDataType<T>>(
         featureCellDescriptor.initial === null || featureCellDescriptor.initial === undefined
@@ -82,13 +81,13 @@ export function provideFeatureCell<Service, T>(
         }
       } as VaultBehaviorContext<T>;
 
-      _behaviorRunner.onInit(coreId, featureCellDescriptor.key, service.name, ctx);
+      _behaviorRunner.onInit(_coreId, featureCellDescriptor.key, service.name, ctx);
 
       const _reset = (): void => {
         _isLoading.set(false);
         _error.set(null);
         _value.set(undefined);
-        _behaviorRunner.onReset(coreId, featureCellDescriptor.key, ctx);
+        _behaviorRunner.onReset(_coreId, featureCellDescriptor.key, ctx);
       };
 
       const _destroy = (): void => {
@@ -97,7 +96,7 @@ export function provideFeatureCell<Service, T>(
 
         _reset();
 
-        _behaviorRunner.onDestroy(coreId, featureCellDescriptor.key, ctx);
+        _behaviorRunner.onDestroy(_coreId, featureCellDescriptor.key, ctx);
       };
 
       // Angular DI teardown
@@ -111,7 +110,7 @@ export function provideFeatureCell<Service, T>(
         }
 
         ctx.next = next as VaultStateType<T>;
-        _behaviorRunner.onSet(coreId, featureCellDescriptor.key, ctx);
+        _behaviorRunner.onSet(_coreId, featureCellDescriptor.key, ctx);
       };
 
       const _patch = (patch: VaultStateInputType<T>): void => {
@@ -122,7 +121,7 @@ export function provideFeatureCell<Service, T>(
         }
 
         ctx.patch = patch as VaultStateType<T>;
-        _behaviorRunner.onPatch(coreId, featureCellDescriptor.key, ctx);
+        _behaviorRunner.onPatch(_coreId, featureCellDescriptor.key, ctx);
       };
 
       const _fromObservable = (source$: Observable<T>): Observable<VaultSignalRef<T>> => {
@@ -131,14 +130,14 @@ export function provideFeatureCell<Service, T>(
           const _errorSignal = signal<ResourceStateError | null>(null);
           const _valueSignal = signal<VaultDataType<T>>(undefined);
 
-          _behaviorRunner.onLoad(coreId, featureCellDescriptor.key, ctx);
+          _behaviorRunner.onLoad(_coreId, featureCellDescriptor.key, ctx);
 
           source$.pipe(take(1)).subscribe({
             next: (value) => {
               _valueSignal.set(value);
               _loadingSignal.set(false);
 
-              _behaviorRunner.onSet(coreId, featureCellDescriptor.key, ctx);
+              _behaviorRunner.onSet(_coreId, featureCellDescriptor.key, ctx);
 
               observer.next({
                 isLoading: _loadingSignal.asReadonly(),
@@ -150,19 +149,19 @@ export function provideFeatureCell<Service, T>(
             },
             error: (err) => {
               observer.error(resourceError(err));
-              _behaviorRunner.onError(coreId, featureCellDescriptor.key, ctx);
+              _behaviorRunner.onError(_coreId, featureCellDescriptor.key, ctx);
             },
             complete: () => {
               _loadingSignal.set(false);
-              _behaviorRunner.onDispose(coreId, featureCellDescriptor.key, ctx);
+              _behaviorRunner.onDispose(_coreId, featureCellDescriptor.key, ctx);
               observer.complete();
             }
           });
         });
       };
 
-      // Create vault first so we can reference it inside loadListFrom
-      const vault: ResourceVaultModel<T> = {
+      // Create the base FeatureCell instance
+      const cell: FeatureCell<T> = {
         state: {
           isLoading: _isLoading.asReadonly(),
           value: _value.asReadonly(),
@@ -177,7 +176,7 @@ export function provideFeatureCell<Service, T>(
         destroyed$: _destroyed$.asObservable()
       };
 
-      return vault;
+      return cell;
     }
   };
 

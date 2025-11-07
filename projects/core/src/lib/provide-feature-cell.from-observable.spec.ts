@@ -2,7 +2,7 @@ import { provideHttpClient } from '@angular/common/http';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { Injector, provideZonelessChangeDetection, runInInjectionContext, signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
-import { ResourceVaultModel, VaultSignalRef } from '@ngvault/shared-models';
+import { FeatureCell, VaultSignalRef } from '@ngvault/shared-models';
 import { getTestBehavior, withTestBehavior } from '@ngvault/testing';
 import { Subject } from 'rxjs';
 import { provideFeatureCell } from './provide-feature-cell';
@@ -13,7 +13,7 @@ interface TestModel {
 }
 
 describe('ResourceVaultModel (setState, patchState, fromObservable)', () => {
-  let vault: ResourceVaultModel<TestModel[] | TestModel>;
+  let vault: FeatureCell<TestModel[] | TestModel>;
   let subject: Subject<TestModel[]>;
   const calls: any = [];
 
@@ -66,7 +66,7 @@ describe('ResourceVaultModel (setState, patchState, fromObservable)', () => {
 
     const provider = providers.find((p: any) => typeof p.useFactory === 'function');
 
-    let vault!: ResourceVaultModel<any>;
+    let vault!: FeatureCell<any>;
 
     runInInjectionContext(TestBed.inject(Injector), () => {
       vault = (provider as any).useFactory();

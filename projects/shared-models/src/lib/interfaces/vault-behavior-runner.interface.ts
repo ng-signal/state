@@ -8,8 +8,7 @@ export interface VaultBehaviorRunner<T = any> {
 
   onSet(behaviorId: string, vaultKey: string, ctx: VaultBehaviorContext<T>): void;
 
-  initializeBehaviors<T>(injector: Injector, factories: Array<VaultBehaviorFactory<T>>): void;
-  initialize(): string;
+  initializeBehaviors<T>(injector: Injector, factories: Array<VaultBehaviorFactory<T>>): string;
 
   onError(behaviorId: string, vaultKey: string, ctx: VaultBehaviorContext<T>): void;
   onReset(behaviorId: string, vaultKey: string, ctx: VaultBehaviorContext<T>): void;

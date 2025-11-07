@@ -9,6 +9,9 @@ import { VaultBehaviorFactory } from '../types/vault-behavior-factory.type';
 import { VaultBehaviorTypeOrder } from '../types/vault-behavior.type';
 
 class VaultBehaviorRunnerClass implements VaultBehaviorRunner {
+  initialize(): string {
+    throw new Error('Method not implemented.');
+  }
   readonly #typeOrder = [...VaultBehaviorTypeOrder];
   // eslint-disable-next-line
   #behaviors: VaultBehavior<any>[] = [];
@@ -42,31 +45,6 @@ class VaultBehaviorRunnerClass implements VaultBehaviorRunner {
     if (!nextId) return undefined;
 
     return { type: nextType, id: nextId };
-  }
-
-  initialize(): string {
-    if (this.#initialized) {
-      throw new Error('[NgVault] VaultBehaviorRunner already initialized — cannot reissue core behavior ID.');
-    }
-    this.#initializeBehaviorIds();
-
-    const coreId = this.#behaviorIds.get('core');
-    if (!coreId) throw new Error('[NgVault] Failed to obtain core behavior ID during initialization.');
-
-    this.#initialized = true;
-    Object.freeze(this.#behaviorIds);
-    Object.freeze(this.#idToType);
-
-    return coreId;
-  }
-
-  #verifyInitialized(): void {
-    if (!this.#initialized) {
-      throw new Error(
-        '[NgVault] VaultBehaviorRunner has not been initialized. ' +
-          'Call initialize() before invoking lifecycle methods.'
-      );
-    }
   }
 
   #lifeCycle<T>(
@@ -120,10 +98,35 @@ class VaultBehaviorRunnerClass implements VaultBehaviorRunner {
     this.#lifeCycle(hook, vaultKey, ctx, nextBehaviors, serviceName);
   }
 
-  initializeBehaviors<T>(injector: Injector, behaviors: Array<VaultBehaviorFactory<T>>): void {
-    this.#verifyInitialized();
+  #verifyInitialized(): void {
+    if (!this.#initialized) {
+      throw new Error(
+        '[NgVault] VaultBehaviorRunner has not been initialized. ' +
+          'Call initialize() before invoking lifecycle methods.'
+      );
+    }
+  }
 
-    if (!behaviors || behaviors.length === 0) return;
+  #initialize(): string {
+    if (this.#initialized) {
+      throw new Error('[NgVault] VaultBehaviorRunner already initialized — cannot reissue core behavior ID.');
+    }
+    this.#initializeBehaviorIds();
+
+    const coreId = this.#behaviorIds.get('core');
+    if (!coreId) throw new Error('[NgVault] Failed to obtain core behavior ID during initialization.');
+
+    this.#initialized = true;
+    Object.freeze(this.#behaviorIds);
+    Object.freeze(this.#idToType);
+
+    return coreId;
+  }
+
+  initializeBehaviors<T>(injector: Injector, behaviors: Array<VaultBehaviorFactory<T>>): string {
+    const coreId = this.#initialize();
+
+    if (!behaviors || behaviors.length === 0) return coreId;
 
     const seenKeys = new Set<string>();
 
@@ -186,6 +189,8 @@ class VaultBehaviorRunnerClass implements VaultBehaviorRunner {
         }
       })
       .filter((b): b is VaultBehavior<T> => !!b);
+
+    return coreId;
   }
 
   onInit<T>(behaviorId: string, vaultKey: string, serviceName: string, ctx: VaultBehaviorContext<T>): void {

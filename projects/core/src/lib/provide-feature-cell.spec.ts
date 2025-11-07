@@ -8,7 +8,7 @@ import {
   runInInjectionContext
 } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
-import { ResourceVaultModel, VaultBehaviorFactory } from '@ngvault/shared-models';
+import { FeatureCell, VaultBehaviorFactory } from '@ngvault/shared-models';
 import { getTestBehavior, withTestBehavior } from '@ngvault/testing';
 import { FEATURE_CELL_REGISTRY } from './constants/feature-cell-registry.constant';
 import { provideFeatureCell } from './provide-feature-cell';
@@ -77,7 +77,7 @@ describe('Provider: Feature Cell (core vault functionality)', () => {
     const makeVault = (initial: any) => {
       const providers = provideFeatureCell(class DummyService {}, { key: 'init-test', initial });
       const provider = providers.find((p: any) => typeof p.useFactory === 'function');
-      let vault: ResourceVaultModel<any>;
+      let vault: FeatureCell<any>;
       runInInjectionContext(TestBed.inject(Injector), () => {
         vault = (provider as any).useFactory();
       });
@@ -100,7 +100,7 @@ describe('Provider: Feature Cell (core vault functionality)', () => {
   it('should gracefully reset all vault signals when setState(null) or patchState(null) is used', () => {
     const providers = provideFeatureCell(class DummyService {}, { key: 'reset-test', initial: [1, 2, 3] });
     const provider = providers.find((p: any) => typeof p.useFactory === 'function');
-    let vault!: ResourceVaultModel<any>;
+    let vault!: FeatureCell<any>;
 
     runInInjectionContext(TestBed.inject(Injector), () => {
       vault = (provider as any).useFactory();
@@ -158,7 +158,7 @@ describe('Provider: Feature Cell (core vault functionality)', () => {
   it('should merge arrays and objects correctly using patchState()', () => {
     const providers = provideFeatureCell(class DummyService {}, { key: 'merge-test', initial: [] });
     const provider = providers.find((p: any) => typeof p.useFactory === 'function');
-    let vault!: ResourceVaultModel<any>;
+    let vault!: FeatureCell<any>;
 
     runInInjectionContext(TestBed.inject(Injector), () => {
       vault = (provider as any).useFactory();
@@ -178,7 +178,7 @@ describe('Provider: Feature Cell (core vault functionality)', () => {
   it('should replace data completely when type differs between current and next', () => {
     const providers = provideFeatureCell(class DummyService {}, { key: 'replace-test', initial: [1, 2] });
     const provider = providers.find((p: any) => typeof p.useFactory === 'function');
-    let vault!: ResourceVaultModel<any>;
+    let vault!: FeatureCell<any>;
 
     runInInjectionContext(TestBed.inject(Injector), () => {
       vault = (provider as any).useFactory();
@@ -192,7 +192,7 @@ describe('Provider: Feature Cell (core vault functionality)', () => {
   it('should correctly propagate loading and error updates', () => {
     const providers = provideFeatureCell(class DummyService {}, { key: 'state-test', initial: [] });
     const provider = providers.find((p: any) => typeof p.useFactory === 'function');
-    let vault!: ResourceVaultModel<any>;
+    let vault!: FeatureCell<any>;
 
     runInInjectionContext(TestBed.inject(Injector), () => {
       vault = (provider as any).useFactory();
@@ -255,7 +255,7 @@ describe('Provider: Feature Cell (core vault functionality)', () => {
   it('should merge arrays when current and next are both arrays', () => {
     const providers = provideFeatureCell(class DummyService {}, { key: 'reset-test', initial: [1, 2, 3] });
     const provider = providers.find((p: any) => typeof p.useFactory === 'function');
-    let vault!: ResourceVaultModel<any>;
+    let vault!: FeatureCell<any>;
 
     runInInjectionContext(TestBed.inject(Injector), () => {
       vault = (provider as any).useFactory();
@@ -270,7 +270,7 @@ describe('Provider: Feature Cell (core vault functionality)', () => {
   it('should merge objects shallowly when both current and next are plain objects', () => {
     const providers = provideFeatureCell(class DummyService {}, { key: 'reset-test', initial: [1, 2, 3] });
     const provider = providers.find((p: any) => typeof p.useFactory === 'function');
-    let vault!: ResourceVaultModel<any>;
+    let vault!: FeatureCell<any>;
 
     runInInjectionContext(TestBed.inject(Injector), () => {
       vault = (provider as any).useFactory();
@@ -286,7 +286,7 @@ describe('Provider: Feature Cell (core vault functionality)', () => {
   it('should replace completely when types differ (array → object or null)', () => {
     const providers = provideFeatureCell(class DummyService {}, { key: 'reset-test', initial: [1, 2, 3] });
     const provider = providers.find((p: any) => typeof p.useFactory === 'function');
-    let vault!: ResourceVaultModel<any>;
+    let vault!: FeatureCell<any>;
 
     runInInjectionContext(TestBed.inject(Injector), () => {
       vault = (provider as any).useFactory();
@@ -305,7 +305,7 @@ describe('Provider: Feature Cell (core vault functionality)', () => {
   it('should update loading when partial.loading is provided', () => {
     const providers = provideFeatureCell(class DummyService {}, { key: 'reset-test', initial: [1, 2, 3] });
     const provider = providers.find((p: any) => typeof p.useFactory === 'function');
-    let vault!: ResourceVaultModel<any>;
+    let vault!: FeatureCell<any>;
 
     runInInjectionContext(TestBed.inject(Injector), () => {
       vault = (provider as any).useFactory();
@@ -320,7 +320,7 @@ describe('Provider: Feature Cell (core vault functionality)', () => {
   it('should update error when partial.error is provided', () => {
     const providers = provideFeatureCell(class DummyService {}, { key: 'reset-test', initial: [1, 2, 3] });
     const provider = providers.find((p: any) => typeof p.useFactory === 'function');
-    let vault!: ResourceVaultModel<any>;
+    let vault!: FeatureCell<any>;
 
     runInInjectionContext(TestBed.inject(Injector), () => {
       vault = (provider as any).useFactory();
@@ -339,7 +339,7 @@ describe('Provider: Feature Cell (core vault functionality)', () => {
       const providers = provideFeatureCell(class TestService {}, { key: 'destroy-test', initial: [] });
       const vaultFactory = (providers[0] as any).useFactory;
 
-      let vault!: ResourceVaultModel<any>;
+      let vault!: FeatureCell<any>;
       runInInjectionContext(TestBed.inject(Injector), () => {
         vault = vaultFactory();
       });
@@ -376,7 +376,7 @@ describe('Provider: Feature Cell (core vault functionality)', () => {
     let factory: any;
     let testBehavior: any;
     let providers: any;
-    let vault: ResourceVaultModel<any>;
+    let vault: FeatureCell<any>;
 
     beforeEach(() => {
       testBehavior?.resetEvents();
