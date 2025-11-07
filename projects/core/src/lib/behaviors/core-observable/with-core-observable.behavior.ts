@@ -3,6 +3,7 @@ import {
   defineNgVaultBehaviorKey,
   ResourceStateError,
   VaultBehavior,
+  VaultBehaviorContext,
   VaultBehaviorFactory,
   VaultBehaviorFactoryContext,
   VaultBehaviorType,
@@ -10,7 +11,7 @@ import {
   VaultSignalRef
 } from '@ngvault/shared-models';
 import { Observable, take } from 'rxjs';
-import { resourceError } from '../..//utils/resource-error.util';
+import { resourceError } from '../../utils/resource-error.util';
 import { ObservableBehaviorExtension } from './interface/observable-behavior.interface';
 
 class CoreObservableBehavior<T> implements VaultBehavior<T, ObservableBehaviorExtension<T>> {
@@ -24,7 +25,13 @@ class CoreObservableBehavior<T> implements VaultBehavior<T, ObservableBehaviorEx
   ) {}
 
   extendCellAPI(): ObservableBehaviorExtension<T> {
+    // eslint-disable-next-line
+    const self = this;
     return {
+      onInit(key: string, service: string, ctx: VaultBehaviorContext<T>): void {
+        ctx.behaviorRunner?.onInit?.(self.behaviorId, self.key, service, ctx);
+      },
+
       fromObservable: (key, ctx, source$) =>
         new Observable<VaultSignalRef<T>>((observer) => {
           const _loadingSignal = signal(true);
@@ -32,14 +39,15 @@ class CoreObservableBehavior<T> implements VaultBehavior<T, ObservableBehaviorEx
           const _valueSignal = signal<VaultDataType<T>>(undefined);
           const _hasValue = signal(false);
 
-          ctx.behaviorRunner?.onLoad?.(this.behaviorId, key, ctx);
+          ctx.behaviorRunner?.onLoad?.(self.behaviorId, self.key, ctx);
 
           source$.pipe(take(1)).subscribe({
             next: (value) => {
               _valueSignal.set(value);
               _loadingSignal.set(false);
               _hasValue.set(true);
-              ctx.behaviorRunner?.onSet?.(this.behaviorId, key, ctx);
+
+              ctx.behaviorRunner?.onSet?.(self.behaviorId, self.key, ctx);
 
               observer.next({
                 isLoading: _loadingSignal.asReadonly(),
@@ -51,11 +59,11 @@ class CoreObservableBehavior<T> implements VaultBehavior<T, ObservableBehaviorEx
             },
             error: (err) => {
               observer.error(resourceError(err));
-              ctx.behaviorRunner?.onError?.(this.behaviorId, key, ctx);
+              ctx.behaviorRunner?.onError?.(self.behaviorId, self.key, ctx);
             },
             complete: () => {
               _loadingSignal.set(false);
-              ctx.behaviorRunner?.onDispose?.(this.behaviorId, key, ctx);
+              ctx.behaviorRunner?.onDispose?.(self.behaviorId, self.key, ctx);
               observer.complete();
             }
           });

@@ -147,22 +147,23 @@ describe('ResourceVaultModel (setState, patchState, fromObservable)', () => {
 
     let lastRef!: VaultSignalRef<any>;
     vault.fromObservable!(subject.asObservable()).subscribe({
-      next: (result) => (lastRef = result),
-      complete: () => {
-        expect(lastRef.isLoading()).toBeFalse();
-        expect(lastRef.value()).toEqual({ id: 1, name: 'Ada' });
-        expect(lastRef.error()).toBeNull();
-      }
+      next: (result) => (lastRef = result)
     });
+
+    subject.next({ id: 1, name: 'Ada' });
+    subject.complete();
+
+    expect(lastRef.isLoading()).toBeFalse();
+    expect(lastRef.value()).toEqual({ id: 1, name: 'Ada' });
+    expect(lastRef.error()).toBeNull();
 
     expect(getTestBehavior().getEvents()).toEqual([
       'onInit:http',
       'onInit:NgVault::Core::State',
       'onInit:NgVault::CoreHttpResource::State',
-      'onLoad:http'
+      'onLoad:NgVault::Core::FromObservable',
+      'onSet:NgVault::Core::FromObservable:{"isLoading":false,"value":[],"error":null,"hasValue":true}',
+      'onDispose:NgVault::Core::FromObservable'
     ]);
-
-    subject.next({ id: 1, name: 'Ada' });
-    subject.complete();
   });
 });

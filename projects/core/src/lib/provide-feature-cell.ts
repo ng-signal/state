@@ -5,19 +5,18 @@ import {
   ResourceStateError,
   VaultBehaviorContext,
   VaultBehaviorFactory,
-  VaultSignalRef,
   VaultStateSnapshot
 } from '@ngvault/shared-models';
 import { VaultDataType } from '@ngvault/shared-models/types/vault-data.type';
 import { VaultStateInputType } from '@ngvault/shared-models/types/vault-state-input.type';
 import { VaultStateType } from '@ngvault/shared-models/types/vault-state.type';
-import { Observable, Subject, take } from 'rxjs';
+import { Subject } from 'rxjs';
 import { withCoreHttpResourceStateBehavior } from './behaviors/core-http-resource-state/with-core-http-resource-state.behavior';
+import { withCoreObservableBehavior } from './behaviors/core-observable/with-core-observable.behavior';
 import { withCoreStateBehavior } from './behaviors/core-state/with-core-state.behavior';
 import { FEATURE_CELL_REGISTRY } from './constants/feature-cell-registry.constant';
 import { FeatureCellDescriptorModel } from './models/feature-cell-descriptor.model';
 import { getOrCreateFeatureCellToken } from './tokens/feature-cell-token-registry';
-import { resourceError } from './utils/resource-error.util';
 
 export function provideFeatureCell<Service, T>(
   service: Type<Service>,
@@ -50,7 +49,11 @@ export function provideFeatureCell<Service, T>(
         );
       }
 
-      const _defaultBehaviors: VaultBehaviorFactory<T>[] = [withCoreStateBehavior, withCoreHttpResourceStateBehavior];
+      const _defaultBehaviors: VaultBehaviorFactory<T>[] = [
+        withCoreStateBehavior,
+        withCoreHttpResourceStateBehavior,
+        withCoreObservableBehavior
+      ];
       const _allBehaviors: VaultBehaviorFactory<T>[] = [..._defaultBehaviors, ...behaviors];
       const _coreId = _behaviorRunner.initializeBehaviors(_injector, _allBehaviors)!;
 
@@ -124,42 +127,6 @@ export function provideFeatureCell<Service, T>(
         _behaviorRunner.onPatch(_coreId, featureCellDescriptor.key, ctx);
       };
 
-      const _fromObservable = (source$: Observable<T>): Observable<VaultSignalRef<T>> => {
-        return new Observable<VaultSignalRef<T>>((observer) => {
-          const _loadingSignal = signal(true);
-          const _errorSignal = signal<ResourceStateError | null>(null);
-          const _valueSignal = signal<VaultDataType<T>>(undefined);
-
-          _behaviorRunner.onLoad(_coreId, featureCellDescriptor.key, ctx);
-
-          source$.pipe(take(1)).subscribe({
-            next: (value) => {
-              _valueSignal.set(value);
-              _loadingSignal.set(false);
-
-              _behaviorRunner.onSet(_coreId, featureCellDescriptor.key, ctx);
-
-              observer.next({
-                isLoading: _loadingSignal.asReadonly(),
-                value: _valueSignal.asReadonly(),
-                error: _errorSignal.asReadonly(),
-                hasValue: _hasValue
-              });
-              observer.complete();
-            },
-            error: (err) => {
-              observer.error(resourceError(err));
-              _behaviorRunner.onError(_coreId, featureCellDescriptor.key, ctx);
-            },
-            complete: () => {
-              _loadingSignal.set(false);
-              _behaviorRunner.onDispose(_coreId, featureCellDescriptor.key, ctx);
-              observer.complete();
-            }
-          });
-        });
-      };
-
       // Create the base FeatureCell instance
       const cell: FeatureCell<T> = {
         state: {
@@ -170,7 +137,6 @@ export function provideFeatureCell<Service, T>(
         },
         setState: _set,
         patchState: _patch,
-        fromObservable: _fromObservable,
         reset: _reset,
         destroy: _destroy,
         destroyed$: _destroyed$.asObservable()
