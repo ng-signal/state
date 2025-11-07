@@ -37,7 +37,6 @@ describe('Provider: Feature Cell (core vault functionality)', () => {
       (p: any): p is ValueProvider | ClassProvider | FactoryProvider | ExistingProvider =>
         (p as any).provide === FEATURE_CELL_REGISTRY
     ) as ValueProvider;
-
     expect(registryProvider).toBeDefined();
     expect((registryProvider as any).multi).toBeTrue();
     expect(registryProvider.useValue).toEqual({ key: 'http', token: jasmine.any(Function) });
@@ -392,7 +391,11 @@ describe('Provider: Feature Cell (core vault functionality)', () => {
 
       testBehavior = getTestBehavior();
 
-      expect(testBehavior.getEvents()).toEqual(['onInit:devtools-test', 'onInit:NgVault::Core::State']);
+      expect(testBehavior.getEvents()).toEqual([
+        'onInit:devtools-test',
+        'onInit:NgVault::Core::State',
+        'onInit:NgVault::CoreHttpResource::State'
+      ]);
     });
 
     it('should emit a "dispose" event when vault.destroy() is called', () => {
@@ -406,6 +409,7 @@ describe('Provider: Feature Cell (core vault functionality)', () => {
       expect(testBehavior.getEvents()).toEqual([
         'onInit:devtools-test',
         'onInit:NgVault::Core::State',
+        'onInit:NgVault::CoreHttpResource::State',
         'onReset:devtools-test',
         'onDestroy:devtools-test'
       ]);
@@ -429,6 +433,7 @@ describe('Provider: Feature Cell (core vault functionality)', () => {
       expect(testBehavior.getEvents()).toEqual([
         'onInit:devtools-test',
         'onInit:NgVault::Core::State',
+        'onInit:NgVault::CoreHttpResource::State',
 
         'onSet:devtools-test:{"isLoading":false,"value":[],"error":null,"hasValue":true}',
 

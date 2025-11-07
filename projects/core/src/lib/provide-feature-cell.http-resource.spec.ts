@@ -2,8 +2,9 @@ import { httpResource, provideHttpClient } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { ApplicationRef, Injector, provideZonelessChangeDetection, runInInjectionContext, signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
-import { ResourceVaultModel } from '@ngvault/shared-models';
 import { getTestBehavior, withTestBehavior } from '@ngvault/testing';
+import { FeatureCell } from './decorators/feature-cell.decorator';
+import { injectVault } from './injectors/feature-vault.injector';
 import { provideFeatureCell } from './provide-feature-cell';
 
 interface TestModel {
@@ -11,24 +12,31 @@ interface TestModel {
   name: string;
 }
 
+@FeatureCell<TestModel[]>('cars')
+class TestService {
+  vault = injectVault<TestModel[]>(TestService);
+}
+
 describe('Provider: Feature Cell Resource', () => {
-  let vault: ResourceVaultModel<TestModel[] | TestModel | number | undefined>;
+  let vault: any;
+  let injector: any;
 
   beforeEach(() => {
     TestBed.configureTestingModule({
-      providers: [provideHttpClient(), provideHttpClientTesting(), provideZonelessChangeDetection()]
+      providers: [
+        provideHttpClient(),
+        provideHttpClientTesting(),
+        provideZonelessChangeDetection(),
+
+        provideFeatureCell(TestService, { key: 'cars', initial: [] }, [withTestBehavior])
+      ]
     });
 
-    const injector = TestBed.inject(Injector);
-    const providers = provideFeatureCell(class TestService {}, { key: 'http', initial: [] }, [withTestBehavior]);
-    const vaultFactory = (providers[0] as any).useFactory;
+    injector = TestBed.inject(Injector);
 
-    runInInjectionContext(injector, () => {
-      vault = vaultFactory();
-    });
+    const service = TestBed.inject(TestService);
+    vault = service.vault;
   });
-
-  afterEach(() => {});
 
   describe('setState', () => {
     it('should reactively mirror HttpResourceRef signals via setState()', async () => {
@@ -43,15 +51,15 @@ describe('Provider: Feature Cell Resource', () => {
 
       const id = signal(0);
       const mockBackend = TestBed.inject(HttpTestingController);
-      const response = httpResource<TestModel[]>(() => `/data/${id()}`, { injector: TestBed.inject(Injector) });
+      const response = httpResource<TestModel[]>(() => `/data/${id()}`, { injector });
 
       vault.setState(response);
       TestBed.tick();
 
       expect(vault.state.isLoading()).toBeTrue();
-      expect(vault.state.value()).toBeUndefined();
+      expect(vault.state.value()).toEqual([{ id: 1, name: 'Ada' }]);
       expect(vault.state.error()).toBeNull();
-      expect(vault.state.hasValue()).toBeFalse();
+      expect(vault.state.hasValue()).toBeTrue();
 
       const firstRequest = mockBackend.expectOne('/data/0');
       firstRequest.flush([Object({ id: 1, name: 'Ada' }), Object({ id: 2, name: 'Grace' })]);
@@ -113,7 +121,7 @@ describe('Provider: Feature Cell Resource', () => {
     it('should react when underlying HttpResourceRef signals reloads', async () => {
       const id = signal(0);
       const mockBackend = TestBed.inject(HttpTestingController);
-      const response = httpResource<TestModel[]>(() => `/data/${id()}`, { injector: TestBed.inject(Injector) });
+      const response = httpResource<TestModel[]>(() => `/data/${id()}`, { injector });
 
       vault.setState(response);
       TestBed.tick();
@@ -139,7 +147,7 @@ describe('Provider: Feature Cell Resource', () => {
 
     it('should capture HttpResourceRef errors reactively', async () => {
       const mockBackend = TestBed.inject(HttpTestingController);
-      const response = httpResource<TestModel[]>(() => '/fail', { injector: TestBed.inject(Injector) });
+      const response = httpResource<TestModel[]>(() => '/fail', { injector });
 
       vault.setState(response);
       TestBed.tick();
@@ -158,13 +166,13 @@ describe('Provider: Feature Cell Resource', () => {
         })
       );
       expect(vault.state.isLoading()).toBeFalse();
-      expect(vault.state.value()).toBeUndefined();
-      expect(vault.state.hasValue()).toBeFalse();
+      expect(vault.state.value()).toEqual([]);
+      expect(vault.state.hasValue()).toBeTrue();
     });
 
     it('should reset vault state when setState(null) is called after HttpResourceRef', async () => {
       const mockBackend = TestBed.inject(HttpTestingController);
-      const response = httpResource<TestModel[]>(() => '/data', { injector: TestBed.inject(Injector) });
+      const response = httpResource<TestModel[]>(() => '/data', { injector });
 
       vault.setState(response);
       TestBed.tick();
@@ -184,7 +192,7 @@ describe('Provider: Feature Cell Resource', () => {
 
     it('should emit events from the httpResource lifecycle', async () => {
       const mockBackend = TestBed.inject(HttpTestingController);
-      const response = httpResource<TestModel[]>(() => '/data', { injector: TestBed.inject(Injector) });
+      const response = httpResource<TestModel[]>(() => '/data', { injector });
 
       vault.setState(response);
       TestBed.tick();
@@ -202,11 +210,12 @@ describe('Provider: Feature Cell Resource', () => {
       expect(vault.state.hasValue()).toBeFalse();
 
       expect(getTestBehavior().getEvents()).toEqual([
-        'onInit:http',
+        'onInit:cars',
         'onInit:NgVault::Core::State',
-        'onSet:http:{"isLoading":true,"error":null,"hasValue":false}',
-        'onSet:http:{"isLoading":false,"value":[{"id":1,"name":"Ada"}],"error":null,"hasValue":true}',
-        'onReset:http'
+        'onInit:NgVault::CoreHttpResource::State',
+        'onSet:cars:{"isLoading":false,"value":[],"error":null,"hasValue":true}',
+        'onSet:NgVault::CoreHttpResource::State:{"isLoading":false,"value":[{"id":1,"name":"Ada"}],"error":null,"hasValue":true}',
+        'onReset:cars'
       ]);
     });
   });
@@ -217,7 +226,7 @@ describe('Provider: Feature Cell Resource', () => {
       vault.setState({ loading: false, value: [{ id: 1, name: 'Ada' }], error: null });
 
       const mockBackend = TestBed.inject(HttpTestingController);
-      const response = httpResource<TestModel[]>(() => '/patch-array', { injector: TestBed.inject(Injector) });
+      const response = httpResource<TestModel[]>(() => '/patch-array', { injector });
 
       // patch the vault with a live HttpResourceRef
       vault.patchState(response);
@@ -241,7 +250,7 @@ describe('Provider: Feature Cell Resource', () => {
       const objVault = runInInjectionContext(TestBed.inject(Injector), () => vaultFactory());
 
       const mockBackend = TestBed.inject(HttpTestingController);
-      const response = httpResource<TestModel>(() => '/patch-object', { injector: TestBed.inject(Injector) });
+      const response = httpResource<TestModel>(() => '/patch-object', { injector });
 
       objVault.patchState(response);
       TestBed.tick();
@@ -261,7 +270,7 @@ describe('Provider: Feature Cell Resource', () => {
       vault.setState({ value: [{ id: 9, name: 'Existing' }], loading: false, error: null });
 
       const mockBackend = TestBed.inject(HttpTestingController);
-      const response = httpResource<TestModel[]>(() => '/patch-fail', { injector: TestBed.inject(Injector) });
+      const response = httpResource<TestModel[]>(() => '/patch-fail', { injector });
 
       vault.patchState(response);
       TestBed.tick();
@@ -287,7 +296,7 @@ describe('Provider: Feature Cell Resource', () => {
 
     it('should reset vault state when patchState(null) is called after HttpResourceRef', async () => {
       const mockBackend = TestBed.inject(HttpTestingController);
-      const response = httpResource<TestModel[]>(() => '/patch-reset', { injector: TestBed.inject(Injector) });
+      const response = httpResource<TestModel[]>(() => '/patch-reset', { injector });
 
       vault.patchState(response);
       TestBed.tick();
@@ -309,7 +318,7 @@ describe('Provider: Feature Cell Resource', () => {
     it('should correctly update primitive data types from HttpResourceRef via patchState (final else path)', async () => {
       // Arrange
       const mockBackend = TestBed.inject(HttpTestingController);
-      const response = httpResource<number>(() => '/primitive', { injector: TestBed.inject(Injector) });
+      const response = httpResource<number>(() => '/primitive', { injector });
 
       // Use patchState to go through the experimental HttpResourceRef branch
       vault.patchState(response);
@@ -345,7 +354,7 @@ describe('Provider: Feature Cell Resource', () => {
     it('should emit events from the httpResource lifecycle', async () => {
       // Arrange
       const mockBackend = TestBed.inject(HttpTestingController);
-      const response = httpResource<number>(() => '/primitive', { injector: TestBed.inject(Injector) });
+      const response = httpResource<number>(() => '/primitive', { injector });
 
       // Use patchState to go through the experimental HttpResourceRef branch
       vault.patchState(response);
@@ -378,8 +387,9 @@ describe('Provider: Feature Cell Resource', () => {
       expect(vault.state.hasValue()).toBeTrue();
 
       expect(getTestBehavior().getEvents()).toEqual([
-        'onInit:http',
-        'onInit:NgVault::Core::State'
+        'onInit:cars',
+        'onInit:NgVault::Core::State',
+        'onInit:NgVault::CoreHttpResource::State'
         // 'onPatch:http:{"isLoading":false,"value":42,"error":null,"hasValue":true}',
         // 'onPatch:http:{"isLoading":true,"value":42,"error":null,"hasValue":true}',
         // 'onPatch:http:{"isLoading":false,"value":7,"error":null,"hasValue":true}'

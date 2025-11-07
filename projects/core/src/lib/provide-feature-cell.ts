@@ -23,6 +23,7 @@ import { VaultDataType } from '@ngvault/shared-models/types/vault-data.type';
 import { VaultStateInputType } from '@ngvault/shared-models/types/vault-state-input.type';
 import { VaultStateType } from '@ngvault/shared-models/types/vault-state.type';
 import { Observable, Subject, take } from 'rxjs';
+import { withCoreHttpResourceStateBehavior } from './behaviors/with-core-http-resource-state.behavior';
 import { withCoreStateBehavior } from './behaviors/with-core-state.behavior';
 import { NGVAULT_EXPERIMENTAL_HTTP_RESOURCE } from './constants/experimental-flag.constant';
 import { FEATURE_CELL_REGISTRY } from './constants/feature-cell-registry.constant';
@@ -45,7 +46,7 @@ export function provideFeatureCell<Service, T>(
     useFactory: (): ResourceVaultModel<T> => {
       const _isLoading = signal(false);
       const _error = signal<ResourceStateError | null>(null);
-      const _behaviorLifeCycle = NgVaultBehaviorLifecycleService();
+      const _behaviorRunner = NgVaultBehaviorLifecycleService();
       const _injector = inject(Injector);
       const _destroyRef = inject(DestroyRef);
       const _destroyed$ = new Subject<void>();
@@ -64,10 +65,10 @@ export function provideFeatureCell<Service, T>(
         );
       }
 
-      const defaultBehaviors: VaultBehaviorFactory<T>[] = [withCoreStateBehavior];
+      const defaultBehaviors: VaultBehaviorFactory<T>[] = [withCoreStateBehavior, withCoreHttpResourceStateBehavior];
       const allBehaviors: VaultBehaviorFactory<T>[] = [...defaultBehaviors, ...behaviors];
-      const coreId = _behaviorLifeCycle.initialize();
-      _behaviorLifeCycle.initializeBehaviors(_injector, allBehaviors);
+      const coreId = _behaviorRunner.initialize();
+      _behaviorRunner.initializeBehaviors(_injector, allBehaviors);
 
       const _value = signal<VaultDataType<T>>(
         featureCellDescriptor.initial === null || featureCellDescriptor.initial === undefined
@@ -84,7 +85,7 @@ export function provideFeatureCell<Service, T>(
         isLoading: _isLoading,
         error: _error,
         value: _value,
-        behaviorRunner: _behaviorLifeCycle,
+        behaviorRunner: _behaviorRunner,
 
         get state(): Readonly<VaultStateSnapshot<T>> {
           return {
@@ -96,13 +97,13 @@ export function provideFeatureCell<Service, T>(
         }
       } as VaultBehaviorContext<T>;
 
-      _behaviorLifeCycle.onInit(coreId, featureCellDescriptor.key, service.name, ctx);
+      _behaviorRunner.onInit(coreId, featureCellDescriptor.key, service.name, ctx);
 
       const _reset = (): void => {
         _isLoading.set(false);
         _error.set(null);
         _value.set(undefined);
-        _behaviorLifeCycle.onReset(coreId, featureCellDescriptor.key, ctx);
+        _behaviorRunner.onReset(coreId, featureCellDescriptor.key, ctx);
       };
 
       const _destroy = (): void => {
@@ -111,7 +112,7 @@ export function provideFeatureCell<Service, T>(
 
         _reset();
 
-        _behaviorLifeCycle.onDestroy(coreId, featureCellDescriptor.key, ctx);
+        _behaviorRunner.onDestroy(coreId, featureCellDescriptor.key, ctx);
       };
 
       // Angular DI teardown
@@ -127,32 +128,9 @@ export function provideFeatureCell<Service, T>(
           return;
         }
 
-        // 🧪 Experimental Angular HttpResourceRef<T> integration
-        if (NGVAULT_EXPERIMENTAL_HTTP_RESOURCE && isHttpResourceRef<T>(next)) {
-          // eslint-disable-next-line
-          ctx.next = next as any;
-          const resource = next as HttpResourceRef<T>;
-
-          runInInjectionContext(_injector, () => {
-            effect(() => {
-              _isLoading.set(resource.isLoading());
-              try {
-                _value.set(resource.value());
-
-                _behaviorLifeCycle.onSet(coreId, featureCellDescriptor.key, ctx);
-              } catch {
-                _error.set(resourceError(resource.error()));
-                _behaviorLifeCycle.onError(coreId, featureCellDescriptor.key, ctx);
-              }
-            });
-          });
-
-          devWarnExperimentalHttpResource();
-          return;
-        }
-
-        ctx.next = Object.freeze(next as VaultStateType<T>);
-        _behaviorLifeCycle.onSet(coreId, featureCellDescriptor.key, ctx);
+        // ctx.next = Object.freeze(next as VaultStateType<T>);
+        ctx.next = next as VaultStateType<T>;
+        _behaviorRunner.onSet(coreId, featureCellDescriptor.key, ctx);
       };
 
       const _patch = (partial: VaultStateInputType<T>): void => {
@@ -181,7 +159,7 @@ export function provideFeatureCell<Service, T>(
                   // _behaviorLifeCycle.onPatch(coreId, featureCellDescriptor.key, ctx);
                 } catch {
                   _error.set(resourceError(resource.error()));
-                  _behaviorLifeCycle.onError(coreId, featureCellDescriptor.key, ctx);
+                  _behaviorRunner.onError(coreId, featureCellDescriptor.key, ctx);
                 }
               });
             });
@@ -192,7 +170,7 @@ export function provideFeatureCell<Service, T>(
         }
 
         ctx.next = Object.freeze(partial as VaultStateType<T>);
-        _behaviorLifeCycle.onPatch(coreId, featureCellDescriptor.key, ctx);
+        _behaviorRunner.onPatch(coreId, featureCellDescriptor.key, ctx);
       };
 
       const _fromObservable = (source$: Observable<T>): Observable<VaultSignalRef<T>> => {
@@ -201,14 +179,14 @@ export function provideFeatureCell<Service, T>(
           const _errorSignal = signal<ResourceStateError | null>(null);
           const _valueSignal = signal<VaultDataType<T>>(undefined);
 
-          _behaviorLifeCycle.onLoad(coreId, featureCellDescriptor.key, ctx);
+          _behaviorRunner.onLoad(coreId, featureCellDescriptor.key, ctx);
 
           source$.pipe(take(1)).subscribe({
             next: (value) => {
               _valueSignal.set(value);
               _loadingSignal.set(false);
 
-              _behaviorLifeCycle.onSet(coreId, featureCellDescriptor.key, ctx);
+              _behaviorRunner.onSet(coreId, featureCellDescriptor.key, ctx);
 
               observer.next({
                 isLoading: _loadingSignal.asReadonly(),
@@ -220,11 +198,11 @@ export function provideFeatureCell<Service, T>(
             },
             error: (err) => {
               observer.error(resourceError(err));
-              _behaviorLifeCycle.onError(coreId, featureCellDescriptor.key, ctx);
+              _behaviorRunner.onError(coreId, featureCellDescriptor.key, ctx);
             },
             complete: () => {
               _loadingSignal.set(false);
-              _behaviorLifeCycle.onDispose(coreId, featureCellDescriptor.key, ctx);
+              _behaviorRunner.onDispose(coreId, featureCellDescriptor.key, ctx);
               observer.complete();
             }
           });

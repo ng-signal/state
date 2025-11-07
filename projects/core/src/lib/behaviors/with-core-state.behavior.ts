@@ -16,7 +16,7 @@ import { isHttpResourceRef } from '../utils/is-http-resource.util';
  * Core behavior responsible for replacing state values.
  * No HTTP logic, no devtools hooks — pure synchronous state mutation.
  */
-class CoreSetBehavior<T> implements VaultBehavior<T> {
+class CoreStateBehavior<T> implements VaultBehavior<T> {
   public readonly critical = true;
   public readonly key = defineNgVaultBehaviorKey('Core', 'State');
 
@@ -78,7 +78,7 @@ class CoreSetBehavior<T> implements VaultBehavior<T> {
 }
 
 export const withCoreStateBehavior = ((context: VaultBehaviorFactoryContext): VaultBehavior => {
-  return new CoreSetBehavior(context.behaviorId, 'state', context.injector);
+  return new CoreStateBehavior(context.behaviorId, 'state', context.injector);
 }) as VaultBehaviorFactory;
 
 withCoreStateBehavior.type = 'state';
