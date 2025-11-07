@@ -479,4 +479,46 @@ describe('Provider: Feature Cell (core vault functionality)', () => {
       );
     });
   });
+
+  it('should attach and execute an extended FeatureCell API method from a behavior', () => {
+    // Step 1: Create a behavior that adds a custom method via extendCellAPI
+    // eslint-disable-next-line
+    const withCustomBehavior = (ctx: any) => ({
+      type: 'state',
+      key: 'NgVault::Testing::CustomBehavior',
+      behaviorId: 'custom-id',
+      extendCellAPI: () => ({
+        sayHello: (key: string, _ctx: any, name: string) => `Hello ${name} from ${key}`
+      })
+    });
+
+    // Add required metadata (type and critical flags)
+    (withCustomBehavior as any).type = 'state';
+    (withCustomBehavior as any).critical = false;
+
+    // Step 2: Provide the feature cell with the custom behavior
+    const providers = provideFeatureCell(class DummyService {}, { key: 'extension-test', initial: [] }, [
+      withCustomBehavior as any
+    ]);
+
+    const provider = providers.find((p: any) => typeof p.useFactory === 'function');
+    let vault!: FeatureCell<any>;
+
+    // Step 3: Instantiate the feature cell within Angular DI
+    runInInjectionContext(TestBed.inject(Injector), () => {
+      vault = (provider as any).useFactory();
+    });
+
+    // Step 4: Verify that the extension method was added
+    expect(typeof (vault as any).sayHello).toBe('function');
+
+    // Step 5: Call the method and verify it works
+    const result = (vault as any).sayHello('World');
+    expect(result).toBe('Hello World from extension-test');
+
+    // Step 6: Confirm that the base FeatureCell API still works
+    vault.setState({ value: [1, 2, 3] });
+    expect(vault.state.value()).toEqual([1, 2, 3]);
+    expect(vault.state.hasValue()).toBeTrue();
+  });
 });

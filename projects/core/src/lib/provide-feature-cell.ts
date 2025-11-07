@@ -189,6 +189,8 @@ export function provideFeatureCell<Service, T>(
         writable: false
       });
 
+      _behaviorRunner.applyBehaviorExtensions(cell);
+
       return cell;
     }
   };

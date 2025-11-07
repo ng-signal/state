@@ -17,4 +17,5 @@ export interface VaultBehavior<T = unknown> {
 
   // eslint-disable-next-line
   extendCellAPI?(cell: FeatureCell<T>): void | Record<string, (...args: any[]) => unknown>;
+  allowOverride?: string[];
 }

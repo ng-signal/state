@@ -32,11 +32,12 @@ describe('VaultBehaviorLifecycleService', () => {
   let randonUuid: any;
   let injector: any;
   let ids: any = [];
+  let warnSpy: any;
 
   beforeEach(() => {
+    warnSpy = spyOn(console, 'warn');
     calls.length = 0;
     randonUuid = crypto.randomUUID;
-    spyOn(console, 'warn');
 
     resetTestBehaviorFactoryId();
 
@@ -370,15 +371,13 @@ describe('VaultBehaviorLifecycleService', () => {
     it('handles empty behaviors', () => {
       vaultRunner.initializeBehaviors(injector, []);
 
-      // eslint-disable-next-line
-      expect(console.warn).not.toHaveBeenCalled();
+      expect(warnSpy).not.toHaveBeenCalled();
     });
 
     it('handles undefined behaviors', () => {
       vaultRunner.initializeBehaviors(injector, undefined as any);
 
-      // eslint-disable-next-line
-      expect(console.warn).not.toHaveBeenCalled();
+      expect(warnSpy).not.toHaveBeenCalled();
     });
 
     it('handles factory returning non-object gracefully', () => {
@@ -386,8 +385,7 @@ describe('VaultBehaviorLifecycleService', () => {
 
       vaultRunner.initializeBehaviors(injector, [badBehaviorFactory]);
 
-      // eslint-disable-next-line
-      expect(console.warn).toHaveBeenCalledWith(
+      expect(warnSpy).toHaveBeenCalledWith(
         '[NgVault] Behavior initialization failed: [NgVault] Behavior did not return an object'
       );
     });
@@ -399,8 +397,7 @@ describe('VaultBehaviorLifecycleService', () => {
         '[NgVault] Behavior factory missing type metadata.'
       );
 
-      // eslint-disable-next-line
-      expect(console.warn).not.toHaveBeenCalled();
+      expect(warnSpy).not.toHaveBeenCalled();
     });
 
     it('throws an error if a critical factory returns a non-object', () => {
@@ -425,8 +422,7 @@ describe('VaultBehaviorLifecycleService', () => {
 
       vaultRunner.initializeBehaviors(injector, [throwingFactory, workingFactory]);
 
-      // eslint-disable-next-line
-      expect(console.warn).toHaveBeenCalledWith('[NgVault] Non-critical behavior initialization failed: boom');
+      expect(warnSpy).toHaveBeenCalledWith('[NgVault] Non-critical behavior initialization failed: boom');
     });
 
     it('ignores invalid non-function behaviors', () => {
@@ -436,8 +432,7 @@ describe('VaultBehaviorLifecycleService', () => {
         '[NgVault] Behavior factory missing type metadata.'
       );
 
-      // eslint-disable-next-line
-      expect(console.warn).not.toHaveBeenCalled();
+      expect(warnSpy).not.toHaveBeenCalled();
     });
 
     it('filters null and undefined factories but retains valid ones', () => {
@@ -453,13 +448,10 @@ describe('VaultBehaviorLifecycleService', () => {
 
       vaultRunner.initializeBehaviors(injector, [nullFactory, undefinedFactory, validFactory]);
 
-      // eslint-disable-next-line
-      expect(console.warn).toHaveBeenCalledTimes(2);
+      expect(warnSpy).toHaveBeenCalledTimes(2);
 
-      // eslint-disable-next-line
-      const call1 = (console.warn as jasmine.Spy).calls.allArgs()[0];
-      // eslint-disable-next-line
-      const call2 = (console.warn as jasmine.Spy).calls.allArgs()[1];
+      const call1 = (warnSpy as jasmine.Spy).calls.allArgs()[0];
+      const call2 = (warnSpy as jasmine.Spy).calls.allArgs()[1];
       expect(call1).toEqual(['[NgVault] Behavior initialization failed: [NgVault] Behavior did not return an object']);
       expect(call2).toEqual(['[NgVault] Behavior initialization failed: [NgVault] Behavior did not return an object']);
     });
@@ -487,8 +479,7 @@ describe('VaultBehaviorLifecycleService', () => {
         '[NgVault] Behavior missing key for type "state". Every behavior must define a unique "key".'
       );
 
-      // eslint-disable-next-line
-      expect(console.warn).not.toHaveBeenCalled();
+      expect(warnSpy).not.toHaveBeenCalled();
     });
 
     it('throws an error if a behavior has a bad key', () => {
@@ -498,8 +489,7 @@ describe('VaultBehaviorLifecycleService', () => {
         '[NgVault] Behavior missing key for type "state". Every behavior must define a unique "key".'
       );
 
-      // eslint-disable-next-line
-      expect(console.warn).not.toHaveBeenCalled();
+      expect(warnSpy).not.toHaveBeenCalled();
     });
 
     it('throws an error if a behavior has a duplicate key', () => {
@@ -508,8 +498,7 @@ describe('VaultBehaviorLifecycleService', () => {
 
       vaultRunner.initializeBehaviors(injector, [childBehavior, childBehaviorDup]);
 
-      // eslint-disable-next-line
-      expect(console.warn).toHaveBeenCalledWith(
+      expect(warnSpy).toHaveBeenCalledWith(
         '[NgVault] Skipping duplicate behavior with key "NgVault::Testing::Duplicate"'
       );
     });
@@ -657,11 +646,10 @@ describe('VaultBehaviorLifecycleService', () => {
       const descriptor = Object.getOwnPropertyDescriptor(mockCell, 'extra')!;
       expect(descriptor.enumerable).toBeFalse();
       expect(descriptor.writable).toBeFalse();
-      expect(descriptor.configurable).toBeFalse();
+      expect(descriptor.configurable).toBeTrue();
     });
 
-    it('should warn and skip redefining an existing FeatureCell method', () => {
-      // Arrange: create a mock cell with a safe existing property (non-protected)
+    it('should throw when a behavior attempts to redefine an existing FeatureCell method without allowOverride', () => {
       const mockCell = {
         existingCustom: jasmine.createSpy('existingCustom').and.returnValue('original')
       } as any;
@@ -678,16 +666,12 @@ describe('VaultBehaviorLifecycleService', () => {
 
       vaultRunner.initializeBehaviors(injector, [redefineBehavior]);
 
-      // Act: apply the behavior extensions
-      vaultRunner.applyBehaviorExtensions(mockCell);
-
-      // Assert: should warn and skip redefinition
-      // eslint-disable-next-line
-      expect(console.warn).toHaveBeenCalledWith(
-        '[NgVault] Behavior "NgVault::Testing::Id0" attempted to redefine existing method "existingCustom". Skipping.'
+      // Expect an explicit error instead of a warning
+      expect(() => vaultRunner.applyBehaviorExtensions(mockCell)).toThrowError(
+        '[NgVault] Behavior "NgVault::Testing::Id0" attempted to redefine method "existingCustom" already provided by another behavior.'
       );
 
-      // Verify original property still works
+      // Original method remains intact
       expect(mockCell.existingCustom()).toBe('original');
     });
 
@@ -725,6 +709,195 @@ describe('VaultBehaviorLifecycleService', () => {
         `[NgVault] Behavior extension "boomMethod" threw an error:`,
         jasmine.any(Error)
       );
+    });
+
+    it('should throw when multiple behaviors define the same method name without allowOverride', () => {
+      // Behavior A adds two custom methods
+      const behaviorA = createTestBehaviorFactory(
+        () => ({
+          extendCellAPI: () => ({
+            methodA: (key: string) => `A:${key}`,
+            shared: (key: string) => `shared-from-A:${key}`
+          })
+        }),
+        'state'
+      );
+
+      // Behavior B tries to redefine `shared` without allowOverride
+      const behaviorB = createTestBehaviorFactory(
+        () => ({
+          extendCellAPI: () => ({
+            methodB: (key: string) => `B:${key}`,
+            shared: (key: string) => `shared-from-B:${key}`
+          })
+        }),
+        'state'
+      );
+
+      vaultRunner.initializeBehaviors(injector, [behaviorA, behaviorB]);
+
+      const mockCell: any = { key: 'cell-key', ctx: { id: 'mock-ctx' } };
+
+      expect(() => vaultRunner.applyBehaviorExtensions(mockCell)).toThrowError(
+        `[NgVault] Behavior "NgVault::Testing::Id1" attempted to redefine method "shared" already provided by another behavior.`
+      );
+    });
+
+    it('should throw if a behavior tries to overwrite a protected FeatureCell method', () => {
+      // Behavior attempts to overwrite a protected method ("reset")
+      const protectedBehavior = createTestBehaviorFactory(
+        () => ({
+          extendCellAPI: () => ({
+            reset: () => 'hacked'
+          })
+        }),
+        'state'
+      );
+
+      vaultRunner.initializeBehaviors(injector, [protectedBehavior]);
+
+      const mockCell: any = {
+        key: 'cell-key',
+        ctx: { id: 'mock-ctx' },
+        reset: () => 'original-reset'
+      };
+
+      // Expect the applyBehaviorExtensions call to throw
+      expect(() => vaultRunner.applyBehaviorExtensions(mockCell)).toThrowError(
+        `[NgVault] Behavior "NgVault::Testing::Id0" attempted to overwrite core FeatureCell method "reset".`
+      );
+
+      // Ensure original method remains intact
+      expect(mockCell.reset()).toBe('original-reset');
+    });
+
+    it('should handle behaviors with no or empty extensions gracefully', () => {
+      const noExtensionBehavior = createTestBehaviorFactory(
+        () => ({
+          extendCellAPI: () => undefined
+        }),
+        'state'
+      );
+
+      const emptyExtensionBehavior = createTestBehaviorFactory(
+        () => ({
+          extendCellAPI: () => ({})
+        }),
+        'state'
+      );
+
+      vaultRunner.initializeBehaviors(injector, [noExtensionBehavior, emptyExtensionBehavior]);
+
+      const mockCell: any = { key: 'cell-key', ctx: { id: 'mock-ctx' } };
+
+      expect(() => vaultRunner.applyBehaviorExtensions(mockCell)).not.toThrow();
+
+      // No new properties should be added
+      expect(Object.keys(mockCell)).toEqual(['key', 'ctx']);
+
+      // No warnings or errors
+      expect(warnSpy).not.toHaveBeenCalled();
+    });
+
+    it('should compose multiple behavior extensions that access ctx and key', () => {
+      const behaviorA = createTestBehaviorFactory(
+        () => ({
+          extendCellAPI: () => ({
+            logKey: (key: string, ctx: any) => `A:${key}:${ctx.id}`
+          })
+        }),
+        'state'
+      );
+
+      const behaviorB = createTestBehaviorFactory(
+        () => ({
+          extendCellAPI: () => ({
+            logValue: (key: string, ctx: any, val: string) => `B:${key}:${ctx.id}:${val}`
+          })
+        }),
+        'state'
+      );
+
+      vaultRunner.initializeBehaviors(injector, [behaviorA, behaviorB]);
+
+      const mockCell: any = {
+        key: 'NgVault::Feature::TestCell',
+        ctx: { id: 'ctx-123', value: 42 }
+      };
+
+      // Apply all behavior extensions
+      vaultRunner.applyBehaviorExtensions(mockCell);
+
+      // Verify both new methods exist
+      expect(typeof mockCell.logKey).toBe('function');
+      expect(typeof mockCell.logValue).toBe('function');
+
+      // Ensure they received the correct injected args automatically
+      expect(mockCell.logKey()).toBe('A:NgVault::Feature::TestCell:ctx-123');
+      expect(mockCell.logValue('foo')).toBe('B:NgVault::Feature::TestCell:ctx-123:foo');
+
+      // Ensure both methods are non-enumerable (hidden API surface)
+      const keys = Object.keys(mockCell);
+      expect(keys).not.toContain('logKey');
+      expect(keys).not.toContain('logValue');
+    });
+
+    it('should throw if two behaviors define the same method name without allowOverride', () => {
+      const behaviorA = createTestBehaviorFactory(
+        () => ({
+          extendCellAPI: () => ({
+            shared: () => 'A'
+          })
+        }),
+        'state'
+      );
+
+      const behaviorB = createTestBehaviorFactory(
+        () => ({
+          extendCellAPI: () => ({
+            shared: () => 'B'
+          })
+        }),
+        'state'
+      );
+
+      vaultRunner.initializeBehaviors(injector, [behaviorA, behaviorB]);
+
+      const mockCell: any = { key: 'cell-key', ctx: {} };
+
+      expect(() => vaultRunner.applyBehaviorExtensions(mockCell)).toThrowError(
+        `[NgVault] Behavior "NgVault::Testing::Id1" attempted to redefine method "shared" already provided by another behavior.`
+      );
+    });
+
+    it('should allow overriding when allowOverride explicitly includes the method name', () => {
+      const behaviorA = createTestBehaviorFactory(
+        () => ({
+          extendCellAPI: () => ({
+            shared: () => 'A'
+          })
+        }),
+        'state'
+      );
+
+      const behaviorB = createTestBehaviorFactory(
+        () => ({
+          extendCellAPI: () => ({
+            shared: () => 'B'
+          }),
+          allowOverride: ['shared']
+        }),
+        'state'
+      );
+
+      vaultRunner.initializeBehaviors(injector, [behaviorA, behaviorB]);
+
+      const mockCell: any = { key: 'cell-key', ctx: {} };
+
+      vaultRunner.applyBehaviorExtensions(mockCell);
+
+      // allowed override
+      expect(mockCell.shared()).toBe('B');
     });
   });
 });

@@ -195,39 +195,50 @@ class VaultBehaviorRunnerClass implements VaultBehaviorRunner {
   applyBehaviorExtensions<T>(cell: FeatureCell<T>): void {
     for (const behavior of this.#behaviors) {
       const extensions = behavior.extendCellAPI?.(cell);
-      if (extensions && typeof extensions === 'object') {
-        for (const [key, fn] of Object.entries(extensions)) {
-          if (PROTECTED_FEATURE_CELL_KEYS.has(key)) {
-            throw new Error(
-              `[NgVault] Behavior "${behavior.key}" attempted to overwrite core FeatureCell method "${key}".`
-            );
-          }
+      if (!extensions || typeof extensions !== 'object') continue;
 
-          if (cell[key as keyof FeatureCell<T>] !== undefined) {
-            // eslint-disable-next-line
-            console.warn(
-              `[NgVault] Behavior "${behavior.key}" attempted to redefine existing method "${key}". Skipping.`
-            );
-            continue;
-          }
+      for (const [key, fn] of Object.entries(extensions)) {
+        const alreadyDefined = cell[key as keyof FeatureCell<T>] !== undefined;
+        const canOverride =
+          //eslint-disable-next-line
+          Array.isArray((behavior as any).allowOverride) && (behavior as any).allowOverride.includes(key);
 
-          Object.defineProperty(cell, key, {
-            // eslint-disable-next-line
-            value: (...args: any[]) => {
-              try {
-                // Automatically inject feature key + context into all extensions
-                return fn.call(cell, cell.key, cell.ctx, ...args);
-              } catch (err) {
-                // eslint-disable-next-line
-                console.error(`[NgVault] Behavior extension "${key}" threw an error:`, err);
-                throw err;
-              }
-            },
-            enumerable: false,
-            writable: false,
-            configurable: false
-          });
+        // Block core keys
+        if (PROTECTED_FEATURE_CELL_KEYS.has(key)) {
+          throw new Error(
+            `[NgVault] Behavior "${behavior.key}" attempted to overwrite core FeatureCell method "${key}".`
+          );
         }
+
+        if (alreadyDefined && !canOverride) {
+          throw new Error(
+            `[NgVault] Behavior "${behavior.key}" attempted to redefine method "${key}" already provided by another behavior.`
+          );
+        }
+
+        if (alreadyDefined && canOverride) {
+          //eslint-disable-next-line
+          console.warn(`[NgVault] Behavior "${behavior.key}" is overriding method "${key}" (explicitly allowed).`);
+          //eslint-disable-next-line
+          delete (cell as any)[key]; // always safe now
+        }
+
+        // Always configurable for future safe overrides
+        Object.defineProperty(cell, key, {
+          //eslint-disable-next-line
+          value: (...args: any[]) => {
+            try {
+              return fn.call(cell, cell.key, cell.ctx, ...args);
+            } catch (err) {
+              //eslint-disable-next-line
+              console.error(`[NgVault] Behavior extension "${key}" threw an error:`, err);
+              throw err;
+            }
+          },
+          enumerable: false,
+          writable: false,
+          configurable: true
+        });
       }
     }
   }
