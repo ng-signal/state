@@ -194,7 +194,7 @@ class VaultBehaviorRunnerClass implements VaultBehaviorRunner {
 
   applyBehaviorExtensions<T>(cell: FeatureCell<T>): void {
     for (const behavior of this.#behaviors) {
-      const extensions = behavior.extendCellAPI?.(cell);
+      const extensions = behavior.extendCellAPI?.();
       if (!extensions || typeof extensions !== 'object') continue;
 
       for (const [key, fn] of Object.entries(extensions)) {
@@ -228,7 +228,7 @@ class VaultBehaviorRunnerClass implements VaultBehaviorRunner {
           //eslint-disable-next-line
           value: (...args: any[]) => {
             try {
-              return fn.call(cell, cell.key, cell.ctx, ...args);
+              return fn?.(cell.key as string, cell.ctx as VaultBehaviorContext<T>, ...args);
             } catch (err) {
               //eslint-disable-next-line
               console.error(`[NgVault] Behavior extension "${key}" threw an error:`, err);

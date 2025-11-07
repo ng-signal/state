@@ -480,45 +480,146 @@ describe('Provider: Feature Cell (core vault functionality)', () => {
     });
   });
 
-  it('should attach and execute an extended FeatureCell API method from a behavior', () => {
-    // Step 1: Create a behavior that adds a custom method via extendCellAPI
-    // eslint-disable-next-line
-    const withCustomBehavior = (ctx: any) => ({
-      type: 'state',
-      key: 'NgVault::Testing::CustomBehavior',
-      behaviorId: 'custom-id',
-      extendCellAPI: () => ({
-        sayHello: (key: string, _ctx: any, name: string) => `Hello ${name} from ${key}`
-      })
+  describe('Behavior Factory extendCellApi)', () => {
+    it('should attach and execute an extended FeatureCell API method from a behavior', () => {
+      // Step 1: Create a behavior that adds a custom method via extendCellAPI
+      // eslint-disable-next-line
+      const withCustomBehavior = (ctx: any) => ({
+        type: 'state',
+        key: 'NgVault::Testing::CustomBehavior',
+        behaviorId: 'custom-id',
+        extendCellAPI: () => ({
+          sayHello: (key: string, _ctx: any, name: string) => `Hello ${name} from ${key}`
+        })
+      });
+
+      // Add required metadata (type and critical flags)
+      (withCustomBehavior as any).type = 'state';
+      (withCustomBehavior as any).critical = false;
+
+      // Step 2: Provide the feature cell with the custom behavior
+      const providers = provideFeatureCell(class DummyService {}, { key: 'extension-test', initial: [] }, [
+        withCustomBehavior as any
+      ]);
+
+      const provider = providers.find((p: any) => typeof p.useFactory === 'function');
+      let vault!: FeatureCell<any>;
+
+      // Step 3: Instantiate the feature cell within Angular DI
+      runInInjectionContext(TestBed.inject(Injector), () => {
+        vault = (provider as any).useFactory();
+      });
+
+      // Step 4: Verify that the extension method was added
+      expect(typeof (vault as any).sayHello).toBe('function');
+
+      // Step 5: Call the method and verify it works
+      const result = (vault as any).sayHello('World');
+      expect(result).toBe('Hello World from extension-test');
+
+      // Step 6: Confirm that the base FeatureCell API still works
+      vault.setState({ value: [1, 2, 3] });
+      expect(vault.state.value()).toEqual([1, 2, 3]);
+      expect(vault.state.hasValue()).toBeTrue();
     });
 
-    // Add required metadata (type and critical flags)
-    (withCustomBehavior as any).type = 'state';
-    (withCustomBehavior as any).critical = false;
+    it('should throw when two behaviors define the same method name without allowOverride', () => {
+      const behaviorA = () => ({
+        type: 'state',
+        key: 'NgVault::Testing::BehaviorA',
+        behaviorId: 'A-id',
+        extendCellAPI: () => ({
+          shared: () => 'shared-A'
+        })
+      });
+      (behaviorA as any).type = 'state';
+      (behaviorA as any).critical = false;
 
-    // Step 2: Provide the feature cell with the custom behavior
-    const providers = provideFeatureCell(class DummyService {}, { key: 'extension-test', initial: [] }, [
-      withCustomBehavior as any
-    ]);
+      const behaviorB = () => ({
+        type: 'state',
+        key: 'NgVault::Testing::BehaviorB',
+        behaviorId: 'B-id',
+        extendCellAPI: () => ({
+          shared: () => 'shared-B'
+        })
+      });
+      (behaviorB as any).type = 'state';
+      (behaviorB as any).critical = false;
 
-    const provider = providers.find((p: any) => typeof p.useFactory === 'function');
-    let vault!: FeatureCell<any>;
+      const providers = provideFeatureCell(class DummyService {}, { key: 'multi-extension', initial: [] }, [
+        behaviorA as any,
+        behaviorB as any
+      ]);
 
-    // Step 3: Instantiate the feature cell within Angular DI
-    runInInjectionContext(TestBed.inject(Injector), () => {
-      vault = (provider as any).useFactory();
+      const provider = providers.find((p: any) => typeof p.useFactory === 'function');
+
+      expect(() => {
+        runInInjectionContext(TestBed.inject(Injector), () => {
+          (provider as any).useFactory();
+        });
+      }).toThrowError(
+        `[NgVault] Behavior "NgVault::Testing::BehaviorB" attempted to redefine method "shared" already provided by another behavior.`
+      );
     });
 
-    // Step 4: Verify that the extension method was added
-    expect(typeof (vault as any).sayHello).toBe('function');
+    it('should allow overriding when allowOverride explicitly includes the method name', () => {
+      spyOn(console, 'warn');
+      // Step 1: Behavior A defines shared method
+      const behaviorA = () => ({
+        type: 'state',
+        key: 'NgVault::Testing::BehaviorA',
+        behaviorId: 'A-id',
+        extendCellAPI: () => ({
+          shared: (key: string, _ctx: any) => `shared-A from ${key}`
+        })
+      });
+      (behaviorA as any).type = 'state';
+      (behaviorA as any).critical = false;
 
-    // Step 5: Call the method and verify it works
-    const result = (vault as any).sayHello('World');
-    expect(result).toBe('Hello World from extension-test');
+      // Step 2: Behavior B defines same method, but explicitly allows override
+      const behaviorB = () => ({
+        type: 'state',
+        key: 'NgVault::Testing::BehaviorB',
+        behaviorId: 'B-id',
+        allowOverride: ['shared'],
+        extendCellAPI: () => ({
+          shared: (key: string, _ctx: any) => `shared-B from ${key}`
+        })
+      });
+      (behaviorB as any).type = 'state';
+      (behaviorB as any).critical = false;
 
-    // Step 6: Confirm that the base FeatureCell API still works
-    vault.setState({ value: [1, 2, 3] });
-    expect(vault.state.value()).toEqual([1, 2, 3]);
-    expect(vault.state.hasValue()).toBeTrue();
+      // Step 3: Provide FeatureCell with both behaviors
+      const providers = provideFeatureCell(class DummyService {}, { key: 'override-test', initial: [] }, [
+        behaviorA as any,
+        behaviorB as any
+      ]);
+
+      const provider = providers.find((p: any) => typeof p.useFactory === 'function');
+      let vault!: FeatureCell<any>;
+
+      // Step 4: Instantiate FeatureCell via Angular injector context
+      runInInjectionContext(TestBed.inject(Injector), () => {
+        vault = (provider as any).useFactory();
+      });
+
+      // Step 5: Verify the overridden method exists
+      expect(typeof (vault as any).shared).toBe('function');
+
+      // Step 6: Behavior B’s override wins
+      const result = (vault as any).shared();
+      expect(result).toBe('shared-B from override-test');
+
+      // Step 7: Verify warning message logged (not an error)
+      // eslint-disable-next-line
+      expect(console.warn).toHaveBeenCalledWith(
+        `[NgVault] Behavior "NgVault::Testing::BehaviorB" is overriding method "shared" (explicitly allowed).`
+      );
+
+      // Step 8: Confirm FeatureCell’s base state API still works
+      vault.setState({ value: [100] });
+      expect(vault.state.value()).toEqual([100]);
+      expect(vault.state.hasValue()).toBeTrue();
+    });
   });
 });
