@@ -11,6 +11,7 @@ export interface VaultBehaviorContext<T> {
   value?: Signal<VaultDataType<T>> & { set(value: VaultDataType<T>): void };
 
   next?: Readonly<VaultStateType<T>> | null;
+  patch?: Readonly<VaultStateType<T>> | null;
 
   state: Readonly<VaultStateSnapshot<T>>;
   behaviorRunner?: VaultBehaviorRunner<T>;

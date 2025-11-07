@@ -104,6 +104,7 @@ export function provideFeatureCell<Service, T>(
       _destroyRef.onDestroy(() => _destroy());
 
       const _set = (next: VaultStateInputType<T>): void => {
+        ctx.patch = null;
         if (next == null) {
           _reset();
           return;
@@ -113,13 +114,14 @@ export function provideFeatureCell<Service, T>(
         _behaviorRunner.onSet(coreId, featureCellDescriptor.key, ctx);
       };
 
-      const _patch = (partial: VaultStateInputType<T>): void => {
-        if (partial == null) {
+      const _patch = (patch: VaultStateInputType<T>): void => {
+        ctx.next = null;
+        if (patch == null) {
           _reset();
           return;
         }
 
-        ctx.next = partial as VaultStateType<T>;
+        ctx.patch = patch as VaultStateType<T>;
         _behaviorRunner.onPatch(coreId, featureCellDescriptor.key, ctx);
       };
 

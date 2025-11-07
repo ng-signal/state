@@ -59,8 +59,8 @@ class CoreHttpResourceStateBehavior<T> implements VaultBehavior<T> {
   }
 
   onPatch(key: string, ctx: VaultBehaviorContext<T>): void {
-    if (NGVAULT_EXPERIMENTAL_HTTP_RESOURCE && isHttpResourceRef<T>(ctx.next)) {
-      const resource = ctx.next as HttpResourceRef<T>;
+    if (NGVAULT_EXPERIMENTAL_HTTP_RESOURCE && isHttpResourceRef<T>(ctx.patch)) {
+      const resource = ctx.patch as HttpResourceRef<T>;
       const { isLoading, error, value } = ctx;
 
       runInInjectionContext(this.injector, () => {

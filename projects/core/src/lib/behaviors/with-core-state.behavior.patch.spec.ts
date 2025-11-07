@@ -26,17 +26,17 @@ describe('Behavior: withCoreState: Patch', () => {
   });
 
   it('should safely return when patch is null or not an object', () => {
-    ctx.next = null;
+    ctx.patch = null;
     behavior.onPatch?.('vault', ctx);
     expect(ctx.value()).toBeUndefined();
 
-    ctx.next = 42; // invalid
+    ctx.patch = 42; // invalid
     behavior.onPatch?.('vault', ctx);
     expect(ctx.value()).toBeUndefined();
   });
 
   it('should update loading and error when provided', () => {
-    ctx.next = { loading: true, error: { message: 'fail' } };
+    ctx.patch = { loading: true, error: { message: 'fail' } };
     behavior.onPatch?.('vault', ctx);
 
     expect(ctx.isLoading()).toBeTrue();
@@ -44,15 +44,15 @@ describe('Behavior: withCoreState: Patch', () => {
   });
 
   it('should set primitive value correctly', () => {
-    ctx.next = { value: 123 };
+    ctx.patch = { value: 123 };
     behavior.onPatch?.('vault', ctx);
     expect(ctx.value()).toBe(123);
 
-    ctx.next = { value: 'test' };
+    ctx.patch = { value: 'test' };
     behavior.onPatch?.('vault', ctx);
     expect(ctx.value()).toBe('test');
 
-    ctx.next = { value: true };
+    ctx.patch = { value: true };
     behavior.onPatch?.('vault', ctx);
     expect(ctx.value()).toBeTrue();
   });
@@ -64,7 +64,7 @@ describe('Behavior: withCoreState: Patch', () => {
     behavior.onSet?.('vault', ctx);
 
     const patchArgs = [1, 2, 6];
-    ctx.next = { value: patchArgs };
+    ctx.patch = { value: patchArgs };
     behavior.onPatch?.('vault', ctx);
 
     expect(ctx.value()).toEqual([1, 2, 6]);
@@ -85,12 +85,12 @@ describe('Behavior: withCoreState: Patch', () => {
   });
 
   it('should handle multiple updates sequentially', () => {
-    ctx.next = { loading: true, value: [1, 2] };
+    ctx.patch = { loading: true, value: [1, 2] };
     behavior.onPatch?.('vault', ctx);
     expect(ctx.isLoading()).toBeTrue();
     expect(ctx.value()).toEqual([1, 2]);
 
-    ctx.next = { loading: false, error: { message: 'done' }, value: { status: 'ok' } };
+    ctx.patch = { loading: false, error: { message: 'done' }, value: { status: 'ok' } };
     behavior.onPatch?.('vault', ctx);
 
     expect(ctx.isLoading()).toBeFalse();
@@ -118,7 +118,7 @@ describe('Behavior: withCoreState: Patch', () => {
     const spyRunner = jasmine.createSpyObj('runner', ['onPatch']);
     ctx.behaviorRunner = spyRunner;
 
-    ctx.next = { value: [42] };
+    ctx.patch = { value: [42] };
     behavior.onPatch?.('vault', ctx);
 
     expect(spyRunner.onPatch).toHaveBeenCalledTimes(1);
@@ -137,7 +137,7 @@ describe('Behavior: withCoreState: Patch', () => {
 
   it('should shallow merge nested objects', () => {
     ctx.value.set({ profile: { name: 'Alice' }, meta: { age: 30 } });
-    ctx.next = { value: { profile: { city: 'Paris' } } };
+    ctx.patch = { value: { profile: { city: 'Paris' } } };
 
     behavior.onPatch?.('vault', ctx);
 

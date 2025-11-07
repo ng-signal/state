@@ -57,8 +57,8 @@ class CoreStateBehavior<T> implements VaultBehavior<T> {
   }
 
   onPatch(key: string, ctx: VaultBehaviorContext<T>): void {
-    if (ctx.next && typeof ctx.next === 'object' && !isHttpResourceRef<T>(ctx.next)) {
-      const patch = ctx.next as VaultStateType<T>;
+    if (ctx.patch && typeof ctx.patch === 'object' && !isHttpResourceRef<T>(ctx.patch)) {
+      const patch = ctx.patch as VaultStateType<T>;
       const { isLoading, error, value } = ctx;
 
       if (patch.loading !== undefined) isLoading?.set(patch.loading);
