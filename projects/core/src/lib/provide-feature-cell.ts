@@ -28,6 +28,7 @@ import { NGVAULT_EXPERIMENTAL_HTTP_RESOURCE } from './constants/experimental-fla
 import { FEATURE_CELL_REGISTRY } from './constants/feature-cell-registry.constant';
 import { FeatureCellDescriptorModel } from './models/feature-cell-descriptor.model';
 import { getOrCreateFeatureCellToken } from './tokens/feature-cell-token-registry';
+import { applyNgVaultValueMerge } from './utils/apply-vault-merge.util';
 import { devWarnExperimentalHttpResource } from './utils/dev-warning.util';
 import { isHttpResourceRef } from './utils/is-http-resource.util';
 import { resourceError } from './utils/resource-error.util';
@@ -174,6 +175,9 @@ export function provideFeatureCell<Service, T>(
                   const next = resource.value();
                   const curr = _value();
 
+                  applyNgVaultValueMerge(ctx, curr, next);
+
+                  /*
                   if (next == null) return;
 
                   if (Array.isArray(curr) && Array.isArray(next)) {
@@ -190,6 +194,7 @@ export function provideFeatureCell<Service, T>(
                   } else {
                     _value.set(next as VaultDataType<T>);
                   }
+                    */
 
                   _error.set(null);
                   // _behaviorLifeCycle.onPatch(coreId, featureCellDescriptor.key, ctx);

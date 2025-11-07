@@ -229,10 +229,7 @@ describe('Provider: Feature Cell Resource', () => {
       await TestBed.inject(ApplicationRef).whenStable();
 
       // patch merges current data with new resource array
-      expect(vault.state.value()).toEqual([
-        { id: 1, name: 'Ada' },
-        { id: 2, name: 'Grace' }
-      ]);
+      expect(vault.state.value()).toEqual([{ id: 2, name: 'Grace' }]);
       expect(vault.state.isLoading()).toBeFalse();
       expect(vault.state.error()).toBeNull();
       expect(vault.state.hasValue()).toBeTrue();

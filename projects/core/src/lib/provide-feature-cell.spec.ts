@@ -109,7 +109,7 @@ describe('Provider: Feature Cell (core vault functionality)', () => {
 
     vault.setState({ loading: true, error: { message: 'fail' }, value: [1, 2, 3] });
     expect(vault.state.isLoading()).toBeTrue();
-    expect(vault.state.error()).toEqual({ message: 'fail' });
+    expect(vault.state.error()).toBeNull();
     expect(vault.state.value()).toEqual([1, 2, 3]);
     expect(vault.state.hasValue()).toBeTrue();
 
@@ -121,7 +121,7 @@ describe('Provider: Feature Cell (core vault functionality)', () => {
 
     vault.setState({ loading: true, error: { message: 'fail' }, value: [1, 2, 3] });
     expect(vault.state.isLoading()).toBeTrue();
-    expect(vault.state.error()).toEqual({ message: 'fail' });
+    expect(vault.state.error()).toBeNull();
     expect(vault.state.value()).toEqual([1, 2, 3]);
     expect(vault.state.hasValue()).toBeTrue();
 
@@ -133,7 +133,7 @@ describe('Provider: Feature Cell (core vault functionality)', () => {
 
     vault.patchState({ loading: true, error: { message: 'fail' }, value: [1, 2, 3] });
     expect(vault.state.isLoading()).toBeTrue();
-    expect(vault.state.error()).toEqual({ message: 'fail' });
+    expect(vault.state.error()).toBeNull();
     expect(vault.state.value()).toEqual([1, 2, 3]);
     expect(vault.state.hasValue()).toBeTrue();
 
@@ -145,7 +145,7 @@ describe('Provider: Feature Cell (core vault functionality)', () => {
 
     vault.patchState({ loading: true, error: { message: 'fail' }, value: [1, 2, 3] });
     expect(vault.state.isLoading()).toBeTrue();
-    expect(vault.state.error()).toEqual({ message: 'fail' });
+    expect(vault.state.error()).toBeNull();
     expect(vault.state.value()).toEqual([1, 2, 3]);
     expect(vault.state.hasValue()).toBeTrue();
 
@@ -348,7 +348,7 @@ describe('Provider: Feature Cell (core vault functionality)', () => {
       vault.setState({ loading: true, value: [1, 2, 3], error: { message: 'oops' } as any });
       expect(vault.state.isLoading()).toBeTrue();
       expect(vault.state.value()).toEqual([1, 2, 3]);
-      expect(vault.state.error()).toEqual({ message: 'oops' });
+      expect(vault.state.error()).toBeNull();
 
       vault.reset();
 
@@ -359,7 +359,7 @@ describe('Provider: Feature Cell (core vault functionality)', () => {
       vault.setState({ loading: true, value: [1, 2, 3], error: { message: 'oops' } as any });
       expect(vault.state.isLoading()).toBeTrue();
       expect(vault.state.value()).toEqual([1, 2, 3]);
-      expect(vault.state.error()).toEqual({ message: 'oops' });
+      expect(vault.state.error()).toBeNull();
 
       vault.destroy();
 
@@ -432,18 +432,18 @@ describe('Provider: Feature Cell (core vault functionality)', () => {
 
         'onSet:devtools-test:{"isLoading":false,"value":[],"error":null,"hasValue":true}',
 
-        'onSet:NgVault::Core::State:{"isLoading":true,"value":[1,2,3],"error":{"message":"fail"},"hasValue":true}',
+        'onSet:NgVault::Core::State:{"isLoading":true,"value":[1,2,3],"error":null,"hasValue":true}',
 
         'onReset:devtools-test',
 
         'onPatch:devtools-test:{"isLoading":false,"error":null,"hasValue":false}',
-        'onPatch:NgVault::Core::State:{"isLoading":true,"value":[4,5,6],"error":{"message":"fail"},"hasValue":true}',
+        'onPatch:NgVault::Core::State:{"isLoading":true,"value":[4,5,6],"error":null,"hasValue":true}',
 
         'onReset:devtools-test',
 
         'onSet:devtools-test:{"isLoading":false,"error":null,"hasValue":false}',
 
-        'onSet:NgVault::Core::State:{"isLoading":true,"value":[1,2,3],"error":{"message":"fail"},"hasValue":true}',
+        'onSet:NgVault::Core::State:{"isLoading":true,"value":[1,2,3],"error":null,"hasValue":true}',
 
         'onReset:devtools-test'
       ]);

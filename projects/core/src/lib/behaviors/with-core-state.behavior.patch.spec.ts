@@ -94,7 +94,7 @@ describe('Behavior: withCoreState: Patch', () => {
     behavior.onPatch?.('vault', ctx);
 
     expect(ctx.isLoading()).toBeFalse();
-    expect(ctx.error()).toEqual({ message: 'done' });
+    expect(ctx.error()).toBeNull();
     expect(ctx.value()).toEqual({ status: 'ok' });
   });
 

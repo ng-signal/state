@@ -9,6 +9,7 @@ import {
   VaultDataType,
   VaultStateType
 } from '@ngvault/shared-models';
+import { applyNgVaultValueMerge } from '../utils/apply-vault-merge.util';
 import { isHttpResourceRef } from '../utils/is-http-resource.util';
 
 /**
@@ -48,6 +49,8 @@ class CoreSetBehavior<T> implements VaultBehavior<T> {
           value?.set(val as VaultDataType<T>);
         }
 
+        error?.set(null);
+
         ctx.behaviorRunner?.onSet?.(this.behaviorId, this.key, ctx);
       }
     }
@@ -64,21 +67,9 @@ class CoreSetBehavior<T> implements VaultBehavior<T> {
       if (patch.value !== undefined) {
         const curr = value?.();
         const next = patch.value;
+        applyNgVaultValueMerge(ctx, curr, next);
 
-        if (Array.isArray(curr) && Array.isArray(next)) {
-          value?.set([...next] as VaultDataType<T>);
-        } else if (
-          curr &&
-          next &&
-          typeof curr === 'object' &&
-          typeof next === 'object' &&
-          !Array.isArray(curr) &&
-          !Array.isArray(next)
-        ) {
-          value?.set({ ...curr, ...next } as VaultDataType<T>);
-        } else {
-          value?.set(next as VaultDataType<T>);
-        }
+        error?.set(null);
 
         ctx.behaviorRunner?.onPatch(this.behaviorId, this.key, ctx);
       }
