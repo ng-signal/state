@@ -177,25 +177,6 @@ export function provideFeatureCell<Service, T>(
 
                   applyNgVaultValueMerge(ctx, curr, next);
 
-                  /*
-                  if (next == null) return;
-
-                  if (Array.isArray(curr) && Array.isArray(next)) {
-                    _value.set([...curr, ...next] as VaultDataType<T>);
-                  } else if (
-                    curr &&
-                    next &&
-                    typeof curr === 'object' &&
-                    typeof next === 'object' &&
-                    !Array.isArray(curr) &&
-                    !Array.isArray(next)
-                  ) {
-                    _value.set({ ...curr, ...next } as VaultDataType<T>);
-                  } else {
-                    _value.set(next as VaultDataType<T>);
-                  }
-                    */
-
                   _error.set(null);
                   // _behaviorLifeCycle.onPatch(coreId, featureCellDescriptor.key, ctx);
                 } catch {
