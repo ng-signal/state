@@ -23,13 +23,14 @@ import { VaultDataType } from '@ngvault/shared-models/types/vault-data.type';
 import { VaultStateInputType } from '@ngvault/shared-models/types/vault-state-input.type';
 import { VaultStateType } from '@ngvault/shared-models/types/vault-state.type';
 import { Observable, Subject, take } from 'rxjs';
+import { withCorePatchBehavior } from './behaviors/with-core-patch.behavior';
 import { withCoreSetBehavior } from './behaviors/with-core-set.behavior';
 import { NGVAULT_EXPERIMENTAL_HTTP_RESOURCE } from './constants/experimental-flag.constant';
 import { FEATURE_CELL_REGISTRY } from './constants/feature-cell-registry.constant';
 import { FeatureCellDescriptorModel } from './models/feature-cell-descriptor.model';
 import { getOrCreateFeatureCellToken } from './tokens/feature-cell-token-registry';
 import { devWarnExperimentalHttpResource } from './utils/dev-warning.util';
-import { isHttpResource } from './utils/is-http-resource.util';
+import { isHttpResourceRef } from './utils/is-http-resource.util';
 import { resourceError } from './utils/resource-error.util';
 
 export function provideFeatureCell<Service, T>(
@@ -63,7 +64,7 @@ export function provideFeatureCell<Service, T>(
         );
       }
 
-      const defaultBehaviors: VaultBehaviorFactory<T>[] = [withCoreSetBehavior];
+      const defaultBehaviors: VaultBehaviorFactory<T>[] = [withCoreSetBehavior, withCorePatchBehavior];
       const allBehaviors: VaultBehaviorFactory<T>[] = [...defaultBehaviors, ...behaviors];
       const coreId = _behaviorLifeCycle.initialize();
       _behaviorLifeCycle.initializeBehaviors(_injector, allBehaviors);
@@ -127,7 +128,7 @@ export function provideFeatureCell<Service, T>(
         }
 
         // 🧪 Experimental Angular HttpResourceRef<T> integration
-        if (NGVAULT_EXPERIMENTAL_HTTP_RESOURCE && isHttpResource<T>(next)) {
+        if (NGVAULT_EXPERIMENTAL_HTTP_RESOURCE && isHttpResourceRef<T>(next)) {
           // eslint-disable-next-line
           ctx.next = next as any;
           const resource = next as HttpResourceRef<T>;
@@ -161,7 +162,7 @@ export function provideFeatureCell<Service, T>(
         }
 
         // 🧪 Experimental Angular HttpResourceRef<T> integration
-        if (NGVAULT_EXPERIMENTAL_HTTP_RESOURCE && isHttpResource<T>(partial)) {
+        if (NGVAULT_EXPERIMENTAL_HTTP_RESOURCE && isHttpResourceRef<T>(partial)) {
           const resource = partial as HttpResourceRef<T>;
 
           runInInjectionContext(_injector, () => {
@@ -192,7 +193,7 @@ export function provideFeatureCell<Service, T>(
                   }
 
                   _error.set(null);
-                  _behaviorLifeCycle.onPatch(coreId, featureCellDescriptor.key, ctx);
+                  // _behaviorLifeCycle.onPatch(coreId, featureCellDescriptor.key, ctx);
                 } catch {
                   _error.set(resourceError(resource.error()));
                   _behaviorLifeCycle.onError(coreId, featureCellDescriptor.key, ctx);
@@ -205,34 +206,8 @@ export function provideFeatureCell<Service, T>(
           return;
         }
 
-        if (partial && typeof partial === 'object' && !isHttpResource<T>(partial)) {
-          const patch = partial as VaultStateType<T>;
-
-          if (patch.loading !== undefined) _isLoading.set(patch.loading);
-          if (patch.error !== undefined) _error.set(patch.error);
-
-          if (patch.value !== undefined) {
-            const curr = _value();
-            const next = patch.value;
-
-            if (Array.isArray(curr) && Array.isArray(next)) {
-              _value.set([...curr, ...next] as VaultDataType<T>);
-            } else if (
-              curr &&
-              next &&
-              typeof curr === 'object' &&
-              typeof next === 'object' &&
-              !Array.isArray(curr) &&
-              !Array.isArray(next)
-            ) {
-              _value.set({ ...curr, ...next } as VaultDataType<T>);
-            } else {
-              _value.set(next as VaultDataType<T>);
-            }
-
-            _behaviorLifeCycle.onPatch(coreId, featureCellDescriptor.key, ctx);
-          }
-        }
+        ctx.next = Object.freeze(partial as VaultStateType<T>);
+        _behaviorLifeCycle.onPatch(coreId, featureCellDescriptor.key, ctx);
       };
 
       const _fromObservable = (source$: Observable<T>): Observable<VaultSignalRef<T>> => {

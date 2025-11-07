@@ -204,10 +204,9 @@ describe('Provider: Feature Cell Resource', () => {
       expect(getTestBehavior().getEvents()).toEqual([
         'onInit:http',
         'onInit:NgVault::Core::Set',
-        'onSet:http',
-        'onSetState:http:{"isLoading":true,"error":null,"hasValue":false}',
-        'onSet:http',
-        'onSetState:http:{"isLoading":false,"value":[{"id":1,"name":"Ada"}],"error":null,"hasValue":true}',
+        'onInit:NgVault::Core::Patch',
+        'onSet:http:{"isLoading":true,"error":null,"hasValue":false}',
+        'onSet:http:{"isLoading":false,"value":[{"id":1,"name":"Ada"}],"error":null,"hasValue":true}',
         'onReset:http'
       ]);
     });
@@ -385,9 +384,10 @@ describe('Provider: Feature Cell Resource', () => {
       expect(getTestBehavior().getEvents()).toEqual([
         'onInit:http',
         'onInit:NgVault::Core::Set',
-        'onPatch:http',
-        'onPatch:http',
-        'onPatch:http'
+        'onInit:NgVault::Core::Patch'
+        // 'onPatch:http:{"isLoading":false,"value":42,"error":null,"hasValue":true}',
+        // 'onPatch:http:{"isLoading":true,"value":42,"error":null,"hasValue":true}',
+        // 'onPatch:http:{"isLoading":false,"value":7,"error":null,"hasValue":true}'
       ]);
     });
   });

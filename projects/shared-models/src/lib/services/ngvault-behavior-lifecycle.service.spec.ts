@@ -287,8 +287,7 @@ describe('VaultBehaviorLifecycleService', () => {
       vaultRunner.onDispose('core-id', 'vault1', ctx);
 
       expect(getTestBehavior().getEvents()).toEqual([
-        'onSet:vault1',
-        'onSetState:vault1:{"isLoading":false,"value":"initial","error":null,"hasValue":true}',
+        'onSet:vault1:{"isLoading":false,"value":"initial","error":null,"hasValue":true}',
 
         'onInit:vault1',
 
@@ -298,7 +297,7 @@ describe('VaultBehaviorLifecycleService', () => {
 
         'onDestroy:vault1',
 
-        'onPatch:vault1',
+        'onPatch:vault1:{"isLoading":false,"value":"initial","error":null,"hasValue":true}',
 
         'onLoad:vault1',
 

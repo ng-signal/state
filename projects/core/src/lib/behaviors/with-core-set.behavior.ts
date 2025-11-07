@@ -8,7 +8,7 @@ import {
   VaultBehaviorType,
   VaultDataType
 } from '@ngvault/shared-models';
-import { isHttpResource } from '../utils/is-http-resource.util';
+import { isHttpResourceRef } from '../utils/is-http-resource.util';
 
 /**
  * Core behavior responsible for replacing state values.
@@ -29,7 +29,7 @@ class CoreSetBehavior<T> implements VaultBehavior<T> {
   }
 
   onSet(key: string, ctx: VaultBehaviorContext<T>): void {
-    if (ctx.next && typeof ctx.next === 'object' && !isHttpResource<T>(ctx.next)) {
+    if (ctx.next && typeof ctx.next === 'object' && !isHttpResourceRef<T>(ctx.next)) {
       const { isLoading, error, value, next } = ctx;
 
       // Update basic flags if provided

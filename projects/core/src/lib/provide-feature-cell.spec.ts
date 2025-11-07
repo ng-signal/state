@@ -395,7 +395,11 @@ describe('Provider: Feature Cell (core vault functionality)', () => {
 
       testBehavior = getTestBehavior();
 
-      expect(testBehavior.getEvents()).toEqual(['onInit:devtools-test', 'onInit:NgVault::Core::Set']);
+      expect(testBehavior.getEvents()).toEqual([
+        'onInit:devtools-test',
+        'onInit:NgVault::Core::Set',
+        'onInit:NgVault::Core::Patch'
+      ]);
     });
 
     it('should emit a "dispose" event when vault.destroy() is called', () => {
@@ -409,6 +413,7 @@ describe('Provider: Feature Cell (core vault functionality)', () => {
       expect(testBehavior.getEvents()).toEqual([
         'onInit:devtools-test',
         'onInit:NgVault::Core::Set',
+        'onInit:NgVault::Core::Patch',
         'onReset:devtools-test',
         'onDestroy:devtools-test'
       ]);
@@ -433,23 +438,22 @@ describe('Provider: Feature Cell (core vault functionality)', () => {
         'onInit:devtools-test',
         'onInit:NgVault::Core::Set',
 
-        'onSet:devtools-test',
-        'onSetState:devtools-test:{"isLoading":false,"value":[],"error":null,"hasValue":true}',
+        'onInit:NgVault::Core::Patch',
 
-        'onSet:NgVault::Core::Set',
-        'onSetState:NgVault::Core::Set:{"isLoading":true,"value":[1,2,3],"error":{"message":"fail"},"hasValue":true}',
+        'onSet:devtools-test:{"isLoading":false,"value":[],"error":null,"hasValue":true}',
 
-        'onReset:devtools-test',
-
-        'onPatch:devtools-test',
+        'onSet:NgVault::Core::Set:{"isLoading":true,"value":[1,2,3],"error":{"message":"fail"},"hasValue":true}',
 
         'onReset:devtools-test',
 
-        'onSet:devtools-test',
-        'onSetState:devtools-test:{"isLoading":false,"error":null,"hasValue":false}',
+        'onPatch:devtools-test:{"isLoading":false,"error":null,"hasValue":false}',
+        'onPatch:NgVault::Core::Patch:{"isLoading":true,"value":[4,5,6],"error":{"message":"fail"},"hasValue":true}',
 
-        'onSet:NgVault::Core::Set',
-        'onSetState:NgVault::Core::Set:{"isLoading":true,"value":[1,2,3],"error":{"message":"fail"},"hasValue":true}',
+        'onReset:devtools-test',
+
+        'onSet:devtools-test:{"isLoading":false,"error":null,"hasValue":false}',
+
+        'onSet:NgVault::Core::Set:{"isLoading":true,"value":[1,2,3],"error":{"message":"fail"},"hasValue":true}',
 
         'onReset:devtools-test'
       ]);

@@ -49,13 +49,12 @@ class TestBehavior {
     this.#events.push(`onLoad:${key}`);
   }
 
-  onPatch(key: string) {
-    this.#events.push(`onPatch:${key}`);
+  onPatch(key: string, ctx: any) {
+    this.#events.push(`onPatch:${key}:${JSON.stringify(ctx.state) || 'undefined'}`);
   }
 
   onSet(key: string, ctx: any): void {
-    this.#events.push(`onSet:${key}`);
-    this.#events.push(`onSetState:${key}:${JSON.stringify(ctx.state) || 'undefined'}`);
+    this.#events.push(`onSet:${key}:${JSON.stringify(ctx.state) || 'undefined'}`);
   }
 }
 
