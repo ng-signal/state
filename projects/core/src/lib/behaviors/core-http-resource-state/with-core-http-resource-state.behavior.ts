@@ -9,11 +9,11 @@ import {
   VaultBehaviorFactoryContext,
   VaultBehaviorType
 } from '@ngvault/shared-models';
-import { NGVAULT_EXPERIMENTAL_HTTP_RESOURCE } from '../constants/experimental-flag.constant';
-import { applyNgVaultValueMerge } from '../utils/apply-vault-merge.util';
-import { devWarnExperimentalHttpResource } from '../utils/dev-warning.util';
-import { isHttpResourceRef } from '../utils/is-http-resource.util';
-import { resourceError } from '../utils/resource-error.util';
+import { NGVAULT_EXPERIMENTAL_HTTP_RESOURCE } from '../../constants/experimental-flag.constant';
+import { applyNgVaultValueMerge } from '../../utils/apply-vault-merge.util';
+import { devWarnExperimentalHttpResource } from '../../utils/dev-warning.util';
+import { isHttpResourceRef } from '../../utils/is-http-resource.util';
+import { resourceError } from '../../utils/resource-error.util';
 
 /**
  * Core behavior responsible for replacing state values.
@@ -72,11 +72,12 @@ class CoreHttpResourceStateBehavior<T> implements VaultBehavior<T> {
             try {
               const next = resource.value();
               const curr = value?.();
+              if (next !== undefined) {
+                applyNgVaultValueMerge(ctx, curr, next);
 
-              applyNgVaultValueMerge(ctx, curr, next);
-
-              error?.set(null);
-              ctx.behaviorRunner?.onPatch(this.behaviorId, this.key, ctx);
+                error?.set(null);
+                ctx.behaviorRunner?.onPatch(this.behaviorId, this.key, ctx);
+              }
             } catch {
               error?.set(resourceError(resource.error()));
               ctx.behaviorRunner?.onError(this.behaviorId, this.key, ctx);
@@ -86,7 +87,6 @@ class CoreHttpResourceStateBehavior<T> implements VaultBehavior<T> {
       });
 
       devWarnExperimentalHttpResource();
-      return;
     }
   }
 }

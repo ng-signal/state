@@ -21,8 +21,10 @@ describe('Behavior: withCoreState: Patch', () => {
     });
   });
 
-  it('should mark factory as critical', () => {
+  it('should have default attributes', () => {
     expect(behavior.critical).toBeTrue();
+    expect(behavior.key).toBe('NgVault::Core::State');
+    expect(behavior.type).toBe('state');
   });
 
   it('should safely return when patch is null or not an object', () => {

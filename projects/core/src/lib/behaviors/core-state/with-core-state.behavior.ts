@@ -9,8 +9,8 @@ import {
   VaultDataType,
   VaultStateType
 } from '@ngvault/shared-models';
-import { applyNgVaultValueMerge } from '../utils/apply-vault-merge.util';
-import { isHttpResourceRef } from '../utils/is-http-resource.util';
+import { applyNgVaultValueMerge } from '../../utils/apply-vault-merge.util';
+import { isHttpResourceRef } from '../../utils/is-http-resource.util';
 
 /**
  * Core behavior responsible for replacing state values.

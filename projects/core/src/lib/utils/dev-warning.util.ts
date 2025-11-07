@@ -8,3 +8,9 @@ export function devWarnExperimentalHttpResource(): void {
   console.warn('[NgVault] Experimental HttpResource support enabled — may change in Angular 21+.');
   warned = true;
 }
+
+export function resetWarnExperimentalHttpResourceTestingOnly(): void {
+  if (isDevMode()) {
+    warned = false;
+  }
+}
