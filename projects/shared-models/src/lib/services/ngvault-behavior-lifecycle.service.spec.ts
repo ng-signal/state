@@ -551,4 +551,180 @@ describe('VaultBehaviorLifecycleService', () => {
       );
     });
   });
+
+  describe('applyBehaviorExtensions', () => {
+    let mockCell: any;
+
+    beforeEach(() => {
+      mockCell = {
+        setState: () => {},
+        patchState: () => {},
+        reset: () => {},
+        destroy: () => {},
+        state: {},
+        destroyed$: {},
+        key: 'mock-key',
+        ctx: 'mock-ctx'
+      };
+
+      vaultRunner = NgVaultBehaviorLifecycleService();
+    });
+
+    it('should attach new methods from extendCellAPI to the FeatureCell', () => {
+      const extendBehavior = createTestBehaviorFactory(
+        () => ({
+          extendCellAPI: () => ({
+            customMethod: (key: string, ctx: any, ...args: any) => `${key}:${ctx}:${args.toString()}`
+          })
+        }),
+        'state'
+      );
+
+      vaultRunner.initializeBehaviors(injector, [extendBehavior]);
+
+      vaultRunner.applyBehaviorExtensions(mockCell);
+
+      expect(typeof mockCell.customMethod).toBe('function');
+      expect(mockCell.customMethod('arg1', 'arg2')).toBe('mock-key:mock-ctx:arg1,arg2');
+      expect(mockCell.customMethod()).toBe('mock-key:mock-ctx:');
+    });
+
+    it('should throw if a behavior tries to overwrite a protected key', () => {
+      const dangerousBehavior = createTestBehaviorFactory(
+        () => ({
+          key: 'NgVault::Testing::Overwrite',
+          extendCellAPI: () => ({
+            reset: () => {}
+          })
+        }),
+        'state'
+      );
+
+      vaultRunner.initializeBehaviors(injector, [dangerousBehavior]);
+
+      expect(() => vaultRunner.applyBehaviorExtensions(mockCell)).toThrowError(
+        '[NgVault] Behavior "NgVault::Testing::Id0" attempted to overwrite core FeatureCell method "reset".'
+      );
+    });
+
+    it('should warn and skip redefining an existing method', () => {
+      const redefineBehavior = createTestBehaviorFactory(
+        () => ({
+          key: 'NgVault::Testing::Redefine',
+          extendCellAPI: () => ({
+            setState: () => {}
+          })
+        }),
+        'state'
+      );
+
+      vaultRunner.initializeBehaviors(injector, [redefineBehavior]);
+
+      expect(() => vaultRunner.applyBehaviorExtensions(mockCell)).toThrowError(
+        '[NgVault] Behavior "NgVault::Testing::Id0" attempted to overwrite core FeatureCell method "setState".'
+      );
+    });
+
+    it('should skip if extendCellAPI returns null or non-object', () => {
+      const noOpBehavior = createTestBehaviorFactory(
+        () => ({
+          key: 'NgVault::Testing::NoOp',
+          extendCellAPI: () => null
+        }),
+        'state'
+      );
+
+      vaultRunner.initializeBehaviors(injector, [noOpBehavior]);
+
+      // should not throw or modify
+      expect(() => vaultRunner.applyBehaviorExtensions(mockCell)).not.toThrow();
+      expect(Object.keys(mockCell)).not.toContain('customMethod');
+    });
+
+    it('should define new methods as non-enumerable and read-only', () => {
+      const defineBehavior = createTestBehaviorFactory(
+        () => ({
+          extendCellAPI: () => ({
+            extra: () => 'immutable'
+          })
+        }),
+        'state'
+      );
+
+      vaultRunner.initializeBehaviors(injector, [defineBehavior]);
+      vaultRunner.applyBehaviorExtensions(mockCell);
+
+      const descriptor = Object.getOwnPropertyDescriptor(mockCell, 'extra')!;
+      expect(descriptor.enumerable).toBeFalse();
+      expect(descriptor.writable).toBeFalse();
+      expect(descriptor.configurable).toBeFalse();
+    });
+
+    it('should warn and skip redefining an existing FeatureCell method', () => {
+      // Arrange: create a mock cell with a safe existing property (non-protected)
+      const mockCell = {
+        existingCustom: jasmine.createSpy('existingCustom').and.returnValue('original')
+      } as any;
+
+      const redefineBehavior = createTestBehaviorFactory(
+        () => ({
+          key: 'NgVault::Testing::Redefine',
+          extendCellAPI: () => ({
+            existingCustom: () => 'new'
+          })
+        }),
+        'state'
+      );
+
+      vaultRunner.initializeBehaviors(injector, [redefineBehavior]);
+
+      // Act: apply the behavior extensions
+      vaultRunner.applyBehaviorExtensions(mockCell);
+
+      // Assert: should warn and skip redefinition
+      // eslint-disable-next-line
+      expect(console.warn).toHaveBeenCalledWith(
+        '[NgVault] Behavior "NgVault::Testing::Id0" attempted to redefine existing method "existingCustom". Skipping.'
+      );
+
+      // Verify original property still works
+      expect(mockCell.existingCustom()).toBe('original');
+    });
+
+    it('should catch and log errors thrown inside behavior extension methods', () => {
+      const consoleSpy = spyOn(console, 'error');
+
+      // Mock behavior that throws when called
+      const throwingBehavior = createTestBehaviorFactory(
+        () => ({
+          extendCellAPI: () => ({
+            boomMethod: () => {
+              throw new Error('Boom!');
+            }
+          })
+        }),
+        'state'
+      );
+
+      // Initialize with our single throwing behavior
+      vaultRunner.initializeBehaviors(injector, [throwingBehavior]);
+
+      // Mock cell that has key + ctx (like a real FeatureCell)
+      const mockCell: any = { key: 'feature-key', ctx: { id: 'mock-ctx' } };
+
+      // Apply extensions
+      vaultRunner.applyBehaviorExtensions(mockCell);
+
+      // Verify method was attached
+      expect(typeof mockCell.boomMethod).toBe('function');
+
+      // Expect thrown error is logged and rethrown
+      expect(() => mockCell.boomMethod()).toThrowError('Boom!');
+
+      expect(consoleSpy).toHaveBeenCalledWith(
+        `[NgVault] Behavior extension "boomMethod" threw an error:`,
+        jasmine.any(Error)
+      );
+    });
+  });
 });

@@ -1,17 +1,16 @@
 // projects/core/src/lib/services/vault-behavior-lifecycle.service.ts
 import { Injector } from '@angular/core';
-import { validateNgVaultBehaviorKey } from '@ngvault/shared-models';
+import { PROTECTED_FEATURE_CELL_KEYS } from '../constants/protected-feature-cell-keys.constant';
 import { VaultBehaviorFactoryContext } from '../contexts/vault-behavior-factory.context';
 import { VaultBehaviorContext } from '../contexts/vault-behavior.context';
 import { VaultBehaviorRunner } from '../interfaces/vault-behavior-runner.interface';
 import { VaultBehavior } from '../interfaces/vault-behavior.interface';
+import { FeatureCell } from '../models/feature-cell.model';
 import { VaultBehaviorFactory } from '../types/vault-behavior-factory.type';
 import { VaultBehaviorTypeOrder } from '../types/vault-behavior.type';
+import { validateNgVaultBehaviorKey } from '../utils/define-ngvault-behavior-key.util';
 
 class VaultBehaviorRunnerClass implements VaultBehaviorRunner {
-  initialize(): string {
-    throw new Error('Method not implemented.');
-  }
   readonly #typeOrder = [...VaultBehaviorTypeOrder];
   // eslint-disable-next-line
   #behaviors: VaultBehavior<any>[] = [];
@@ -191,6 +190,46 @@ class VaultBehaviorRunnerClass implements VaultBehaviorRunner {
       .filter((b): b is VaultBehavior<T> => !!b);
 
     return coreId;
+  }
+
+  applyBehaviorExtensions<T>(cell: FeatureCell<T>): void {
+    for (const behavior of this.#behaviors) {
+      const extensions = behavior.extendCellAPI?.(cell);
+      if (extensions && typeof extensions === 'object') {
+        for (const [key, fn] of Object.entries(extensions)) {
+          if (PROTECTED_FEATURE_CELL_KEYS.has(key)) {
+            throw new Error(
+              `[NgVault] Behavior "${behavior.key}" attempted to overwrite core FeatureCell method "${key}".`
+            );
+          }
+
+          if (cell[key as keyof FeatureCell<T>] !== undefined) {
+            // eslint-disable-next-line
+            console.warn(
+              `[NgVault] Behavior "${behavior.key}" attempted to redefine existing method "${key}". Skipping.`
+            );
+            continue;
+          }
+
+          Object.defineProperty(cell, key, {
+            // eslint-disable-next-line
+            value: (...args: any[]) => {
+              try {
+                // Automatically inject feature key + context into all extensions
+                return fn.call(cell, cell.key, cell.ctx, ...args);
+              } catch (err) {
+                // eslint-disable-next-line
+                console.error(`[NgVault] Behavior extension "${key}" threw an error:`, err);
+                throw err;
+              }
+            },
+            enumerable: false,
+            writable: false,
+            configurable: false
+          });
+        }
+      }
+    }
   }
 
   onInit<T>(behaviorId: string, vaultKey: string, serviceName: string, ctx: VaultBehaviorContext<T>): void {

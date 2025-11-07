@@ -176,6 +176,19 @@ export function provideFeatureCell<Service, T>(
         destroyed$: _destroyed$.asObservable()
       };
 
+      // Attach internal metadata for behavior extensions
+      Object.defineProperty(cell, 'ctx', {
+        value: ctx,
+        enumerable: false,
+        writable: false
+      });
+
+      Object.defineProperty(cell, 'key', {
+        value: featureCellDescriptor.key,
+        enumerable: false,
+        writable: false
+      });
+
       return cell;
     }
   };
