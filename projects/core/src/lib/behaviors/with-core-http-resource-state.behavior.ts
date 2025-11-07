@@ -10,6 +10,7 @@ import {
   VaultBehaviorType
 } from '@ngvault/shared-models';
 import { NGVAULT_EXPERIMENTAL_HTTP_RESOURCE } from '../constants/experimental-flag.constant';
+import { applyNgVaultValueMerge } from '../utils/apply-vault-merge.util';
 import { devWarnExperimentalHttpResource } from '../utils/dev-warning.util';
 import { isHttpResourceRef } from '../utils/is-http-resource.util';
 import { resourceError } from '../utils/resource-error.util';
@@ -57,27 +58,37 @@ class CoreHttpResourceStateBehavior<T> implements VaultBehavior<T> {
     }
   }
 
-  /*
   onPatch(key: string, ctx: VaultBehaviorContext<T>): void {
-    if (ctx.next && typeof ctx.next === 'object' && !isHttpResourceRef<T>(ctx.next)) {
-      const patch = ctx.next as VaultStateType<T>;
+    if (NGVAULT_EXPERIMENTAL_HTTP_RESOURCE && isHttpResourceRef<T>(ctx.next)) {
+      const resource = ctx.next as HttpResourceRef<T>;
       const { isLoading, error, value } = ctx;
 
-      if (patch.loading !== undefined) isLoading?.set(patch.loading);
-      if (patch.error !== undefined) error?.set(patch.error);
+      runInInjectionContext(this.injector, () => {
+        effect(() => {
+          isLoading?.set(resource.isLoading());
 
-      if (patch.value !== undefined) {
-        const curr = value?.();
-        const next = patch.value;
-        applyNgVaultValueMerge(ctx, curr, next);
+          // Use queueMicrotask to avoid signal reentrancy
+          queueMicrotask(() => {
+            try {
+              const next = resource.value();
+              const curr = value?.();
 
-        error?.set(null);
+              applyNgVaultValueMerge(ctx, curr, next);
 
-        ctx.behaviorRunner?.onPatch(this.behaviorId, this.key, ctx);
-      }
+              error?.set(null);
+              ctx.behaviorRunner?.onPatch(this.behaviorId, this.key, ctx);
+            } catch {
+              error?.set(resourceError(resource.error()));
+              ctx.behaviorRunner?.onError(this.behaviorId, this.key, ctx);
+            }
+          });
+        });
+      });
+
+      devWarnExperimentalHttpResource();
+      return;
     }
   }
-    */
 }
 
 export const withCoreHttpResourceStateBehavior = ((context: VaultBehaviorFactoryContext): VaultBehavior => {

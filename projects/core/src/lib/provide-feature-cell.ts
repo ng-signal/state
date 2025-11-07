@@ -1,15 +1,4 @@
-import { HttpResourceRef } from '@angular/common/http';
-import {
-  DestroyRef,
-  Injector,
-  Provider,
-  Type,
-  computed,
-  effect,
-  inject,
-  runInInjectionContext,
-  signal
-} from '@angular/core';
+import { DestroyRef, Injector, Provider, Type, computed, inject, signal } from '@angular/core';
 import {
   NgVaultBehaviorLifecycleService,
   ResourceStateError,
@@ -25,13 +14,9 @@ import { VaultStateType } from '@ngvault/shared-models/types/vault-state.type';
 import { Observable, Subject, take } from 'rxjs';
 import { withCoreHttpResourceStateBehavior } from './behaviors/with-core-http-resource-state.behavior';
 import { withCoreStateBehavior } from './behaviors/with-core-state.behavior';
-import { NGVAULT_EXPERIMENTAL_HTTP_RESOURCE } from './constants/experimental-flag.constant';
 import { FEATURE_CELL_REGISTRY } from './constants/feature-cell-registry.constant';
 import { FeatureCellDescriptorModel } from './models/feature-cell-descriptor.model';
 import { getOrCreateFeatureCellToken } from './tokens/feature-cell-token-registry';
-import { applyNgVaultValueMerge } from './utils/apply-vault-merge.util';
-import { devWarnExperimentalHttpResource } from './utils/dev-warning.util';
-import { isHttpResourceRef } from './utils/is-http-resource.util';
 import { resourceError } from './utils/resource-error.util';
 
 export function provideFeatureCell<Service, T>(
@@ -118,17 +103,12 @@ export function provideFeatureCell<Service, T>(
       // Angular DI teardown
       _destroyRef.onDestroy(() => _destroy());
 
-      /**
-       * Updates the vault’s state reactively.
-       * Supports partial updates, full resets, or Angular HttpResourceRef<T>.
-       */
       const _set = (next: VaultStateInputType<T>): void => {
         if (next == null) {
           _reset();
           return;
         }
 
-        // ctx.next = Object.freeze(next as VaultStateType<T>);
         ctx.next = next as VaultStateType<T>;
         _behaviorRunner.onSet(coreId, featureCellDescriptor.key, ctx);
       };
@@ -139,37 +119,7 @@ export function provideFeatureCell<Service, T>(
           return;
         }
 
-        // 🧪 Experimental Angular HttpResourceRef<T> integration
-        if (NGVAULT_EXPERIMENTAL_HTTP_RESOURCE && isHttpResourceRef<T>(partial)) {
-          const resource = partial as HttpResourceRef<T>;
-
-          runInInjectionContext(_injector, () => {
-            effect(() => {
-              _isLoading.set(resource.isLoading());
-
-              // Use queueMicrotask to avoid signal reentrancy
-              queueMicrotask(() => {
-                try {
-                  const next = resource.value();
-                  const curr = _value();
-
-                  applyNgVaultValueMerge(ctx, curr, next);
-
-                  _error.set(null);
-                  // _behaviorLifeCycle.onPatch(coreId, featureCellDescriptor.key, ctx);
-                } catch {
-                  _error.set(resourceError(resource.error()));
-                  _behaviorRunner.onError(coreId, featureCellDescriptor.key, ctx);
-                }
-              });
-            });
-          });
-
-          devWarnExperimentalHttpResource();
-          return;
-        }
-
-        ctx.next = Object.freeze(partial as VaultStateType<T>);
+        ctx.next = partial as VaultStateType<T>;
         _behaviorRunner.onPatch(coreId, featureCellDescriptor.key, ctx);
       };
 

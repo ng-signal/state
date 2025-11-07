@@ -389,10 +389,12 @@ describe('Provider: Feature Cell Resource', () => {
       expect(getTestBehavior().getEvents()).toEqual([
         'onInit:cars',
         'onInit:NgVault::Core::State',
-        'onInit:NgVault::CoreHttpResource::State'
-        // 'onPatch:http:{"isLoading":false,"value":42,"error":null,"hasValue":true}',
-        // 'onPatch:http:{"isLoading":true,"value":42,"error":null,"hasValue":true}',
-        // 'onPatch:http:{"isLoading":false,"value":7,"error":null,"hasValue":true}'
+        'onInit:NgVault::CoreHttpResource::State',
+        'onPatch:cars:{"isLoading":false,"value":[],"error":null,"hasValue":true}',
+        'onPatch:NgVault::CoreHttpResource::State:{"isLoading":true,"value":[],"error":null,"hasValue":true}',
+        'onPatch:NgVault::CoreHttpResource::State:{"isLoading":false,"value":42,"error":null,"hasValue":true}',
+        'onPatch:NgVault::CoreHttpResource::State:{"isLoading":true,"value":42,"error":null,"hasValue":true}',
+        'onPatch:NgVault::CoreHttpResource::State:{"isLoading":false,"value":7,"error":null,"hasValue":true}'
       ]);
     });
   });
