@@ -61,6 +61,7 @@ describe('Behavior: withCoreHttpResourcceState: Set', () => {
     });
 
     it('should reactively mirror HttpResourceRef signals via setState()', async () => {
+      resetWarnExperimentalHttpResourceTestingOnly();
       // Step 1: baseline state
       ctx.value.set([{ id: 1, name: 'Ada' }]);
       ctx.isLoading.set(false);
@@ -73,7 +74,7 @@ describe('Behavior: withCoreHttpResourcceState: Set', () => {
 
       // Step 2: create reactive HttpResourceRef
       const id = signal(0);
-      const response = httpResource<TestModel[]>(() => `/data/${id()}`, { injector });
+      let response = httpResource<TestModel[]>(() => `/data/${id()}`, { injector });
 
       // Inject resource into context
       ctx.next = response;
@@ -101,15 +102,31 @@ describe('Behavior: withCoreHttpResourcceState: Set', () => {
       expect(ctx.error()).toBeNull();
       expect(ctx.behaviorRunner.onSet).toHaveBeenCalled();
 
+      // Step 4: simulate data response
+      id.set(222);
+
+      behavior.onSet('vault', ctx);
+      TestBed.tick();
+
+      const testRequest = mockBackend.expectOne('/data/222');
+      testRequest.flush([Object({ id: 3, name: 'Brian' })]);
+
+      await TestBed.inject(ApplicationRef).whenStable();
+
+      expect(ctx.isLoading()).toBeFalse();
+      expect(ctx.value()).toEqual([{ id: 3, name: 'Brian' }]);
+      expect(ctx.error()).toBeNull();
+      expect(ctx.behaviorRunner.onSet).toHaveBeenCalled();
+
       response.reload();
       TestBed.tick();
 
       expect(ctx.isLoading()).toBeTrue();
       expect(ctx.error()).toBeNull();
-      expect(ctx.value()).toEqual([Object({ id: 1, name: 'Ada' }), Object({ id: 2, name: 'Grace' })]);
+      expect(ctx.value()).toEqual([{ id: 3, name: 'Brian' }]);
 
       // Step 6: second response completes
-      const secondRequest = mockBackend.expectOne('/data/0');
+      const secondRequest = mockBackend.expectOne('/data/222');
       secondRequest.flush([Object({ id: 3, name: 'Brian' })]);
 
       await TestBed.inject(ApplicationRef).whenStable();
@@ -122,7 +139,7 @@ describe('Behavior: withCoreHttpResourcceState: Set', () => {
       response.reload();
       TestBed.tick();
 
-      const thirdRequest = mockBackend.expectOne('/data/0');
+      const thirdRequest = mockBackend.expectOne('/data/222');
       thirdRequest.flush('Internal Error', { status: 500, statusText: 'Server Error' });
 
       expect(ctx.error()).toBeNull();
@@ -133,7 +150,7 @@ describe('Behavior: withCoreHttpResourcceState: Set', () => {
       expect(ctx.behaviorRunner.onError).toHaveBeenCalled();
       expect(ctx.error()).toEqual(
         Object({
-          message: 'Http failure response for /data/0: 500 Server Error',
+          message: 'Http failure response for /data/222: 500 Server Error',
           status: 500,
           statusText: 'Server Error',
           details: 'Internal Error'
@@ -146,6 +163,8 @@ describe('Behavior: withCoreHttpResourcceState: Set', () => {
       expect(warnSpy).toHaveBeenCalledWith(
         '[NgVault] Experimental HttpResource support enabled — may change in Angular 21+.'
       );
+
+      expect(warnSpy).toHaveBeenCalledTimes(1);
     });
 
     it('should react when underlying HttpResourceRef signals reloads', async () => {
