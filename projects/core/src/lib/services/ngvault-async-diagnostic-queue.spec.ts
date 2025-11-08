@@ -1,16 +1,16 @@
-import { ApplicationRef, provideZonelessChangeDetection } from '@angular/core';
+import { ApplicationRef, effect, Injector, provideZonelessChangeDetection, runInInjectionContext } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { flushNgVaultQueue } from '@ngvault/testing';
-import { NgVaultAsyncQueue } from './ngvault-async-queue';
+import { NgVaultAsyncDiagnosticQueue } from './ngvault-async-diagnostic-queue';
 
-describe('Queue: NgVaultAsync', () => {
-  let queue: NgVaultAsyncQueue;
+describe('Queue: NgVaultAsyncDiagnostic', () => {
+  let queue: NgVaultAsyncDiagnosticQueue;
 
   beforeEach(() => {
-    queue = new NgVaultAsyncQueue();
+    queue = new NgVaultAsyncDiagnosticQueue();
 
     TestBed.configureTestingModule({
-      providers: [provideZonelessChangeDetection(), NgVaultAsyncQueue]
+      providers: [provideZonelessChangeDetection(), NgVaultAsyncDiagnosticQueue]
     });
   });
 
@@ -162,5 +162,97 @@ describe('Queue: NgVaultAsync', () => {
     await flushMicrotasks();
 
     expect(results).toEqual(['done']);
+  });
+
+  it('should expose immutable frozen stats snapshots', () => {
+    const stats = queue.stats;
+    expect(Object.isFrozen(stats)).toBeTrue();
+    expect(typeof stats.id).toBe('string');
+    expect(stats.isRunning).toBeFalse();
+    expect(stats.queued).toBe(0);
+  });
+
+  it('should update stats$ signal when queue changes', async () => {
+    const changes: any[] = [];
+
+    runInInjectionContext(TestBed.inject(Injector), () => {
+      effect(() => {
+        const s = queue.stats$();
+        changes.push({ ...s });
+      });
+    });
+
+    const initial = queue.stats;
+
+    queue.enqueue(() => {}); // triggers signal update
+
+    TestBed.tick();
+    await flushNgVaultQueue(2);
+
+    const after = queue.stats;
+
+    expect(after.enqueuedTotal).toBe(initial.enqueuedTotal + 1);
+    expect(after.queued).toBeGreaterThanOrEqual(0);
+
+    // Verify reactive effect actually saw the update
+    expect(changes.length).toBeGreaterThanOrEqual(2);
+  });
+
+  it('should emit "enqueue", "dequeue", and "processed" events via events$', async () => {
+    const emitted: string[] = [];
+    queue.events$.subscribe((e) => emitted.push(e.type));
+
+    queue.enqueue(() => {}); // enqueue → dequeue → processed
+
+    await flushMicrotasks();
+    await TestBed.inject(ApplicationRef).whenStable();
+
+    expect(emitted).toContain('enqueue');
+    expect(emitted).toContain('dequeue');
+    expect(emitted).toContain('processed');
+  });
+
+  it('should emit "error" event when a task throws', async () => {
+    const emitted: any[] = [];
+
+    queue.events$.subscribe((e) => emitted.push(e));
+
+    queue.enqueue(() => {
+      throw new Error('boom');
+    });
+
+    await flushMicrotasks();
+    await TestBed.inject(ApplicationRef).whenStable();
+
+    const errorEvent = emitted.find((e) => e.type === 'error');
+    expect(errorEvent).toBeDefined();
+    expect(errorEvent.error).toEqual(jasmine.any(Error));
+  });
+
+  it('should do nothing if dequeue is called with empty queue', async () => {
+    // @ts-expect-error accessing private method for edge case
+    await queue['#dequeue']?.();
+    const stats = queue.stats;
+    expect(stats.isRunning).toBeFalse();
+    expect(stats.queued).toBe(0);
+  });
+
+  it('should correctly increment processed and enqueue counters over multiple cycles', async () => {
+    queue.enqueue(() => {});
+    queue.enqueue(() => {});
+    await flushMicrotasks();
+    await TestBed.inject(ApplicationRef).whenStable();
+
+    const stats1 = queue.stats;
+    expect(stats1.enqueuedTotal).toBe(2);
+    expect(stats1.processedTotal).toBe(2);
+
+    queue.enqueue(() => {});
+    await flushMicrotasks();
+    await TestBed.inject(ApplicationRef).whenStable();
+
+    const stats2 = queue.stats;
+    expect(stats2.enqueuedTotal).toBe(3);
+    expect(stats2.processedTotal).toBe(3);
   });
 });

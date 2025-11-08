@@ -1,14 +1,15 @@
 import { provideZonelessChangeDetection } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
+import { NgVaultAsyncDiagnosticQueue } from '@ngvault/core/services/ngvault-async-diagnostic-queue';
+import { NgVaultSyncQueue } from '@ngvault/core/services/ngvault-sync-queue';
 import { NGVAULT_DEV_MODE } from '../../constants/ngvault-dev-mode.constant';
 import { NgVaultConfigModel } from '../../models/ng-vault-config.model';
-import { NgVaultAsyncQueue } from '../../services/ngvault-async-queue';
 import { NGVAULT_CONFIG } from '../../tokens/ngvault-config.token';
 import { NGVAULT_QUEUE } from '../../tokens/ngvault-queue.token';
 import { _resetNgVaultConfigForTests, provideVault } from './provide-vault'; // adjust import
 
 // Mock queue for testing
-class MockQueue extends NgVaultAsyncQueue {
+class MockQueue extends NgVaultAsyncDiagnosticQueue {
   static created = false;
   constructor() {
     super();
@@ -102,7 +103,7 @@ describe('provideVault()', () => {
     if (configProvider && 'useFactory' in configProvider && queueProvider && 'useFactory' in queueProvider) {
       const cfg = configProvider.useFactory();
       const instance = queueProvider.useFactory(cfg);
-      expect(instance instanceof NgVaultAsyncQueue).toBeTrue();
+      expect(instance instanceof NgVaultAsyncDiagnosticQueue).toBeTrue();
     }
   });
 
@@ -139,7 +140,7 @@ describe('provideVault()', () => {
     expect(devModeProvider && 'useValue' in devModeProvider && devModeProvider.useValue).toBeFalse();
   });
 
-  it('should integrate cleanly with Angular DI', () => {
+  it('should integrate the NgVaultAsyncQueue cleanly with Angular DI', () => {
     TestBed.configureTestingModule({
       providers: [provideVault(), provideZonelessChangeDetection()]
     });
@@ -149,7 +150,35 @@ describe('provideVault()', () => {
     const devMode = TestBed.inject(NGVAULT_DEV_MODE);
 
     expect(config).toBeTruthy();
-    expect(queue instanceof NgVaultAsyncQueue).toBeTrue();
+    expect(queue instanceof NgVaultAsyncDiagnosticQueue).toBeTrue();
+    expect(typeof devMode).toBe('boolean');
+  });
+
+  it('should integrate the NgVaultAsyncDiasnoticQueue cleanly with Angular DI', () => {
+    TestBed.configureTestingModule({
+      providers: [provideVault({ queue: NgVaultAsyncDiagnosticQueue }), provideZonelessChangeDetection()]
+    });
+
+    const config = TestBed.inject(NGVAULT_CONFIG);
+    const queue = TestBed.inject(NGVAULT_QUEUE);
+    const devMode = TestBed.inject(NGVAULT_DEV_MODE);
+
+    expect(config).toBeTruthy();
+    expect(queue instanceof NgVaultAsyncDiagnosticQueue).toBeTrue();
+    expect(typeof devMode).toBe('boolean');
+  });
+
+  it('should integrate the NgVaultSyncQueue cleanly with Angular DI', () => {
+    TestBed.configureTestingModule({
+      providers: [provideVault({ queue: NgVaultSyncQueue }), provideZonelessChangeDetection()]
+    });
+
+    const config = TestBed.inject(NGVAULT_CONFIG);
+    const queue = TestBed.inject(NGVAULT_QUEUE);
+    const devMode = TestBed.inject(NGVAULT_DEV_MODE);
+
+    expect(config).toBeTruthy();
+    expect(queue instanceof NgVaultSyncQueue).toBeTrue();
     expect(typeof devMode).toBe('boolean');
   });
 });

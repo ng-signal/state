@@ -1,16 +1,16 @@
 import { ApplicationRef, provideZonelessChangeDetection } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { flushNgVaultQueue } from '@ngvault/testing';
-import { NgVaultAsyncQueue } from './ngvault-async-queue';
+import { NgVaultSyncQueue } from './ngvault-sync-queue';
 
-describe('Queue: NgVaultAsync', () => {
-  let queue: NgVaultAsyncQueue;
+describe('Queue: NgVaultSync', () => {
+  let queue: NgVaultSyncQueue;
 
   beforeEach(() => {
-    queue = new NgVaultAsyncQueue();
+    queue = new NgVaultSyncQueue();
 
     TestBed.configureTestingModule({
-      providers: [provideZonelessChangeDetection(), NgVaultAsyncQueue]
+      providers: [provideZonelessChangeDetection(), NgVaultSyncQueue]
     });
   });
 
@@ -33,12 +33,6 @@ describe('Queue: NgVaultAsync', () => {
     });
 
     // nothing runs immediately (async boundary)
-    expect(results).toEqual([]);
-
-    await flushMicrotasks();
-
-    await TestBed.inject(ApplicationRef).whenStable();
-
     expect(results).toEqual([1, 2, 3]);
   });
 
@@ -54,11 +48,11 @@ describe('Queue: NgVaultAsync', () => {
     });
 
     // still empty before microtasks complete
-    expect(results).toEqual([]);
+    expect(results).toEqual(['second']);
 
     await new Promise((r) => setTimeout(r, 10));
 
-    expect(results).toEqual(['first', 'second']);
+    expect(results).toEqual(['second', 'first']);
   });
 
   it('should continue processing even if one task throws', async () => {
@@ -125,7 +119,7 @@ describe('Queue: NgVaultAsync', () => {
     await flushNgVaultQueue();
 
     // async-2 should run after sync-1, before sync-3
-    expect(results).toEqual(['sync-1', 'async-2', 'sync-3']);
+    expect(results).toEqual(['sync-1', 'sync-3', 'async-2']);
   });
 
   it('should not start a second dequeue loop while already running', async () => {
@@ -146,7 +140,7 @@ describe('Queue: NgVaultAsync', () => {
     await TestBed.inject(ApplicationRef).whenStable();
 
     // Tasks added during execution are appended to the queue (FIFO semantics)
-    expect(results).toEqual(['first', 'third', 'second']);
+    expect(results).toEqual(['first', 'second', 'third']);
   });
 
   it('should gracefully process a task that returns a resolved Promise', async () => {

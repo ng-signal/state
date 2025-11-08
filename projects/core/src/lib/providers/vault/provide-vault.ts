@@ -1,9 +1,9 @@
 import { Provider } from '@angular/core';
+import { NgVaultAsyncDiagnosticQueue } from '@ngvault/core/services/ngvault-async-diagnostic-queue';
 import { isTestEnv } from '../../../../../shared-models/src/lib/helpers/testing-environment.helper';
 import { NGVAULT_DEV_MODE } from '../../constants/ngvault-dev-mode.constant';
 import { VAULT_ROOT as NGVAULT_ROOT } from '../../constants/ngvault-root.constant';
 import { NgVaultConfigModel } from '../../models/ng-vault-config.model';
-import { NgVaultAsyncQueue } from '../../services/ngvault-async-queue';
 import { FEATURE_CELL_REGISTRY } from '../../tokens/feature-cell-registry.token';
 import { NGVAULT_CONFIG } from '../../tokens/ngvault-config.token';
 import { NGVAULT_QUEUE } from '../../tokens/ngvault-queue.token';
@@ -49,7 +49,7 @@ export function provideVault(options: NgVaultConfigModel = {}): Provider[] {
     {
       provide: NGVAULT_QUEUE,
       useFactory: (cfg: Readonly<NgVaultConfigModel>) => {
-        const QueueCtor = (cfg.queue ?? NgVaultAsyncQueue) as new () => NgVaultAsyncQueue;
+        const QueueCtor = (cfg.queue ?? NgVaultAsyncDiagnosticQueue) as new () => NgVaultAsyncDiagnosticQueue;
         const instance = new QueueCtor();
         return instance;
       },
