@@ -24,14 +24,14 @@ class CoreObservableBehavior<T> implements VaultBehavior<T, ObservableBehaviorEx
     private readonly injector: VaultBehaviorFactoryContext['injector']
   ) {}
 
+  onInit(key: string, service: string, ctx: VaultBehaviorContext<T>): void {
+    ctx.behaviorRunner?.onInit?.(this.behaviorId, this.key, service, ctx);
+  }
+
   extendCellAPI(): ObservableBehaviorExtension<T> {
     // eslint-disable-next-line
     const self = this;
     return {
-      onInit(key: string, service: string, ctx: VaultBehaviorContext<T>): void {
-        ctx.behaviorRunner?.onInit?.(self.behaviorId, self.key, service, ctx);
-      },
-
       fromObservable: (key, ctx, source$) =>
         new Observable<VaultSignalRef<T>>((observer) => {
           const _loadingSignal = signal(true);
@@ -47,15 +47,13 @@ class CoreObservableBehavior<T> implements VaultBehavior<T, ObservableBehaviorEx
               _loadingSignal.set(false);
               _hasValue.set(true);
 
-              ctx.behaviorRunner?.onSet?.(self.behaviorId, self.key, ctx);
-
               observer.next({
                 isLoading: _loadingSignal.asReadonly(),
                 value: _valueSignal.asReadonly(),
                 error: _errorSignal.asReadonly(),
                 hasValue: _hasValue.asReadonly()
               });
-              observer.complete();
+              ctx.behaviorRunner?.onSet?.(self.behaviorId, self.key, ctx);
             },
             error: (err) => {
               observer.error(resourceError(err));

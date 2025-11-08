@@ -55,15 +55,14 @@ describe('Behavior: withCoreObservableBehavior', () => {
   });
 
   it('should emit signals correctly for a successful Observable', async () => {
-    const api = behavior?.extendCellAPI?.();
     const ctx = {
       behaviorRunner: {
         onInit: jasmine.createSpy('onInit')
       }
     } as any;
-    api?.onInit?.('fake-key', 'fake-service', ctx);
 
-    await TestBed.inject(ApplicationRef).whenStable();
+    behavior.onInit('fake-key', 'fake-service', ctx);
+
     expect(ctx.behaviorRunner!.onInit).toHaveBeenCalledWith(
       'test-id',
       'NgVault::Core::FromObservable',

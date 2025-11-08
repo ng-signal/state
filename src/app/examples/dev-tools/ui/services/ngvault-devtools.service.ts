@@ -18,21 +18,13 @@ export class NgVaultDevtoolsService {
     this.bus
       .listen$()
       .pipe(
-        filter((e) => !!e),
+        filter((e): e is NgVaultEventModel => !!e),
         takeUntilDestroyed(this.destroyRef)
       )
-      .subscribe({
-        next: (event: NgVaultEventModel) => {
-          // Maintain event log
-          this.events.update((prev) => [event, ...prev].slice(0, 200));
-
-          // Maintain latest vault state per key
-          if (event.key && event.state) {
-            this.vaults.update((map) => ({
-              ...map,
-              [event.key]: event.state
-            }));
-          }
+      .subscribe((event) => {
+        this.events.update((prev) => [event, ...prev].slice(0, 200));
+        if (event.key && event.state) {
+          this.vaults.update((map) => ({ ...map, [event.key]: event.state }));
         }
       });
   }

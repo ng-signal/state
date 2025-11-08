@@ -9,6 +9,7 @@ import { FeatureCell } from '../models/feature-cell.model';
 import { VaultBehaviorFactory } from '../types/vault-behavior-factory.type';
 import { VaultBehaviorTypeOrder } from '../types/vault-behavior.type';
 import { validateNgVaultBehaviorKey } from '../utils/define-ngvault-behavior-key.util';
+import { NgVaultAsyncQueue } from './ngvault-async-queue';
 
 class VaultBehaviorRunnerClass implements VaultBehaviorRunner {
   readonly #typeOrder = [...VaultBehaviorTypeOrder];
@@ -17,6 +18,7 @@ class VaultBehaviorRunnerClass implements VaultBehaviorRunner {
   readonly #behaviorIds = new Map<VaultBehavior['type'], string>();
   readonly #idToType = new Map<string, VaultBehavior['type']>();
   #initialized = false;
+  #queue = new NgVaultAsyncQueue();
 
   #initializeBehaviorIds(): void {
     const gen = () =>
@@ -76,7 +78,7 @@ class VaultBehaviorRunnerClass implements VaultBehaviorRunner {
 
   #runLifecycles<T>(
     behaviorId: string,
-    hook: keyof VaultBehavior<T>, // e.g., 'onInit', 'onSet', etc.
+    hook: keyof VaultBehavior<T>, // 'onInit', 'onSet', etc.
     vaultKey: string,
     ctx: VaultBehaviorContext<T>,
     serviceName?: string
@@ -84,17 +86,18 @@ class VaultBehaviorRunnerClass implements VaultBehaviorRunner {
     this.#verifyInitialized();
     if (!(this.#behaviors?.length && this.#isKnownBehaviorId(behaviorId))) return;
 
-    const systemBehaviors = this.#behaviors.filter((b) => {
-      return ['dev-tools', 'events'].includes(b.type);
+    this.#queue.enqueue(() => {
+      // 1) system-first (dev-tools, events)
+      const systemBehaviors = this.#behaviors.filter((b) => b.type === 'dev-tools' || b.type === 'events');
+      this.#lifeCycle(hook, vaultKey, ctx, systemBehaviors, serviceName);
+
+      // 2) then the next run-level derived from caller
+      const next = this.#getNextBehaviorFromId(behaviorId);
+      if (!next) return;
+
+      const nextBehaviors = this.#behaviors.filter((b) => b.type === next.type);
+      this.#lifeCycle(hook, vaultKey, ctx, nextBehaviors, serviceName);
     });
-    this.#lifeCycle(hook, vaultKey, ctx, systemBehaviors, serviceName);
-
-    const next = this.#getNextBehaviorFromId(behaviorId);
-    if (!next) return; // End of the pipeline — nothing further to execute
-
-    // 🔹 Retrieve and execute only that next run level
-    const nextBehaviors = this.#behaviors.filter((b) => b.type === next.type);
-    this.#lifeCycle(hook, vaultKey, ctx, nextBehaviors, serviceName);
   }
 
   #verifyInitialized(): void {
@@ -142,9 +145,11 @@ class VaultBehaviorRunnerClass implements VaultBehaviorRunner {
           }
           // Create the instance with its signed ID
           const behaviorId = this.#behaviorIds.get(behaviorType);
+
           const instance = factory({
             injector,
-            behaviorId
+            behaviorId,
+            type: behaviorType
           } as VaultBehaviorFactoryContext);
 
           if (!instance || typeof instance !== 'object') {
@@ -158,6 +163,12 @@ class VaultBehaviorRunnerClass implements VaultBehaviorRunner {
             // eslint-disable-next-line
             console.warn(`[NgVault] Behavior initialization failed: ${message}`);
             return null;
+          }
+
+          if (typeof instance.onInit !== 'function') {
+            throw new Error(
+              `[NgVault] Behavior "${instance.constructor.name}" missing required "onInit" method. All behaviors must implement onInit().`
+            );
           }
 
           if (!(instance.key && validateNgVaultBehaviorKey(instance.key))) {
@@ -240,6 +251,8 @@ class VaultBehaviorRunnerClass implements VaultBehaviorRunner {
           configurable: true
         });
       }
+
+      behavior.onInit(behavior.key!, cell.key!, cell.ctx!);
     }
   }
 

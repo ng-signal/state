@@ -15,7 +15,7 @@ export interface VaultBehavior<T = unknown, E extends VaultBehaviorExtension<T> 
   readonly key?: string;
   readonly behaviorId: string;
 
-  onInit?(key: string, service: string, ctx: VaultBehaviorContext<T>): void;
+  onInit(key: string, service: string, ctx: VaultBehaviorContext<T>): void;
   onLoad?(key: string, ctx: VaultBehaviorContext<T>): void;
   onSet?(key: string, ctx: VaultBehaviorContext<T>): void;
   onPatch?(key: string, ctx: VaultBehaviorContext<T>): void;

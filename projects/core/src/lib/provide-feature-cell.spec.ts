@@ -9,7 +9,7 @@ import {
 } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { FeatureCell, VaultBehaviorFactory } from '@ngvault/shared-models';
-import { getTestBehavior, withTestBehavior } from '@ngvault/testing';
+import { flushNgVaultQueue, getTestBehavior, withTestBehavior } from '@ngvault/testing';
 import { FEATURE_CELL_REGISTRY } from './constants/feature-cell-registry.constant';
 import { provideFeatureCell } from './provide-feature-cell';
 
@@ -73,7 +73,7 @@ describe('Provider: Feature Cell (core vault functionality)', () => {
     );
   });
 
-  it('should initialize _data as null when desc.initial is null or undefined', () => {
+  it('should initialize _data as null when desc.initial is null or undefined', async () => {
     const makeVault = (initial: any) => {
       const providers = provideFeatureCell(class DummyService {}, { key: 'init-test', initial });
       const provider = providers.find((p: any) => typeof p.useFactory === 'function');
@@ -85,19 +85,21 @@ describe('Provider: Feature Cell (core vault functionality)', () => {
     };
 
     const nullVault = makeVault(null);
+    await flushNgVaultQueue(1);
     expect(nullVault.state.value()).toBeUndefined();
     expect(nullVault.state.isLoading()).toBeFalse();
     expect(nullVault.state.error()).toBeNull();
     expect(nullVault.state.hasValue()).toBeFalse();
 
     const undefinedVault = makeVault(undefined);
+    await flushNgVaultQueue(1);
     expect(undefinedVault.state.value()).toBeUndefined();
     expect(undefinedVault.state.isLoading()).toBeFalse();
     expect(undefinedVault.state.error()).toBeNull();
     expect(undefinedVault.state.hasValue()).toBeFalse();
   });
 
-  it('should gracefully reset all vault signals when setState(null) or patchState(null) is used', () => {
+  it('should gracefully reset all vault signals when setState(null) or patchState(null) is used', async () => {
     const providers = provideFeatureCell(class DummyService {}, { key: 'reset-test', initial: [1, 2, 3] });
     const provider = providers.find((p: any) => typeof p.useFactory === 'function');
     let vault!: FeatureCell<any>;
@@ -107,55 +109,63 @@ describe('Provider: Feature Cell (core vault functionality)', () => {
     });
 
     vault.setState({ loading: true, error: { message: 'fail' }, value: [1, 2, 3] });
+    await flushNgVaultQueue(1);
     expect(vault.state.isLoading()).toBeTrue();
     expect(vault.state.error()).toBeNull();
     expect(vault.state.value()).toEqual([1, 2, 3]);
     expect(vault.state.hasValue()).toBeTrue();
 
     vault.setState(undefined);
+    await flushNgVaultQueue(1);
     expect(vault.state.isLoading()).toBeFalse();
     expect(vault.state.error()).toBeNull();
     expect(vault.state.value()).toBeUndefined();
     expect(vault.state.hasValue()).toBeFalse();
 
     vault.setState({ loading: true, error: { message: 'fail' }, value: [1, 2, 3] });
+    await flushNgVaultQueue(2);
     expect(vault.state.isLoading()).toBeTrue();
     expect(vault.state.error()).toBeNull();
     expect(vault.state.value()).toEqual([1, 2, 3]);
     expect(vault.state.hasValue()).toBeTrue();
 
     vault.setState(null);
+    await flushNgVaultQueue(1);
     expect(vault.state.isLoading()).toBeFalse();
     expect(vault.state.error()).toBeNull();
     expect(vault.state.value()).toBeUndefined();
     expect(vault.state.hasValue()).toBeFalse();
 
     vault.patchState({ loading: true, error: { message: 'fail' }, value: [1, 2, 3] });
+    await flushNgVaultQueue(1);
     expect(vault.state.isLoading()).toBeTrue();
     expect(vault.state.error()).toBeNull();
     expect(vault.state.value()).toEqual([1, 2, 3]);
     expect(vault.state.hasValue()).toBeTrue();
 
     vault.patchState(undefined);
+    await flushNgVaultQueue(1);
     expect(vault.state.isLoading()).toBeFalse();
     expect(vault.state.error()).toBeNull();
     expect(vault.state.value()).toBeUndefined();
     expect(vault.state.hasValue()).toBeFalse();
 
     vault.patchState({ loading: true, error: { message: 'fail' }, value: [1, 2, 3] });
+    await flushNgVaultQueue(1);
     expect(vault.state.isLoading()).toBeTrue();
     expect(vault.state.error()).toBeNull();
     expect(vault.state.value()).toEqual([1, 2, 3]);
     expect(vault.state.hasValue()).toBeTrue();
 
     vault.patchState(null);
+    await flushNgVaultQueue(1);
     expect(vault.state.isLoading()).toBeFalse();
     expect(vault.state.error()).toBeNull();
     expect(vault.state.value()).toBeUndefined();
     expect(vault.state.hasValue()).toBeFalse();
   });
 
-  it('should merge arrays and objects correctly using patchState()', () => {
+  it('should merge arrays and objects correctly using patchState()', async () => {
     const providers = provideFeatureCell(class DummyService {}, { key: 'merge-test', initial: [] });
     const provider = providers.find((p: any) => typeof p.useFactory === 'function');
     let vault!: FeatureCell<any>;
@@ -165,17 +175,21 @@ describe('Provider: Feature Cell (core vault functionality)', () => {
     });
 
     vault.setState({ value: [1, 2] });
+    await flushNgVaultQueue(1);
     vault.patchState({ value: [3, 4] });
+    await flushNgVaultQueue(3);
     expect(vault.state.value()).toEqual([3, 4]);
     expect(vault.state.hasValue()).toBeTrue();
 
     vault.setState({ value: { name: 'Alice', age: 30 } });
+    await flushNgVaultQueue(1);
     vault.patchState({ value: { age: 31 } });
+    await flushNgVaultQueue(1);
     expect(vault.state.value()).toEqual({ name: 'Alice', age: 31 });
     expect(vault.state.hasValue()).toBeTrue();
   });
 
-  it('should replace data completely when type differs between current and next', () => {
+  it('should replace data completely when type differs between current and next', async () => {
     const providers = provideFeatureCell(class DummyService {}, { key: 'replace-test', initial: [1, 2] });
     const provider = providers.find((p: any) => typeof p.useFactory === 'function');
     let vault!: FeatureCell<any>;
@@ -185,11 +199,12 @@ describe('Provider: Feature Cell (core vault functionality)', () => {
     });
 
     vault.patchState({ value: { user: 'Alice' } });
+    await flushNgVaultQueue(1);
     expect(vault.state.value()).toEqual({ user: 'Alice' });
     expect(vault.state.hasValue()).toBeTrue();
   });
 
-  it('should correctly propagate loading and error updates', () => {
+  it('should correctly propagate loading and error updates', async () => {
     const providers = provideFeatureCell(class DummyService {}, { key: 'state-test', initial: [] });
     const provider = providers.find((p: any) => typeof p.useFactory === 'function');
     let vault!: FeatureCell<any>;
@@ -197,18 +212,21 @@ describe('Provider: Feature Cell (core vault functionality)', () => {
     runInInjectionContext(TestBed.inject(Injector), () => {
       vault = (provider as any).useFactory();
     });
+    await flushNgVaultQueue(1);
 
     vault.setState({ loading: true });
+    await flushNgVaultQueue(2);
     expect(vault.state.isLoading()).toBeTrue();
     expect(vault.state.hasValue()).toBeTrue();
 
     vault.patchState({ loading: false, error: { message: 'timeout' } });
+    await flushNgVaultQueue(1);
     expect(vault.state.isLoading()).toBeFalse();
     expect(vault.state.error()).toEqual({ message: 'timeout' });
     expect(vault.state.hasValue()).toBeTrue();
   });
 
-  it('should correctly handle primitive and null data updates in setState()', () => {
+  it('should correctly handle primitive and null data updates in setState()', async () => {
     const providers = provideFeatureCell(class DummyService {}, { key: 'primitive-test', initial: 0 });
     const provider = providers.find((p: any) => typeof p.useFactory === 'function');
     let vault: any;
@@ -217,6 +235,7 @@ describe('Provider: Feature Cell (core vault functionality)', () => {
     runInInjectionContext(TestBed.inject(Injector), () => {
       vault = (provider as any).useFactory();
     });
+    await flushNgVaultQueue(1);
 
     // Initial state
     expect(vault.state.value()).toBe(0);
@@ -226,6 +245,7 @@ describe('Provider: Feature Cell (core vault functionality)', () => {
 
     // Set a new primitive (string)
     vault.setState({ value: 'new-value' });
+    await flushNgVaultQueue(2);
     expect(vault.state.value()).toBe('new-value');
     expect(vault.state.isLoading()).toBeFalse();
     expect(vault.state.error()).toBeNull();
@@ -233,26 +253,30 @@ describe('Provider: Feature Cell (core vault functionality)', () => {
 
     // Set a different primitive (boolean)
     vault.setState({ value: true });
+    await flushNgVaultQueue(1);
     expect(vault.state.value()).toBeTrue();
     expect(vault.state.hasValue()).toBeTrue();
 
     // Set same primitive value (should not throw or rewrap)
     vault.setState({ value: true });
+    await flushNgVaultQueue(1);
     expect(vault.state.value()).toBeTrue();
     expect(vault.state.hasValue()).toBeTrue();
 
     // Set null (reset to null state)
     vault.setState({ value: null });
+    await flushNgVaultQueue(1);
     expect(vault.state.value()).toBeNull();
     expect(vault.state.hasValue()).toBeFalse();
 
     // Set a number again after null (rehydrate)
     vault.setState({ value: 42 });
+    await flushNgVaultQueue(1);
     expect(vault.state.value()).toBe(42);
     expect(vault.state.hasValue()).toBeTrue();
   });
 
-  it('should merge arrays when current and next are both arrays', () => {
+  it('should merge arrays when current and next are both arrays', async () => {
     const providers = provideFeatureCell(class DummyService {}, { key: 'reset-test', initial: [1, 2, 3] });
     const provider = providers.find((p: any) => typeof p.useFactory === 'function');
     let vault!: FeatureCell<any>;
@@ -261,13 +285,15 @@ describe('Provider: Feature Cell (core vault functionality)', () => {
       vault = (provider as any).useFactory();
     });
     vault.setState({ value: [{ id: 1, name: 'Ada' }] });
+    await flushNgVaultQueue(1);
     expect(vault.state.hasValue()).toBeTrue();
     vault.patchState({ value: [{ id: 2, name: 'Grace' }] });
+    await flushNgVaultQueue(3);
     expect(vault.state.value()).toEqual([{ id: 2, name: 'Grace' }]);
     expect(vault.state.hasValue()).toBeTrue();
   });
 
-  it('should merge objects shallowly when both current and next are plain objects', () => {
+  it('should merge objects shallowly when both current and next are plain objects', async () => {
     const providers = provideFeatureCell(class DummyService {}, { key: 'reset-test', initial: [1, 2, 3] });
     const provider = providers.find((p: any) => typeof p.useFactory === 'function');
     let vault!: FeatureCell<any>;
@@ -277,13 +303,15 @@ describe('Provider: Feature Cell (core vault functionality)', () => {
     });
     // simulate current object state
     vault.setState({ value: { id: 1, name: 'Initial' } as any });
+    await flushNgVaultQueue(2);
     expect(vault.state.hasValue()).toBeTrue();
     vault.patchState({ value: { name: 'Updated' } as any });
+    await flushNgVaultQueue(2);
     expect(vault.state.value()).toEqual({ id: 1, name: 'Updated' });
     expect(vault.state.hasValue()).toBeTrue();
   });
 
-  it('should replace completely when types differ (array → object or null)', () => {
+  it('should replace completely when types differ (array → object or null)', async () => {
     const providers = provideFeatureCell(class DummyService {}, { key: 'reset-test', initial: [1, 2, 3] });
     const provider = providers.find((p: any) => typeof p.useFactory === 'function');
     let vault!: FeatureCell<any>;
@@ -294,6 +322,7 @@ describe('Provider: Feature Cell (core vault functionality)', () => {
     vault.setState({ value: [{ id: 1, name: 'Ada' }] });
     expect(vault.state.hasValue()).toBeTrue();
     vault.patchState({ value: { id: 99, name: 'Replaced' } as any });
+    await flushNgVaultQueue(2);
     expect(vault.state.value()).toEqual({ id: 99, name: 'Replaced' });
     expect(vault.state.hasValue()).toBeTrue();
 
@@ -302,7 +331,7 @@ describe('Provider: Feature Cell (core vault functionality)', () => {
     expect(vault.state.hasValue()).toBeTrue();
   });
 
-  it('should update loading when partial.loading is provided', () => {
+  it('should update loading when partial.loading is provided', async () => {
     const providers = provideFeatureCell(class DummyService {}, { key: 'reset-test', initial: [1, 2, 3] });
     const provider = providers.find((p: any) => typeof p.useFactory === 'function');
     let vault!: FeatureCell<any>;
@@ -313,11 +342,12 @@ describe('Provider: Feature Cell (core vault functionality)', () => {
     expect(vault.state.isLoading()).toBeFalse();
     expect(vault.state.hasValue()).toBeTrue();
     vault.patchState({ loading: true });
+    await flushNgVaultQueue(2);
     expect(vault.state.isLoading()).toBeTrue();
     expect(vault.state.hasValue()).toBeTrue();
   });
 
-  it('should update error when partial.error is provided', () => {
+  it('should update error when partial.error is provided', async () => {
     const providers = provideFeatureCell(class DummyService {}, { key: 'reset-test', initial: [1, 2, 3] });
     const provider = providers.find((p: any) => typeof p.useFactory === 'function');
     let vault!: FeatureCell<any>;
@@ -329,13 +359,13 @@ describe('Provider: Feature Cell (core vault functionality)', () => {
     expect(vault.state.hasValue()).toBeTrue();
     const testError = { message: 'Something went wrong' } as any;
     vault.patchState({ error: testError });
+    await flushNgVaultQueue(2);
     expect(vault.state.error()).toEqual(testError);
     expect(vault.state.hasValue()).toBeTrue();
   });
 
-  // FILE: provide-feature-cell.spec.ts
   describe('FeatureCell Destroy Lifecycle', () => {
-    it('should fully destroy and reset signals on destroy()', () => {
+    it('should fully destroy and reset signals on destroy()', async () => {
       const providers = provideFeatureCell(class TestService {}, { key: 'destroy-test', initial: [] });
       const vaultFactory = (providers[0] as any).useFactory;
 
@@ -345,22 +375,27 @@ describe('Provider: Feature Cell (core vault functionality)', () => {
       });
 
       vault.setState({ loading: true, value: [1, 2, 3], error: { message: 'oops' } as any });
+      await flushNgVaultQueue(1);
+
       expect(vault.state.isLoading()).toBeTrue();
       expect(vault.state.value()).toEqual([1, 2, 3]);
       expect(vault.state.error()).toBeNull();
 
       vault.reset();
 
+      await flushNgVaultQueue(1);
       expect(vault.state.isLoading()).toBeFalse();
       expect(vault.state.value()).toBeUndefined();
       expect(vault.state.error()).toBeNull();
 
       vault.setState({ loading: true, value: [1, 2, 3], error: { message: 'oops' } as any });
+      await flushNgVaultQueue(2);
       expect(vault.state.isLoading()).toBeTrue();
       expect(vault.state.value()).toEqual([1, 2, 3]);
       expect(vault.state.error()).toBeNull();
 
       vault.destroy();
+      await flushNgVaultQueue(1);
 
       expect(vault.state.isLoading()).toBeFalse();
       expect(vault.state.value()).toBeUndefined();
@@ -384,38 +419,42 @@ describe('Provider: Feature Cell (core vault functionality)', () => {
       factory = (providers[0] as any).useFactory;
     });
 
-    it('should emit an "init" event when onInit is called', () => {
+    it('should emit an "init" event when onInit is called', async () => {
       runInInjectionContext(TestBed.inject(Injector), () => {
         vault = factory();
       });
 
       testBehavior = getTestBehavior();
+      await flushNgVaultQueue(1);
 
       expect(testBehavior.getEvents()).toEqual([
         'onInit:devtools-test',
-        'onInit:NgVault::Core::State',
-        'onInit:NgVault::CoreHttpResource::State'
+        'onInit:NgVault::Core::FromObservable',
+        'onInit:NgVault::Core::State'
       ]);
     });
 
-    it('should emit a "dispose" event when vault.destroy() is called', () => {
+    it('should emit a "dispose" event when vault.destroy() is called', async () => {
       runInInjectionContext(TestBed.inject(Injector), () => {
         vault = factory();
         vault.destroy();
       });
 
       testBehavior = getTestBehavior();
+      await flushNgVaultQueue(5);
 
       expect(testBehavior.getEvents()).toEqual([
         'onInit:devtools-test',
+        'onInit:NgVault::Core::FromObservable',
+        'onReset:devtools-test',
+        'onDestroy:devtools-test',
         'onInit:NgVault::Core::State',
         'onInit:NgVault::CoreHttpResource::State',
-        'onReset:devtools-test',
-        'onDestroy:devtools-test'
+        'onInit:NgVault::Core::FromObservable'
       ]);
     });
 
-    it('should emit on all the calls', () => {
+    it('should emit on all the calls', async () => {
       runInInjectionContext(TestBed.inject(Injector), () => {
         vault = factory();
       });
@@ -429,28 +468,22 @@ describe('Provider: Feature Cell (core vault functionality)', () => {
       vault.setState(undefined);
 
       testBehavior = getTestBehavior();
+      await flushNgVaultQueue(6);
 
       expect(testBehavior.getEvents()).toEqual([
         'onInit:devtools-test',
+        'onInit:NgVault::Core::FromObservable',
+        'onSet:devtools-test:{"isLoading":false,"error":null,"hasValue":false}',
+        'onReset:devtools-test',
+        'onPatch:devtools-test:{"isLoading":true,"value":[1,2,3],"error":null,"hasValue":true}',
+        'onReset:devtools-test',
+        'onSet:devtools-test:{"isLoading":true,"value":[1,2,3],"error":null,"hasValue":true}',
+        'onReset:devtools-test',
         'onInit:NgVault::Core::State',
         'onInit:NgVault::CoreHttpResource::State',
-
-        'onSet:devtools-test:{"isLoading":false,"value":[],"error":null,"hasValue":true}',
-
+        'onInit:NgVault::Core::FromObservable',
         'onSet:NgVault::Core::State:{"isLoading":true,"value":[1,2,3],"error":null,"hasValue":true}',
-
-        'onReset:devtools-test',
-
-        'onPatch:devtools-test:{"isLoading":false,"error":null,"hasValue":false}',
-        'onPatch:NgVault::Core::State:{"isLoading":true,"value":[4,5,6],"error":null,"hasValue":true}',
-
-        'onReset:devtools-test',
-
-        'onSet:devtools-test:{"isLoading":false,"error":null,"hasValue":false}',
-
-        'onSet:NgVault::Core::State:{"isLoading":true,"value":[1,2,3],"error":null,"hasValue":true}',
-
-        'onReset:devtools-test'
+        'onSet:NgVault::Core::State:{"isLoading":true,"value":[1,2,3],"error":null,"hasValue":true}'
       ]);
     });
   });
@@ -481,13 +514,14 @@ describe('Provider: Feature Cell (core vault functionality)', () => {
   });
 
   describe('Behavior Factory extendCellApi)', () => {
-    it('should attach and execute an extended FeatureCell API method from a behavior', () => {
+    it('should attach and execute an extended FeatureCell API method from a behavior', async () => {
       // Step 1: Create a behavior that adds a custom method via extendCellAPI
       // eslint-disable-next-line
       const withCustomBehavior = (ctx: any) => ({
         type: 'state',
         key: 'NgVault::Testing::CustomBehavior',
         behaviorId: 'custom-id',
+        onInit: () => {},
         extendCellAPI: () => ({
           sayHello: (key: string, _ctx: any, name: string) => `Hello ${name} from ${key}`
         })
@@ -519,6 +553,7 @@ describe('Provider: Feature Cell (core vault functionality)', () => {
 
       // Step 6: Confirm that the base FeatureCell API still works
       vault.setState({ value: [1, 2, 3] });
+      await flushNgVaultQueue(1);
       expect(vault.state.value()).toEqual([1, 2, 3]);
       expect(vault.state.hasValue()).toBeTrue();
     });
@@ -528,6 +563,7 @@ describe('Provider: Feature Cell (core vault functionality)', () => {
         type: 'state',
         key: 'NgVault::Testing::BehaviorA',
         behaviorId: 'A-id',
+        onInit: () => {},
         extendCellAPI: () => ({
           shared: () => 'shared-A'
         })
@@ -539,6 +575,7 @@ describe('Provider: Feature Cell (core vault functionality)', () => {
         type: 'state',
         key: 'NgVault::Testing::BehaviorB',
         behaviorId: 'B-id',
+        onInit: () => {},
         extendCellAPI: () => ({
           shared: () => 'shared-B'
         })
@@ -562,13 +599,14 @@ describe('Provider: Feature Cell (core vault functionality)', () => {
       );
     });
 
-    it('should allow overriding when allowOverride explicitly includes the method name', () => {
+    it('should allow overriding when allowOverride explicitly includes the method name', async () => {
       spyOn(console, 'warn');
       // Step 1: Behavior A defines shared method
       const behaviorA = () => ({
         type: 'state',
         key: 'NgVault::Testing::BehaviorA',
         behaviorId: 'A-id',
+        onInit: () => {},
         extendCellAPI: () => ({
           shared: (key: string, _ctx: any) => `shared-A from ${key}`
         })
@@ -582,6 +620,7 @@ describe('Provider: Feature Cell (core vault functionality)', () => {
         key: 'NgVault::Testing::BehaviorB',
         behaviorId: 'B-id',
         allowOverride: ['shared'],
+        onInit: () => {},
         extendCellAPI: () => ({
           shared: (key: string, _ctx: any) => `shared-B from ${key}`
         })
@@ -618,6 +657,8 @@ describe('Provider: Feature Cell (core vault functionality)', () => {
 
       // Step 8: Confirm FeatureCell’s base state API still works
       vault.setState({ value: [100] });
+      await flushNgVaultQueue(1);
+
       expect(vault.state.value()).toEqual([100]);
       expect(vault.state.hasValue()).toBeTrue();
     });

@@ -6,7 +6,8 @@ export function createTestBehaviorFactory(
   factory: (...args: any[]) => any,
   type?: string,
   key?: string,
-  critical: boolean = false
+  critical: boolean = false,
+  autoFix = true
 ): any {
   const wrappedFactory = (context: any) => {
     const behavior = factory(context);
@@ -47,6 +48,18 @@ export function createTestBehaviorFactory(
       });
     }
 
+    if (typeof behavior.onInit !== 'function') {
+      if (autoFix) {
+        Object.defineProperty(behavior, 'onInit', {
+          value: (key: string, service: string, ctx: any) => {
+            // No-op for tests — ensures lifecycle consistency
+            // console.debug(`[NgVault::Testing] Auto-added onInit() for ${behavior.key ?? '(no-key)'}`);
+          },
+          enumerable: false,
+          writable: false
+        });
+      }
+    }
     return behavior;
   };
 

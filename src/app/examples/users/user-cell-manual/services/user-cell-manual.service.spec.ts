@@ -6,6 +6,7 @@ import { UserCellManualService } from './user-cell-manual.service';
 import { provideHttpClient } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { provideFeatureCell } from '@ngvault/core';
+import { flushNgVaultQueue } from '@ngvault/testing';
 
 describe('Service: User Cell Manual', () => {
   let service: UserCellManualService;
@@ -190,10 +191,12 @@ describe('Service: User Cell Manual', () => {
       expect(state.error()).toBeNull();
     });
 
-    it('should set error when http fails', () => {
+    it('should set error when http fails', async () => {
       service.loadUsers();
 
       const state = service.users();
+      TestBed.tick();
+      await flushNgVaultQueue(1);
 
       expect(state.value()).toBeUndefined();
       expect(state.isLoading()).toBeTrue();

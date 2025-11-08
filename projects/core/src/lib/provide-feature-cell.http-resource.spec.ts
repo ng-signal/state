@@ -2,7 +2,7 @@ import { httpResource, provideHttpClient } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { ApplicationRef, Injector, provideZonelessChangeDetection } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
-import { getTestBehavior, withTestBehavior } from '@ngvault/testing';
+import { flushNgVaultQueue, getTestBehavior, withTestBehavior } from '@ngvault/testing';
 import { FeatureCell } from './decorators/feature-cell.decorator';
 import { injectVault } from './injectors/feature-vault.injector';
 import { provideFeatureCell } from './provide-feature-cell';
@@ -59,6 +59,7 @@ describe('Provider: Feature Cell Resource', () => {
       expect(vault.state.value()).toEqual([{ id: 1, name: 'Ada' }]);
 
       vault.setState(undefined);
+      await flushNgVaultQueue(1);
 
       expect(vault.state.value()).toBeUndefined();
       expect(vault.state.isLoading()).toBeFalse();
@@ -67,9 +68,11 @@ describe('Provider: Feature Cell Resource', () => {
 
       expect(getTestBehavior().getEvents()).toEqual([
         'onInit:cars',
+        'onInit:NgVault::Core::FromObservable',
+        'onSet:cars:{"isLoading":false,"value":[],"error":null,"hasValue":true}',
         'onInit:NgVault::Core::State',
         'onInit:NgVault::CoreHttpResource::State',
-        'onSet:cars:{"isLoading":false,"value":[],"error":null,"hasValue":true}',
+        'onInit:NgVault::Core::FromObservable',
         'onSet:NgVault::CoreHttpResource::State:{"isLoading":false,"value":[{"id":1,"name":"Ada"}],"error":null,"hasValue":true}',
         'onReset:cars'
       ]);
@@ -92,12 +95,12 @@ describe('Provider: Feature Cell Resource', () => {
 
       // Before response arrives, value() throws → _data should remain undefined
       expect(vault.state.value()).toEqual([]);
-      expect(vault.state.isLoading()).toBeTrue();
+      expect(vault.state.isLoading()).toBeFalse();
       expect(vault.state.hasValue()).toBeTrue();
 
       // Simulate backend returning a primitive (final else case)
       mockBackend.expectOne('/primitive').flush(42);
-      await TestBed.inject(ApplicationRef).whenStable();
+      await flushNgVaultQueue(1);
 
       // After flush, final else executes (`_data.set(next as VaultDataType<T>)`)
       expect(vault.state.value()).toBe(42);
@@ -109,18 +112,21 @@ describe('Provider: Feature Cell Resource', () => {
       response.reload();
       TestBed.tick();
       mockBackend.expectOne('/primitive').flush(7);
-      await TestBed.inject(ApplicationRef).whenStable();
+      await flushNgVaultQueue(1);
 
       expect(vault.state.value()).toBe(7);
       expect(vault.state.error()).toBeNull();
       expect(vault.state.isLoading()).toBeFalse();
       expect(vault.state.hasValue()).toBeTrue();
+      await flushNgVaultQueue(1);
 
       expect(getTestBehavior().getEvents()).toEqual([
         'onInit:cars',
+        'onInit:NgVault::Core::FromObservable',
+        'onPatch:cars:{"isLoading":false,"value":[],"error":null,"hasValue":true}',
         'onInit:NgVault::Core::State',
         'onInit:NgVault::CoreHttpResource::State',
-        'onPatch:cars:{"isLoading":false,"value":[],"error":null,"hasValue":true}',
+        'onInit:NgVault::Core::FromObservable',
         'onPatch:NgVault::CoreHttpResource::State:{"isLoading":false,"value":42,"error":null,"hasValue":true}',
         'onPatch:NgVault::CoreHttpResource::State:{"isLoading":true,"value":42,"error":null,"hasValue":true}',
         'onPatch:NgVault::CoreHttpResource::State:{"isLoading":false,"value":7,"error":null,"hasValue":true}'

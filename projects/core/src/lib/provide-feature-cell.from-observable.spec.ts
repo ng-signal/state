@@ -3,7 +3,7 @@ import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { Injector, provideZonelessChangeDetection, runInInjectionContext, signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { FeatureCell, VaultSignalRef } from '@ngvault/shared-models';
-import { getTestBehavior, withTestBehavior } from '@ngvault/testing';
+import { flushNgVaultQueue, getTestBehavior, withTestBehavior } from '@ngvault/testing';
 import { Subject } from 'rxjs';
 import { provideFeatureCell } from './provide-feature-cell';
 
@@ -34,7 +34,7 @@ describe('ResourceVaultModel (setState, patchState, fromObservable)', () => {
     });
   });
 
-  it('should set state fully with setState()', () => {
+  it('should set state fully with setState()', async () => {
     const initial = vault.state.value();
     expect(initial).toEqual([]);
 
@@ -43,25 +43,29 @@ describe('ResourceVaultModel (setState, patchState, fromObservable)', () => {
       { id: 2, name: 'Grace' }
     ];
     vault.setState({ loading: true });
+    await flushNgVaultQueue(2);
     expect(vault.state.isLoading()).toBeTrue();
     expect(vault.state.hasValue()).toBeTrue();
 
     vault.setState({ value: newData, loading: false });
+    await flushNgVaultQueue(1);
     expect(vault.state.value()).toEqual(newData);
     expect(vault.state.isLoading()).toBeFalse();
     expect(vault.state.error()).toBeNull();
     expect(vault.state.hasValue()).toBeTrue();
   });
 
-  it('should replace array when patchState() is called with array data', () => {
+  it('should replace array when patchState() is called with array data', async () => {
     vault.setState({ value: [{ id: 1, name: 'Ada' }] });
+    await flushNgVaultQueue(3);
     expect(vault.state.hasValue()).toBeTrue();
     vault.patchState({ value: [{ id: 2, name: 'Grace' }] });
+    await flushNgVaultQueue(1);
     expect(vault.state.value()).toEqual([{ id: 2, name: 'Grace' }]);
     expect(vault.state.hasValue()).toBeTrue();
   });
 
-  it('should shallow merge objects when patchState() is called with object data', () => {
+  it('should shallow merge objects when patchState() is called with object data', async () => {
     const providers = provideFeatureCell(class ObjService {}, { key: 'obj', initial: { id: 1, name: 'Ada' } });
 
     const provider = providers.find((p: any) => typeof p.useFactory === 'function');
@@ -73,6 +77,7 @@ describe('ResourceVaultModel (setState, patchState, fromObservable)', () => {
     });
 
     vault.patchState({ value: { name: 'Grace' } as any });
+    await flushNgVaultQueue(1);
     expect(vault.state.value()).toEqual({ id: 1, name: 'Grace' });
     expect(vault.state.hasValue()).toBeTrue();
   });
@@ -142,7 +147,7 @@ describe('ResourceVaultModel (setState, patchState, fromObservable)', () => {
     expect(resource.error()!.message).toContain('Network failure');
   });
 
-  it('should emit events for fromObservable lifecycle', () => {
+  it('should emit events for fromObservable lifecycle', async () => {
     const subject = new Subject<any>();
 
     let lastRef!: VaultSignalRef<any>;
@@ -156,14 +161,17 @@ describe('ResourceVaultModel (setState, patchState, fromObservable)', () => {
     expect(lastRef.isLoading()).toBeFalse();
     expect(lastRef.value()).toEqual({ id: 1, name: 'Ada' });
     expect(lastRef.error()).toBeNull();
+    await flushNgVaultQueue(5);
 
     expect(getTestBehavior().getEvents()).toEqual([
       'onInit:http',
-      'onInit:NgVault::Core::State',
-      'onInit:NgVault::CoreHttpResource::State',
+      'onInit:NgVault::Core::FromObservable',
       'onLoad:NgVault::Core::FromObservable',
       'onSet:NgVault::Core::FromObservable:{"isLoading":false,"value":[],"error":null,"hasValue":true}',
-      'onDispose:NgVault::Core::FromObservable'
+      'onDispose:NgVault::Core::FromObservable',
+      'onInit:NgVault::Core::State',
+      'onInit:NgVault::CoreHttpResource::State',
+      'onInit:NgVault::Core::FromObservable'
     ]);
   });
 });

@@ -5,7 +5,6 @@ import {
   provideZonelessChangeDetection
 } from '@angular/core';
 import { provideRouter } from '@angular/router';
-import { provideVault } from '@ngvault/core';
 
 import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
 import { HttpClientInMemoryWebApiModule } from 'angular-in-memory-web-api';
@@ -36,7 +35,7 @@ export const appConfig: ApplicationConfig = {
      * Initializes the root NG Signal Store context.
      * Provides the global store registry and root configuration.
      */
-    provideVault(),
+    // provideVault(),
 
     /**
      * Registers the 'user' feature state using the UserStateService.
