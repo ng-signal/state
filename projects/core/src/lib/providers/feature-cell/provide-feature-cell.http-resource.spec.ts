@@ -92,6 +92,9 @@ describe('Provider: Feature Cell Resource', () => {
         'onReset:cars',
 
         'onSet:cars:{"isLoading":false,"error":null,"hasValue":false}',
+
+        'onSet:NgVault::CoreHttpResource::State:{"isLoading":true,"value":[{"id":1,"name":"Ada"}],"error":null,"hasValue":true}',
+
         'onSet:NgVault::CoreHttpResource::State:{"isLoading":false,"value":[{"id":2,"name":"Kai"}],"error":null,"hasValue":true}',
 
         'onReset:cars',

@@ -1,6 +1,6 @@
 // projects/core/src/lib/behaviors/with-core-set.behavior.ts
 import { HttpResourceRef } from '@angular/common/http';
-import { effect, runInInjectionContext } from '@angular/core';
+import { effect, runInInjectionContext, signal } from '@angular/core';
 import {
   defineNgVaultBehaviorKey,
   VaultBehavior,
@@ -22,7 +22,9 @@ import { resourceError } from '../../utils/resource-error.util';
 class CoreHttpResourceStateBehavior<T> implements VaultBehavior<T> {
   public readonly critical = true;
   public readonly key = defineNgVaultBehaviorKey('CoreHttpResource', 'State');
-  #destroyed = false;
+
+  #hasActiveResource = signal(false);
+  #destroyed = signal(false);
 
   constructor(
     readonly behaviorId: string,
@@ -39,23 +41,26 @@ class CoreHttpResourceStateBehavior<T> implements VaultBehavior<T> {
       const resource = ctx.next as HttpResourceRef<T>;
       const { isLoading, error, value } = ctx;
 
+      this.#hasActiveResource.set(true);
+      this.#destroyed.set(false);
+
       runInInjectionContext(this.injector, () => {
         effect(() => {
-          if (this.#destroyed) {
-            this.#destroyed = false;
-            return;
-          }
+          if (this.#destroyed()) return;
+
           isLoading?.set(resource.isLoading());
-          try {
-            if (resource.value() !== undefined) {
-              value?.set(resource.value());
-              error?.set(null);
-              ctx.behaviorRunner?.onSet(this.behaviorId, this.key, ctx);
+          queueMicrotask(() => {
+            try {
+              if (resource.value() !== undefined) {
+                value?.set(resource.value());
+                error?.set(null);
+                ctx.behaviorRunner?.onSet(this.behaviorId, this.key, ctx);
+              }
+            } catch {
+              error?.set(resourceError(resource.error()));
+              ctx.behaviorRunner?.onError(this.behaviorId, this.key, ctx);
             }
-          } catch {
-            error?.set(resourceError(resource.error()));
-            ctx.behaviorRunner?.onError(this.behaviorId, this.key, ctx);
-          }
+          });
         });
       });
 
@@ -68,12 +73,12 @@ class CoreHttpResourceStateBehavior<T> implements VaultBehavior<T> {
       const resource = ctx.patch as HttpResourceRef<T>;
       const { isLoading, error, value } = ctx;
 
+      this.#hasActiveResource.set(true);
+      this.#destroyed.set(false);
+
       runInInjectionContext(this.injector, () => {
         effect(() => {
-          if (this.#destroyed) {
-            this.#destroyed = false;
-            return;
-          }
+          if (this.#destroyed()) return;
 
           isLoading?.set(resource.isLoading());
 
@@ -103,7 +108,10 @@ class CoreHttpResourceStateBehavior<T> implements VaultBehavior<T> {
    * Cleans up any active effects or async subscriptions when the cell is destroyed.
    */
   onReset(key: string, ctx: VaultBehaviorContext<T>): void {
-    this.#destroyed = true;
+    if (this.#hasActiveResource()) {
+      this.#destroyed.set(true);
+      this.#hasActiveResource.set(false);
+    }
     ctx.behaviorRunner?.onReset(this.behaviorId, key, ctx);
   }
 
@@ -111,7 +119,10 @@ class CoreHttpResourceStateBehavior<T> implements VaultBehavior<T> {
    * Cleans up any active effects or async subscriptions when the cell is destroyed.
    */
   onDestroy(key: string, ctx: VaultBehaviorContext<T>): void {
-    this.#destroyed = true;
+    if (this.#hasActiveResource()) {
+      this.#destroyed.set(true);
+      this.#hasActiveResource.set(false);
+    }
     ctx.behaviorRunner?.onDestroy(this.behaviorId, key, ctx);
   }
 }
