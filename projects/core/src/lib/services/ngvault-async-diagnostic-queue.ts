@@ -1,13 +1,13 @@
 import { signal } from '@angular/core';
-import { NgVaultQueueEvent, NgVaultQueueStats } from '@ngvault/shared-models';
+import { NgVaultInspectableQueue, NgVaultQueueEvent, NgVaultQueueStats } from '@ngvault/shared-models';
 import { Subject } from 'rxjs';
 
-export class NgVaultAsyncDiagnosticQueue {
+export class NgVaultAsyncDiagnosticQueue implements NgVaultInspectableQueue {
   #queue: (() => Promise<void> | void)[] = [];
   #running = false;
   #processedCount = 0;
   #enqueueCount = 0;
-  #instanceId = Math.random().toString(36).slice(2, 8); // 6 chars of random entropy
+  #instanceId = Math.random().toString(36).slice(2, 8);
 
   readonly #statsSignal = signal<NgVaultQueueStats>({
     id: this.#instanceId,
@@ -19,12 +19,10 @@ export class NgVaultAsyncDiagnosticQueue {
 
   readonly events$ = new Subject<NgVaultQueueEvent>();
 
-  /** Reactive signal snapshot */
   get stats$() {
     return this.#statsSignal.asReadonly();
   }
 
-  /** Frozen public stats object */
   get stats(): Readonly<NgVaultQueueStats> {
     return Object.freeze(this.#statsSignal());
   }
@@ -37,7 +35,6 @@ export class NgVaultAsyncDiagnosticQueue {
 
     if (!this.#running) {
       this.#running = true;
-      // 🔸 Parity with old behavior: start immediately (no queueMicrotask)
       this.#dequeue();
     }
   }
@@ -49,7 +46,6 @@ export class NgVaultAsyncDiagnosticQueue {
       this.events$.next({ type: 'dequeue', stats: this.stats });
 
       try {
-        // 🔸 Same as old behavior — each task awaits microtask boundary for async consistency
         await Promise.resolve().then(task);
         this.#processedCount++;
         this.#syncStats();
