@@ -21,14 +21,18 @@ function setNgVaultConfig(config: NgVaultConfigModel): void {
 
   _config = Object.freeze({
     strict: config.strict ?? !testMode,
-    devMode: config.devMode ?? true,
-    queue: config.queue
+    devMode: config.devMode ?? false,
+    queue: config.queue,
+    logLevel: config.logLevel ?? 'off'
   });
 
   _initialized = true;
 }
 
-function getNgVaultConfig(): Readonly<NgVaultConfigModel | undefined> {
+export function getNgVaultConfig(): Readonly<NgVaultConfigModel> {
+  if (!_initialized || !_config) {
+    throw new Error('[NgVault] Missing root Vault configuration. Did you forget to call provideVault()?');
+  }
   return _config;
 }
 

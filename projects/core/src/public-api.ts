@@ -8,3 +8,4 @@ export * from './lib/models/feature-cell-descriptor.model';
 export * from './lib/providers/feature-cell/provide-feature-cell';
 export * from './lib/providers/vault/provide-vault';
 export * from './lib/tokens/feature-cell-token-registry';
+export * from './lib/types/ngvault-log-level.type';

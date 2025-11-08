@@ -6,7 +6,7 @@ import { NGVAULT_DEV_MODE } from '../../constants/ngvault-dev-mode.constant';
 import { NgVaultConfigModel } from '../../models/ng-vault-config.model';
 import { NGVAULT_CONFIG } from '../../tokens/ngvault-config.token';
 import { NGVAULT_QUEUE } from '../../tokens/ngvault-queue.token';
-import { _resetNgVaultConfigForTests, provideVault } from './provide-vault'; // adjust import
+import { _resetNgVaultConfigForTests, getNgVaultConfig, provideVault } from './provide-vault'; // adjust import
 
 // Mock queue for testing
 class MockQueue extends NgVaultAsyncDiagnosticQueue {
@@ -180,5 +180,25 @@ describe('provideVault()', () => {
     expect(config).toBeTruthy();
     expect(queue instanceof NgVaultSyncQueue).toBeTrue();
     expect(typeof devMode).toBe('boolean');
+  });
+
+  it('should throw an error if called before provideVault()', () => {
+    expect(() => getNgVaultConfig()).toThrowError(
+      '[NgVault] Missing root Vault configuration. Did you forget to call provideVault()?'
+    );
+  });
+
+  it('should return the current config after provideVault() initializes it', () => {
+    const config: NgVaultConfigModel = { strict: true, devMode: true };
+    provideVault(config); // initializes the internal _config
+
+    const result = getNgVaultConfig();
+
+    expect(result).toEqual(
+      jasmine.objectContaining({
+        strict: true,
+        devMode: true
+      })
+    );
   });
 });
