@@ -7,6 +7,7 @@ import {
 import { provideRouter } from '@angular/router';
 
 import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
+import { provideVault } from '@ngvault/core';
 import { HttpClientInMemoryWebApiModule } from 'angular-in-memory-web-api';
 import { MockApiService } from 'src/testing/mock-api.service';
 import { NGVAULT_CELLS } from './inital-cells/application-cells';
@@ -35,7 +36,7 @@ export const appConfig: ApplicationConfig = {
      * Initializes the root NG Signal Store context.
      * Provides the global store registry and root configuration.
      */
-    // provideVault(),
+    ...provideVault(),
 
     /**
      * Registers the 'user' feature state using the UserStateService.

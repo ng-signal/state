@@ -10,6 +10,10 @@
     "inlineSources": true,
     "types": []
   },
-  "include": ["src/**/*.ts"],
+  "include": [
+    "src/**/*.ts",
+    "../core/src/lib/services/ngvault-async-queue.spec.ts",
+    "../core/src/lib/services/ngvault-async-queue.ts"
+  ],
   "exclude": ["**/*.spec.ts"]
 }

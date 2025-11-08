@@ -1,9 +1,10 @@
 import { provideZonelessChangeDetection } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
+import { provideVaultTesting } from '@ngvault/testing';
 import 'reflect-metadata';
 import { NGVAULT_METADATA_KEYS } from '../constants/metadata-keys.constant';
 import { FeatureCellDescriptorModel } from '../models/feature-cell-descriptor.model';
-import { provideFeatureCell } from '../provide-feature-cell';
+import { provideFeatureCell } from '../providers/feature-cell/provide-feature-cell';
 import { getOrCreateFeatureCellToken } from '../tokens/feature-cell-token-registry';
 import { injectVault } from './feature-vault.injector';
 
@@ -30,7 +31,11 @@ describe('Injector: Vault', () => {
     };
 
     TestBed.configureTestingModule({
-      providers: [provideZonelessChangeDetection(), ...provideFeatureCell(TestFeatureCellService, desc)]
+      providers: [
+        provideVaultTesting(),
+        provideZonelessChangeDetection(),
+        provideFeatureCell(TestFeatureCellService, desc)
+      ]
     });
   });
 
@@ -60,7 +65,7 @@ describe('Injector: Vault', () => {
     const service = TestBed.inject(TestFeatureCellService);
 
     // Inject vault manually again using token
-    const token = getOrCreateFeatureCellToken<TestVault>('testFeature', false);
+    const token = getOrCreateFeatureCellToken<TestVault>('testFeature', true);
     const vaultFromToken = TestBed.inject(token);
 
     expect(vaultFromToken).toBe(service.vault);

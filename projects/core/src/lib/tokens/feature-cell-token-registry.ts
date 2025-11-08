@@ -1,14 +1,15 @@
-import { getNgVaultConfig } from '../config/ng-vault.config';
+import { _isTestEnvironment } from '@angular/cdk/platform';
 import { FEATURE_CELL_TOKEN } from './feature-cell-token';
 
 const _featureCellTokens = new Map<string, ReturnType<typeof FEATURE_CELL_TOKEN>>();
+let devMode = false;
 
 export function getOrCreateFeatureCellToken<T>(key: string, allowExisting: boolean) {
-  const { strict } = getNgVaultConfig();
+  const strict = true;
 
   if (_featureCellTokens.has(key)) {
     // istanbul ignore next
-    if (strict && !allowExisting) {
+    if (strict && !allowExisting && !devMode) {
       const existing = _featureCellTokens.get(key);
       throw new Error(
         `[NgVault] Duplicate FeatureCell key detected: "${key}".\n` +
@@ -21,4 +22,11 @@ export function getOrCreateFeatureCellToken<T>(key: string, allowExisting: boole
   }
 
   return _featureCellTokens.get(key)!;
+}
+
+//
+export function setGetOrCreateFeatureCellTokenDevMode() {
+  /* istanbul ignore next */
+  if (!_isTestEnvironment()) return;
+  _featureCellTokens.clear();
 }

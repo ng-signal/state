@@ -3,6 +3,7 @@ import { HttpTestingController, provideHttpClientTesting } from '@angular/common
 import { ApplicationRef, Injector, provideZonelessChangeDetection, runInInjectionContext, signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { ResourceStateError, VaultBehaviorContext } from '@ngvault/shared-models';
+import { provideVaultTesting } from '@ngvault/testing';
 import { of, throwError } from 'rxjs';
 import { withCoreObservableBehavior } from './with-core-observable.behavior';
 
@@ -21,7 +22,12 @@ describe('Behavior: withCoreObservableBehavior', () => {
 
   beforeEach(() => {
     TestBed.configureTestingModule({
-      providers: [provideHttpClient(), provideHttpClientTesting(), provideZonelessChangeDetection()]
+      providers: [
+        provideVaultTesting(),
+        provideHttpClient(),
+        provideHttpClientTesting(),
+        provideZonelessChangeDetection()
+      ]
     });
 
     injector = TestBed.inject(Injector);

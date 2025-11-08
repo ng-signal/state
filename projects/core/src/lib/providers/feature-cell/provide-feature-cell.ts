@@ -1,4 +1,5 @@
 import { DestroyRef, Injector, Provider, Type, computed, inject, signal } from '@angular/core';
+import { getOrCreateFeatureCellToken } from '@ngvault/core';
 import {
   FeatureCell,
   NgVaultBehaviorLifecycleService,
@@ -11,12 +12,11 @@ import { VaultDataType } from '@ngvault/shared-models/types/vault-data.type';
 import { VaultStateInputType } from '@ngvault/shared-models/types/vault-state-input.type';
 import { VaultStateType } from '@ngvault/shared-models/types/vault-state.type';
 import { Subject } from 'rxjs';
-import { withCoreHttpResourceStateBehavior } from './behaviors/core-http-resource-state/with-core-http-resource-state.behavior';
-import { withCoreObservableBehavior } from './behaviors/core-observable/with-core-observable.behavior';
-import { withCoreStateBehavior } from './behaviors/core-state/with-core-state.behavior';
-import { FEATURE_CELL_REGISTRY } from './constants/feature-cell-registry.constant';
-import { FeatureCellDescriptorModel } from './models/feature-cell-descriptor.model';
-import { getOrCreateFeatureCellToken } from './tokens/feature-cell-token-registry';
+import { withCoreHttpResourceStateBehavior } from '../../behaviors/core-http-resource-state/with-core-http-resource-state.behavior';
+import { withCoreObservableBehavior } from '../../behaviors/core-observable/with-core-observable.behavior';
+import { withCoreStateBehavior } from '../../behaviors/core-state/with-core-state.behavior';
+import { FeatureCellDescriptorModel } from '../../models/feature-cell-descriptor.model';
+import { FEATURE_CELL_REGISTRY } from '../../tokens/feature-cell-registry.token';
 
 export function provideFeatureCell<Service, T>(
   service: Type<Service>,
@@ -98,7 +98,6 @@ export function provideFeatureCell<Service, T>(
         _destroyed$.complete();
 
         _reset();
-
         _behaviorRunner.onDestroy(_coreId, featureCellDescriptor.key, ctx);
       };
 

@@ -6,5 +6,10 @@
     "outDir": "../../out-tsc/spec",
     "types": ["jasmine"]
   },
-  "include": ["src/**/*.ts", "src/**/*.spec.ts"]
+  "include": [
+    "src/**/*.ts",
+    "src/**/*.spec.ts",
+    "../core/src/lib/services/ngvault-async-queue.spec.ts",
+    "../core/src/lib/services/ngvault-async-queue.ts"
+  ]
 }

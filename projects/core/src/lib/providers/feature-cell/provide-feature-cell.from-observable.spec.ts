@@ -3,7 +3,7 @@ import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { Injector, provideZonelessChangeDetection, runInInjectionContext, signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { FeatureCell, VaultSignalRef } from '@ngvault/shared-models';
-import { flushNgVaultQueue, getTestBehavior, withTestBehavior } from '@ngvault/testing';
+import { flushNgVaultQueue, getTestBehavior, provideVaultTesting, withTestBehavior } from '@ngvault/testing';
 import { Subject } from 'rxjs';
 import { provideFeatureCell } from './provide-feature-cell';
 
@@ -22,7 +22,12 @@ describe('ResourceVaultModel (setState, patchState, fromObservable)', () => {
     calls.length = 0;
 
     TestBed.configureTestingModule({
-      providers: [provideHttpClient(), provideHttpClientTesting(), provideZonelessChangeDetection()]
+      providers: [
+        provideVaultTesting(),
+        provideHttpClient(),
+        provideHttpClientTesting(),
+        provideZonelessChangeDetection()
+      ]
     });
 
     const injector = TestBed.inject(Injector);
@@ -165,13 +170,12 @@ describe('ResourceVaultModel (setState, patchState, fromObservable)', () => {
 
     expect(getTestBehavior().getEvents()).toEqual([
       'onInit:http',
+      'onInit:NgVault::Core::State',
+      'onInit:NgVault::CoreHttpResource::State',
       'onInit:NgVault::Core::FromObservable',
       'onLoad:NgVault::Core::FromObservable',
       'onSet:NgVault::Core::FromObservable:{"isLoading":false,"value":[],"error":null,"hasValue":true}',
-      'onDispose:NgVault::Core::FromObservable',
-      'onInit:NgVault::Core::State',
-      'onInit:NgVault::CoreHttpResource::State',
-      'onInit:NgVault::Core::FromObservable'
+      'onDispose:NgVault::Core::FromObservable'
     ]);
   });
 });

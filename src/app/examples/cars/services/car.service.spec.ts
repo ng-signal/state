@@ -5,6 +5,7 @@ import { CarService } from './car.service';
 import { provideHttpClient } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { provideFeatureCell } from '@ngvault/core';
+import { provideVaultTesting } from '@ngvault/testing';
 import { getCarData } from 'src/testing/data/car.data';
 
 describe('Service: Car State', () => {
@@ -15,6 +16,7 @@ describe('Service: Car State', () => {
     TestBed.resetTestingModule();
     await TestBed.configureTestingModule({
       providers: [
+        provideVaultTesting(),
         provideHttpClient(),
         provideHttpClientTesting(),
         provideZonelessChangeDetection(),

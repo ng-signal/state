@@ -1,5 +1,6 @@
 // projects/core/src/lib/services/vault-behavior-lifecycle.service.ts
-import { Injector } from '@angular/core';
+import { inject, Injector } from '@angular/core';
+import { NGVAULT_QUEUE } from '@ngvault/core/tokens/ngvault-queue.token';
 import { PROTECTED_FEATURE_CELL_KEYS } from '../constants/protected-feature-cell-keys.constant';
 import { VaultBehaviorFactoryContext } from '../contexts/vault-behavior-factory.context';
 import { VaultBehaviorContext } from '../contexts/vault-behavior.context';
@@ -9,7 +10,6 @@ import { FeatureCell } from '../models/feature-cell.model';
 import { VaultBehaviorFactory } from '../types/vault-behavior-factory.type';
 import { VaultBehaviorTypeOrder } from '../types/vault-behavior.type';
 import { validateNgVaultBehaviorKey } from '../utils/define-ngvault-behavior-key.util';
-import { NgVaultAsyncQueue } from './ngvault-async-queue';
 
 class VaultBehaviorRunnerClass implements VaultBehaviorRunner {
   readonly #typeOrder = [...VaultBehaviorTypeOrder];
@@ -18,7 +18,7 @@ class VaultBehaviorRunnerClass implements VaultBehaviorRunner {
   readonly #behaviorIds = new Map<VaultBehavior['type'], string>();
   readonly #idToType = new Map<string, VaultBehavior['type']>();
   #initialized = false;
-  #queue = new NgVaultAsyncQueue();
+  #queue = inject(NGVAULT_QUEUE);
 
   #initializeBehaviorIds(): void {
     const gen = () =>
@@ -251,8 +251,6 @@ class VaultBehaviorRunnerClass implements VaultBehaviorRunner {
           configurable: true
         });
       }
-
-      behavior.onInit(behavior.key!, cell.key!, cell.ctx!);
     }
   }
 

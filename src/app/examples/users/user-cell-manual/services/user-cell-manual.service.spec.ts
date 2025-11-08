@@ -6,7 +6,7 @@ import { UserCellManualService } from './user-cell-manual.service';
 import { provideHttpClient } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { provideFeatureCell } from '@ngvault/core';
-import { flushNgVaultQueue } from '@ngvault/testing';
+import { flushNgVaultQueue, provideVaultTesting } from '@ngvault/testing';
 
 describe('Service: User Cell Manual', () => {
   let service: UserCellManualService;
@@ -16,6 +16,7 @@ describe('Service: User Cell Manual', () => {
     TestBed.resetTestingModule();
     await TestBed.configureTestingModule({
       providers: [
+        provideVaultTesting(),
         provideHttpClient(),
         provideHttpClientTesting(),
         provideZonelessChangeDetection(),

@@ -22,6 +22,7 @@ import { resourceError } from '../../utils/resource-error.util';
 class CoreHttpResourceStateBehavior<T> implements VaultBehavior<T> {
   public readonly critical = true;
   public readonly key = defineNgVaultBehaviorKey('CoreHttpResource', 'State');
+  #destroyed = false;
 
   constructor(
     readonly behaviorId: string,
@@ -40,6 +41,10 @@ class CoreHttpResourceStateBehavior<T> implements VaultBehavior<T> {
 
       runInInjectionContext(this.injector, () => {
         effect(() => {
+          if (this.#destroyed) {
+            this.#destroyed = false;
+            return;
+          }
           isLoading?.set(resource.isLoading());
           try {
             if (resource.value() !== undefined) {
@@ -65,6 +70,11 @@ class CoreHttpResourceStateBehavior<T> implements VaultBehavior<T> {
 
       runInInjectionContext(this.injector, () => {
         effect(() => {
+          if (this.#destroyed) {
+            this.#destroyed = false;
+            return;
+          }
+
           isLoading?.set(resource.isLoading());
 
           // Use queueMicrotask to avoid signal reentrancy
@@ -74,7 +84,6 @@ class CoreHttpResourceStateBehavior<T> implements VaultBehavior<T> {
               const curr = value?.();
               if (next !== undefined) {
                 applyNgVaultValueMerge(ctx, curr, next);
-
                 error?.set(null);
                 ctx.behaviorRunner?.onPatch(this.behaviorId, this.key, ctx);
               }
@@ -88,6 +97,22 @@ class CoreHttpResourceStateBehavior<T> implements VaultBehavior<T> {
 
       devWarnExperimentalHttpResource();
     }
+  }
+
+  /**
+   * Cleans up any active effects or async subscriptions when the cell is destroyed.
+   */
+  onReset(key: string, ctx: VaultBehaviorContext<T>): void {
+    this.#destroyed = true;
+    ctx.behaviorRunner?.onReset(this.behaviorId, key, ctx);
+  }
+
+  /**
+   * Cleans up any active effects or async subscriptions when the cell is destroyed.
+   */
+  onDestroy(key: string, ctx: VaultBehaviorContext<T>): void {
+    this.#destroyed = true;
+    ctx.behaviorRunner?.onDestroy(this.behaviorId, key, ctx);
   }
 }
 

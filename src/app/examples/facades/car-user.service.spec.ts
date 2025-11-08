@@ -3,6 +3,7 @@ import { HttpTestingController, provideHttpClientTesting } from '@angular/common
 import { provideZonelessChangeDetection } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { provideFeatureCell } from '@ngvault/core';
+import { provideVaultTesting } from '@ngvault/testing';
 import { CarService } from '../cars/services/car.service';
 import { CarModel } from '../models/car.model';
 import { UserModel } from '../models/user.model';
@@ -11,33 +12,30 @@ import { UserCarFacadeService } from './car-user.service';
 
 describe('UserCarFacadeService (integration)', () => {
   let service: UserCarFacadeService;
-  let http: HttpTestingController;
-
-  const NgVault_STATES = [
-    provideFeatureCell(UserCellManualService, { key: 'userManual', initial: null }),
-    provideFeatureCell(CarService, { key: 'cars', initial: null })
-  ];
+  let httpMock: HttpTestingController;
 
   beforeEach(() => {
     TestBed.configureTestingModule({
       imports: [],
       providers: [
+        provideVaultTesting(),
         provideHttpClient(),
         provideHttpClientTesting(),
         provideZonelessChangeDetection(),
         UserCarFacadeService,
         CarService,
         UserCellManualService,
-        ...NgVault_STATES
+        provideFeatureCell(UserCellManualService, { key: 'userManual', initial: null }),
+        provideFeatureCell(CarService, { key: 'cars', initial: null })
       ]
     });
 
     service = TestBed.inject(UserCarFacadeService);
-    http = TestBed.inject(HttpTestingController);
+    httpMock = TestBed.inject(HttpTestingController);
   });
 
   afterEach(() => {
-    http.verify();
+    httpMock.verify();
   });
 
   it('should initialize with empty state', () => {
@@ -63,11 +61,11 @@ describe('UserCarFacadeService (integration)', () => {
     service.loadAll();
 
     // Users request
-    const userReq = http.expectOne('/api/users');
+    const userReq = httpMock.expectOne('/api/users');
     expect(userReq.request.method).toBe('GET');
 
     // Cars request
-    const carReq = http.expectOne('/api/cars');
+    const carReq = httpMock.expectOne('/api/cars');
     expect(carReq.request.method).toBe('GET');
 
     // Respond in any order — both effects should merge reactively
@@ -103,9 +101,9 @@ describe('UserCarFacadeService (integration)', () => {
   it('should handle missing users or cars gracefully', (done) => {
     service.loadAll();
 
-    const userReq = http.expectOne('/api/users');
+    const userReq = httpMock.expectOne('/api/users');
     userReq.flush([]); // no users
-    const carReq = http.expectOne('/api/cars');
+    const carReq = httpMock.expectOne('/api/cars');
     carReq.flush([{ id: '1', year: 2022, make: 'Tesla', model: 'Model S' }]);
 
     setTimeout(() => {

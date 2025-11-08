@@ -34,7 +34,9 @@ describe('Behavior: withCoreHttpResourcceState: Set', () => {
       behaviorRunner: {
         onInit: jasmine.createSpy('onInit'),
         onSet: jasmine.createSpy('onSet'),
-        onError: jasmine.createSpy('onError')
+        onError: jasmine.createSpy('onError'),
+        onReset: jasmine.createSpy('onReset'),
+        onDestroy: jasmine.createSpy('onDestroy')
       }
     };
 
@@ -48,255 +50,417 @@ describe('Behavior: withCoreHttpResourcceState: Set', () => {
     mockBackend.verify();
   });
 
-  describe('setState', () => {
-    it('should have default attributes', () => {
-      behavior.onInit('fake-key', 'fake-service-name', ctx);
-      expect(ctx.behaviorRunner.onInit).toHaveBeenCalled();
-    });
+  it('should have default attributes', () => {
+    behavior.onInit('fake-key', 'fake-service-name', ctx);
+    expect(ctx.behaviorRunner.onInit).toHaveBeenCalled();
+  });
 
-    it('should have default attributes', () => {
-      expect(behavior.critical).toBeTrue();
-      expect(behavior.key).toBe('NgVault::CoreHttpResource::State');
-      expect(behavior.type).toBe('state');
-    });
+  it('should have default attributes', () => {
+    expect(behavior.critical).toBeTrue();
+    expect(behavior.key).toBe('NgVault::CoreHttpResource::State');
+    expect(behavior.type).toBe('state');
+  });
 
-    it('should reactively mirror HttpResourceRef signals via setState()', async () => {
-      resetWarnExperimentalHttpResourceTestingOnly();
-      // Step 1: baseline state
-      ctx.value.set([{ id: 1, name: 'Ada' }]);
-      ctx.isLoading.set(false);
-      ctx.error.set(null);
-      ctx.next = Object({ loading: false, value: [{ id: 1, name: 'Ada' }], error: null });
+  it('should reactively mirror HttpResourceRef signals via setState()', async () => {
+    resetWarnExperimentalHttpResourceTestingOnly();
+    // Step 1: baseline state
+    ctx.value.set([{ id: 1, name: 'Ada' }]);
+    ctx.isLoading.set(false);
+    ctx.error.set(null);
+    ctx.next = Object({ loading: false, value: [{ id: 1, name: 'Ada' }], error: null });
 
-      expect(ctx.isLoading()).toBeFalse();
-      expect(ctx.value()).toEqual([{ id: 1, name: 'Ada' }]);
-      expect(ctx.error()).toBeNull();
+    expect(ctx.isLoading()).toBeFalse();
+    expect(ctx.value()).toEqual([{ id: 1, name: 'Ada' }]);
+    expect(ctx.error()).toBeNull();
 
-      // Step 2: create reactive HttpResourceRef
-      const id = signal(0);
-      let response = httpResource<TestModel[]>(() => `/data/${id()}`, { injector });
+    // Step 2: create reactive HttpResourceRef
+    const id = signal(0);
+    let response = httpResource<TestModel[]>(() => `/data/${id()}`, { injector });
 
-      // Inject resource into context
-      ctx.next = response;
+    // Inject resource into context
+    ctx.next = response;
 
-      // Step 3: trigger onSet
-      behavior.onSet('vault', ctx);
-      TestBed.tick();
+    // Step 3: trigger onSet
+    behavior.onSet('vault', ctx);
+    TestBed.tick();
 
-      expect(ctx.isLoading()).toBeTrue();
-      expect(ctx.value()).toEqual([{ id: 1, name: 'Ada' }]);
-      expect(ctx.error()).toBeNull();
-      expect(ctx.behaviorRunner.onSet).toHaveBeenCalledTimes(0); // not yet until value emits
+    expect(ctx.isLoading()).toBeTrue();
+    expect(ctx.value()).toEqual([{ id: 1, name: 'Ada' }]);
+    expect(ctx.error()).toBeNull();
+    expect(ctx.behaviorRunner.onSet).toHaveBeenCalledTimes(0); // not yet until value emits
 
-      // Step 4: simulate data response
-      const firstRequest = mockBackend.expectOne('/data/0');
-      firstRequest.flush([Object({ id: 1, name: 'Ada' }), Object({ id: 2, name: 'Grace' })]);
+    // Step 4: simulate data response
+    const firstRequest = mockBackend.expectOne('/data/0');
+    firstRequest.flush([Object({ id: 1, name: 'Ada' }), Object({ id: 2, name: 'Grace' })]);
 
-      await TestBed.inject(ApplicationRef).whenStable();
+    await TestBed.inject(ApplicationRef).whenStable();
 
-      expect(ctx.isLoading()).toBeFalse();
-      expect(ctx.value()).toEqual([
-        { id: 1, name: 'Ada' },
-        { id: 2, name: 'Grace' }
-      ]);
-      expect(ctx.error()).toBeNull();
-      expect(ctx.behaviorRunner.onSet).toHaveBeenCalled();
+    expect(ctx.isLoading()).toBeFalse();
+    expect(ctx.value()).toEqual([
+      { id: 1, name: 'Ada' },
+      { id: 2, name: 'Grace' }
+    ]);
+    expect(ctx.error()).toBeNull();
+    expect(ctx.behaviorRunner.onSet).toHaveBeenCalled();
 
-      // Step 4: simulate data response
-      id.set(222);
+    // Step 4: simulate data response
+    id.set(222);
 
-      behavior.onSet('vault', ctx);
-      TestBed.tick();
+    behavior.onSet('vault', ctx);
+    TestBed.tick();
 
-      const testRequest = mockBackend.expectOne('/data/222');
-      testRequest.flush([Object({ id: 3, name: 'Brian' })]);
+    const testRequest = mockBackend.expectOne('/data/222');
+    testRequest.flush([Object({ id: 3, name: 'Brian' })]);
 
-      await TestBed.inject(ApplicationRef).whenStable();
+    await TestBed.inject(ApplicationRef).whenStable();
 
-      expect(ctx.isLoading()).toBeFalse();
-      expect(ctx.value()).toEqual([{ id: 3, name: 'Brian' }]);
-      expect(ctx.error()).toBeNull();
-      expect(ctx.behaviorRunner.onSet).toHaveBeenCalled();
+    expect(ctx.isLoading()).toBeFalse();
+    expect(ctx.value()).toEqual([{ id: 3, name: 'Brian' }]);
+    expect(ctx.error()).toBeNull();
+    expect(ctx.behaviorRunner.onSet).toHaveBeenCalled();
 
-      response.reload();
-      TestBed.tick();
+    response.reload();
+    TestBed.tick();
 
-      expect(ctx.isLoading()).toBeTrue();
-      expect(ctx.error()).toBeNull();
-      expect(ctx.value()).toEqual([{ id: 3, name: 'Brian' }]);
+    expect(ctx.isLoading()).toBeTrue();
+    expect(ctx.error()).toBeNull();
+    expect(ctx.value()).toEqual([{ id: 3, name: 'Brian' }]);
 
-      // Step 6: second response completes
-      const secondRequest = mockBackend.expectOne('/data/222');
-      secondRequest.flush([Object({ id: 3, name: 'Brian' })]);
+    // Step 6: second response completes
+    const secondRequest = mockBackend.expectOne('/data/222');
+    secondRequest.flush([Object({ id: 3, name: 'Brian' })]);
 
-      await TestBed.inject(ApplicationRef).whenStable();
+    await TestBed.inject(ApplicationRef).whenStable();
 
-      expect(ctx.value()).toEqual([{ id: 3, name: 'Brian' }]);
-      expect(ctx.isLoading()).toBeFalse();
-      expect(ctx.error()).toBeNull();
+    expect(ctx.value()).toEqual([{ id: 3, name: 'Brian' }]);
+    expect(ctx.isLoading()).toBeFalse();
+    expect(ctx.error()).toBeNull();
 
-      // Step 7: simulate HTTP error state
-      response.reload();
-      TestBed.tick();
+    // Step 7: simulate HTTP error state
+    response.reload();
+    TestBed.tick();
 
-      const thirdRequest = mockBackend.expectOne('/data/222');
-      thirdRequest.flush('Internal Error', { status: 500, statusText: 'Server Error' });
+    const thirdRequest = mockBackend.expectOne('/data/222');
+    thirdRequest.flush('Internal Error', { status: 500, statusText: 'Server Error' });
 
-      expect(ctx.error()).toBeNull();
-      expect(ctx.value()).toEqual([{ id: 3, name: 'Brian' }]);
-      expect(ctx.isLoading()).toBeTrue();
-      await TestBed.inject(ApplicationRef).whenStable();
+    expect(ctx.error()).toBeNull();
+    expect(ctx.value()).toEqual([{ id: 3, name: 'Brian' }]);
+    expect(ctx.isLoading()).toBeTrue();
+    await TestBed.inject(ApplicationRef).whenStable();
 
-      expect(ctx.behaviorRunner.onError).toHaveBeenCalled();
-      expect(ctx.error()).toEqual(
-        Object({
-          message: 'Http failure response for /data/222: 500 Server Error',
-          status: 500,
-          statusText: 'Server Error',
-          details: 'Internal Error'
-        })
-      );
-      expect(ctx.isLoading()).toBeFalse();
-      expect(ctx.value()).toEqual([Object({ id: 3, name: 'Brian' })]);
-
-      // Step 8: verify experimental warning
-      expect(warnSpy).toHaveBeenCalledWith(
-        '[NgVault] Experimental HttpResource support enabled — may change in Angular 21+.'
-      );
-
-      expect(warnSpy).toHaveBeenCalledTimes(1);
-    });
-
-    it('should react when underlying HttpResourceRef signals reloads', async () => {
-      // Step 1: initialize the HttpResourceRef
-      const id = signal(0);
-      const response = httpResource<TestModel[]>(() => `/data/${id()}`, { injector });
-
-      // Inject the HttpResourceRef into the behavior context
-      ctx.next = response;
-
-      // Trigger the behavior
-      behavior.onSet('vault', ctx);
-      TestBed.tick();
-
-      // Step 2: flush first HTTP request
-      const firstRequest = mockBackend.expectOne('/data/0');
-      firstRequest.flush([{ id: 1, name: 'Ada' }]);
-      await TestBed.inject(ApplicationRef).whenStable();
-
-      // Assertions after first response
-      expect(ctx.isLoading()).toBeFalse();
-      expect(ctx.value()).toEqual([{ id: 1, name: 'Ada' }]);
-      expect(ctx.error()).toBeNull();
-      expect(ctx.behaviorRunner.onSet).toHaveBeenCalled();
-
-      // Step 3: simulate reload by changing signal (id = 1)
-      id.set(1);
-      TestBed.tick();
-
-      // Expect second request due to reactive reload
-      const secondRequest = mockBackend.expectOne('/data/1');
-      secondRequest.flush([{ id: 2, name: 'Grace' }]);
-      await TestBed.inject(ApplicationRef).whenStable();
-
-      // Assertions after second response
-      expect(ctx.isLoading()).toBeFalse();
-      expect(ctx.value()).toEqual([{ id: 2, name: 'Grace' }]);
-      expect(ctx.error()).toBeNull();
-      expect(ctx.behaviorRunner.onSet).toHaveBeenCalledTimes(2);
-    });
-
-    it('should capture HttpResourceRef errors reactively', async () => {
-      // Step 1: create HttpResourceRef
-      const response = httpResource<TestModel[]>(() => '/fail', { injector });
-
-      // Inject resource into context
-      ctx.next = response;
-
-      // Step 2: trigger behavior lifecycle
-      behavior.onSet('vault', ctx);
-      TestBed.tick();
-
-      // Step 3: simulate server error response
-      const req = mockBackend.expectOne('/fail');
-      req.flush('Internal Error', { status: 500, statusText: 'Server Error' });
-
-      await TestBed.inject(ApplicationRef).whenStable();
-
-      // Step 4: verify reactive error propagation
-      expect(ctx.error()).toEqual({
-        message: 'Http failure response for /fail: 500 Server Error',
+    expect(ctx.behaviorRunner.onError).toHaveBeenCalled();
+    expect(ctx.error()).toEqual(
+      Object({
+        message: 'Http failure response for /data/222: 500 Server Error',
         status: 500,
         statusText: 'Server Error',
         details: 'Internal Error'
-      });
-      expect(ctx.isLoading()).toBeFalse();
+      })
+    );
+    expect(ctx.isLoading()).toBeFalse();
+    expect(ctx.value()).toEqual([Object({ id: 3, name: 'Brian' })]);
 
-      // When error occurs, value signal should remain stable
-      expect(ctx.value()).toBeUndefined();
-      expect(ctx.behaviorRunner.onError).toHaveBeenCalled();
+    // Step 8: verify experimental warning
+    expect(warnSpy).toHaveBeenCalledWith(
+      '[NgVault] Experimental HttpResource support enabled — may change in Angular 21+.'
+    );
+
+    expect(warnSpy).toHaveBeenCalledTimes(1);
+  });
+
+  it('should react when underlying HttpResourceRef signals reloads', async () => {
+    // Step 1: initialize the HttpResourceRef
+    const id = signal(0);
+    const response = httpResource<TestModel[]>(() => `/data/${id()}`, { injector });
+
+    // Inject the HttpResourceRef into the behavior context
+    ctx.next = response;
+
+    // Trigger the behavior
+    behavior.onSet('vault', ctx);
+    TestBed.tick();
+
+    // Step 2: flush first HTTP request
+    const firstRequest = mockBackend.expectOne('/data/0');
+    firstRequest.flush([{ id: 1, name: 'Ada' }]);
+    await TestBed.inject(ApplicationRef).whenStable();
+
+    // Assertions after first response
+    expect(ctx.isLoading()).toBeFalse();
+    expect(ctx.value()).toEqual([{ id: 1, name: 'Ada' }]);
+    expect(ctx.error()).toBeNull();
+    expect(ctx.behaviorRunner.onSet).toHaveBeenCalled();
+
+    // Step 3: simulate reload by changing signal (id = 1)
+    id.set(1);
+    TestBed.tick();
+
+    // Expect second request due to reactive reload
+    const secondRequest = mockBackend.expectOne('/data/1');
+    secondRequest.flush([{ id: 2, name: 'Grace' }]);
+    await TestBed.inject(ApplicationRef).whenStable();
+
+    // Assertions after second response
+    expect(ctx.isLoading()).toBeFalse();
+    expect(ctx.value()).toEqual([{ id: 2, name: 'Grace' }]);
+    expect(ctx.error()).toBeNull();
+    expect(ctx.behaviorRunner.onSet).toHaveBeenCalledTimes(2);
+  });
+
+  it('should capture HttpResourceRef errors reactively', async () => {
+    // Step 1: create HttpResourceRef
+    const response = httpResource<TestModel[]>(() => '/fail', { injector });
+
+    // Inject resource into context
+    ctx.next = response;
+
+    // Step 2: trigger behavior lifecycle
+    behavior.onSet('vault', ctx);
+    TestBed.tick();
+
+    // Step 3: simulate server error response
+    const req = mockBackend.expectOne('/fail');
+    req.flush('Internal Error', { status: 500, statusText: 'Server Error' });
+
+    await TestBed.inject(ApplicationRef).whenStable();
+
+    // Step 4: verify reactive error propagation
+    expect(ctx.error()).toEqual({
+      message: 'Http failure response for /fail: 500 Server Error',
+      status: 500,
+      statusText: 'Server Error',
+      details: 'Internal Error'
     });
+    expect(ctx.isLoading()).toBeFalse();
 
-    it('should reset vault state when setState(null) is called after HttpResourceRef', async () => {
-      // Step 1: initialize HttpResourceRef
-      const response = httpResource<TestModel[]>(() => '/data', { injector });
+    // When error occurs, value signal should remain stable
+    expect(ctx.value()).toBeUndefined();
+    expect(ctx.behaviorRunner.onError).toHaveBeenCalled();
+  });
 
-      // Bind resource to behavior context
-      ctx.next = response;
+  it('should reset vault state when setState(null) is called after HttpResourceRef', async () => {
+    // Step 1: initialize HttpResourceRef
+    const response = httpResource<TestModel[]>(() => '/data', { injector });
 
-      // Step 2: trigger onSet lifecycle
-      behavior.onSet('vault', ctx);
-      TestBed.tick();
+    // Bind resource to behavior context
+    ctx.next = response;
 
-      // Simulate first backend response
-      mockBackend.expectOne('/data').flush([{ id: 1, name: 'Ada' }]);
-      await TestBed.inject(ApplicationRef).whenStable();
+    // Step 2: trigger onSet lifecycle
+    behavior.onSet('vault', ctx);
+    TestBed.tick();
 
-      // Verify reactive value
-      expect(ctx.value()).toEqual([{ id: 1, name: 'Ada' }]);
-      expect(ctx.isLoading()).toBeFalse();
-      expect(ctx.error()).toBeNull();
+    // Simulate first backend response
+    mockBackend.expectOne('/data').flush([{ id: 1, name: 'Ada' }]);
+    await TestBed.inject(ApplicationRef).whenStable();
 
-      // Step 3: simulate reset (setState(undefined))
-      ctx.next = undefined as any;
-      behavior.onSet('vault', ctx);
-      TestBed.tick();
+    // Verify reactive value
+    expect(ctx.value()).toEqual([{ id: 1, name: 'Ada' }]);
+    expect(ctx.isLoading()).toBeFalse();
+    expect(ctx.error()).toBeNull();
 
-      // Verify reset state
-      expect(ctx.value()).toEqual([{ id: 1, name: 'Ada' }]);
-      expect(ctx.isLoading()).toBeFalse();
-      expect(ctx.error()).toBeNull();
-    });
+    // Step 3: simulate reset (setState(undefined))
+    ctx.next = undefined as any;
+    behavior.onSet('vault', ctx);
+    TestBed.tick();
 
-    it('should emit lifecycle events during HttpResourceRef transitions', async () => {
-      // Step 1: initialize HttpResourceRef
-      const response = httpResource<TestModel[]>(() => '/data', { injector });
+    // Verify reset state
+    expect(ctx.value()).toEqual([{ id: 1, name: 'Ada' }]);
+    expect(ctx.isLoading()).toBeFalse();
+    expect(ctx.error()).toBeNull();
+  });
 
-      // Bind to context
-      ctx.next = response;
+  it('should emit lifecycle events during HttpResourceRef transitions', async () => {
+    // Step 1: initialize HttpResourceRef
+    const response = httpResource<TestModel[]>(() => '/data', { injector });
 
-      // Step 2: trigger onSet
-      behavior.onSet('vault', ctx);
-      TestBed.tick();
+    // Bind to context
+    ctx.next = response;
 
-      // Step 3: flush first response
-      mockBackend.expectOne('/data').flush([{ id: 1, name: 'Ada' }]);
-      await TestBed.inject(ApplicationRef).whenStable();
+    // Step 2: trigger onSet
+    behavior.onSet('vault', ctx);
+    TestBed.tick();
 
-      // Verify reactive update
-      expect(ctx.value()).toEqual([{ id: 1, name: 'Ada' }]);
-      expect(ctx.isLoading()).toBeFalse();
-      expect(ctx.error()).toBeNull();
+    // Step 3: flush first response
+    mockBackend.expectOne('/data').flush([{ id: 1, name: 'Ada' }]);
+    await TestBed.inject(ApplicationRef).whenStable();
 
-      // Step 4: simulate reset (as vault.setState(undefined))
-      ctx.next = undefined as any;
-      behavior.onSet('vault', ctx);
-      TestBed.tick();
+    // Verify reactive update
+    expect(ctx.value()).toEqual([{ id: 1, name: 'Ada' }]);
+    expect(ctx.isLoading()).toBeFalse();
+    expect(ctx.error()).toBeNull();
 
-      // Verify reset state
-      expect(ctx.value()).toEqual([{ id: 1, name: 'Ada' }]);
-      expect(ctx.isLoading()).toBeFalse();
-      expect(ctx.error()).toBeNull();
-    });
+    // Step 4: simulate reset (as vault.setState(undefined))
+    ctx.next = undefined as any;
+    behavior.onSet('vault', ctx);
+    TestBed.tick();
+
+    // Verify reset state
+    expect(ctx.value()).toEqual([{ id: 1, name: 'Ada' }]);
+    expect(ctx.isLoading()).toBeFalse();
+    expect(ctx.error()).toBeNull();
+  });
+
+  it('should handle a reset', async () => {
+    // Step 1: baseline state
+    ctx.value.set([{ id: 1, name: 'Ada' }]);
+    ctx.isLoading.set(false);
+    ctx.error.set(null);
+
+    expect(ctx.isLoading()).toBeFalse();
+    expect(ctx.value()).toEqual([{ id: 1, name: 'Ada' }]);
+    expect(ctx.error()).toBeNull();
+
+    // Step 2: create reactive HttpResourceRef
+    const id = signal(0);
+    const response = httpResource<TestModel[]>(() => `/data/${id()}`, { injector });
+
+    // Inject resource into context for setting
+    ctx.next = response;
+
+    // Step 3: trigger onSet
+    behavior.onSet('vault', ctx);
+    TestBed.tick();
+
+    expect(ctx.isLoading()).toBeTrue();
+    expect(ctx.value()).toEqual([{ id: 1, name: 'Ada' }]);
+    expect(ctx.error()).toBeNull();
+
+    mockBackend.expectOne('/data/0').flush({ age: 31 });
+    await TestBed.inject(ApplicationRef).whenStable();
+
+    expect(ctx.isLoading()).toBeFalse();
+    expect(ctx.value()).toEqual({ age: 31 });
+    expect(ctx.error()).toBeNull();
+    expect(ctx.behaviorRunner.onSet).toHaveBeenCalledTimes(1);
+    expect(ctx.behaviorRunner.onReset).toHaveBeenCalledTimes(0);
+    expect(ctx.behaviorRunner.onDestroy).toHaveBeenCalledTimes(0);
+
+    behavior.onReset('key', ctx);
+    TestBed.tick();
+
+    expect(ctx.isLoading()).toBeFalse();
+    expect(ctx.value()).toEqual({ age: 31 });
+    expect(ctx.error()).toBeNull();
+    expect(ctx.behaviorRunner.onSet).toHaveBeenCalledTimes(1);
+    expect(ctx.behaviorRunner.onReset).toHaveBeenCalledTimes(1);
+    expect(ctx.behaviorRunner.onDestroy).toHaveBeenCalledTimes(0);
+
+    // Inject resource into context for setting
+    ctx.next = response;
+
+    // Step 3: trigger onSet
+    behavior.onSet('vault', ctx);
+    TestBed.tick();
+
+    expect(ctx.isLoading()).toBeFalse();
+    expect(ctx.value()).toEqual({ age: 31 });
+    expect(ctx.error()).toBeNull();
+    expect(ctx.behaviorRunner.onSet).toHaveBeenCalledTimes(1);
+    expect(ctx.behaviorRunner.onReset).toHaveBeenCalledTimes(1);
+    expect(ctx.behaviorRunner.onDestroy).toHaveBeenCalledTimes(0);
+
+    id.set(1);
+    behavior.onSet('vault', ctx);
+    TestBed.tick();
+
+    expect(ctx.isLoading()).toBeTrue();
+    expect(ctx.value()).toEqual({ age: 31 });
+    expect(ctx.error()).toBeNull();
+
+    mockBackend.expectOne('/data/1').flush(32);
+    await TestBed.inject(ApplicationRef).whenStable();
+
+    expect(ctx.isLoading()).toBeFalse();
+    expect(ctx.value()).toEqual(32);
+    expect(ctx.error()).toBeNull();
+    expect(ctx.behaviorRunner.onSet).toHaveBeenCalledTimes(3);
+    expect(ctx.behaviorRunner.onReset).toHaveBeenCalledTimes(1);
+    expect(ctx.behaviorRunner.onDestroy).toHaveBeenCalledTimes(0);
+
+    expect(warnSpy).toHaveBeenCalledWith(
+      '[NgVault] Experimental HttpResource support enabled — may change in Angular 21+.'
+    );
+  });
+
+  it('should handle a destroy', async () => {
+    // Step 1: baseline state
+    ctx.value.set([{ id: 1, name: 'Ada' }]);
+    ctx.isLoading.set(false);
+    ctx.error.set(null);
+
+    expect(ctx.isLoading()).toBeFalse();
+    expect(ctx.value()).toEqual([{ id: 1, name: 'Ada' }]);
+    expect(ctx.error()).toBeNull();
+
+    // Step 2: create reactive HttpResourceRef
+    const id = signal(0);
+    const response = httpResource<TestModel[]>(() => `/data/${id()}`, { injector });
+
+    // Inject resource into context for setting
+    ctx.next = response;
+
+    // Step 3: trigger onSet
+    behavior.onSet('vault', ctx);
+    TestBed.tick();
+
+    expect(ctx.isLoading()).toBeTrue();
+    expect(ctx.value()).toEqual([{ id: 1, name: 'Ada' }]);
+    expect(ctx.error()).toBeNull();
+
+    mockBackend.expectOne('/data/0').flush({ age: 31 });
+    await TestBed.inject(ApplicationRef).whenStable();
+
+    expect(ctx.isLoading()).toBeFalse();
+    expect(ctx.value()).toEqual({ age: 31 });
+    expect(ctx.error()).toBeNull();
+    expect(ctx.behaviorRunner.onSet).toHaveBeenCalledTimes(1);
+    expect(ctx.behaviorRunner.onReset).toHaveBeenCalledTimes(0);
+    expect(ctx.behaviorRunner.onDestroy).toHaveBeenCalledTimes(0);
+
+    behavior.onDestroy('key', ctx);
+    TestBed.tick();
+
+    expect(ctx.isLoading()).toBeFalse();
+    expect(ctx.value()).toEqual({ age: 31 });
+    expect(ctx.error()).toBeNull();
+    expect(ctx.behaviorRunner.onSet).toHaveBeenCalledTimes(1);
+    expect(ctx.behaviorRunner.onReset).toHaveBeenCalledTimes(0);
+    expect(ctx.behaviorRunner.onDestroy).toHaveBeenCalledTimes(1);
+
+    // Inject resource into context for setting
+    ctx.next = response;
+
+    // Step 3: trigger onSet
+    behavior.onSet('vault', ctx);
+    TestBed.tick();
+
+    expect(ctx.isLoading()).toBeFalse();
+    expect(ctx.value()).toEqual({ age: 31 });
+    expect(ctx.error()).toBeNull();
+    expect(ctx.behaviorRunner.onSet).toHaveBeenCalledTimes(1);
+    expect(ctx.behaviorRunner.onReset).toHaveBeenCalledTimes(0);
+    expect(ctx.behaviorRunner.onDestroy).toHaveBeenCalledTimes(1);
+
+    id.set(1);
+    behavior.onSet('vault', ctx);
+    TestBed.tick();
+
+    expect(ctx.isLoading()).toBeTrue();
+    expect(ctx.value()).toEqual({ age: 31 });
+    expect(ctx.error()).toBeNull();
+
+    mockBackend.expectOne('/data/1').flush(32);
+    await TestBed.inject(ApplicationRef).whenStable();
+
+    expect(ctx.isLoading()).toBeFalse();
+    expect(ctx.value()).toEqual(32);
+    expect(ctx.error()).toBeNull();
+    expect(ctx.behaviorRunner.onSet).toHaveBeenCalledTimes(3);
+    expect(ctx.behaviorRunner.onReset).toHaveBeenCalledTimes(0);
+    expect(ctx.behaviorRunner.onDestroy).toHaveBeenCalledTimes(1);
+
+    expect(warnSpy).toHaveBeenCalledWith(
+      '[NgVault] Experimental HttpResource support enabled — may change in Angular 21+.'
+    );
   });
 });

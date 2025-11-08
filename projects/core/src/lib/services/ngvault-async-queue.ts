@@ -1,7 +1,6 @@
 import { signal } from '@angular/core';
+import { NgVaultQueueEvent, NgVaultQueueStats } from '@ngvault/shared-models';
 import { Subject } from 'rxjs';
-import { NgVaultQueueEvent } from '../models/ngvault-queue-event.model';
-import { NgVaultQueueStats } from '../models/ngvault-queue-stats.model';
 
 export class NgVaultAsyncQueue {
   #queue: (() => Promise<void> | void)[] = [];

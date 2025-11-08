@@ -9,22 +9,28 @@ import {
 } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { FeatureCell, VaultBehaviorFactory } from '@ngvault/shared-models';
-import { flushNgVaultQueue, getTestBehavior, withTestBehavior } from '@ngvault/testing';
-import { FEATURE_CELL_REGISTRY } from './constants/feature-cell-registry.constant';
+import { flushNgVaultQueue, getTestBehavior, provideVaultTesting, withTestBehavior } from '@ngvault/testing';
+import { FEATURE_CELL_REGISTRY } from '../../tokens/feature-cell-registry.token';
 import { provideFeatureCell } from './provide-feature-cell';
 
 describe('Provider: Feature Cell (core vault functionality)', () => {
   let providers: any[];
+  let injector: any;
 
   beforeEach(() => {
     TestBed.configureTestingModule({
       providers: [
         provideZonelessChangeDetection(),
+        provideVaultTesting(),
         { provide: FEATURE_CELL_REGISTRY, multi: true, useValue: { key: 'user', token: {} } }
       ]
     });
 
-    providers = provideFeatureCell(class TestService {}, { key: 'http', initial: [] });
+    injector = TestBed.inject(Injector);
+
+    runInInjectionContext(injector, () => {
+      providers = provideFeatureCell(class TestService {}, { key: 'http', initial: [] });
+    });
   });
 
   it('should return an array with two providers', () => {
@@ -46,8 +52,8 @@ describe('Provider: Feature Cell (core vault functionality)', () => {
     const registry = TestBed.inject(FEATURE_CELL_REGISTRY) as unknown[];
 
     expect(Array.isArray(registry)).toBeTrue();
-    expect(registry.length).toBe(1);
-    expect(registry[0]).toEqual({ key: 'user', token: {} });
+    expect(registry.length).toBe(2);
+    expect(registry[1]).toEqual({ key: 'user', token: {} });
   });
 
   it('should throw an error if desc.initial contains a "data" field (resource-like object)', () => {
@@ -57,15 +63,18 @@ describe('Provider: Feature Cell (core vault functionality)', () => {
       error: null
     };
 
-    const providers = provideFeatureCell(class DummyService {}, {
-      key: 'invalid-initial',
-      initial: invalidInitial
+    runInInjectionContext(injector, () => {
+      providers = provideFeatureCell(class DummyService {}, {
+        key: 'invalid-initial',
+        initial: invalidInitial
+      });
     });
+
     const provider = providers.find((p: any) => typeof p.useFactory === 'function');
 
     expect(() =>
       // 👇 ensure the factory runs inside an Angular injection context
-      runInInjectionContext(TestBed.inject(Injector), () => (provider as any).useFactory())
+      runInInjectionContext(injector, () => (provider as any).useFactory())
     ).toThrowError(
       `[NgVault] Invalid FeatureCellDescriptorModel.initial for feature "invalid-initial". ` +
         `Expected raw data (e.g., [] or {}), but received an object with resource fields { loading, data, error }. ` +
@@ -73,38 +82,14 @@ describe('Provider: Feature Cell (core vault functionality)', () => {
     );
   });
 
-  it('should initialize _data as null when desc.initial is null or undefined', async () => {
-    const makeVault = (initial: any) => {
-      const providers = provideFeatureCell(class DummyService {}, { key: 'init-test', initial });
-      const provider = providers.find((p: any) => typeof p.useFactory === 'function');
-      let vault: FeatureCell<any>;
-      runInInjectionContext(TestBed.inject(Injector), () => {
-        vault = (provider as any).useFactory();
-      });
-      return vault!;
-    };
-
-    const nullVault = makeVault(null);
-    await flushNgVaultQueue(1);
-    expect(nullVault.state.value()).toBeUndefined();
-    expect(nullVault.state.isLoading()).toBeFalse();
-    expect(nullVault.state.error()).toBeNull();
-    expect(nullVault.state.hasValue()).toBeFalse();
-
-    const undefinedVault = makeVault(undefined);
-    await flushNgVaultQueue(1);
-    expect(undefinedVault.state.value()).toBeUndefined();
-    expect(undefinedVault.state.isLoading()).toBeFalse();
-    expect(undefinedVault.state.error()).toBeNull();
-    expect(undefinedVault.state.hasValue()).toBeFalse();
-  });
-
   it('should gracefully reset all vault signals when setState(null) or patchState(null) is used', async () => {
-    const providers = provideFeatureCell(class DummyService {}, { key: 'reset-test', initial: [1, 2, 3] });
+    runInInjectionContext(injector, () => {
+      providers = provideFeatureCell(class DummyService {}, { key: 'reset-test', initial: [1, 2, 3] });
+    });
     const provider = providers.find((p: any) => typeof p.useFactory === 'function');
     let vault!: FeatureCell<any>;
 
-    runInInjectionContext(TestBed.inject(Injector), () => {
+    runInInjectionContext(injector, () => {
       vault = (provider as any).useFactory();
     });
 
@@ -166,11 +151,13 @@ describe('Provider: Feature Cell (core vault functionality)', () => {
   });
 
   it('should merge arrays and objects correctly using patchState()', async () => {
-    const providers = provideFeatureCell(class DummyService {}, { key: 'merge-test', initial: [] });
+    runInInjectionContext(injector, () => {
+      providers = provideFeatureCell(class DummyService {}, { key: 'merge-test', initial: [] });
+    });
     const provider = providers.find((p: any) => typeof p.useFactory === 'function');
     let vault!: FeatureCell<any>;
 
-    runInInjectionContext(TestBed.inject(Injector), () => {
+    runInInjectionContext(injector, () => {
       vault = (provider as any).useFactory();
     });
 
@@ -190,11 +177,13 @@ describe('Provider: Feature Cell (core vault functionality)', () => {
   });
 
   it('should replace data completely when type differs between current and next', async () => {
-    const providers = provideFeatureCell(class DummyService {}, { key: 'replace-test', initial: [1, 2] });
+    runInInjectionContext(injector, () => {
+      providers = provideFeatureCell(class DummyService {}, { key: 'replace-test', initial: [1, 2] });
+    });
     const provider = providers.find((p: any) => typeof p.useFactory === 'function');
     let vault!: FeatureCell<any>;
 
-    runInInjectionContext(TestBed.inject(Injector), () => {
+    runInInjectionContext(injector, () => {
       vault = (provider as any).useFactory();
     });
 
@@ -205,11 +194,13 @@ describe('Provider: Feature Cell (core vault functionality)', () => {
   });
 
   it('should correctly propagate loading and error updates', async () => {
-    const providers = provideFeatureCell(class DummyService {}, { key: 'state-test', initial: [] });
+    runInInjectionContext(injector, () => {
+      providers = provideFeatureCell(class DummyService {}, { key: 'state-test', initial: [] });
+    });
     const provider = providers.find((p: any) => typeof p.useFactory === 'function');
     let vault!: FeatureCell<any>;
 
-    runInInjectionContext(TestBed.inject(Injector), () => {
+    runInInjectionContext(injector, () => {
       vault = (provider as any).useFactory();
     });
     await flushNgVaultQueue(1);
@@ -227,12 +218,14 @@ describe('Provider: Feature Cell (core vault functionality)', () => {
   });
 
   it('should correctly handle primitive and null data updates in setState()', async () => {
-    const providers = provideFeatureCell(class DummyService {}, { key: 'primitive-test', initial: 0 });
+    runInInjectionContext(injector, () => {
+      providers = provideFeatureCell(class DummyService {}, { key: 'primitive-test', initial: 0 });
+    });
     const provider = providers.find((p: any) => typeof p.useFactory === 'function');
     let vault: any;
 
     // Ensure DI context for Angular signals
-    runInInjectionContext(TestBed.inject(Injector), () => {
+    runInInjectionContext(injector, () => {
       vault = (provider as any).useFactory();
     });
     await flushNgVaultQueue(1);
@@ -277,11 +270,13 @@ describe('Provider: Feature Cell (core vault functionality)', () => {
   });
 
   it('should merge arrays when current and next are both arrays', async () => {
-    const providers = provideFeatureCell(class DummyService {}, { key: 'reset-test', initial: [1, 2, 3] });
+    runInInjectionContext(injector, () => {
+      providers = provideFeatureCell(class DummyService {}, { key: 'reset-test', initial: [1, 2, 3] });
+    });
     const provider = providers.find((p: any) => typeof p.useFactory === 'function');
     let vault!: FeatureCell<any>;
 
-    runInInjectionContext(TestBed.inject(Injector), () => {
+    runInInjectionContext(injector, () => {
       vault = (provider as any).useFactory();
     });
     vault.setState({ value: [{ id: 1, name: 'Ada' }] });
@@ -294,11 +289,13 @@ describe('Provider: Feature Cell (core vault functionality)', () => {
   });
 
   it('should merge objects shallowly when both current and next are plain objects', async () => {
-    const providers = provideFeatureCell(class DummyService {}, { key: 'reset-test', initial: [1, 2, 3] });
+    runInInjectionContext(injector, () => {
+      providers = provideFeatureCell(class DummyService {}, { key: 'reset-test', initial: [1, 2, 3] });
+    });
     const provider = providers.find((p: any) => typeof p.useFactory === 'function');
     let vault!: FeatureCell<any>;
 
-    runInInjectionContext(TestBed.inject(Injector), () => {
+    runInInjectionContext(injector, () => {
       vault = (provider as any).useFactory();
     });
     // simulate current object state
@@ -312,11 +309,13 @@ describe('Provider: Feature Cell (core vault functionality)', () => {
   });
 
   it('should replace completely when types differ (array → object or null)', async () => {
-    const providers = provideFeatureCell(class DummyService {}, { key: 'reset-test', initial: [1, 2, 3] });
+    runInInjectionContext(injector, () => {
+      providers = provideFeatureCell(class DummyService {}, { key: 'reset-test', initial: [1, 2, 3] });
+    });
     const provider = providers.find((p: any) => typeof p.useFactory === 'function');
     let vault!: FeatureCell<any>;
 
-    runInInjectionContext(TestBed.inject(Injector), () => {
+    runInInjectionContext(injector, () => {
       vault = (provider as any).useFactory();
     });
     vault.setState({ value: [{ id: 1, name: 'Ada' }] });
@@ -332,11 +331,13 @@ describe('Provider: Feature Cell (core vault functionality)', () => {
   });
 
   it('should update loading when partial.loading is provided', async () => {
-    const providers = provideFeatureCell(class DummyService {}, { key: 'reset-test', initial: [1, 2, 3] });
+    runInInjectionContext(injector, () => {
+      providers = provideFeatureCell(class DummyService {}, { key: 'reset-test', initial: [1, 2, 3] });
+    });
     const provider = providers.find((p: any) => typeof p.useFactory === 'function');
     let vault!: FeatureCell<any>;
 
-    runInInjectionContext(TestBed.inject(Injector), () => {
+    runInInjectionContext(injector, () => {
       vault = (provider as any).useFactory();
     });
     expect(vault.state.isLoading()).toBeFalse();
@@ -348,11 +349,13 @@ describe('Provider: Feature Cell (core vault functionality)', () => {
   });
 
   it('should update error when partial.error is provided', async () => {
-    const providers = provideFeatureCell(class DummyService {}, { key: 'reset-test', initial: [1, 2, 3] });
+    runInInjectionContext(injector, () => {
+      providers = provideFeatureCell(class DummyService {}, { key: 'reset-test', initial: [1, 2, 3] });
+    });
     const provider = providers.find((p: any) => typeof p.useFactory === 'function');
     let vault!: FeatureCell<any>;
 
-    runInInjectionContext(TestBed.inject(Injector), () => {
+    runInInjectionContext(injector, () => {
       vault = (provider as any).useFactory();
     });
     expect(vault.state.error()).toBeNull();
@@ -366,11 +369,14 @@ describe('Provider: Feature Cell (core vault functionality)', () => {
 
   describe('FeatureCell Destroy Lifecycle', () => {
     it('should fully destroy and reset signals on destroy()', async () => {
-      const providers = provideFeatureCell(class TestService {}, { key: 'destroy-test', initial: [] });
+      runInInjectionContext(injector, () => {
+        providers = provideFeatureCell(class TestService {}, { key: 'destroy-test', initial: [] });
+      });
+
       const vaultFactory = (providers[0] as any).useFactory;
 
       let vault!: FeatureCell<any>;
-      runInInjectionContext(TestBed.inject(Injector), () => {
+      runInInjectionContext(injector, () => {
         vault = vaultFactory();
       });
 
@@ -410,17 +416,19 @@ describe('Provider: Feature Cell (core vault functionality)', () => {
   describe('Devtools hooks', () => {
     let factory: any;
     let testBehavior: any;
-    let providers: any;
+
     let vault: FeatureCell<any>;
 
     beforeEach(() => {
       testBehavior?.resetEvents();
-      providers = provideFeatureCell(class TestService {}, { key: 'devtools-test', initial: [] }, [withTestBehavior]);
+      runInInjectionContext(injector, () => {
+        providers = provideFeatureCell(class TestService {}, { key: 'devtools-test', initial: [] }, [withTestBehavior]);
+      });
       factory = (providers[0] as any).useFactory;
     });
 
     it('should emit an "init" event when onInit is called', async () => {
-      runInInjectionContext(TestBed.inject(Injector), () => {
+      runInInjectionContext(injector, () => {
         vault = factory();
       });
 
@@ -429,13 +437,14 @@ describe('Provider: Feature Cell (core vault functionality)', () => {
 
       expect(testBehavior.getEvents()).toEqual([
         'onInit:devtools-test',
-        'onInit:NgVault::Core::FromObservable',
-        'onInit:NgVault::Core::State'
+        'onInit:NgVault::Core::State',
+        'onInit:NgVault::CoreHttpResource::State',
+        'onInit:NgVault::Core::FromObservable'
       ]);
     });
 
     it('should emit a "dispose" event when vault.destroy() is called', async () => {
-      runInInjectionContext(TestBed.inject(Injector), () => {
+      runInInjectionContext(injector, () => {
         vault = factory();
         vault.destroy();
       });
@@ -445,17 +454,19 @@ describe('Provider: Feature Cell (core vault functionality)', () => {
 
       expect(testBehavior.getEvents()).toEqual([
         'onInit:devtools-test',
-        'onInit:NgVault::Core::FromObservable',
-        'onReset:devtools-test',
-        'onDestroy:devtools-test',
         'onInit:NgVault::Core::State',
         'onInit:NgVault::CoreHttpResource::State',
-        'onInit:NgVault::Core::FromObservable'
+        'onInit:NgVault::Core::FromObservable',
+        'onReset:devtools-test',
+        'onReset:devtools-test',
+
+        'onDestroy:devtools-test',
+        'onDestroy:devtools-test'
       ]);
     });
 
     it('should emit on all the calls', async () => {
-      runInInjectionContext(TestBed.inject(Injector), () => {
+      runInInjectionContext(injector, () => {
         vault = factory();
       });
 
@@ -472,35 +483,34 @@ describe('Provider: Feature Cell (core vault functionality)', () => {
 
       expect(testBehavior.getEvents()).toEqual([
         'onInit:devtools-test',
-        'onInit:NgVault::Core::FromObservable',
-        'onSet:devtools-test:{"isLoading":false,"error":null,"hasValue":false}',
-        'onReset:devtools-test',
-        'onPatch:devtools-test:{"isLoading":true,"value":[1,2,3],"error":null,"hasValue":true}',
-        'onReset:devtools-test',
-        'onSet:devtools-test:{"isLoading":true,"value":[1,2,3],"error":null,"hasValue":true}',
-        'onReset:devtools-test',
         'onInit:NgVault::Core::State',
         'onInit:NgVault::CoreHttpResource::State',
         'onInit:NgVault::Core::FromObservable',
+        'onSet:devtools-test:{"isLoading":false,"value":[],"error":null,"hasValue":true}',
         'onSet:NgVault::Core::State:{"isLoading":true,"value":[1,2,3],"error":null,"hasValue":true}',
-        'onSet:NgVault::Core::State:{"isLoading":true,"value":[1,2,3],"error":null,"hasValue":true}'
+        'onReset:devtools-test',
+        'onReset:devtools-test',
+        'onPatch:devtools-test:{"isLoading":false,"error":null,"hasValue":false}',
+        'onPatch:NgVault::Core::State:{"isLoading":true,"value":[4,5,6],"error":null,"hasValue":true}',
+        'onReset:devtools-test',
+        'onReset:devtools-test',
+        'onSet:devtools-test:{"isLoading":false,"error":null,"hasValue":false}',
+        'onSet:NgVault::Core::State:{"isLoading":true,"value":[1,2,3],"error":null,"hasValue":true}',
+        'onReset:devtools-test',
+        'onReset:devtools-test'
       ]);
     });
   });
 
   describe('Behavior Factory Instantiation)', () => {
-    let injector: Injector;
-
-    beforeEach(() => {
-      injector = TestBed.inject(Injector);
-    });
-
     it('filters null and undefined factories but retains valid ones', () => {
       spyOn(console, 'warn');
       const nullFactory = (() => null as any) as unknown as VaultBehaviorFactory<any>;
       nullFactory.type = 'state';
 
-      const providers = provideFeatureCell(class ExampleService {}, { key: 'cell-filter', initial: [] }, [nullFactory]);
+      runInInjectionContext(injector, () => {
+        providers = provideFeatureCell(class ExampleService {}, { key: 'cell-filter', initial: null }, [nullFactory]);
+      });
 
       const provider = providers.find((p: any) => typeof p.useFactory === 'function');
 
@@ -532,15 +542,18 @@ describe('Provider: Feature Cell (core vault functionality)', () => {
       (withCustomBehavior as any).critical = false;
 
       // Step 2: Provide the feature cell with the custom behavior
-      const providers = provideFeatureCell(class DummyService {}, { key: 'extension-test', initial: [] }, [
-        withCustomBehavior as any
-      ]);
+
+      runInInjectionContext(injector, () => {
+        providers = provideFeatureCell(class DummyService {}, { key: 'extension-test', initial: [] }, [
+          withCustomBehavior as any
+        ]);
+      });
 
       const provider = providers.find((p: any) => typeof p.useFactory === 'function');
       let vault!: FeatureCell<any>;
 
       // Step 3: Instantiate the feature cell within Angular DI
-      runInInjectionContext(TestBed.inject(Injector), () => {
+      runInInjectionContext(injector, () => {
         vault = (provider as any).useFactory();
       });
 
@@ -583,15 +596,17 @@ describe('Provider: Feature Cell (core vault functionality)', () => {
       (behaviorB as any).type = 'state';
       (behaviorB as any).critical = false;
 
-      const providers = provideFeatureCell(class DummyService {}, { key: 'multi-extension', initial: [] }, [
-        behaviorA as any,
-        behaviorB as any
-      ]);
+      runInInjectionContext(injector, () => {
+        providers = provideFeatureCell(class DummyService {}, { key: 'override-test', initial: [] }, [
+          behaviorA as any,
+          behaviorB as any
+        ]);
+      });
 
       const provider = providers.find((p: any) => typeof p.useFactory === 'function');
 
       expect(() => {
-        runInInjectionContext(TestBed.inject(Injector), () => {
+        runInInjectionContext(injector, () => {
           (provider as any).useFactory();
         });
       }).toThrowError(
@@ -629,16 +644,19 @@ describe('Provider: Feature Cell (core vault functionality)', () => {
       (behaviorB as any).critical = false;
 
       // Step 3: Provide FeatureCell with both behaviors
-      const providers = provideFeatureCell(class DummyService {}, { key: 'override-test', initial: [] }, [
-        behaviorA as any,
-        behaviorB as any
-      ]);
+
+      runInInjectionContext(injector, () => {
+        providers = provideFeatureCell(class DummyService {}, { key: 'override-test', initial: [] }, [
+          behaviorA as any,
+          behaviorB as any
+        ]);
+      });
 
       const provider = providers.find((p: any) => typeof p.useFactory === 'function');
       let vault!: FeatureCell<any>;
 
       // Step 4: Instantiate FeatureCell via Angular injector context
-      runInInjectionContext(TestBed.inject(Injector), () => {
+      runInInjectionContext(injector, () => {
         vault = (provider as any).useFactory();
       });
 

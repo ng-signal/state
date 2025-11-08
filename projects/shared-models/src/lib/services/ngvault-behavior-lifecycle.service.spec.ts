@@ -1,10 +1,11 @@
 // projects/core/src/lib/services/vault-behavior-lifecycle.service.spec.ts
-import { ApplicationRef, Injector, provideZonelessChangeDetection } from '@angular/core';
+import { ApplicationRef, Injector, provideZonelessChangeDetection, runInInjectionContext } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import {
   createTestBehaviorFactory,
   flushNgVaultQueue,
   getTestBehavior,
+  provideVaultTesting,
   resetTestBehaviorFactoryId,
   withTestBehavior
 } from '@ngvault/testing';
@@ -12,7 +13,7 @@ import { VaultBehaviorContext } from '../contexts/vault-behavior.context';
 import { VaultBehaviorRunner } from '../interfaces/vault-behavior-runner.interface';
 import { NgVaultBehaviorLifecycleService } from './ngvault-behavior-lifecycle.service';
 
-describe('VaultBehaviorLifecycleService', () => {
+describe('Service: VaultBehaviorLifecycle', () => {
   function createParenttBehaviorFactory(): any {
     const coreBehavior = createTestBehaviorFactory(() => {
       return {
@@ -46,12 +47,12 @@ describe('VaultBehaviorLifecycleService', () => {
     spyOn(crypto, 'randomUUID').and.callFake(() => ids.shift() as any);
 
     TestBed.configureTestingModule({
-      providers: [NgVaultBehaviorLifecycleService, provideZonelessChangeDetection()]
+      providers: [provideVaultTesting(), NgVaultBehaviorLifecycleService, provideZonelessChangeDetection()]
     });
 
     injector = TestBed.inject(Injector);
-
-    vaultRunner = NgVaultBehaviorLifecycleService();
+    const vaultService = TestBed.inject(NgVaultBehaviorLifecycleService);
+    vaultRunner = vaultService;
 
     // minimal fake context
     ctx = {
@@ -244,10 +245,10 @@ describe('VaultBehaviorLifecycleService', () => {
           };
         }, 'state');
 
-        vaultRunner.initializeBehaviors(injector, [parentBehavior, childBehavior]);
-        vaultRunner.onInit('core-id', 'vault1', 'service-name', ctx);
-
-        await flushNgVaultQueue(1);
+        runInInjectionContext(injector, () => {
+          vaultRunner.initializeBehaviors(injector, [parentBehavior, childBehavior]);
+          vaultRunner.onInit('core-id', 'vault1', 'service-name', ctx);
+        });
 
         expect(calls).toEqual(['onInit:vault1']);
       });
@@ -256,14 +257,18 @@ describe('VaultBehaviorLifecycleService', () => {
         const parentBehavior = createParenttBehaviorFactory();
         const behaviorWithoutOnInit = createTestBehaviorFactory(() => {}, 'state');
 
-        vaultRunner.initializeBehaviors(injector, [parentBehavior, behaviorWithoutOnInit]);
-        vaultRunner.onInit('core-id', 'vault1', 'service-name', ctx);
+        runInInjectionContext(injector, () => {
+          vaultRunner.initializeBehaviors(injector, [parentBehavior, behaviorWithoutOnInit]);
+          vaultRunner.onInit('core-id', 'vault1', 'service-name', ctx);
+        });
 
         expect(calls).toEqual([]);
       });
 
       it('throws an error if a lifecycle hook is called before initialize', () => {
-        vaultRunner = NgVaultBehaviorLifecycleService();
+        runInInjectionContext(injector, () => {
+          vaultRunner = NgVaultBehaviorLifecycleService();
+        });
 
         expect(() => vaultRunner.onInit('22', 'vault1', 'service-name', ctx)).toThrowError(
           '[NgVault] VaultBehaviorRunner has not been initialized. Call initialize() before invoking lifecycle methods.'
@@ -277,24 +282,14 @@ describe('VaultBehaviorLifecycleService', () => {
       const parentBehavior = createParenttBehaviorFactory();
 
       vaultRunner.initializeBehaviors(injector, [parentBehavior, withTestBehavior]);
-      await TestBed.inject(ApplicationRef).whenStable();
       vaultRunner.onSet('core-id', 'vault1', ctx);
-      await TestBed.inject(ApplicationRef).whenStable();
       vaultRunner.onInit('core-id', 'vault1', 'service-name', ctx);
-      await TestBed.inject(ApplicationRef).whenStable();
       vaultRunner.onError('core-id', 'vault1', ctx);
-      await TestBed.inject(ApplicationRef).whenStable();
       vaultRunner.onReset('core-id', 'vault1', ctx);
-      await TestBed.inject(ApplicationRef).whenStable();
       vaultRunner.onDestroy('core-id', 'vault1', ctx);
-      await TestBed.inject(ApplicationRef).whenStable();
       vaultRunner.onPatch('core-id', 'vault1', ctx);
-      await TestBed.inject(ApplicationRef).whenStable();
       vaultRunner.onLoad('core-id', 'vault1', ctx);
-      await TestBed.inject(ApplicationRef).whenStable();
       vaultRunner.onDispose('core-id', 'vault1', ctx);
-
-      await TestBed.inject(ApplicationRef).whenStable();
 
       expect(getTestBehavior().getEvents()).toEqual([
         'onSet:vault1:{"isLoading":false,"value":"initial","error":null,"hasValue":true}',
@@ -369,7 +364,9 @@ describe('VaultBehaviorLifecycleService', () => {
         return {};
       }, 'encryption');
 
-      vaultRunner = NgVaultBehaviorLifecycleService();
+      runInInjectionContext(injector, () => {
+        vaultRunner = NgVaultBehaviorLifecycleService();
+      });
 
       const coreId = vaultRunner.initializeBehaviors(injector, [
         parentBehavior,
@@ -383,11 +380,8 @@ describe('VaultBehaviorLifecycleService', () => {
       ]);
 
       vaultRunner.onSet(coreId!, 'vault1', ctx);
-
       await TestBed.inject(ApplicationRef).whenStable();
-
       vaultRunner.onSet('missing', 'vault1', ctx);
-
       await TestBed.inject(ApplicationRef).whenStable();
 
       expect(calls).toEqual(['onSet:vault1']);
@@ -596,7 +590,9 @@ describe('VaultBehaviorLifecycleService', () => {
         ctx: 'mock-ctx'
       };
 
-      vaultRunner = NgVaultBehaviorLifecycleService();
+      runInInjectionContext(injector, () => {
+        vaultRunner = NgVaultBehaviorLifecycleService();
+      });
     });
 
     it('should attach new methods from extendCellAPI to the FeatureCell', () => {

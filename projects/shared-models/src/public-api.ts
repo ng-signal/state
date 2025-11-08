@@ -4,6 +4,7 @@
 
 export * from './lib/contexts/vault-behavior-factory.context';
 export * from './lib/contexts/vault-behavior.context';
+export * from './lib/helpers/testing-environment.helper';
 export * from './lib/interfaces/vault-behavior-runner.interface';
 export * from './lib/interfaces/vault-behavior.interface';
 export * from './lib/models/feature-cell.model';
