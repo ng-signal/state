@@ -1,4 +1,4 @@
-import { defineNgVaultBehaviorKey } from '@ngvault/shared-models';
+import { defineNgVaultBehaviorKey } from '@ngvault/shared';
 
 let counter = 0;
 

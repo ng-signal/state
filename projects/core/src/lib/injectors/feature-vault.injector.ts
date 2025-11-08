@@ -1,5 +1,5 @@
 import { inject } from '@angular/core';
-import { FeatureCell } from '@ngvault/shared-models';
+import { FeatureCell } from '@ngvault/shared';
 import { NGVAULT_METADATA_KEYS } from '../constants/metadata-keys.constant';
 import { getOrCreateFeatureCellToken } from '../tokens/feature-cell-token-registry';
 

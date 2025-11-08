@@ -1,5 +1,5 @@
 import { Signal } from '@angular/core';
-import { VaultBehaviorRunner } from '@ngvault/shared-models';
+import { VaultBehaviorRunner } from '@ngvault/shared';
 import { ResourceStateError } from '../models/resource-state-error.model';
 import { VaultStateSnapshot } from '../models/vault-state-snapshot.model';
 import { VaultDataType } from '../types/vault-data.type';

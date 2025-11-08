@@ -1,7 +1,7 @@
 import { HttpClient } from '@angular/common/http';
 import { computed, inject, Injectable } from '@angular/core';
 import { FeatureCell, injectVault } from '@ngvault/core';
-import { VaultSignalRef } from '@ngvault/shared-models';
+import { VaultSignalRef } from '@ngvault/shared';
 import { map, take } from 'rxjs';
 import { UserModel } from '../../../models/user.model';
 

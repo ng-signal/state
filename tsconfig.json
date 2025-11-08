@@ -15,8 +15,8 @@
       "@ngvault/dev-tools/*": ["projects/dev-tools/src/lib/*"],
       "@ngvault/styles": ["projects/styles/src/lib"],
       "@ngvault/styles/*": ["projects/styles/src/lib/*"],
-      "@ngvault/shared-models": ["projects/shared-models/src/public-api"],
-      "@ngvault/shared-models/*": ["projects/shared-models/src/lib/*"],
+      "@ngvault/shared": ["projects/shared/src/public-api"],
+      "@ngvault/shared/*": ["projects/shared/src/lib/*"],
       "@ngvault/testing": ["projects/testing/src/public-api"],
       "@ngvault/testing/*": ["projects/testing/src/lib/*"]
     },
@@ -62,10 +62,10 @@
       "path": "./projects/styles/tsconfig.spec.json"
     },
     {
-      "path": "./projects/shared-models/tsconfig.lib.json"
+      "path": "./projects/shared/tsconfig.lib.json"
     },
     {
-      "path": "./projects/shared-models/tsconfig.spec.json"
+      "path": "./projects/shared/tsconfig.spec.json"
     },
     {
       "path": "./projects/testing/tsconfig.lib.json"

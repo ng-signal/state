@@ -1,4 +1,4 @@
-import { NgVaultQueue } from '@ngvault/shared-models';
+import { NgVaultQueue } from '@ngvault/shared';
 
 /**
  * Synchronous queue that executes tasks immediately.

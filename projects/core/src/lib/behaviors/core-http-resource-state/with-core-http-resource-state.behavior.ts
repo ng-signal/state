@@ -8,7 +8,7 @@ import {
   VaultBehaviorFactory,
   VaultBehaviorFactoryContext,
   VaultBehaviorType
-} from '@ngvault/shared-models';
+} from '@ngvault/shared';
 import { NGVAULT_EXPERIMENTAL_HTTP_RESOURCE } from '../../constants/experimental-flag.constant';
 import { applyNgVaultValueMerge } from '../../utils/apply-vault-merge.util';
 import { devWarnExperimentalHttpResource } from '../../utils/dev-warning.util';

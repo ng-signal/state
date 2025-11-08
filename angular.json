@@ -183,20 +183,20 @@
         }
       }
     },
-    "shared-models": {
+    "shared": {
       "projectType": "library",
-      "root": "projects/shared-models",
-      "sourceRoot": "projects/shared-models/src",
+      "root": "projects/shared",
+      "sourceRoot": "projects/shared/src",
       "prefix": "ngvault",
       "architect": {
         "build": {
           "builder": "@angular/build:ng-packagr",
           "configurations": {
             "production": {
-              "tsConfig": "projects/shared-models/tsconfig.lib.prod.json"
+              "tsConfig": "projects/shared/tsconfig.lib.prod.json"
             },
             "development": {
-              "tsConfig": "projects/shared-models/tsconfig.lib.json"
+              "tsConfig": "projects/shared/tsconfig.lib.json"
             }
           },
           "defaultConfiguration": "production"
@@ -204,8 +204,8 @@
         "test": {
           "builder": "@angular/build:karma",
           "options": {
-            "tsConfig": "projects/shared-models/tsconfig.spec.json",
-            "karmaConfig": "projects/shared-models/karma.conf.js",
+            "tsConfig": "projects/shared/tsconfig.spec.json",
+            "karmaConfig": "projects/shared/karma.conf.js",
             "inlineStyleLanguage": "scss",
             "stylePreprocessorOptions": {
               "includePaths": ["projects/styles/src/lib"]

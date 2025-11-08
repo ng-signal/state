@@ -1,4 +1,4 @@
-import { VaultBehaviorFactoryContext } from '@ngvault/shared-models';
+import { VaultBehaviorFactoryContext } from '@ngvault/shared';
 import { VaultBehaviorContext } from '../contexts/vault-behavior.context';
 import { VaultBehaviorType } from '../types/vault-behavior.type';
 

@@ -1,7 +1,7 @@
 import { provideZonelessChangeDetection } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { NgVaultEventModel } from '@ngvault/dev-tools';
-import { NgVaultDevModeService } from '@ngvault/shared-models';
+import { NgVaultDevModeService } from '@ngvault/shared';
 import { take } from 'rxjs';
 import { NgVaultEventBus } from './ngvault-event-bus';
 

@@ -1,5 +1,5 @@
 import { inject } from '@angular/core';
-import { NgVaultDevModeService } from '@ngvault/shared-models';
+import { NgVaultDevModeService } from '@ngvault/shared';
 import { VaultEventType } from '../types/event-vault.type';
 import { NgVaultEventBus } from '../utils/ngvault-event-bus';
 

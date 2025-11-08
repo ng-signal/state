@@ -8,7 +8,7 @@ import {
   runInInjectionContext
 } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
-import { FeatureCell, VaultBehaviorFactory } from '@ngvault/shared-models';
+import { FeatureCell, VaultBehaviorFactory } from '@ngvault/shared';
 import { flushNgVaultQueue, getTestBehavior, provideVaultTesting, withTestBehavior } from '@ngvault/testing';
 import { FEATURE_CELL_REGISTRY } from '../../tokens/feature-cell-registry.token';
 import { provideFeatureCell } from './provide-feature-cell';

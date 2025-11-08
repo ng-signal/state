@@ -1,5 +1,5 @@
 /*
- * Public API Surface of shared-models
+ * Public API Surface of shared
  */
 
 export * from './lib/contexts/vault-behavior-factory.context';

@@ -1,4 +1,4 @@
-import { VaultBehaviorContext, VaultDataType } from '@ngvault/shared-models';
+import { VaultBehaviorContext, VaultDataType } from '@ngvault/shared';
 
 export function applyNgVaultValueMerge<T>(
   ctx: VaultBehaviorContext<T>,

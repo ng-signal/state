@@ -8,7 +8,7 @@ import {
   VaultBehaviorType,
   VaultDataType,
   VaultStateType
-} from '@ngvault/shared-models';
+} from '@ngvault/shared';
 import { applyNgVaultValueMerge } from '../../utils/apply-vault-merge.util';
 import { isHttpResourceRef } from '../../utils/is-http-resource.util';
 

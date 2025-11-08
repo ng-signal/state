@@ -7,10 +7,10 @@ import {
   VaultBehaviorContext,
   VaultBehaviorFactory,
   VaultStateSnapshot
-} from '@ngvault/shared-models';
-import { VaultDataType } from '@ngvault/shared-models/types/vault-data.type';
-import { VaultStateInputType } from '@ngvault/shared-models/types/vault-state-input.type';
-import { VaultStateType } from '@ngvault/shared-models/types/vault-state.type';
+} from '@ngvault/shared';
+import { VaultDataType } from '@ngvault/shared/types/vault-data.type';
+import { VaultStateInputType } from '@ngvault/shared/types/vault-state-input.type';
+import { VaultStateType } from '@ngvault/shared/types/vault-state.type';
 import { Subject } from 'rxjs';
 import { withCoreHttpResourceStateBehavior } from '../../behaviors/core-http-resource-state/with-core-http-resource-state.behavior';
 import { withCoreObservableBehavior } from '../../behaviors/core-observable/with-core-observable.behavior';

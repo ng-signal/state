@@ -1,5 +1,5 @@
 import { runInInjectionContext, signal } from '@angular/core';
-import { VaultBehaviorFactoryContext } from '@ngvault/shared-models';
+import { VaultBehaviorFactoryContext } from '@ngvault/shared';
 import { withCoreStateBehavior } from './with-core-state.behavior';
 
 describe('Behavior: withCoreState: Set', () => {

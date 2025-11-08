@@ -1,4 +1,4 @@
-import { VaultBehaviorContext, VaultSignalRef } from '@ngvault/shared-models';
+import { VaultBehaviorContext, VaultSignalRef } from '@ngvault/shared';
 import { Observable } from 'rxjs';
 
 export interface ObservableBehaviorExtension<T> {

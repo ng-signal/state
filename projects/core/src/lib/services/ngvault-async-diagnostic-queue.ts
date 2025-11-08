@@ -1,5 +1,5 @@
 import { signal } from '@angular/core';
-import { NgVaultInspectableQueue, NgVaultQueueEvent, NgVaultQueueStats } from '@ngvault/shared-models';
+import { NgVaultInspectableQueue, NgVaultQueueEvent, NgVaultQueueStats } from '@ngvault/shared';
 import { Subject } from 'rxjs';
 
 export class NgVaultAsyncDiagnosticQueue implements NgVaultInspectableQueue {

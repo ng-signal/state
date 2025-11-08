@@ -1,6 +1,6 @@
 import { Injector, provideZonelessChangeDetection, runInInjectionContext } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
-import { NgVaultDevModeService, VaultBehavior } from '@ngvault/shared-models';
+import { NgVaultDevModeService, VaultBehavior } from '@ngvault/shared';
 import { NgVaultDebuggerService } from '../services/ngvault-debugger.service';
 import { withDevtoolsBehavior } from './with-devtools.behavior';
 

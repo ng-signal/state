@@ -1,4 +1,4 @@
-// shared-models/vault-behavior-type.ts
+// shared/vault-behavior-type.ts
 
 export const VaultBehaviorTypeOrder = Object.freeze([
   'dev-tools', // 0

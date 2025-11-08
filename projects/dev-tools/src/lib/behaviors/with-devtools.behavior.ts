@@ -8,7 +8,7 @@ import {
   VaultBehaviorFactoryContext,
   VaultBehaviorType,
   VaultStateSnapshot
-} from '@ngvault/shared-models';
+} from '@ngvault/shared';
 import { VaultEventType } from '../types/event-vault.type';
 import { NgVaultEventBus } from '../utils/ngvault-event-bus';
 import { registerNgVault, unregisterNgVault } from '../utils/ngvault-registry';

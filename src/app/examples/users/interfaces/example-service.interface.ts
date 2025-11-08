@@ -1,5 +1,5 @@
 import { Signal } from '@angular/core';
-import { VaultSignalRef } from '@ngvault/shared-models';
+import { VaultSignalRef } from '@ngvault/shared';
 import { UserModel } from '../../models/user.model';
 
 /**

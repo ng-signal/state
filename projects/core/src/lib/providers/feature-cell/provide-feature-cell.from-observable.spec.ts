@@ -2,7 +2,7 @@ import { provideHttpClient } from '@angular/common/http';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { Injector, provideZonelessChangeDetection, runInInjectionContext, signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
-import { FeatureCell, VaultSignalRef } from '@ngvault/shared-models';
+import { FeatureCell, VaultSignalRef } from '@ngvault/shared';
 import { flushNgVaultQueue, getTestBehavior, provideVaultTesting, withTestBehavior } from '@ngvault/testing';
 import { Subject } from 'rxjs';
 import { provideFeatureCell } from './provide-feature-cell';

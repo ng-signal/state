@@ -1,6 +1,6 @@
 // projects/dev-tools/src/lib/utils/ngvault-event-bus.ts
 import { inject, Injectable } from '@angular/core';
-import { NgVaultDevModeService } from '@ngvault/shared-models';
+import { NgVaultDevModeService } from '@ngvault/shared';
 import { Subject } from 'rxjs';
 import { NgVaultEventModel } from '../models/ngvault-event.model';
 

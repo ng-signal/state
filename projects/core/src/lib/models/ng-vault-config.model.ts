@@ -1,4 +1,4 @@
-import { NgVaultInspectableQueue, NgVaultQueue } from '@ngvault/shared-models';
+import { NgVaultInspectableQueue, NgVaultQueue } from '@ngvault/shared';
 import { NgVaultLogLevel } from '../types/ngvault-log-level.type';
 
 // store-config.ts

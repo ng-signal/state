@@ -1,5 +1,5 @@
 import { Injector } from '@angular/core';
-import { VaultStateSnapshot } from '@ngvault/shared-models';
+import { VaultStateSnapshot } from '@ngvault/shared';
 
 /**
  * Provides lifecycle hooks and contextual access for FeatureCell behaviors.

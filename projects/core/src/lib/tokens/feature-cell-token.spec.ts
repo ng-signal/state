@@ -1,5 +1,5 @@
 import { InjectionToken } from '@angular/core';
-import { FeatureCell } from '@ngvault/shared-models';
+import { FeatureCell } from '@ngvault/shared';
 import { FEATURE_CELL_TOKEN } from './feature-cell-token';
 
 describe('Token: Feature Cell', () => {

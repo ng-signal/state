@@ -1,4 +1,4 @@
-// projects/shared-models/src/lib/tokens/ngvault-queue.token.ts
+// projects/shared/src/lib/tokens/ngvault-queue.token.ts
 import { InjectionToken } from '@angular/core';
 import { NgVaultConfigModel } from '../models/ng-vault-config.model';
 

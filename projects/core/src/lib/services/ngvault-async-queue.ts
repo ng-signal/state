@@ -1,4 +1,4 @@
-import { NgVaultQueue } from '@ngvault/shared-models';
+import { NgVaultQueue } from '@ngvault/shared';
 
 /**
  * Lightweight asynchronous queue for basic use cases.

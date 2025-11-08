@@ -1,5 +1,5 @@
 import { computed, effect, inject, Injectable, signal } from '@angular/core';
-import { ResourceStateError, VaultSignalRef } from '@ngvault/shared-models';
+import { ResourceStateError, VaultSignalRef } from '@ngvault/shared';
 import { CarService } from '../cars/services/car.service';
 import { CarModel } from '../models/car.model';
 import { UserModel } from '../models/user.model';

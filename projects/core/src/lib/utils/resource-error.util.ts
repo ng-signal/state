@@ -1,5 +1,5 @@
 import { HttpErrorResponse } from '@angular/common/http';
-import { ResourceStateError } from '@ngvault/shared-models';
+import { ResourceStateError } from '@ngvault/shared';
 
 export function resourceError(err: unknown): ResourceStateError {
   if (err instanceof HttpErrorResponse) {

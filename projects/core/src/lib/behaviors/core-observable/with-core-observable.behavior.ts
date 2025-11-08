@@ -9,7 +9,7 @@ import {
   VaultBehaviorType,
   VaultDataType,
   VaultSignalRef
-} from '@ngvault/shared-models';
+} from '@ngvault/shared';
 import { Observable, take } from 'rxjs';
 import { resourceError } from '../../utils/resource-error.util';
 import { ObservableBehaviorExtension } from './interface/observable-behavior.interface';

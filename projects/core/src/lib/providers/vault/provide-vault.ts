@@ -1,6 +1,6 @@
 import { Provider } from '@angular/core';
 import { NgVaultAsyncDiagnosticQueue } from '@ngvault/core/services/ngvault-async-diagnostic-queue';
-import { isTestEnv } from '../../../../../shared-models/src/lib/helpers/testing-environment.helper';
+import { isTestEnv } from '../../../../../shared/src/lib/helpers/testing-environment.helper';
 import { NGVAULT_DEV_MODE } from '../../constants/ngvault-dev-mode.constant';
 import { VAULT_ROOT as NGVAULT_ROOT } from '../../constants/ngvault-root.constant';
 import { NgVaultConfigModel } from '../../models/ng-vault-config.model';

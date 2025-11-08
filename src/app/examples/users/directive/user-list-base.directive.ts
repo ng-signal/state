@@ -1,5 +1,5 @@
 import { Directive, inject, Signal } from '@angular/core';
-import { VaultSignalRef } from '@ngvault/shared-models';
+import { VaultSignalRef } from '@ngvault/shared';
 import { CarService } from '../../cars/services/car.service';
 import { UserCarFacadeService } from '../../facades/car-user.service';
 import { UserModel } from '../../models/user.model';
