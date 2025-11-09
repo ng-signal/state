@@ -19,4 +19,6 @@ export interface VaultBehaviorContext<T> {
 
   destroyed$?: Observable<void>;
   reset$?: Observable<void>;
+
+  message?: string;
 }

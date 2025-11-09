@@ -5,4 +5,5 @@ export interface VaultStateSnapshot<T> {
   value: T | undefined;
   error: ResourceStateError | null;
   hasValue: boolean;
+  message?: string;
 }

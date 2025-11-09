@@ -72,6 +72,7 @@ class CoreObservableBehavior<T> implements VaultBehavior<T, ObservableBehaviorEx
             error: (err) => {
               ngVaultError('fromObservable → error()');
               observer.error(resourceError(err));
+              ctx.message = err.message;
               ctx.behaviorRunner?.onError?.(self.behaviorId, self.key, ctx);
             },
 

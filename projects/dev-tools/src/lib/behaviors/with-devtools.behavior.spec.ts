@@ -45,6 +45,7 @@ describe('Behavior: withDevtools', () => {
     });
 
     it('should register, emit init and prevent double registration', () => {
+      ctx.message = 'this is the message';
       behavior.onInit?.('vault1', 'TestService', ctx);
 
       expect(emitted).toEqual([
@@ -76,6 +77,8 @@ describe('Behavior: withDevtools', () => {
       behavior.onReset?.('vault1', ctx);
       behavior.onSet?.('vault1', ctx);
       behavior.onDestroy?.('vault1', ctx);
+      behavior.onDispose?.('vault1', ctx);
+      behavior.onError?.('vault1', ctx);
 
       expect(emitted).toEqual([
         Object({
@@ -116,8 +119,23 @@ describe('Behavior: withDevtools', () => {
         Object({
           id: jasmine.any(String),
           key: 'vault1',
+          type: 'destroy',
+          timestamp: jasmine.any(Number),
+          state: Object({ isLoading: true, value: 'hello', error: null, hasValue: false })
+        }),
+        Object({
+          id: jasmine.any(String),
+          key: 'vault1',
           type: 'dispose',
           timestamp: jasmine.any(Number),
+          state: Object({ isLoading: true, value: 'hello', error: null, hasValue: false })
+        }),
+        Object({
+          id: jasmine.any(String),
+          key: 'vault1',
+          type: 'error',
+          timestamp: jasmine.any(Number),
+          error: 'this is the message',
           state: Object({ isLoading: true, value: 'hello', error: null, hasValue: false })
         })
       ]);
@@ -171,7 +189,7 @@ describe('Behavior: withDevtools', () => {
         Object({
           id: jasmine.any(String),
           key: 'vault1',
-          type: 'dispose',
+          type: 'destroy',
           timestamp: jasmine.any(Number),
           state: Object({ isLoading: true, value: 'hello', error: null, hasValue: false })
         })

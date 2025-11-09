@@ -1,4 +1,5 @@
 import { inject } from '@angular/core';
+import { NgVaultEventModel } from '@ngvault/dev-tools';
 import {
   defineNgVaultBehaviorKey,
   NgVaultDevModeService,
@@ -40,6 +41,10 @@ class DevtoolsBehavior implements VaultBehavior {
     this.#emitEvent(key, ctx.state, 'load');
   }
 
+  onSet<T>(key: string, ctx: Readonly<VaultBehaviorContext<T>>): void {
+    this.#emitEvent(key, ctx.state, 'set');
+  }
+
   onPatch<T>(key: string, ctx: Readonly<VaultBehaviorContext<T>>): void {
     this.#emitEvent(key, ctx.state, 'patch');
   }
@@ -48,28 +53,38 @@ class DevtoolsBehavior implements VaultBehavior {
     this.#emitEvent(key, ctx.state, 'reset');
   }
 
-  onSet<T>(key: string, ctx: Readonly<VaultBehaviorContext<T>>): void {
-    this.#emitEvent(key, ctx.state, 'set');
+  onError<T>(key: string, ctx: Readonly<VaultBehaviorContext<T>>): void {
+    this.#emitEvent(key, ctx.state, 'error', ctx.message);
   }
 
   onDestroy<T>(key: string, ctx: Readonly<VaultBehaviorContext<T>>): void {
-    this.#emitEvent(key, ctx.state, 'dispose');
+    this.#emitEvent(key, ctx.state, 'destroy');
     if (this.#registered.has(key)) {
       unregisterNgVault(key);
     }
   }
 
-  #emitEvent<T>(key: string, ctx: Readonly<VaultStateSnapshot<T>>, type: VaultEventType): void {
+  onDispose<T>(key: string, ctx: Readonly<VaultBehaviorContext<T>>): void {
+    this.#emitEvent(key, ctx.state, 'dispose');
+  }
+
+  #emitEvent<T>(key: string, ctx: Readonly<VaultStateSnapshot<T>>, type: VaultEventType, error?: string): void {
     if (!this.#initialized.has(key)) {
       throw new Error(`[NgVault] Behavior "${this.constructor.name}" used before onInit() for "${key}".`);
     }
 
-    this.#eventBus.next({
+    const event = {
       key,
       type,
       timestamp: Date.now(),
       state: ctx
-    });
+    } as NgVaultEventModel;
+
+    if (error) {
+      event.error = error;
+    }
+
+    this.#eventBus.next(event);
   }
 }
 
