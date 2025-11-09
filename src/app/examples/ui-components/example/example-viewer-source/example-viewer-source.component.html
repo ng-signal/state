@@ -1,10 +1,26 @@
 <div class="example-viewer-source">
   <mat-tab-group animationDuration="0ms" mat-stretch-tabs="false">
-    @for (tab of tabs(); track tab) {
-      <mat-tab [label]="tab.label()">
-        <div class="tab-content">
-          <!-- Directly render projected inner content -->
-          <ng-container *ngTemplateOutlet="tab.template"></ng-container>
+    @for (tab of tabs(); let i = $index; track tab) {
+      <mat-tab>
+        <ng-template mat-tab-label>{{ tab.label() }}</ng-template>
+
+        <div class="tab-body">
+          <div class="source-row">
+            <pre>
+              <code #codeBlock>
+                <ng-container *ngTemplateOutlet="tab.template"></ng-container>
+              </code>
+            </pre>
+
+            <button
+              mat-icon-button
+              matTooltip="Copy {{ tab.label() }} source"
+              aria-label="Copy {{ tab.label() }} source"
+              class="copy-btn"
+              (click)="copyCode(i)">
+              <mat-icon>content_copy</mat-icon>
+            </button>
+          </div>
         </div>
       </mat-tab>
     }

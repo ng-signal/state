@@ -3,13 +3,6 @@
     <h3>{{ title }}</h3>
   </div>
 
-  <mat-chip-set aria-label="Fish selection">
-    <mat-chip>One fish</mat-chip>
-    <mat-chip>Two fish</mat-chip>
-    <mat-chip>Three fish</mat-chip>
-    <mat-chip disabled>Four fish</mat-chip>
-  </mat-chip-set>
-
   <div class="action-container">
     <div class="action-container-row">
       <div class="button-container">
@@ -62,7 +55,15 @@
         <!-- Source content -->
         <div source>
           <ngvault-example-viewer-source>
-            <ngvault-example-viewer-tab label="HTML"><pre>Hello World</pre></ngvault-example-viewer-tab>
+            <ngvault-example-viewer-tab label="HTML">
+              <pre><code ngvaultCodeEscape>
+<div example>
+  @for (user of userList.value(); track user.id) {
+    <ngvault-info-icon [data]="user" [icon]="'person'" class="info-icon" />
+  }
+</div>
+</code></pre>
+            </ngvault-example-viewer-tab>
             <ngvault-example-viewer-tab label="TS">Fun Timte</ngvault-example-viewer-tab>
           </ngvault-example-viewer-source>
         </div>

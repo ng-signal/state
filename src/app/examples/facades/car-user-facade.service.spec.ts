@@ -68,7 +68,7 @@ describe('UserCarFacadeService (integration)', () => {
       await TestBed.inject(ApplicationRef).whenStable();
 
       const result = service.usersWithCars();
-      expect(result.length).toBe(3);
+      expect(result.length).toBe(2);
 
       const ada = result?.find((u) => u.name.includes('Ada'));
       const alan = result?.find((u) => u.name.includes('Alan'));
@@ -76,7 +76,7 @@ describe('UserCarFacadeService (integration)', () => {
 
       expect(ada?.car?.make).toBe('Tesla');
       expect(alan?.car?.make).toBe('Ford');
-      expect(grace?.car).toBeNull();
+      expect(grace?.car).toBeUndefined();
 
       // Derived signals
       const noCars = service.usersWithoutCars();

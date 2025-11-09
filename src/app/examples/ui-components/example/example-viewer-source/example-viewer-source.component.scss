@@ -1,38 +1,110 @@
 @use 'global' as global;
 
 .example-viewer-source {
-  background-color: var(--surface-bg, global.$ngvault-surface-light);
-  border: 1px solid var(--surface-outline, global.$ngvault-surface-outline);
-  border-radius: global.$border-radius-md;
-  box-shadow: global.$ngvault-shadow-base;
-  overflow: hidden;
-
-  .mat-mdc-tab-header {
-    background: linear-gradient(to right, global.$ngvault-primary-light, global.$ngvault-primary-base);
-    color: global.$ngvault-text-white;
-  }
-
-  .mat-mdc-tab-label-content {
-    font-family: global.$ngvault-font-family;
-    font-weight: global.$ngvault-font-weight-medium;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-  }
-
-  .tab-content {
-    min-height: 200px;
+  border: 1px soild red;
+  .tab-body {
     padding: global.$spacing-md;
+    border: 1px soild red;
+  }
+
+  .source-row {
+    position: relative;
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
     background-color: var(--surface-bg, global.$ngvault-surface-light);
-    color: var(--surface-text, global.$ngvault-text-primary);
-    font-family: 'JetBrains Mono', monospace;
-    font-size: global.$font-size-sm;
-    line-height: 1.6;
-    overflow-x: auto;
+    border-radius: global.$border-radius-md;
+    box-shadow: global.$ngvault-shadow-base;
+    transition:
+      box-shadow 0.25s ease,
+      background-color 0.3s ease;
+
+    &:hover {
+      @include global.ngvault-elevate(hover);
+    }
+    border: 1px soild red;
 
     pre {
       margin: 0;
+      flex: 1;
+      overflow-x: auto;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: global.$font-size-sm;
+      line-height: 1.6;
+      color: var(--surface-text, global.$ngvault-text-primary);
+      background: transparent;
+      border: none;
+      padding: global.$spacing-md;
       white-space: pre-wrap;
       word-break: break-word;
+    }
+
+    /* Vault-style copy button */
+    .copy-btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+
+      width: 36px;
+      height: 36px;
+
+      padding: 0;
+      margin: global.$spacing-sm;
+      line-height: 1;
+      vertical-align: middle;
+
+      border-radius: 50%;
+      background-color: rgba(global.$ngvault-text-white, 0.1);
+      color: global.$ngvault-primary-dark !important;
+      border: 1px solid transparent;
+
+      transition:
+        background-color 0.2s ease,
+        transform 0.1s ease;
+
+      mat-icon {
+        font-size: global.$font-size-lg;
+        line-height: 1;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+
+      &:hover {
+        background-color: global.$ngvault-primary-dark;
+        color: global.$ngvault-text-white !important;
+        transform: scale(1.05);
+      }
+
+      &:active {
+        transform: scale(0.95);
+        @include global.ngvault-elevate(active);
+      }
+
+      &:focus-visible {
+        outline: 2px solid global.$ngvault-accent-base;
+        outline-offset: 2px;
+      }
+    }
+  }
+  // example-viewer-source.component.scss
+  pre code[ngvaultCodeEscape] {
+    border: 1px solid red;
+    display: block;
+    background-color: var(--surface-bg, #0f172a);
+    color: var(--surface-text, #e2e8f0);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.875rem;
+    line-height: 1.6;
+    padding: 1rem;
+    border-radius: 8px;
+    white-space: pre;
+    overflow-x: auto;
+    tab-size: 2;
+
+    transition: box-shadow 0.3s ease;
+    &:hover {
+      box-shadow: 0 0 8px rgba(25, 118, 210, 0.4);
     }
   }
 }

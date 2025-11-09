@@ -7,7 +7,7 @@ export class ExampleViewerService {
   /** Returns a signal controlling visibility for a given exampleId */
   getVisibilitySignal(exampleId: string) {
     if (!this._visibilityMap.has(exampleId)) {
-      this._visibilityMap.set(exampleId, signal(false)); // hidden by default
+      this._visibilityMap.set(exampleId, signal(true)); // hidden by default
     }
     return this._visibilityMap.get(exampleId)!;
   }
