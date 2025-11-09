@@ -23,26 +23,35 @@ export class UserCarFacadeService {
 
   private readonly _isLoading = signal(false);
   private readonly _error = signal<ResourceStateError | null>(null);
-  private readonly _value = signal<UserWithCarModel[]>([]);
+  private readonly _userValue = signal<UserWithCarModel[]>([]);
 
   private _hasValue = computed(() => {
-    const val = this._value();
+    const val = this._userValue();
     return val !== null && val !== undefined;
   });
 
   readonly usersWithCars: VaultSignalRef<UserWithCarModel[]> = {
     isLoading: this._isLoading.asReadonly(),
-    value: this._value.asReadonly(),
+    value: this._userValue.asReadonly(),
     error: this._error.asReadonly(),
     hasValue: this._hasValue
   };
 
+  /** Derived: Cars without assigned users (reactive) — opposite from the car perspective */
+  readonly carsWithoutUsers = computed(() => {
+    const cars = this.carState.cars().value() ?? [];
+    const users = this._userValue();
+
+    const assignedIds = new Set(users.filter((u) => u.car).map((u) => String(u.car!.id)));
+    return cars.filter((car) => !assignedIds.has(String(car.id)));
+  });
+
   /** Derived: Users without cars (reactive) */
-  readonly usersWithoutCars = computed(() => this._value().filter((u) => !u.car));
+  readonly usersWithoutCars = computed(() => this._userValue().filter((u) => !u.car));
 
   /** Derived: Users grouped by car make (reactive) */
   readonly groupedByMake = computed<UsersGroupedByMake[]>(() => {
-    const list = this._value();
+    const list = this._userValue();
     const map = new Map<string, UserWithCarModel[]>();
 
     for (const user of list) {
@@ -56,7 +65,8 @@ export class UserCarFacadeService {
 
   constructor() {
     effect(() => {
-      const users = this.userState.users().value();
+      const users = this.userState.users().value() as UserModel[] | undefined;
+
       const cars = this.carState.cars().value();
       const loading = this.userState.users().isLoading() || this.carState.cars().isLoading();
       const error = this.userState.users().error() || this.carState.cars().error();
@@ -65,7 +75,7 @@ export class UserCarFacadeService {
       this._error.set(error);
 
       if (!users?.length || !cars?.length) {
-        this._value.set([]);
+        this._userValue.set([]);
         return;
       }
 
@@ -74,7 +84,7 @@ export class UserCarFacadeService {
         car: cars.find((car: CarModel) => String(car.id) === String(user.carId)) || null
       }));
 
-      this._value.set(merged);
+      this._userValue.set(merged);
     });
   }
 

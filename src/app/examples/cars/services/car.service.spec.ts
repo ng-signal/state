@@ -103,4 +103,35 @@ describe('Service: Car State', () => {
       expect(err?.details).toEqual(Object({ message: 'Internal Server Error' }));
     });
   });
+
+  it('should handle a resetCars', async () => {
+    spyOn(service['vault'], 'reset');
+    expect(service['isLoaded']()).toBeFalse();
+
+    service.resetCars();
+
+    expect(service['vault'].reset).toHaveBeenCalledWith();
+    expect(service['isLoaded']()).toBeFalse();
+  });
+
+  it('should handle a reloadUser', async () => {
+    spyOn(service['vault'], 'reset');
+    (service as any).isLoaded.set(true);
+
+    service.reloadCars();
+    TestBed.tick();
+
+    expect(service['vault'].reset).not.toHaveBeenCalled();
+    expect(service['isLoaded']()).toBeFalse();
+  });
+
+  it('should handle a reactiveReloadCars', async () => {
+    spyOn(service['vault'], 'reset');
+    (service as any).isLoaded.set(true);
+
+    service.reactiveReloadCars();
+
+    expect(service['vault'].reset).toHaveBeenCalledWith();
+    expect(service['isLoaded']()).toBeFalse();
+  });
 });

@@ -36,7 +36,7 @@ export const appConfig: ApplicationConfig = {
      * Initializes the root NG Signal Store context.
      * Provides the global store registry and root configuration.
      */
-    ...provideVault({ logLevel: 'log' }),
+    ...provideVault({ logLevel: 'off' }),
 
     /**
      * Registers the 'user' feature state using the UserStateService.

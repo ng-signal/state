@@ -17,4 +17,8 @@ export interface ExampleServiceInterface {
   loadUsers(): void;
 
   resetUsers(): void;
+
+  reloadUsers(): void;
+
+  reactiveReloadUsers(): void;
 }

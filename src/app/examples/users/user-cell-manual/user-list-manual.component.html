@@ -1,7 +1,31 @@
 <div class="list-container">
   <div class="header">
     <h3>{{ title }}</h3>
-    <div class="action-container"><button class="ngvault-button" (click)="resetUsers()">Reset Users</button></div>
+  </div>
+
+  <div class="action-container">
+    <div class="action-container-row">
+      <div class="button-container">
+        <button class="ngvault-button" (click)="resetUsers()">Reset Users</button>
+      </div>
+      <div class="button-container">
+        <button class="ngvault-button" (click)="reloadUsers()">Reload Users</button>
+      </div>
+      <div class="button-container">
+        <button class="ngvault-button" (click)="reactiveReloadUsers()">Reactive Reload Users</button>
+      </div>
+    </div>
+    <div class="action-container-row">
+      <div class="button-container">
+        <button class="ngvault-button" (click)="resetCars()">Reset Cars</button>
+      </div>
+      <div class="button-container">
+        <button class="ngvault-button" (click)="reloadCars()">Reload Cars</button>
+      </div>
+      <div class="button-container">
+        <button class="ngvault-button" (click)="reactiveReloadCars()">Reactive Reload Cars</button>
+      </div>
+    </div>
   </div>
   <!-- LOADING -->
   @if (userList.isLoading()) {

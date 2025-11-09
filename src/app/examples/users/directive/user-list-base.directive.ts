@@ -1,7 +1,7 @@
 import { Directive, inject, Signal } from '@angular/core';
 import { VaultSignalRef } from '@ngvault/shared';
 import { CarService } from '../../cars/services/car.service';
-import { UserCarFacadeService } from '../../facades/car-user.service';
+import { UserCarFacadeService } from '../../facades/car-user-facade.service';
 import { UserModel } from '../../models/user.model';
 import { ExampleServiceInterface } from '../interfaces/example-service.interface';
 
@@ -15,15 +15,15 @@ export abstract class UserListDirective {
   /**
    * Injected instance of the user feature store service.
    */
-  protected readonly userCellService!: ExampleServiceInterface;
+  protected readonly userService!: ExampleServiceInterface;
 
   readonly userList: VaultSignalRef<UserModel[]>;
 
   readonly usersWithName: Signal<UserModel[]>;
 
-  protected readonly carCell = inject(CarService);
+  protected readonly carService = inject(CarService);
 
-  readonly cars = this.carCell.cars();
+  readonly cars = this.carService.cars();
 
   protected readonly userCarFacadeService = inject(UserCarFacadeService);
 
@@ -32,9 +32,9 @@ export abstract class UserListDirective {
   readonly groupedByMake = this.userCarFacadeService.groupedByMake;
 
   constructor(userCellService: ExampleServiceInterface) {
-    this.userCellService = userCellService;
-    this.userList = this.userCellService.users();
-    this.usersWithName = this.userCellService.usersWithNames;
+    this.userService = userCellService;
+    this.userList = this.userService.users();
+    this.usersWithName = this.userService.usersWithNames;
   }
 
   /**
@@ -48,10 +48,30 @@ export abstract class UserListDirective {
    * Retry handler for re-fetching users after an error.
    */
   retry() {
-    this.userCellService.loadUsers();
+    this.userService.loadUsers();
   }
 
   resetUsers() {
-    this.userCellService.resetUsers();
+    this.userService.resetUsers();
+  }
+
+  reloadUsers() {
+    this.userService.reloadUsers();
+  }
+
+  reactiveReloadUsers() {
+    this.userService.reactiveReloadUsers();
+  }
+
+  resetCars() {
+    this.carService.resetCars();
+  }
+
+  reloadCars() {
+    this.carService.reloadCars();
+  }
+
+  reactiveReloadCars() {
+    this.carService.reactiveReloadCars();
   }
 }

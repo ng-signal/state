@@ -33,6 +33,18 @@ class CoreObservableBehavior<T> implements VaultBehavior<T, ObservableBehaviorEx
     // eslint-disable-next-line
     const self = this;
 
+    /*
+    if (getNgVaultConfig().devMode) {
+  this._callCount ??= 0;
+  this._callCount++;
+  if (this._callCount > 5) {
+    ngVaultWarn(`fromObservable runaway detected — cell ${key}`);
+    observer.complete();
+    return;
+  }
+}
+  */
+
     return {
       fromObservable: (key, ctx, source$) =>
         new Observable<VaultSignalRef<T>>((observer) => {

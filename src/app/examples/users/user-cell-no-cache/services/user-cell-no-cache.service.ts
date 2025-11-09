@@ -1,52 +1,34 @@
-import { HttpClient } from '@angular/common/http';
-import { computed, inject, Injectable } from '@angular/core';
+import { DestroyRef, inject, Injectable } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FeatureCell, injectVault } from '@ngvault/core';
-import { VaultSignalRef } from '@ngvault/shared';
-import { map } from 'rxjs';
+import { map, take } from 'rxjs';
 import { UserModel } from '../../../models/user.model';
+import { UserService } from '../../services/user-base.service';
 
 @FeatureCell<UserModel[]>('userNoCache')
 @Injectable({
   providedIn: 'root'
 })
-export class UserCellNoCacheService {
-  private readonly vault = injectVault<UserModel[]>(UserCellNoCacheService);
+export class UserCellNoCacheService extends UserService<UserModel[]> {
+  readonly #destroyRef = inject(DestroyRef);
 
-  private readonly http = inject(HttpClient);
-
-  users(): VaultSignalRef<UserModel[]> {
-    this.loadUsers();
-
-    return this.vault.state;
+  constructor() {
+    const vault = injectVault<UserModel[]>(UserCellNoCacheService);
+    super(vault);
   }
 
-  /** Computed selector that reverses first/last names reactively */
-  readonly usersWithNames = computed(() => {
-    const users = this.vault.state.value();
-    if (!users) return [];
-
-    return users.map((u) => {
-      const [firstName, lastName = ''] = u.name.split(' ');
-      return {
-        ...u,
-        firstName,
-        lastName
-      };
-    });
-  });
-
-  loadUsers(): void {
+  override loadUsers(): void {
     const state = this.vault.state;
 
     if (!state.value() && !state.isLoading()) {
-      const source$ = this.http.get<UserModel[]>('/api/users').pipe(map((list: UserModel[]) => list));
+      const source$ = this.http.get<UserModel[]>('/api/users').pipe(
+        take(1),
+        takeUntilDestroyed(this.#destroyRef),
+        map((list: UserModel[]) => list)
+      );
       // TODO
       // this.vault.loadListFrom!(source$);
       this.vault.fromObservable!(source$);
     }
-  }
-
-  resetUsers() {
-    this.vault.reset();
   }
 }
