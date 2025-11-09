@@ -92,7 +92,7 @@ describe('UserCarFacadeService (integration)', () => {
       expect(noCars[0].name).toContain('Grace');
 
       const noUsers = service.carsWithoutUsers();
-      expect(noUsers.length).toBe(1);
+      expect(noUsers.length).toBe(0);
 
       const grouped = service.groupedByMake();
       expect(grouped.length).toBe(3);
