@@ -25,3 +25,12 @@
     @include global.spacer($i, height);
   }
 }
+
+.ngvault-hr {
+  appearance: none;
+  border: none;
+  height: 1px;
+  background-color: global.$ngvault-border-color;
+  display: block;
+  width: 100%;
+}

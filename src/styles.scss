@@ -12,10 +12,10 @@ body {
 
   background-color: var(--ngvault-surface-light);
   color: var(--ngvault-text-inverse);
-  font-family: global.$ngvault-font-family;
-  font-weight: global.$ngvault-font-weight;
-  font-size: global.$font-size-md;
-  line-height: global.$line-height;
+  // font-family: global.$ngvault-font-family;
+  // font-weight: global.$ngvault-font-weight;
+  // font-size: global.$font-size-md;
+  // line-height: global.$line-height;
 
   // Smooth text rendering
   -webkit-font-smoothing: antialiased;
@@ -142,30 +142,30 @@ html[data-theme='dark'] {
   --mat-sys-on-primary: #{global.$ngvault-text-white};
 
   .mat-mdc-menu-panel {
-    background-color: #1e293b !important; // slightly lighter than surface-dark
-    color: #e2e8f0 !important; // light slate text
+    background-color: global.$ngvault-surface-dark;
+    color: global.$ngvault-text-primary;
   }
 
   // Ensure menu items are visible and highlighted on hover
   .mat-mdc-menu-item {
-    color: #e2e8f0 !important;
+    color: global.$ngvault-text-primary;
 
     &:hover {
-      background-color: rgba(255, 255, 255, 0.08) !important;
+      background-color: global.$ngvault-hover-background-color;
     }
 
     .mat-icon {
-      color: #e2e8f0 !important;
+      color: global.$ngvault-text-primary;
     }
   }
 
   // Toolbar buttons/icons
   .mat-mdc-icon-button {
-    color: #e2e8f0 !important;
+    color: global.$ngvault-text-primary;
 
     &:hover {
-      color: #ffffff !important;
-      background-color: rgba(255, 255, 255, 0.08);
+      color: global.$ngvault-text-primary;
+      background-color: global.$ngvault-hover-background-color;
     }
   }
 }

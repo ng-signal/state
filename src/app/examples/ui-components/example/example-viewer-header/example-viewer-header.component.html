@@ -1,0 +1,24 @@
+<div class="example-viewer-title">
+  <div class="title-container">
+    <div class="title">
+      {{ title() }}
+    </div>
+
+    <div class="sub-title">
+      {{ subTitle() }}
+    </div>
+  </div>
+
+  <button
+    mat-icon-button
+    type="button"
+    matTooltip="Copy link to example"
+    aria-label="Copy link to {{ title() }} example to the clipboard"
+    (click)="copyLink()">
+    <mat-icon>link</mat-icon>
+  </button>
+
+  <button mat-icon-button type="button" matTooltip="View source" aria-label="View source code" (click)="toggleSource()">
+    <mat-icon>code</mat-icon>
+  </button>
+</div>

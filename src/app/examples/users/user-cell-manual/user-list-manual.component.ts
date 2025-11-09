@@ -2,9 +2,14 @@ import { CommonModule } from '@angular/common';
 import { Component, inject } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
+import { MatChipsModule } from '@angular/material/chips';
 import { MatExpansionModule } from '@angular/material/expansion';
 import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { ExampleViewerBodyComponent } from '../../ui-components/example/example-viewer-body/example-viewer-body.component';
+import { ExampleViewerSourceComponent } from '../../ui-components/example/example-viewer-source/example-viewer-source.component';
+import { ExampleViewerTabComponent } from '../../ui-components/example/example-viewer-tab/example-viewer-source-tab.component';
+import { ExampleViewerComponent } from '../../ui-components/example/example-viewer/example-viewer.component';
 import { InfoIconComponent } from '../../ui-components/info-icon/info-icon.component';
 import { UserListDirective } from '../directive/user-list-base.directive';
 import { UserCellManualService } from './services/user-cell-manual.service';
@@ -24,9 +29,14 @@ import { UserCellManualService } from './services/user-cell-manual.service';
     MatCardModule,
     MatButtonModule,
     MatIconModule,
+    MatChipsModule,
     MatProgressSpinnerModule,
     MatExpansionModule,
-    InfoIconComponent
+    InfoIconComponent,
+    ExampleViewerComponent,
+    ExampleViewerBodyComponent,
+    ExampleViewerSourceComponent,
+    ExampleViewerTabComponent
   ],
   templateUrl: './user-list-manual.component.html',
   styleUrls: ['../scss/example.scss']

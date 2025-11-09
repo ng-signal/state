@@ -1,0 +1,30 @@
+@use 'global' as global;
+
+// ===============================================
+// ngVault Example Viewer Body
+// ===============================================
+.example-viewer-body {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-start;
+  min-height: 25px;
+
+  gap: global.$spacing-md;
+  padding: global.$spacing-xs;
+  background-color: var(--surface-bg, global.$ngvault-surface-light);
+  color: var(--surface-text, global.$ngvault-text-primary);
+
+  // Soft fade-in for content changes (e.g. switching examples)
+  transition:
+    background-color 0.3s ease,
+    color 0.3s ease,
+    opacity 0.25s ease;
+
+  // Responsive stacking for narrow layouts
+  @media (max-width: 768px) {
+    justify-content: center;
+    // gap: global.$spacing-sm;
+    // padding: global.$spacing-sm;
+  }
+}

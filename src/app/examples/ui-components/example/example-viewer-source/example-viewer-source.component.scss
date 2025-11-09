@@ -1,0 +1,38 @@
+@use 'global' as global;
+
+.example-viewer-source {
+  background-color: var(--surface-bg, global.$ngvault-surface-light);
+  border: 1px solid var(--surface-outline, global.$ngvault-surface-outline);
+  border-radius: global.$border-radius-md;
+  box-shadow: global.$ngvault-shadow-base;
+  overflow: hidden;
+
+  .mat-mdc-tab-header {
+    background: linear-gradient(to right, global.$ngvault-primary-light, global.$ngvault-primary-base);
+    color: global.$ngvault-text-white;
+  }
+
+  .mat-mdc-tab-label-content {
+    font-family: global.$ngvault-font-family;
+    font-weight: global.$ngvault-font-weight-medium;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+
+  .tab-content {
+    min-height: 200px;
+    padding: global.$spacing-md;
+    background-color: var(--surface-bg, global.$ngvault-surface-light);
+    color: var(--surface-text, global.$ngvault-text-primary);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: global.$font-size-sm;
+    line-height: 1.6;
+    overflow-x: auto;
+
+    pre {
+      margin: 0;
+      white-space: pre-wrap;
+      word-break: break-word;
+    }
+  }
+}

@@ -16,19 +16,16 @@ export abstract class UserListDirective {
    * Injected instance of the user feature store service.
    */
   protected readonly userService!: ExampleServiceInterface;
-
   readonly userList: VaultSignalRef<UserModel[]>;
-
   readonly usersWithName: Signal<UserModel[]>;
 
   protected readonly carService = inject(CarService);
-
   readonly cars = this.carService.cars();
 
   protected readonly userCarFacadeService = inject(UserCarFacadeService);
-
   readonly usersWithoutCars = this.userCarFacadeService.usersWithoutCars;
-
+  readonly usersWithCars = this.userCarFacadeService.usersWithCars;
+  readonly carsWithoutUsers = this.userCarFacadeService.carsWithoutUsers;
   readonly groupedByMake = this.userCarFacadeService.groupedByMake;
 
   constructor(userCellService: ExampleServiceInterface) {

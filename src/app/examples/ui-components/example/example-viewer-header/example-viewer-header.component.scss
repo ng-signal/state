@@ -1,0 +1,123 @@
+@use 'global' as global;
+
+// ===============================================
+// ngVault Example Viewer Header (theme-variable driven)
+// ===============================================
+
+.example-viewer-title {
+  @include global.ngvault-font-body(global.$font-size-md, global.$font-weight-semibold);
+
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: global.$spacing-sm global.$spacing-md;
+  border-radius: global.$border-radius-md;
+  margin-bottom: global.$spacing-sm;
+
+  // Surface & typography use CSS variables (switchable via data-theme)
+  background: linear-gradient(
+    to right,
+    var(--mat-sys-surface, global.$ngvault-surface-light),
+    var(--mat-sys-primary, global.$ngvault-primary-base)
+  );
+  color: var(--surface-text, global.$ngvault-text-black);
+  box-shadow: global.$ngvault-shadow-base;
+  border: 1px solid var(--surface-outline, global.$ngvault-surface-outline);
+
+  transition:
+    background-color 0.25s ease-in-out,
+    color 0.25s ease-in-out,
+    box-shadow 0.2s ease;
+
+  &:hover {
+    @include global.ngvault-elevate(hover);
+    background: linear-gradient(
+      to right,
+      var(--mat-sys-primary, global.$ngvault-primary-light),
+      var(--mat-sys-on-primary, global.$ngvault-primary-dark)
+    );
+  }
+
+  .title-container {
+    display: flex;
+    flex-direction: row;
+    flex: 1;
+    color: inherit;
+    user-select: none;
+    align-items: center;
+
+    .title {
+      font-size: global.$font-size-lg;
+      font-weight: global.$font-weight-bold;
+      letter-spacing: 0.02em;
+      margin-right: global.$spacing-md;
+    }
+
+    .sub-title {
+      font-size: global.$font-size-sm;
+      letter-spacing: 0.02em;
+    }
+  }
+
+  // ────────────────────────────────
+  // Icon buttons
+  // ────────────────────────────────
+  button[mat-icon-button] {
+    // reset any inherited line height or vertical misalignment
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    width: 36px;
+    height: 36px;
+
+    padding: 0;
+    margin: 0;
+    line-height: 1;
+    vertical-align: middle;
+
+    border-radius: 50%;
+
+    background-color: rgba(global.$ngvault-text-white, 0.1);
+    color: global.$ngvault-primary-dark !important;
+    border: 1px solid transparent;
+
+    transition:
+      background-color 0.2s ease,
+      transform 0.1s ease;
+
+    mat-icon {
+      font-size: global.$font-size-lg;
+      line-height: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    &:hover {
+      background-color: global.$ngvault-primary-dark;
+      color: global.$ngvault-text-white !important;
+      transform: scale(1.05);
+    }
+
+    &:active {
+      transform: scale(0.95);
+      @include global.ngvault-elevate(active);
+    }
+
+    &:focus-visible {
+      outline: 2px solid global.$ngvault-accent-base;
+      outline-offset: 2px;
+    }
+  }
+  // Button spacing
+  button + button {
+    margin-left: global.$spacing-xs;
+  }
+
+  // Focus accessibility
+  button:focus-visible {
+    outline: 2px solid global.$ngvault-accent-base;
+    outline-offset: 2px;
+  }
+}

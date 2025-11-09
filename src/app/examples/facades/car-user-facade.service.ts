@@ -1,5 +1,5 @@
 import { computed, effect, inject, Injectable, signal } from '@angular/core';
-import { ResourceStateError, VaultSignalRef } from '@ngvault/shared';
+import { ResourceStateError } from '@ngvault/shared';
 import { CarService } from '../cars/services/car.service';
 import { CarModel } from '../models/car.model';
 import { UserModel } from '../models/user.model';
@@ -25,18 +25,6 @@ export class UserCarFacadeService {
   private readonly _error = signal<ResourceStateError | null>(null);
   private readonly _userValue = signal<UserWithCarModel[]>([]);
 
-  private _hasValue = computed(() => {
-    const val = this._userValue();
-    return val !== null && val !== undefined;
-  });
-
-  readonly usersWithCars: VaultSignalRef<UserWithCarModel[]> = {
-    isLoading: this._isLoading.asReadonly(),
-    value: this._userValue.asReadonly(),
-    error: this._error.asReadonly(),
-    hasValue: this._hasValue
-  };
-
   /** Derived: Cars without assigned users (reactive) — opposite from the car perspective */
   readonly carsWithoutUsers = computed(() => {
     const cars = this.carState.cars().value() ?? [];
@@ -48,6 +36,7 @@ export class UserCarFacadeService {
 
   /** Derived: Users without cars (reactive) */
   readonly usersWithoutCars = computed(() => this._userValue().filter((u) => !u.car));
+  readonly usersWithCars = computed(() => this._userValue().filter((u) => u.car));
 
   /** Derived: Users grouped by car make (reactive) */
   readonly groupedByMake = computed<UsersGroupedByMake[]>(() => {

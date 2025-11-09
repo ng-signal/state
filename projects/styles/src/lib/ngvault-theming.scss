@@ -1,84 +1,89 @@
+@use 'sass:map';
 @use '@angular/material' as mat;
 @use 'global' as global;
 
-// ===========================================
-// ngVault Material Theme Integration
-// ===========================================
+// =====================================================
+// ✅ ngVault Material v19 (M2 API) — Canonical Fix
+// =====================================================
 
-:root {
-  @include mat.snack-bar-overrides(
-    (
-      // Updated to use ngVault theme tokens
-      container-color: global.$ngvault-surface-light,
-      supporting-text-color: global.$ngvault-text-primary,
-      action-color: global.$ngvault-accent-base
-    )
-  );
-}
-
-$ngvault-primary-palette: mat.define-palette(
+// 1️⃣ Define Typography Config
+$ngvault-typography: mat.m2-define-typography-config(
   (
-    50: global.$ngvault-primary-light,
+    font-family: global.$ngvault-font-family,
+    body-1: (
+      font-size: global.$ngvault-font-size,
+      font-weight: global.$ngvault-font-weight,
+      line-height: global.$line-height,
+      letter-spacing: 0
+    ),
+    headline-5: (
+      font-size: global.$ngvault-font-size,
+      font-weight: global.$ngvault-font-weight,
+      line-height: global.$line-height,
+      letter-spacing: 0
+    )
+  )
+);
+
+// 2️⃣ Define Color Palettes (M2 palettes)
+$ngvault-primary-palette: mat.m2-define-palette(
+  (
+    100: global.$ngvault-primary-light,
     500: global.$ngvault-primary-base,
     700: global.$ngvault-primary-dark,
     contrast: (
-      50: global.$ngvault-text-black,
+      100: global.$ngvault-text-black,
       500: global.$ngvault-text-white,
       700: global.$ngvault-text-white
     )
   )
 );
 
-$ngvault-accent-palette: mat.define-palette(
+$ngvault-accent-palette: mat.m2-define-palette(
   (
-    50: global.$ngvault-accent-light,
+    100: global.$ngvault-accent-light,
     500: global.$ngvault-accent-base,
     700: global.$ngvault-accent-dark,
     contrast: (
-      50: global.$ngvault-text-black,
+      100: global.$ngvault-text-black,
       500: global.$ngvault-text-white,
       700: global.$ngvault-text-white
     )
   )
 );
 
-$ngvault-warn-palette: mat.define-palette(
+$ngvault-warn-palette: mat.m2-define-palette(
   (
-    50: global.$ngvault-warn-light,
+    100: global.$ngvault-warn-light,
     500: global.$ngvault-warn-base,
     700: global.$ngvault-warn-dark,
     contrast: (
-      50: global.$ngvault-text-black,
+      100: global.$ngvault-text-black,
       500: global.$ngvault-text-black,
       700: global.$ngvault-text-white
     )
   )
 );
 
-// Typography (matches Vault system font)
-$ngvault-typography: mat.define-typography-config(
+// 3️⃣ Define the Theme (⚠️ No typography key here!)
+$ngvault-theme: mat.m2-define-light-theme(
   (
-    font-family: global.$ngvault-font-family,
-    headline-6: (
-      font-weight: global.$ngvault-font-weight-bold
+    color: (
+      primary: $ngvault-primary-palette,
+      accent: $ngvault-accent-palette,
+      warn: $ngvault-warn-palette
     ),
-    body-1: (
-      font-weight: global.$ngvault-font-weight
-    )
+    typography: $ngvault-typography,
+    density: 0
   )
 );
 
-// Apply global theme
+// 4️⃣ Apply Theme & Typography
 html {
-  @include mat.theme(
-    (
-      color: (
-        primary: $ngvault-primary-palette,
-        accent: $ngvault-accent-palette,
-        warn: $ngvault-warn-palette
-      ),
-      typography: $ngvault-typography,
-      density: 0
-    )
-  );
+  // Color + density tokens
+  @include mat.theme($ngvault-theme);
+  @include mat.all-component-colors($ngvault-theme);
+  @include mat.all-component-densities($ngvault-theme);
+
+  // @include mat.typography-hierarchy($ngvault-typography);
 }

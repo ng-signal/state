@@ -1,0 +1,12 @@
+<div class="example-viewer-wrapper">
+  <ngvault-example-viewer-header [title]="title()" [subTitle]="subTitle()" [exampleId]="exampleId()">
+  </ngvault-example-viewer-header>
+
+  <div class="example-viewer-source-container" [class.visible]="sourceVisible()">
+    <ng-content select="[source]"></ng-content>
+  </div>
+
+  <ngvault-example-viewer-body>
+    <ng-content select="[example]"></ng-content>
+  </ngvault-example-viewer-body>
+</div>

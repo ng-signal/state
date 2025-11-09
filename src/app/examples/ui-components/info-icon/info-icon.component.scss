@@ -4,10 +4,98 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  margin: 0 4px;
 }
-button {
-  transition: transform 0.15s ease;
+
+/* Match your exact template: <button mat-icon-button> with <mat-icon class="base/overlay"> */
+button[mat-icon-button] {
+  position: relative;
+  width: 44px;
+  height: 44px;
+  border-radius: 9999px;
+  border: 1px solid transparent;
+  background: radial-gradient(circle at 30% 30%, rgba(global.$ngvault-primary-light, 0.15), transparent 70%);
+  color: global.$ngvault-primary-light;
+
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  transition:
+    transform 0.2s ease,
+    background-color 0.3s ease,
+    box-shadow 0.2s ease,
+    border-color 0.2s ease,
+    color 0.2s ease;
+
+  &:hover {
+    transform: scale(1.12);
+    background: linear-gradient(
+      145deg,
+      rgba(global.$ngvault-primary-base, 0.18),
+      rgba(global.$ngvault-primary-dark, 0.24)
+    );
+    border-color: rgba(global.$ngvault-primary-light, 0.35);
+    box-shadow: 0 2px 10px rgba(global.$ngvault-primary-light, 0.28);
+    color: global.$ngvault-text-white;
+  }
+
+  &:active {
+    transform: scale(0.96);
+    box-shadow: inset 0 2px 6px rgba(global.$ngvault-primary-dark, 0.4);
+  }
+}
+
+/* Base icon */
+button[mat-icon-button] .base {
+  font-size: 28px; /* ~32px visual with button size */
+  line-height: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition:
+    color 0.2s ease,
+    filter 0.2s ease;
+}
+
+/* Overlay icon (appears on top, subtle by default) */
+button[mat-icon-button] .overlay {
+  position: absolute;
+  inset: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 22px;
+  color: global.$ngvault-accent-base;
+  opacity: 0;
+  pointer-events: none;
+  transition:
+    opacity 0.2s ease,
+    filter 0.2s ease,
+    transform 0.2s ease;
+}
+
+/* When your template renders the overlay, fade it in on hover */
+button[mat-icon-button]:hover .overlay {
+  opacity: 0.9;
+  filter: drop-shadow(0 0 6px rgba(global.$ngvault-accent-base, 0.45));
+  transform: scale(1.02);
+}
+
+/* Dark theme tweaks */
+html[data-theme='dark'] button[mat-icon-button] {
+  background: radial-gradient(circle at 30% 30%, rgba(global.$ngvault-primary-light, 0.1), transparent 70%);
+  color: global.$ngvault-text-primary;
+
+  &:hover {
+    background: linear-gradient(
+      145deg,
+      rgba(global.$ngvault-accent-light, 0.12),
+      rgba(global.$ngvault-primary-dark, 0.28)
+    );
+    border-color: rgba(global.$ngvault-accent-light, 0.28);
+    box-shadow: 0 2px 10px rgba(global.$ngvault-accent-base, 0.28);
+    color: global.$ngvault-text-white;
+  }
 }
 
 button:hover {

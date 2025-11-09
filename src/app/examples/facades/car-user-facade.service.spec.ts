@@ -38,14 +38,6 @@ describe('UserCarFacadeService (integration)', () => {
     httpMock.verify();
   });
 
-  it('should initialize uesrsWithCars with empty state', () => {
-    const res = service.usersWithCars;
-    expect(res.value()).toEqual([]);
-    expect(res.error()).toBeNull();
-    expect(res.isLoading()).toBeFalse();
-    expect(res.hasValue()).toBeTrue();
-  });
-
   describe('loadAll', () => {
     it('should merge users and cars', async () => {
       const users: UserModel[] = [
@@ -75,9 +67,9 @@ describe('UserCarFacadeService (integration)', () => {
       carReq.flush(cars);
       await TestBed.inject(ApplicationRef).whenStable();
 
-      const result = service.usersWithCars.value();
+      const result = service.usersWithCars();
+      expect(result.length).toBe(3);
 
-      expect(result?.length).toBe(3);
       const ada = result?.find((u) => u.name.includes('Ada'));
       const alan = result?.find((u) => u.name.includes('Alan'));
       const grace = result?.find((u) => u.name.includes('Grace'));
@@ -122,9 +114,8 @@ describe('UserCarFacadeService (integration)', () => {
 
       await TestBed.inject(ApplicationRef).whenStable();
 
-      const result = service.usersWithCars.value();
-
-      expect(result?.length).toBe(0);
+      const result = service.usersWithCars();
+      expect(result.length).toBe(0);
 
       // Derived signals
       const noCars = service.usersWithoutCars();
@@ -162,9 +153,8 @@ describe('UserCarFacadeService (integration)', () => {
       carReq.flush(cars);
       await TestBed.inject(ApplicationRef).whenStable();
 
-      const result = service.usersWithCars.value();
-
-      expect(result?.length).toBe(0);
+      const result = service.usersWithCars();
+      expect(result.length).toBe(0);
 
       // Derived signals
       const noCars = service.usersWithoutCars();
@@ -200,9 +190,8 @@ describe('UserCarFacadeService (integration)', () => {
       carReq.flush(cars);
       await TestBed.inject(ApplicationRef).whenStable();
 
-      const result = service.usersWithCars.value();
-
-      expect(result?.length).toBe(0);
+      const result = service.usersWithCars();
+      expect(result.length).toBe(0);
 
       // Derived signals
       const noCars = service.usersWithoutCars();
@@ -225,7 +214,7 @@ describe('UserCarFacadeService (integration)', () => {
     carReq.flush([{ id: '1', year: 2022, make: 'Tesla', model: 'Model S' }]);
 
     setTimeout(() => {
-      expect(service.usersWithCars.value()).toEqual([]);
+      expect(service.usersWithCars()).toEqual([]);
       expect(service.usersWithoutCars()).toEqual([]);
       done();
     }, 0);

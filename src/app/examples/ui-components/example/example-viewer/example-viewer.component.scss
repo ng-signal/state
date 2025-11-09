@@ -1,0 +1,85 @@
+@use 'global' as global;
+
+// ===============================================
+// ngVault Example Viewer Wrapper
+// ===============================================
+
+.example-viewer-wrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  justify-content: flex-start;
+
+  margin: global.$spacing-md 0;
+  border-radius: global.$border-radius-lg;
+  overflow: hidden;
+
+  // Use theme variables so this auto-updates between light/dark
+  background-color: var(--surface-bg, global.$ngvault-surface-light);
+  color: var(--surface-text, global.$ngvault-text-black);
+  border: 1px solid var(--surface-outline, global.$ngvault-primary-light);
+  box-shadow: var(--vault-shadow, global.$ngvault-shadow-base);
+
+  .example-viewer-source-container {
+    overflow: hidden;
+    max-height: 0;
+    opacity: 0;
+    transform: translateY(-4px);
+    will-change: max-height, opacity, transform;
+    transition:
+      max-height 0.45s ease,
+      opacity 0.35s ease,
+      transform 0.45s ease;
+
+    &.visible {
+      max-height: 2000px;
+      opacity: 1;
+      transform: translateY(0);
+
+      /* this one line is magic */
+      transition-delay: 0s, 0.05s, 0s; // delay only opacity
+      margin-bottom: global.$spacing-xl;
+    }
+
+    // Make sure inner content doesn't jitter
+    ngvault-example-viewer-source {
+      display: block;
+      padding: global.$spacing-md;
+      background-color: var(--surface-bg, global.$ngvault-surface-light);
+      border-top: 1px solid var(--surface-outline, global.$ngvault-primary-light);
+      transition: background-color 0.3s ease;
+    }
+  }
+
+  transition:
+    background-color 0.3s ease,
+    color 0.3s ease,
+    box-shadow 0.2s ease;
+
+  // Add depth on hover
+  &:hover {
+    @include global.ngvault-elevate(hover);
+  }
+
+  // The header and body components stack inside this wrapper
+
+  ngvault-example-viewer-body {
+    padding: global.$spacing-xs;
+    background-color: var(--surface-bg, global.$ngvault-surface-light);
+    color: var(--surface-text, global.$ngvault-text-primary);
+
+    // Smooth transition between states or examples
+    transition:
+      background-color 0.3s ease,
+      color 0.3s ease;
+  }
+
+  // Responsive sizing
+  @media (max-width: 768px) {
+    border-radius: global.$border-radius-md;
+
+    ngvault-example-viewer-body {
+      padding: global.$spacing-sm;
+    }
+  }
+}
