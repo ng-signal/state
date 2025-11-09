@@ -15,4 +15,6 @@ export interface ExampleServiceInterface {
 
   /** Loads or refreshes the data from backend or cache */
   loadUsers(): void;
+
+  resetUsers(): void;
 }

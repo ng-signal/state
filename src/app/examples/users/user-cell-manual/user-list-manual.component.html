@@ -1,6 +1,7 @@
 <div class="list-container">
   <div class="header">
     <h3>{{ title }}</h3>
+    <div class="action-container"><button class="ngvault-button" (click)="resetUsers()">Reset Users</button></div>
   </div>
   <!-- LOADING -->
   @if (userList.isLoading()) {

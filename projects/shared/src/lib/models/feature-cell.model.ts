@@ -17,6 +17,7 @@ export interface FeatureCell<T> extends SignalVaultModel<T> {
   destroy(): void;
 
   destroyed$?: Observable<void>;
+  reset$?: Observable<void>;
 
   /** @internal – used by NgVault for behavior extension context */
   readonly ctx?: VaultBehaviorContext<T>;

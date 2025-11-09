@@ -1,8 +1,9 @@
 import { HttpClient } from '@angular/common/http';
-import { computed, inject, Injectable } from '@angular/core';
+import { computed, DestroyRef, inject, Injectable, signal } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FeatureCell, injectVault } from '@ngvault/core';
 import { VaultSignalRef } from '@ngvault/shared';
-import { map, take } from 'rxjs';
+import { take } from 'rxjs';
 import { UserModel } from '../../../models/user.model';
 
 @FeatureCell<UserModel[]>('userManual')
@@ -11,13 +12,14 @@ import { UserModel } from '../../../models/user.model';
 })
 export class UserCellManualService {
   private readonly vault = injectVault<UserModel[]>(UserCellManualService);
+  readonly #destroyRef = inject(DestroyRef);
+  private isLoaded = signal(false);
 
   private readonly http = inject(HttpClient);
 
-  users(): VaultSignalRef<UserModel[]> {
-    this.loadUsers();
-
-    return this.vault.state;
+  resetUsers(): void {
+    this.isLoaded.set(false);
+    this.vault.reset();
   }
 
   /** Computed selector that reverses first/last names reactively */
@@ -35,17 +37,28 @@ export class UserCellManualService {
     });
   });
 
+  users(): VaultSignalRef<UserModel[]> {
+    if (!this.isLoaded()) {
+      this.isLoaded.set(true);
+      this.loadUsers();
+    }
+
+    return this.vault.state;
+  }
+
   loadUsers(): void {
     const state = this.vault.state;
 
     if (!state.value() && !state.isLoading()) {
-      this.vault.setState({
-        loading: true,
-        error: null
-      });
-      const source$ = this.http.get<UserModel[]>('/api/users').pipe(map((list: UserModel[]) => list));
+      this.vault.setState({ loading: true, error: null });
+
+      const source$ = this.http.get<UserModel[]>('/api/users');
+
       this.vault.fromObservable!(source$)
-        .pipe(take(1))
+        .pipe(
+          take(1), // keep
+          takeUntilDestroyed(this.#destroyRef) // 👈 ties it to Angular DI lifecycle
+        )
         .subscribe({
           next: (state: VaultSignalRef<UserModel[]>) => {
             this.vault.setState({
@@ -55,10 +68,7 @@ export class UserCellManualService {
             });
           },
           error: (err) => {
-            this.vault.setState({
-              loading: false,
-              error: err
-            });
+            this.vault.setState({ loading: false, error: err });
           }
         });
     }

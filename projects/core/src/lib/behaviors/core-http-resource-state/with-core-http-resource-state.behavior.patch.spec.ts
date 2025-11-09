@@ -3,6 +3,7 @@ import { HttpTestingController, provideHttpClientTesting } from '@angular/common
 import { ApplicationRef, Injector, provideZonelessChangeDetection, runInInjectionContext, signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { resetWarnExperimentalHttpResourceTestingOnly } from '@ngvault/core/utils/dev-warning.util';
+import { provideVaultTesting } from '@ngvault/testing';
 import { withCoreHttpResourceStateBehavior } from './with-core-http-resource-state.behavior';
 
 interface TestModel {
@@ -20,7 +21,12 @@ describe('Behavior: withCoreHttpResourceState: Patch', () => {
   beforeEach(() => {
     warnSpy = spyOn(console, 'warn');
     TestBed.configureTestingModule({
-      providers: [provideHttpClient(), provideHttpClientTesting(), provideZonelessChangeDetection()]
+      providers: [
+        provideVaultTesting(),
+        provideHttpClient(),
+        provideHttpClientTesting(),
+        provideZonelessChangeDetection()
+      ]
     });
 
     injector = TestBed.inject(Injector);

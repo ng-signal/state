@@ -11,6 +11,7 @@ import {
 } from '@ngvault/shared';
 import { applyNgVaultValueMerge } from '../../utils/apply-vault-merge.util';
 import { isHttpResourceRef } from '../../utils/is-http-resource.util';
+import { ngVaultLog } from '../../utils/ngvault-logger.util';
 
 /**
  * Core behavior responsible for replacing state values.
@@ -31,7 +32,9 @@ class CoreStateBehavior<T> implements VaultBehavior<T> {
   }
 
   onSet(key: string, ctx: VaultBehaviorContext<T>): void {
+    ngVaultLog('core on set', 1);
     if (ctx.next && typeof ctx.next === 'object' && !isHttpResourceRef<T>(ctx.next)) {
+      ngVaultLog('core on set', 2);
       const { isLoading, error, value, next } = ctx;
 
       // Update basic flags if provided
@@ -57,7 +60,9 @@ class CoreStateBehavior<T> implements VaultBehavior<T> {
   }
 
   onPatch(key: string, ctx: VaultBehaviorContext<T>): void {
+    ngVaultLog('core on patch', 1);
     if (ctx.patch && typeof ctx.patch === 'object' && !isHttpResourceRef<T>(ctx.patch)) {
+      ngVaultLog('core on patch', 2);
       const patch = ctx.patch as VaultStateType<T>;
       const { isLoading, error, value } = ctx;
 

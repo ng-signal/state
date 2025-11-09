@@ -13,6 +13,7 @@ import { NGVAULT_EXPERIMENTAL_HTTP_RESOURCE } from '../../constants/experimental
 import { applyNgVaultValueMerge } from '../../utils/apply-vault-merge.util';
 import { devWarnExperimentalHttpResource } from '../../utils/dev-warning.util';
 import { isHttpResourceRef } from '../../utils/is-http-resource.util';
+import { ngVaultDebug } from '../../utils/ngvault-logger.util';
 import { resourceError } from '../../utils/resource-error.util';
 
 /**
@@ -37,7 +38,9 @@ class CoreHttpResourceStateBehavior<T> implements VaultBehavior<T> {
   }
 
   onSet(key: string, ctx: VaultBehaviorContext<T>): void {
+    ngVaultDebug('http resource on set', 1);
     if (NGVAULT_EXPERIMENTAL_HTTP_RESOURCE && isHttpResourceRef<T>(ctx.next)) {
+      ngVaultDebug('http resource on set', 2);
       const resource = ctx.next as HttpResourceRef<T>;
       const { isLoading, error, value } = ctx;
 
@@ -69,7 +72,9 @@ class CoreHttpResourceStateBehavior<T> implements VaultBehavior<T> {
   }
 
   onPatch(key: string, ctx: VaultBehaviorContext<T>): void {
+    ngVaultDebug('http resource on patch', 1);
     if (NGVAULT_EXPERIMENTAL_HTTP_RESOURCE && isHttpResourceRef<T>(ctx.patch)) {
+      ngVaultDebug('http resource on patch', 2);
       const resource = ctx.patch as HttpResourceRef<T>;
       const { isLoading, error, value } = ctx;
 

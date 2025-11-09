@@ -10,7 +10,8 @@ import {
   VaultDataType,
   VaultSignalRef
 } from '@ngvault/shared';
-import { Observable, take } from 'rxjs';
+import { EMPTY, Observable, take, takeUntil } from 'rxjs';
+import { ngVaultDebug, ngVaultError, ngVaultLog, ngVaultWarn } from '../../utils/ngvault-logger.util';
 import { resourceError } from '../../utils/resource-error.util';
 import { ObservableBehaviorExtension } from './interface/observable-behavior.interface';
 
@@ -31,18 +32,29 @@ class CoreObservableBehavior<T> implements VaultBehavior<T, ObservableBehaviorEx
   extendCellAPI(): ObservableBehaviorExtension<T> {
     // eslint-disable-next-line
     const self = this;
+
     return {
       fromObservable: (key, ctx, source$) =>
         new Observable<VaultSignalRef<T>>((observer) => {
+          ngVaultDebug('fromObservable → start', 1);
+
+          // tie to lifecycle signals for reset & destroy
+          const destroy$ = ctx.destroyed$ ?? EMPTY;
+          const reset$ = ctx.reset$ ?? EMPTY;
+
+          // reactive signals for Vault state reflection
           const _loadingSignal = signal(true);
           const _errorSignal = signal<ResourceStateError | null>(null);
           const _valueSignal = signal<VaultDataType<T>>(undefined);
           const _hasValue = signal(false);
 
+          ngVaultDebug('fromObservable → creating signals', 2);
           ctx.behaviorRunner?.onLoad?.(self.behaviorId, self.key, ctx);
+          ngVaultDebug('fromObservable → onLoad called', 3);
 
-          source$.pipe(take(1)).subscribe({
+          const subscription = source$.pipe(takeUntil(reset$), takeUntil(destroy$), take(1)).subscribe({
             next: (value) => {
+              ngVaultLog('fromObservable → next()');
               _valueSignal.set(value);
               _loadingSignal.set(false);
               _hasValue.set(true);
@@ -53,18 +65,28 @@ class CoreObservableBehavior<T> implements VaultBehavior<T, ObservableBehaviorEx
                 error: _errorSignal.asReadonly(),
                 hasValue: _hasValue.asReadonly()
               });
+
               ctx.behaviorRunner?.onSet?.(self.behaviorId, self.key, ctx);
             },
+
             error: (err) => {
+              ngVaultError('fromObservable → error()');
               observer.error(resourceError(err));
               ctx.behaviorRunner?.onError?.(self.behaviorId, self.key, ctx);
             },
+
             complete: () => {
+              ngVaultLog('fromObservable → complete()');
               _loadingSignal.set(false);
               ctx.behaviorRunner?.onDispose?.(self.behaviorId, self.key, ctx);
               observer.complete();
             }
           });
+
+          return () => {
+            ngVaultWarn('fromObservable → cleanup()');
+            subscription.unsubscribe();
+          };
         })
     };
   }

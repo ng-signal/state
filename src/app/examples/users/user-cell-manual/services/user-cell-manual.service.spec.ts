@@ -225,4 +225,13 @@ describe('Service: User Cell Manual', () => {
       expect(err?.details).toEqual(Object({ message: 'Internal Server Error' }));
     });
   });
+
+  it('should handle a resetUsers', async () => {
+    spyOn(service['vault'], 'reset');
+    expect(service['isLoaded']()).toBeFalse();
+
+    service.resetUsers();
+
+    expect(service['vault'].reset).toHaveBeenCalledWith();
+  });
 });

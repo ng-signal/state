@@ -1,5 +1,6 @@
 import { Signal } from '@angular/core';
 import { VaultBehaviorRunner } from '@ngvault/shared';
+import { Observable } from 'rxjs';
 import { ResourceStateError } from '../models/resource-state-error.model';
 import { VaultStateSnapshot } from '../models/vault-state-snapshot.model';
 import { VaultDataType } from '../types/vault-data.type';
@@ -15,4 +16,7 @@ export interface VaultBehaviorContext<T> {
 
   state: Readonly<VaultStateSnapshot<T>>;
   behaviorRunner?: VaultBehaviorRunner<T>;
+
+  destroyed$?: Observable<void>;
+  reset$?: Observable<void>;
 }

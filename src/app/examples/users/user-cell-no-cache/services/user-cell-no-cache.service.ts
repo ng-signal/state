@@ -45,4 +45,8 @@ export class UserCellNoCacheService {
       this.vault.fromObservable!(source$);
     }
   }
+
+  resetUsers() {
+    this.vault.reset();
+  }
 }

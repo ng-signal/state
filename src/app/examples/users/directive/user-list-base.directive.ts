@@ -50,4 +50,8 @@ export abstract class UserListDirective {
   retry() {
     this.userCellService.loadUsers();
   }
+
+  resetUsers() {
+    this.userCellService.resetUsers();
+  }
 }

@@ -17,6 +17,7 @@ import { withCoreObservableBehavior } from '../../behaviors/core-observable/with
 import { withCoreStateBehavior } from '../../behaviors/core-state/with-core-state.behavior';
 import { FeatureCellDescriptorModel } from '../../models/feature-cell-descriptor.model';
 import { FEATURE_CELL_REGISTRY } from '../../tokens/feature-cell-registry.token';
+import { ngVaultDebug, ngVaultWarn } from '../../utils/ngvault-logger.util';
 
 export function provideFeatureCell<Service, T>(
   service: Type<Service>,
@@ -34,6 +35,7 @@ export function provideFeatureCell<Service, T>(
       const _injector = inject(Injector);
       const _destroyRef = inject(DestroyRef);
       const _destroyed$ = new Subject<void>();
+      const _reset$ = new Subject<void>();
 
       // Prevent incorrect initialization (e.g., passing a resource object)
       if (
@@ -73,6 +75,8 @@ export function provideFeatureCell<Service, T>(
         error: _error,
         value: _value,
         behaviorRunner: _behaviorRunner,
+        destroyed$: _destroyed$.asObservable(),
+        reset$: _reset$.asObservable(),
 
         get state(): Readonly<VaultStateSnapshot<T>> {
           return {
@@ -87,13 +91,16 @@ export function provideFeatureCell<Service, T>(
       _behaviorRunner.onInit(_coreId, featureCellDescriptor.key, service.name, ctx);
 
       const _reset = (): void => {
+        ngVaultWarn('feature cell _reset');
         _isLoading.set(false);
         _error.set(null);
         _value.set(undefined);
+        _reset$.next();
         _behaviorRunner.onReset(_coreId, featureCellDescriptor.key, ctx);
       };
 
       const _destroy = (): void => {
+        ngVaultWarn('feature cell _destroy');
         _destroyed$.next();
         _destroyed$.complete();
 
@@ -105,6 +112,7 @@ export function provideFeatureCell<Service, T>(
       _destroyRef.onDestroy(() => _destroy());
 
       const _set = (next: VaultStateInputType<T>): void => {
+        ngVaultDebug('feature cell _set');
         ctx.patch = null;
         if (next == null) {
           _reset();
@@ -116,6 +124,7 @@ export function provideFeatureCell<Service, T>(
       };
 
       const _patch = (patch: VaultStateInputType<T>): void => {
+        ngVaultDebug('feature cell _patch');
         ctx.next = null;
         if (patch == null) {
           _reset();
@@ -138,7 +147,8 @@ export function provideFeatureCell<Service, T>(
         patchState: _patch,
         reset: _reset,
         destroy: _destroy,
-        destroyed$: _destroyed$.asObservable()
+        destroyed$: _destroyed$.asObservable(),
+        reset$: _reset$.asObservable()
       };
 
       // Attach internal metadata for behavior extensions

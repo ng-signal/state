@@ -1,5 +1,11 @@
 @use 'global' as global;
 
+:host {
+  display: block;
+  height: calc(100vh - var(--app-toolbar-height) - var(--app-footer-height));
+  overflow: hidden;
+}
+
 .dev-tools-container {
   display: flex;
   flex-direction: column;
@@ -14,8 +20,8 @@
   font-family: global.$ngvault-font-family;
 
   /* Fills available height minus toolbar + footer */
-  height: calc(100vh - var(--app-toolbar-height) - var(--app-footer-height) - #{global.$spacing-md});
-  overflow-y: auto;
+  height: 100%;
+  overflow-y: hidden;
   box-sizing: border-box;
 
   /* Scrollbar styling */
@@ -42,6 +48,11 @@
     font-weight: global.$font-weight-semibold;
     color: var(--surface-color);
     margin-bottom: global.$spacing-sm;
+
+    .warn {
+      color: global.$ngvault-warn-base;
+      font-size: global.$font-size-md;
+    }
   }
 
   /* ───────────── Actions ───────────── */
@@ -81,7 +92,7 @@
     display: grid;
     grid-template-columns: 1fr 1fr;
     gap: global.$spacing-lg;
-    height: 100%;
+    height: calc(100% - 110px);
 
     .output-container {
       display: flex;
@@ -90,7 +101,7 @@
       border-radius: global.$border-radius-lg;
       padding: global.$spacing-md;
       overflow: hidden;
-      height: calc(100% - #{global.$spacing-xl});
+      height: calc(100% - 20px);
 
       .title {
         font-size: global.$font-size-md;
@@ -103,7 +114,7 @@
 
       .output {
         overflow-y: auto;
-        height: calc(100% - #{global.$spacing-xxl});
+        height: calc(100% - 50px);
         background: var(--surface-bg);
         border-radius: global.$border-radius-md;
         padding: global.$spacing-sm;
