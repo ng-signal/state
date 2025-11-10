@@ -1,11 +1,14 @@
 @use 'global' as global;
 
 .example-viewer-source {
+  height: 495px;
+
   .tab-body {
     padding: global.$spacing-md;
   }
 
   .source-row {
+    height: 426px;
     position: relative;
     display: flex;
     align-items: flex-start;
@@ -22,39 +25,42 @@
     }
 
     pre {
+      height: 425px;
+      width: 100%;
       margin: 0;
-      flex: 1;
-      overflow-x: auto;
-      font-family: 'JetBrains Mono', monospace;
-      font-size: global.$font-size-sm;
-      line-height: 1.6;
-      color: var(--surface-text, global.$ngvault-text-primary);
-      background: transparent;
-      border: none;
-      padding-left: global.$spacing-md;
-      padding-right: global.$spacing-md;
-      white-space: pre-wrap;
-      word-break: break-word;
+      padding: 0;
+      background: var(--surface-bg, #0f172a);
+      color: var(--surface-text, #e2e8f0);
+      overflow: auto;
+      display: flex;
+      align-items: stretch;
+      justify-content: flex-start;
+
+      /* optional: horizontal + vertical scrollbars */
+      scrollbar-gutter: stable;
 
       code {
+        height: 400px;
+        width: calc(100% - global.$spacing-md * 3 - 4px);
         display: flex;
-        align-items: flex-start;
         background-color: var(--surface-bg, #0f172a);
         color: var(--surface-text, #e2e8f0);
         font-family: 'JetBrains Mono', monospace;
-        font-size: 0.875rem;
-        line-height: 1.6;
-        padding-left: 1rem;
-        padding-right: 1rem;
-        border-radius: 8px;
+        font-size: global.$font-size-sm;
+        line-height: global.$line-height;
+        border-radius: global.$border-radius-md;
         white-space: pre;
-        overflow-x: auto;
+        overflow: scroll;
         tab-size: 2;
         text-align: left;
+        margin-left: global.$spacing-md;
+        margin-top: global.$spacing-md;
+        padding-left: global.$spacing-md;
+        padding-right: global.$spacing-md;
 
         transition: box-shadow 0.3s ease;
         &:hover {
-          box-shadow: 0 0 8px rgba(25, 118, 210, 0.4);
+          box-shadow: global.$ngvault-shadow-base;
         }
       }
     }

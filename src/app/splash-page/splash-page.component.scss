@@ -5,8 +5,8 @@
   justify-content: center;
   align-items: center;
   height: calc(100vh - #{global.$footer-height} - #{global.$toolbar-height});
-  background-color: global.$ngvault-surface-light;
-  color: global.$ngvault-text-black;
+  background-color: var(--surface-bg);
+  color: var(--surface-text);
   text-align: center;
 
   .splash-content {
@@ -39,15 +39,19 @@
     .sub-title {
       font-size: global.$font-size-lg;
       font-weight: global.$font-weight-medium;
-      color: global.$ngvault-text-black;
+      color: var(--surface-text);
       letter-spacing: 0.04em;
     }
 
+    .example-container {
+      width: 840px;
+    }
+
     .about-container {
-      width: 85%;
+      width: 100%;
       max-width: 720px;
       font-size: global.$font-size-sm;
-      color: global.$ngvault-text-black;
+      color: var(--surface-text);
       line-height: global.$line-height;
       text-align: justify;
       margin-top: global.$spacing-md;
@@ -55,29 +59,6 @@
       strong {
         color: global.$ngvault-primary-base;
       }
-    }
-  }
-}
-
-/* 🌙 Dark theme override */
-html[data-theme='dark'] {
-  .splash-container {
-    background-color: global.$ngvault-surface-dark;
-    color: global.$ngvault-text-primary;
-
-    .logo.light {
-      display: none;
-    }
-    .logo.dark {
-      display: block;
-    }
-
-    .title {
-      color: global.$ngvault-primary-light;
-    }
-
-    .sub-title {
-      color: global.$ngvault-text-secondary;
     }
   }
 }

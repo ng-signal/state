@@ -1,30 +1,66 @@
 <div class="splash-container">
   <div class="splash-content">
+    <!-- Brand + tagline -->
     <div class="logo-block">
       <ngvault-logo logo="ngvault-landscape.svg" tooltip="ngVault — Secure State. Reactive by Design." />
       <div class="sub-title">Secure State. Reactive by Design.</div>
     </div>
 
+    <!-- About Section -->
     <div class="about-container">
-      <p>Welcome to the <strong>ngVault Demo</strong> — a showcase of secure, reactive state management for Angular.</p>
       <p>
-        Explore how <strong>signals</strong>, <strong>stores</strong>, and <strong>state synchronization</strong> come
-        together to power dynamic applications.
+        Welcome to the <strong>ngVault Demo</strong> — a living showcase of how
+        <strong>secure, reactive state</strong> transforms Angular applications.
       </p>
-      <p>Use the <strong>Examples</strong> section to view live data and watch ngVault react in real time.</p>
-      <p>Then open the <strong>Dev Tools</strong> panel to inspect every event, patch, and state transition.</p>
+
+      <p>
+        ngVault combines the power of <strong>signals</strong> with a modular
+        <strong>vault-based architecture</strong> to make state management both <em>simple</em> and
+        <em>predictable</em>. It’s designed to be <strong>framework-native</strong>,
+        <strong>developer-friendly</strong>, and <strong>production-safe</strong>.
+      </p>
+
+      <p>
+        Each vault encapsulates its own state, logic, and lifecycle — giving you isolated, traceable state containers
+        that automatically synchronize and react in real time. No boilerplate, no guessing, no hidden mutations.
+      </p>
+
+      <p>
+        Use the <strong>Examples</strong> below to see how ngVault effortlessly manages reactive data flows. Watch how a
+        user list updates instantly as new entities are loaded, and how derived state stays perfectly in sync.
+      </p>
+
+      <p>
+        Then, open the <strong>Dev Tools</strong> panel to dive deeper. You’ll see every <em>event</em>, <em>patch</em>,
+        and <em>state change</em>
+        logged in sequence — a transparent view into the vault’s reactive core.
+      </p>
+
+      <p>
+        ngVault is more than just state management — it’s a full lifecycle engine built for clarity, composability, and
+        security at scale.
+      </p>
     </div>
 
-    <ngvault-example-viewer title="Reactive Fetch (Users)" subTitle="Fetched from User Store" exampleId="user-list">
-      <div source>
-        <ngvault-example-viewer-source [displayExamples]="true" exampleId="user-list">
-          @for (code of userListSourceCode; track code.type) {
-            <ngvault-example-viewer-tab [label]="code.label">
-              {{ code.code }}
-            </ngvault-example-viewer-tab>
+    <!-- Live Example -->
+    <div class="example-container">
+      <ngvault-example-viewer title="Reactive Fetch (Users)" subTitle="Fetched from User Store" exampleId="user-list">
+        <div example>
+          @for (user of userList.value(); track user.id) {
+            <ngvault-info-icon [data]="user" [icon]="'person'" class="info-icon" />
           }
-        </ngvault-example-viewer-source>
-      </div>
-    </ngvault-example-viewer>
+        </div>
+
+        <div source>
+          <ngvault-example-viewer-source [displayExamples]="true" exampleId="user-list">
+            @for (code of userListSourceCode; track code.type) {
+              <ngvault-example-viewer-tab [label]="code.label">
+                {{ code.code }}
+              </ngvault-example-viewer-tab>
+            }
+          </ngvault-example-viewer-source>
+        </div>
+      </ngvault-example-viewer>
+    </div>
   </div>
 </div>

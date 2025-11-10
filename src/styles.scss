@@ -100,6 +100,8 @@ body {
   --mat-sys-on-surface: #{global.$ngvault-text-inverse};
   --mat-sys-primary: #{global.$ngvault-primary-base};
   --mat-sys-on-primary: #{global.$ngvault-text-white};
+
+  --mat-active-text: #{global.$ngvault-primary-base};
 }
 
 // ============================================
@@ -141,6 +143,8 @@ html[data-theme='dark'] {
   --mat-sys-primary: #{global.$ngvault-primary-dark};
   --mat-sys-on-primary: #{global.$ngvault-text-white};
 
+  --mat-active-text: #{global.$ngvault-primary-light};
+
   .mat-mdc-menu-panel {
     background-color: global.$ngvault-surface-dark;
     color: global.$ngvault-text-primary;
@@ -168,6 +172,18 @@ html[data-theme='dark'] {
       background-color: global.$ngvault-hover-background-color;
     }
   }
+}
+
+.mdc-tab__text-label {
+  color: var(--surface-text, #0f172a) !important;
+  transition: color 0.3s ease;
+}
+
+/* When tab is active or focused */
+.mdc-tab--active .mdc-tab__text-label,
+.mdc-tab:focus .mdc-tab__text-label,
+.mdc-tab:hover .mdc-tab__text-label {
+  color: var(--mat-active-text) !important;
 }
 
 .mat-mdc-list-item:hover::before,

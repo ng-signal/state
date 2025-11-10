@@ -1,0 +1,35 @@
+@use 'global' as global;
+
+* {
+  /* Ensure scrollbars are rendered in overlay mode on supported browsers */
+  scrollbar-gutter: stable;
+}
+
+/* Chrome, Edge, Safari (WebKit-based) */
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+::-webkit-scrollbar-track {
+  background-color: var(--surface-bg, global.$ngvault-surface-light);
+  border-radius: global.$border-radius-md;
+}
+
+::-webkit-scrollbar-thumb {
+  background-color: global.$ngvault-primary-base;
+  border-radius: global.$border-radius-md;
+  border: 2px solid var(--surface-bg, global.$ngvault-surface-light);
+
+  transition: background-color 0.2s ease;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background-color: global.$ngvault-primary-dark;
+}
+
+/* Firefox (uses different selectors) */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: global.$ngvault-primary-base var(--surface-bg, global.$ngvault-surface-light);
+}

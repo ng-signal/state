@@ -3,6 +3,8 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatMenuModule } from '@angular/material/menu';
 import { MatToolbarModule } from '@angular/material/toolbar';
+import { RouterLink } from '@angular/router';
+import { NgvaultLogoComponent } from '../helpers/logo/logo.component';
 import { ThemeService } from '../theme/theme.service';
 
 /**
@@ -11,7 +13,7 @@ import { ThemeService } from '../theme/theme.service';
 @Component({
   selector: 'ngvault-toolbar',
   standalone: true,
-  imports: [MatToolbarModule, MatIconModule, MatMenuModule, MatButtonModule],
+  imports: [MatToolbarModule, MatIconModule, MatMenuModule, MatButtonModule, NgvaultLogoComponent, RouterLink],
   templateUrl: './toolbar.component.html',
   styleUrls: ['./toolbar.component.scss']
 })

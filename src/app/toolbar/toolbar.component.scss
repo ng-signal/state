@@ -2,16 +2,14 @@
 
 .toolbar {
   display: flex;
-  flex-direction: row;
   align-items: center;
   justify-content: space-between;
   width: 100%;
   height: global.$toolbar-height;
   padding: 0 global.$spacing-md;
-
+  background-color: var(--toolbar-bg);
   color: var(--toolbar-text);
   border-bottom: 1px solid var(--toolbar-border);
-  background-color: var(--toolbar-bg);
   box-shadow: global.$ngvault-shadow-hover;
 
   button.mat-icon-button {
@@ -23,16 +21,38 @@
     display: flex;
     flex-direction: row;
     align-items: center;
-    width: 300px;
-    @include global.ngvault-font-body;
+    gap: global.$spacing-sm;
+    text-decoration: none;
+    cursor: pointer;
+    transition:
+      transform 0.15s ease,
+      opacity 0.15s ease;
 
-    .title {
-      @include global.ngvault-font-logo;
-      margin-right: global.$spacing-md;
+    &:hover {
+      transform: translateY(-1px);
+      opacity: 0.9;
     }
 
-    mat-icon {
-      color: global.$ngvault-accent-base;
+    ngvault-logo {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 140px;
+    }
+
+    .text-block {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      justify-content: center;
+      color: inherit;
+
+      .subtitle {
+        font-size: global.$font-size-xs;
+        color: var(--toolbar-text, global.$ngvault-text-secondary);
+        font-weight: global.$font-weight-medium;
+        letter-spacing: 0.02em;
+      }
     }
   }
 
