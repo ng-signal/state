@@ -36,9 +36,11 @@ describe('Service NgVaultDevtools', () => {
     let allEvents = service.events();
     expect(allEvents.length).toBe(1);
     expect(allEvents[0]).toEqual(jasmine.objectContaining(base));
+    expect(service.totalEvents()).toBe(1);
 
     service.clearEvents();
     allEvents = service.events();
+    expect(service.totalEvents()).toBe(0);
     expect(allEvents.length).toBe(0);
   });
 
