@@ -6,13 +6,16 @@ import { MatChipsModule } from '@angular/material/chips';
 import { MatExpansionModule } from '@angular/material/expansion';
 import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
-import { NgvaultCodeEscapeDirective } from '../../ui-components/directives/ngvault-code-escape.directive';
+import { MatTabsModule } from '@angular/material/tabs';
+import { NgVaultDevtoolsService } from '../../dev-tools/ui/services/ngvault-devtools.service';
 import { ExampleViewerSourceComponent } from '../../ui-components/example/example-viewer-source/example-viewer-source.component';
 import { ExampleViewerTabComponent } from '../../ui-components/example/example-viewer-tab/example-viewer-source-tab.component';
 import { ExampleViewerComponent } from '../../ui-components/example/example-viewer/example-viewer.component';
 import { InfoIconComponent } from '../../ui-components/info-icon/info-icon.component';
 import { UserListDirective } from '../directive/user-list-base.directive';
 import { UserCellManualService } from './services/user-cell-manual.service';
+import { carsWithDescriptionsCodeModel } from './source-code/cars-with-descriptions/cars-with-descriptions.code';
+import { userListSourceCodeModel } from './source-code/user-list/user-list.code';
 
 /**
  * @component UserListManualComponent
@@ -30,13 +33,13 @@ import { UserCellManualService } from './services/user-cell-manual.service';
     MatButtonModule,
     MatIconModule,
     MatChipsModule,
+    MatTabsModule,
     MatProgressSpinnerModule,
     MatExpansionModule,
     InfoIconComponent,
     ExampleViewerComponent,
     ExampleViewerSourceComponent,
-    ExampleViewerTabComponent,
-    NgvaultCodeEscapeDirective
+    ExampleViewerTabComponent
   ],
   templateUrl: './user-list-manual.component.html',
   styleUrls: ['../scss/example.scss']
@@ -48,7 +51,14 @@ export class UserListManualComponent extends UserListDirective {
   /** Spinner caption shown during manual load operations */
   override spinnerTitle = 'Manual';
 
+  private readonly ngVaultDevToolsService = inject(NgVaultDevtoolsService);
+
+  readonly totalEvents = this.ngVaultDevToolsService.totalEvents;
+
   constructor() {
     super(inject(UserCellManualService));
   }
+
+  userListSourceCode = userListSourceCodeModel;
+  carsWithDescriptionsSourceCode = carsWithDescriptionsCodeModel;
 }

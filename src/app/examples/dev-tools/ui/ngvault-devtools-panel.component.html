@@ -5,10 +5,6 @@
   </div>
   <div class="dev-tool-actions">
     <div class="action-container"><button (click)="clearEvents()">Clear Events</button></div>
-
-    <div class="action-container"><button (click)="clearVaults()">Clear Vaults</button></div>
-
-    <div class="action-container"><button (click)="clearAll()">Clear All</button></div>
   </div>
   <div class="full-output-container">
     <div class="output-container">
@@ -27,17 +23,6 @@
               {{ event.timestamp | date: 'mediumTime' }}
             </span>
             <pre class="text-xs text-slate-300 mt-1">{{ event.state | json }}</pre>
-          </div>
-        }
-      </div>
-    </div>
-    <div class="output-container">
-      <div class="title">Vaults</div>
-      <div class="output">
-        @for (vault of vaults() | keyvalue; track vault.key) {
-          <div>
-            <strong class="text-blue-400">{{ vault.key }}</strong>
-            <pre class="text-xs text-slate-300 mt-1">{{ vault.value | json }}</pre>
           </div>
         }
       </div>

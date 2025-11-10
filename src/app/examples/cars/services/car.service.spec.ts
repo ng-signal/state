@@ -114,7 +114,7 @@ describe('Service: Car State', () => {
     expect(service['isLoaded']()).toBeFalse();
   });
 
-  it('should handle a reloadUser', async () => {
+  it('should handle a reloadcar', async () => {
     spyOn(service['vault'], 'reset');
     (service as any).isLoaded.set(true);
 
@@ -133,5 +133,84 @@ describe('Service: Car State', () => {
 
     expect(service['vault'].reset).toHaveBeenCalledWith();
     expect(service['isLoaded']()).toBeFalse();
+  });
+
+  describe('carsWithDescriptions', () => {
+    it('should return [] when vault state has no cars', () => {
+      const result = service.carsWithDescriptions();
+      expect(result).toEqual([]);
+    });
+
+    it('should compute reversed names when vault state is populated', () => {
+      const testcars = getCarData() as any;
+
+      // Act: update vault (this is the real reactive store)
+      service['vault'].setState({
+        loading: false,
+        value: testcars,
+        error: null
+      });
+      TestBed.tick();
+
+      // Assert: computed selector should reflect reversed names
+      const result = service.carsWithDescriptions();
+      TestBed.tick();
+
+      expect(result.length).toBe(10);
+      expect(result[0]).toEqual(
+        Object({
+          id: '1',
+          year: 2022,
+          make: 'Tesla',
+          model: 'Model 3',
+          blueBookDescription: 'Tesla Model 3 - 2022'
+        })
+      );
+    });
+
+    it('should handle no cars gracefully', () => {
+      service['vault'].setState({
+        loading: false,
+        value: [],
+        error: null
+      });
+
+      const result = service.carsWithDescriptions();
+
+      expect(result.length).toBe(0);
+    });
+
+    it('should handle null cars gracefully', () => {
+      service['vault'].setState({
+        loading: false,
+        value: undefined,
+        error: null
+      });
+
+      const result = service.carsWithDescriptions();
+
+      expect(result.length).toBe(0);
+    });
+
+    it('should recompute reactively when vault data changes', () => {
+      service['vault'].setState({
+        loading: false,
+        value: [{ id: '1', make: 'Ada Lovelace' } as any],
+        error: null
+      });
+
+      const first = service.carsWithDescriptions();
+      expect(first[0].make).toBe('Ada Lovelace');
+
+      // Update real vault again — signal change should propagate
+      service['vault'].setState({
+        loading: false,
+        value: [{ id: '2', make: 'Alan Turing' } as any],
+        error: null
+      });
+
+      const second = service.carsWithDescriptions();
+      expect(second[0].make).toBe('Alan Turing');
+    });
   });
 });

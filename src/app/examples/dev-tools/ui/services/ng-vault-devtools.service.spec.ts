@@ -20,7 +20,6 @@ describe('Service NgVaultDevtools', () => {
   it('should create successfully', () => {
     expect(service).toBeTruthy();
     expect(service.events()).toEqual([]);
-    expect(service.vaults()).toEqual({});
   });
 
   it('should record incoming events from the event bus', () => {
@@ -34,9 +33,13 @@ describe('Service NgVaultDevtools', () => {
 
     bus.next(base);
 
-    const allEvents = service.events();
+    let allEvents = service.events();
     expect(allEvents.length).toBe(1);
     expect(allEvents[0]).toEqual(jasmine.objectContaining(base));
+
+    service.clearEvents();
+    allEvents = service.events();
+    expect(allEvents.length).toBe(0);
   });
 
   it('should cap stored events at 200 entries', () => {
@@ -55,22 +58,5 @@ describe('Service NgVaultDevtools', () => {
     // most recent first
     expect(allEvents[0].id).toBe('249');
     expect(allEvents[199].id).toBe('50');
-  });
-
-  it('should clear all events and vaults when clearAll() is called', () => {
-    bus.next({
-      id: 'x',
-      key: 'temp',
-      type: 'set',
-      timestamp: Date.now(),
-      state: { value: 1 }
-    });
-
-    expect(service.events().length).toBeGreaterThan(0);
-
-    service.clearAll();
-
-    expect(service.events()).toEqual([]);
-    expect(service.vaults()).toEqual({});
   });
 });

@@ -1,10 +1,8 @@
 @use 'global' as global;
 
 .example-viewer-source {
-  border: 1px soild red;
   .tab-body {
     padding: global.$spacing-md;
-    border: 1px soild red;
   }
 
   .source-row {
@@ -22,7 +20,6 @@
     &:hover {
       @include global.ngvault-elevate(hover);
     }
-    border: 1px soild red;
 
     pre {
       margin: 0;
@@ -34,7 +31,19 @@
       color: var(--surface-text, global.$ngvault-text-primary);
       background: transparent;
       border: none;
-      padding: global.$spacing-md;
+      padding-left: global.$spacing-md;
+      padding-right: global.$spacing-md;
+      white-space: pre-wrap;
+      word-break: break-word;
+    }
+
+    /* Vault-style copy button */
+    .copy-btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+
+      width: 36px;
       white-space: pre-wrap;
       word-break: break-word;
     }
@@ -88,15 +97,16 @@
     }
   }
   // example-viewer-source.component.scss
-  pre code[ngvaultCodeEscape] {
-    border: 1px solid red;
-    display: block;
+  pre code {
+    display: flex;
+    align-items: flex-start;
     background-color: var(--surface-bg, #0f172a);
     color: var(--surface-text, #e2e8f0);
     font-family: 'JetBrains Mono', monospace;
     font-size: 0.875rem;
     line-height: 1.6;
-    padding: 1rem;
+    padding-left: 1rem;
+    padding-right: 1rem;
     border-radius: 8px;
     white-space: pre;
     overflow-x: auto;

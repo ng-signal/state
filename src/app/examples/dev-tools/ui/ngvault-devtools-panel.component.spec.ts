@@ -34,17 +34,12 @@ describe('Component: NgVaultDevtoolsPanel', () => {
       } as any
     ]);
 
-    service.vaults.set({
-      userVault: { id: 1, name: 'Ada' }
-    });
-
     // Act — trigger Angular change detection
     fixture.detectChanges();
 
     // Assert — verify the rendered HTML includes both
     const html = fixture.nativeElement as HTMLElement;
     expect(html.textContent).toContain('user');
-    expect(html.textContent).toContain('Ada');
   });
 
   it('should clear events when clearEvents() is called', () => {
@@ -55,26 +50,6 @@ describe('Component: NgVaultDevtoolsPanel', () => {
 
     component.clearEvents();
     expect(service.events()).toEqual([]);
-  });
-
-  it('should clear vaults when clearVaults() is called', () => {
-    service.vaults.set({ test: { id: 1 } });
-    expect(Object.keys(service.vaults()).length).toBe(1);
-
-    component.clearVaults();
-    expect(service.vaults()).toEqual({});
-  });
-
-  it('should clear all when clearAll() is called', () => {
-    service.events.set([
-      { id: '1', key: 'user', type: 'set', timestamp: Date.now(), source: 'manual', payload: {} } as any
-    ]);
-    service.vaults.set({ test: { id: 1 } });
-
-    component.clearAll();
-
-    expect(service.events()).toEqual([]);
-    expect(service.vaults()).toEqual({});
   });
 
   it('should update view reactively when signals change', async () => {

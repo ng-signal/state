@@ -17,5 +17,5 @@ export const NGVAULT_CELLS = [
     [withDevtoolsBehavior]
   ),
   provideFeatureCell(UserCellManualService, { key: 'userManual', initial: initialUsers }, [withDevtoolsBehavior]),
-  provideFeatureCell(CarService, { key: 'cars', initial: initialCars }, [])
+  provideFeatureCell(CarService, { key: 'cars', initial: initialCars }, [withDevtoolsBehavior])
 ];

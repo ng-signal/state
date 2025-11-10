@@ -4,26 +4,48 @@
   </div>
 
   <div class="action-container">
-    <div class="action-container-row">
-      <div class="button-container">
-        <button class="ngvault-button" (click)="resetUsers()">Reset Users</button>
+    <!-- ROW 1: USERS + CARS -->
+    <div class="action-row">
+      <!-- USERS -->
+      <div class="action-group">
+        <div class="group-label">Users</div>
+        <div class="action-container-row">
+          <div class="button-container">
+            <button class="ngvault-button sm" (click)="resetUsers()">Reset</button>
+          </div>
+          <div class="button-container">
+            <button class="ngvault-button sm" (click)="reloadUsers()">Reload</button>
+          </div>
+          <div class="button-container">
+            <button class="ngvault-button" (click)="reactiveReloadUsers()">Reactive Reload</button>
+          </div>
+        </div>
       </div>
-      <div class="button-container">
-        <button class="ngvault-button" (click)="reloadUsers()">Reload Users</button>
-      </div>
-      <div class="button-container">
-        <button class="ngvault-button" (click)="reactiveReloadUsers()">Reactive Reload Users</button>
+
+      <!-- CARS -->
+      <div class="action-group">
+        <div class="group-label">Cars</div>
+        <div class="action-container-row">
+          <div class="button-container">
+            <button class="ngvault-button sm" (click)="resetCars()">Reset</button>
+          </div>
+          <div class="button-container">
+            <button class="ngvault-button sm" (click)="reloadCars()">Reload</button>
+          </div>
+          <div class="button-container">
+            <button class="ngvault-button" (click)="reactiveReloadCars()">Reactive Reload</button>
+          </div>
+        </div>
       </div>
     </div>
-    <div class="action-container-row">
-      <div class="button-container">
-        <button class="ngvault-button" (click)="resetCars()">Reset Cars</button>
-      </div>
-      <div class="button-container">
-        <button class="ngvault-button" (click)="reloadCars()">Reload Cars</button>
-      </div>
-      <div class="button-container">
-        <button class="ngvault-button" (click)="reactiveReloadCars()">Reactive Reload Cars</button>
+
+    <!-- ROW 2: STATISTICS -->
+    <div class="action-row statistics">
+      <div class="action-group full-width">
+        <div class="group-label">Statistics</div>
+        <div class="action-container-row stats">
+          <div class="stat-item"><span class="stat-label">Events:</span> {{ totalEvents() }}</div>
+        </div>
       </div>
     </div>
   </div>
@@ -44,143 +66,183 @@
         <p>Loading users ({{ spinnerTitle }}) ...</p>
       </div>
     } @else {
-      <ngvault-example-viewer title="Reactive Fetch (Users)" subTitle="Fetched from User Store" exampleId="user-list">
-        <!-- Example content -->
-        <div example>
-          @for (user of userList.value(); track user.id) {
-            <ngvault-info-icon [data]="user" [icon]="'person'" class="info-icon" />
-          }
-        </div>
+      <div class="ngvault-tab-container">
+        <mat-tab-group animationDuration="150ms" mat-stretch-tabs="false" class="ngvault-tabs">
+          <mat-tab label="Hydrate State">
+            <div class="tab-panel">
+              <div class="tab-panel-subtitle">How Vault loads and hydrates reactive state from external sources.</div>
+              <ng-content select="[retrieve]">
+                <ngvault-example-viewer
+                  title="Reactive Fetch (Users)"
+                  subTitle="Fetched from User Store"
+                  exampleId="user-list">
+                  <div example>
+                    @for (user of userList.value(); track user.id) {
+                      <ngvault-info-icon [data]="user" [icon]="'person'" class="info-icon" />
+                    }
+                  </div>
 
-        <!-- Source content -->
-        <div source>
-          <ngvault-example-viewer-source>
-            <ngvault-example-viewer-tab label="HTML">
-              <pre><code ngvaultCodeEscape>
-<div example>
-  @for (user of userList.value(); track user.id) {
-    <ngvault-info-icon [data]="user" [icon]="'person'" class="info-icon" />
-  }
-</div>
-</code></pre>
-            </ngvault-example-viewer-tab>
-            <ngvault-example-viewer-tab label="TS">Fun Timte</ngvault-example-viewer-tab>
-          </ngvault-example-viewer-source>
-        </div>
-      </ngvault-example-viewer>
+                  <div source>
+                    <ngvault-example-viewer-source>
+                      @for (code of userListSourceCode; track code.type) {
+                        <ngvault-example-viewer-tab [label]="code.label">
+                          {{ code.code }}
+                        </ngvault-example-viewer-tab>
+                      }
+                    </ngvault-example-viewer-source>
+                  </div>
+                </ngvault-example-viewer>
 
-      <mat-accordion class="insight-accordion" multi>
-        <!-- USERS: Reactive Fetch -->
-        <mat-expansion-panel [expanded]="true">
-          <mat-expansion-panel-header>
-            <mat-panel-title>Reactive Fetch (Users)</mat-panel-title>
-            <mat-panel-description>Fetched from User Store</mat-panel-description>
-          </mat-expansion-panel-header>
+                <mat-expansion-panel [expanded]="true">
+                  <mat-expansion-panel-header>
+                    <mat-panel-title>Reactive Fetch (Cars)</mat-panel-title>
+                    <mat-panel-description>Fetched from Car Store</mat-panel-description>
+                  </mat-expansion-panel-header>
 
-          @for (user of userList.value(); track user.id) {
-            <ngvault-info-icon [data]="user" [icon]="'person'" class="info-icon" />
-          }
-        </mat-expansion-panel>
+                  @for (car of cars.value(); track car.id) {
+                    <ngvault-info-icon [data]="car" [icon]="'directions_car'" class="info-icon" />
+                  }
+                </mat-expansion-panel>
+              </ng-content>
+            </div>
+          </mat-tab>
 
-        <!-- USERS: Reactive Signal Selector -->
-        <mat-expansion-panel [expanded]="true">
-          <mat-expansion-panel-header>
-            <mat-panel-title>Reactive Signal Selector</mat-panel-title>
-            <mat-panel-description>Derived first + last names</mat-panel-description>
-          </mat-expansion-panel-header>
+          <mat-tab label="Selectors">
+            <div class="tab-panel">
+              <div class="tab-panel-subtitle">
+                How Vault derives computed signals and reactive views from core state.
+              </div>
 
-          @for (user of usersWithName(); track user.id) {
-            <ngvault-info-icon [data]="user" [icon]="'person'" class="info-icon" />
-          }
-        </mat-expansion-panel>
+              <ng-content select="[selectors]">
+                <mat-expansion-panel [expanded]="true">
+                  <mat-expansion-panel-header>
+                    <mat-panel-title>Reactive Signal Selector</mat-panel-title>
+                    <mat-panel-description>Derived first + last names</mat-panel-description>
+                  </mat-expansion-panel-header>
 
-        <!-- CARS: Reactive Fetch -->
-        <mat-expansion-panel [expanded]="true">
-          <mat-expansion-panel-header>
-            <mat-panel-title>Reactive Fetch (Cars)</mat-panel-title>
-            <mat-panel-description>Fetched from Car Store</mat-panel-description>
-          </mat-expansion-panel-header>
+                  @for (user of usersWithName(); track user.id) {
+                    <ngvault-info-icon [data]="user" [icon]="'person'" class="info-icon" />
+                  }
+                </mat-expansion-panel>
 
-          @for (car of cars.value(); track car.id) {
-            <ngvault-info-icon [data]="car" [icon]="'directions_car'" class="info-icon" />
-          }
-        </mat-expansion-panel>
+                <ngvault-example-viewer
+                  title="Reactive Fetch (Cars)"
+                  subTitle="Fetched from Car Store"
+                  exampleId="user-list">
+                  <div example>
+                    @for (car of carsWithDescriptions(); track car.id) {
+                      <p>
+                        {{ car.blueBookDescription }}
+                      </p>
+                    }
+                  </div>
 
-        <mat-expansion-panel [expanded]="true">
-          <mat-expansion-panel-header>
-            <mat-panel-title>Smart Match Insight</mat-panel-title>
-            <mat-panel-description>Reactive, signal-driven data fusion of Users with Cars</mat-panel-description>
-          </mat-expansion-panel-header>
+                  <div source>
+                    <ngvault-example-viewer-source>
+                      @for (code of carsWithDescriptionsSourceCode; track code.type) {
+                        <ngvault-example-viewer-tab [label]="code.label">
+                          {{ code.code }}
+                        </ngvault-example-viewer-tab>
+                      }
+                    </ngvault-example-viewer-source>
+                  </div>
+                </ngvault-example-viewer>
+              </ng-content>
+            </div>
+          </mat-tab>
 
-          @if (usersWithCars()) {
-            <section class="no-car-list">
-              <h4>Users with assigned cars</h4>
-              @for (user of usersWithCars(); track user.id) {
-                <ngvault-info-icon [data]="user" [icon]="'person'" class="info-icon" />
-              }
-            </section>
-          } @else {
-            <p class="empty-state">All users have cars assigned.</p>
-          }
-        </mat-expansion-panel>
+          <mat-tab label="Facades">
+            <div class="tab-panel">
+              <div class="tab-panel-subtitle">
+                How Vault orchestrates multiple state sources into cohesive domain logic.
+              </div>
 
-        <mat-expansion-panel [expanded]="true">
-          <mat-expansion-panel-header>
-            <mat-panel-title>Smart Match Insight</mat-panel-title>
-            <mat-panel-description>Reactive, signal-driven data fusion of Users without Cars</mat-panel-description>
-          </mat-expansion-panel-header>
+              <ng-content select="[facades]">
+                <mat-expansion-panel [expanded]="true">
+                  <mat-expansion-panel-header>
+                    <mat-panel-title>Smart Match Insight</mat-panel-title>
+                    <mat-panel-description
+                      >Reactive, signal-driven data fusion of Users with Cars</mat-panel-description
+                    >
+                  </mat-expansion-panel-header>
 
-          @if (usersWithoutCars()) {
-            <section class="no-car-list">
-              <h4>Users without assigned cars</h4>
-              @for (user of usersWithoutCars(); track user.id) {
-                <ngvault-info-icon [data]="user" [icon]="'no_cars_custom'" class="info-icon" />
-              }
-            </section>
-          } @else {
-            <p class="empty-state">All users have cars assigned.</p>
-          }
-        </mat-expansion-panel>
+                  @if (usersWithCars()) {
+                    <section class="no-car-list">
+                      <h4>Users with assigned cars</h4>
+                      @for (user of usersWithCars(); track user.id) {
+                        <ngvault-info-icon [data]="user" [icon]="'person'" class="info-icon" />
+                      }
+                    </section>
+                  } @else {
+                    <p class="empty-state">All users have cars assigned.</p>
+                  }
+                </mat-expansion-panel>
 
-        <mat-expansion-panel [expanded]="true">
-          <mat-expansion-panel-header>
-            <mat-panel-title>Smart Match Insight</mat-panel-title>
-            <mat-panel-description>Reactive, signal-driven data fusion of Cars without Users</mat-panel-description>
-          </mat-expansion-panel-header>
+                <mat-expansion-panel [expanded]="true">
+                  <mat-expansion-panel-header>
+                    <mat-panel-title>Smart Match Insight</mat-panel-title>
+                    <mat-panel-description
+                      >Reactive, signal-driven data fusion of Users without Cars</mat-panel-description
+                    >
+                  </mat-expansion-panel-header>
 
-          @if (carsWithoutUsers()) {
-            <section class="no-car-list">
-              <h4>Cars without assigned users</h4>
-              @for (user of carsWithoutUsers(); track user.id) {
-                <ngvault-info-icon [data]="user" [icon]="'directions_car'" class="info-icon" />
-              }
-            </section>
-          } @else {
-            <p class="empty-state">All users have cars assigned.</p>
-          }
-        </mat-expansion-panel>
+                  @if (usersWithoutCars()) {
+                    <section class="no-car-list">
+                      <h4>Users without assigned cars</h4>
+                      @for (user of usersWithoutCars(); track user.id) {
+                        <ngvault-info-icon [data]="user" [icon]="'no_cars_custom'" class="info-icon" />
+                      }
+                    </section>
+                  } @else {
+                    <p class="empty-state">All users have cars assigned.</p>
+                  }
+                </mat-expansion-panel>
 
-        <mat-expansion-panel [expanded]="true">
-          <mat-expansion-panel-header>
-            <mat-panel-title>Owners grouped by make</mat-panel-title>
-            <mat-panel-description>Organized list of car owners per manufacturer</mat-panel-description>
-          </mat-expansion-panel-header>
+                <mat-expansion-panel [expanded]="true">
+                  <mat-expansion-panel-header>
+                    <mat-panel-title>Smart Match Insight</mat-panel-title>
+                    <mat-panel-description
+                      >Reactive, signal-driven data fusion of Cars without Users</mat-panel-description
+                    >
+                  </mat-expansion-panel-header>
 
-          @if (groupedByMake()) {
-            @for (group of groupedByMake(); track group.make) {
-              <h4>
-                {{ group.make }}
-                {{ group.users.length }} owner(s)
-              </h4>
-              @for (user of usersWithoutCars(); track user.id) {
-                <ngvault-info-icon [data]="user" [icon]="'person'" class="info-icon" />
-              }
-            }
-          } @else {
-            <p class="empty-state">No makes found yet.</p>
-          }
-        </mat-expansion-panel>
-      </mat-accordion>
+                  @if (carsWithoutUsers()) {
+                    <section class="no-car-list">
+                      <h4>Cars without assigned users</h4>
+                      @for (user of carsWithoutUsers(); track user.id) {
+                        <ngvault-info-icon [data]="user" [icon]="'directions_car'" class="info-icon" />
+                      }
+                    </section>
+                  } @else {
+                    <p class="empty-state">All users have cars assigned.</p>
+                  }
+                </mat-expansion-panel>
+
+                <mat-expansion-panel [expanded]="true">
+                  <mat-expansion-panel-header>
+                    <mat-panel-title>Owners grouped by make</mat-panel-title>
+                    <mat-panel-description>Organized list of car owners per manufacturer</mat-panel-description>
+                  </mat-expansion-panel-header>
+
+                  @if (groupedByMake()) {
+                    @for (group of groupedByMake(); track group.make) {
+                      <h4>
+                        {{ group.make }}
+                        {{ group.users.length }} owner(s)
+                      </h4>
+                      @for (user of usersWithoutCars(); track user.id) {
+                        <ngvault-info-icon [data]="user" [icon]="'person'" class="info-icon" />
+                      }
+                    }
+                  } @else {
+                    <p class="empty-state">No makes found yet.</p>
+                  }
+                </mat-expansion-panel>
+              </ng-content>
+            </div>
+          </mat-tab>
+        </mat-tab-group>
+      </div>
 
       <hr class="ngvault-hr" />
     }

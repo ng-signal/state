@@ -2,6 +2,7 @@ import { Directive, inject, Signal } from '@angular/core';
 import { VaultSignalRef } from '@ngvault/shared';
 import { CarService } from '../../cars/services/car.service';
 import { UserCarFacadeService } from '../../facades/car-user-facade.service';
+import { CarModel } from '../../models/car.model';
 import { UserModel } from '../../models/user.model';
 import { ExampleServiceInterface } from '../interfaces/example-service.interface';
 
@@ -21,6 +22,7 @@ export abstract class UserListDirective {
 
   protected readonly carService = inject(CarService);
   readonly cars = this.carService.cars();
+  readonly carsWithDescriptions: Signal<CarModel[]>;
 
   protected readonly userCarFacadeService = inject(UserCarFacadeService);
   readonly usersWithoutCars = this.userCarFacadeService.usersWithoutCars;
@@ -32,6 +34,7 @@ export abstract class UserListDirective {
     this.userService = userCellService;
     this.userList = this.userService.users();
     this.usersWithName = this.userService.usersWithNames;
+    this.carsWithDescriptions = this.carService.carsWithDescriptions;
   }
 
   /**

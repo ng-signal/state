@@ -12,10 +12,10 @@ body {
 
   background-color: var(--ngvault-surface-light);
   color: var(--ngvault-text-inverse);
-  // font-family: global.$ngvault-font-family;
-  // font-weight: global.$ngvault-font-weight;
-  // font-size: global.$font-size-md;
-  // line-height: global.$line-height;
+  font-family: global.$ngvault-font-family;
+  font-weight: global.$ngvault-font-weight;
+  font-size: global.$font-size-md;
+  line-height: global.$line-height;
 
   // Smooth text rendering
   -webkit-font-smoothing: antialiased;

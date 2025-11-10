@@ -28,3 +28,26 @@
     // padding: global.$spacing-sm;
   }
 }
+
+:host {
+  ::ng-deep [example] {
+    display: flex;
+    flex-wrap: wrap;
+    gap: global.$spacing-md;
+    justify-content: center;
+    align-items: center;
+
+    background-color: var(--surface-bg, global.$ngvault-surface-light);
+    border: 1px solid var(--surface-outline, global.$ngvault-primary-light);
+    border-radius: global.$border-radius-md;
+    padding: global.$spacing-md;
+    transition:
+      background-color 0.3s ease,
+      border-color 0.3s ease;
+
+    &:hover {
+      background-color: var(--surface-hover, rgba(global.$ngvault-primary-light, 0.1));
+      border-color: global.$ngvault-primary-base;
+    }
+  }
+}

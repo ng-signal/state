@@ -1,3 +1,4 @@
+export const CAR_MODEL = `
 export interface CarModel {
   id: string;
   year: number;
@@ -5,3 +6,4 @@ export interface CarModel {
   model: string;
   blueBookDescription?: string;
 }
+`;

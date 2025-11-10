@@ -95,6 +95,18 @@ class VaultBehaviorRunnerClass implements VaultBehaviorRunner {
       const next = this.#getNextBehaviorFromId(behaviorId);
       if (!next) return;
 
+      /*
+      if (next.type === 'state') {
+  // run encryption behaviors
+  const encryptionBehaviors = this.#behaviors.filter(b => b.type === 'encrypt');
+  const ctxAfterEncrypt = this.#lifeCycle(hook, vaultKey, ctx, encryptionBehaviors, serviceName);
+
+  // run persistence behaviors (receiving the encrypted ctx)
+  const persistenceBehaviors = this.#behaviors.filter(b => b.type === 'persist');
+  this.#lifeCycle(hook, vaultKey, ctxAfterEncrypt, persistenceBehaviors, serviceName);
+}
+  */
+
       const nextBehaviors = this.#behaviors.filter((b) => b.type === next.type);
       this.#lifeCycle(hook, vaultKey, ctx, nextBehaviors, serviceName);
     });

@@ -1,10 +1,41 @@
+// table-basic-code.ts
+
+import { CAR_MODEL } from '../models/car.model';
+import { SourceCodeModel } from '../models/source-code.model';
+
+const HTML = `
+<div example>
+  @for (car of carsWithDescriptions(); track car.id) {
+    <p>
+      {{ car.blueBookDescription }}
+    </p>
+  }
+</div>
+`;
+
+const COMPONENT = `
+import { inject, Signal } from '@angular/core';
+import { CarService } from 'car.service';
+import { CarModel } from 'car.model';
+
+export abstract class UserListDirective {
+  protected readonly carService = inject(CarService);
+  readonly carsWithDescriptions: Signal<CarModel[]>;
+
+  constructor() {
+    this.carsWithDescriptions = this.carService.carsWithDescriptions;
+  }
+}
+`;
+
+const SERVICE = `
 import { HttpClient } from '@angular/common/http';
-import { computed, DestroyRef, inject, Injectable, signal } from '@angular/core';
+import { computed, DestroyRef, inject, Injectable } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FeatureCell, injectVault } from '@ngvault/core';
 import { VaultSignalRef } from '@ngvault/shared';
+import { CarModel } from 'car.model';
 import { map, take } from 'rxjs';
-import { CarModel } from '../../models/car.model';
 
 @FeatureCell<CarModel[]>('cars')
 @Injectable({
@@ -13,45 +44,21 @@ import { CarModel } from '../../models/car.model';
 export class CarService {
   private readonly vault = injectVault<CarModel[]>(CarService);
   readonly #destroyRef = inject(DestroyRef);
-  private readonly isLoaded = signal(false);
-
   private readonly http = inject(HttpClient);
-
-  resetCars() {
-    this.vault.reset();
-  }
-
-  reloadCars(): void {
-    this.isLoaded.set(false);
-  }
-
-  reactiveReloadCars(): void {
-    this.isLoaded.set(false);
-    this.vault.reset();
-  }
 
   readonly carsWithDescriptions = computed(() => {
     const cars = this.vault.state.value() as CarModel[] | undefined;
     if (!cars) return [];
 
-    return cars.map((car: CarModel) => {
-      const blueBookDescription = car.make + ' ' + car.model + ' - ' + car.year;
+    return cars.map((car: carmodel) => {
+      const bluebookdescription = car.make + ' ' + car.model + ' - ' + car.year;
       return {
         ...car,
         blueBookDescription
       };
     });
   });
-
-  cars(): VaultSignalRef<CarModel[]> {
-    if (!this.isLoaded()) {
-      this.isLoaded.set(true);
-      this.loadCars();
-    }
-
-    return this.vault.state;
-  }
-
+  
   loadCars(): void {
     const state = this.vault.state;
 
@@ -85,3 +92,27 @@ export class CarService {
     }
   }
 }
+`;
+
+export const carsWithDescriptionsCodeModel: SourceCodeModel[] = [
+  {
+    type: 'html',
+    label: 'HTML',
+    code: HTML
+  },
+  {
+    type: 'component',
+    label: 'COMPONENT',
+    code: COMPONENT
+  },
+  {
+    type: 'service',
+    label: 'SERVICE',
+    code: SERVICE
+  },
+  {
+    type: 'model',
+    label: 'MODEL',
+    code: CAR_MODEL
+  }
+];

@@ -89,8 +89,6 @@
 
   /* ───────────── Output Section ───────────── */
   .full-output-container {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
     gap: global.$spacing-lg;
     height: calc(100% - 110px);
 

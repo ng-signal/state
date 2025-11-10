@@ -1,4 +1,4 @@
-import { DestroyRef, inject, Injectable, signal } from '@angular/core';
+import { computed, DestroyRef, inject, Injectable, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { NgVaultDebuggerService, NgVaultEventModel } from '@ngvault/dev-tools';
 import { filter } from 'rxjs/operators';
@@ -11,8 +11,7 @@ export class NgVaultDevtoolsService {
   /** Rolling event history (max 200 entries) */
   readonly events = signal<NgVaultEventModel[]>([]);
 
-  /** Current snapshot of all active vaults */
-  readonly vaults = signal<Record<string, NgVaultEventModel['state']>>({});
+  readonly totalEvents = computed(() => this.events().length);
 
   constructor() {
     this.bus
@@ -23,25 +22,11 @@ export class NgVaultDevtoolsService {
       )
       .subscribe((event) => {
         this.events.update((prev) => [event, ...prev].slice(0, 200));
-        if (event.key && event.state) {
-          this.vaults.update((map) => ({ ...map, [event.key]: event.state }));
-        }
       });
   }
 
   /** Clear the devtools event log */
   clearEvents(): void {
     this.events.set([]);
-  }
-
-  /** Clear the vault state model */
-  clearVaults(): void {
-    this.vaults.set({});
-  }
-
-  /** Clear both (useful when resetting DevTools) */
-  clearAll(): void {
-    this.clearEvents();
-    this.clearVaults();
   }
 }
