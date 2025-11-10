@@ -9,7 +9,7 @@
 
   .router-container {
     width: 100%;
-    border: 1px solid blue;
+    border-left: 1px solid var(--footer-border);
     overflow: hidden;
   }
 
@@ -17,11 +17,9 @@
     width: calc(global.$sidenav-width - 2px);
     height: calc(100vh - #{global.$footer-height} - #{global.$toolbar-height} - 5px);
     background-color: var(--surface-bg);
-    border-right: 1px solid var(--surface-outline);
     color: var(--surface-text);
 
     .sidenav-content {
-      margin-top: 10px;
       width: 100%;
       color: global.$ngvault-text-primary; // replaced black
       overflow-x: hidden;

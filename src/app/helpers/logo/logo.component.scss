@@ -1,0 +1,20 @@
+@use 'global' as global;
+
+.ngvault-logo {
+  display: inline-block;
+  height: auto;
+  cursor: pointer;
+  transition:
+    transform 0.25s ease,
+    filter 0.25s ease;
+
+  &:hover {
+    transform: scale(1.03);
+    filter: drop-shadow(0 4px 10px rgba(25, 118, 210, 0.4));
+  }
+
+  &:focus-visible {
+    outline: 2px solid global.$ngvault-accent-base;
+    outline-offset: 4px;
+  }
+}

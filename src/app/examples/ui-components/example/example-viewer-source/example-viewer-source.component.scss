@@ -35,6 +35,28 @@
       padding-right: global.$spacing-md;
       white-space: pre-wrap;
       word-break: break-word;
+
+      code {
+        display: flex;
+        align-items: flex-start;
+        background-color: var(--surface-bg, #0f172a);
+        color: var(--surface-text, #e2e8f0);
+        font-family: 'JetBrains Mono', monospace;
+        font-size: 0.875rem;
+        line-height: 1.6;
+        padding-left: 1rem;
+        padding-right: 1rem;
+        border-radius: 8px;
+        white-space: pre;
+        overflow-x: auto;
+        tab-size: 2;
+        text-align: left;
+
+        transition: box-shadow 0.3s ease;
+        &:hover {
+          box-shadow: 0 0 8px rgba(25, 118, 210, 0.4);
+        }
+      }
     }
 
     /* Vault-style copy button */
@@ -94,27 +116,6 @@
         outline: 2px solid global.$ngvault-accent-base;
         outline-offset: 2px;
       }
-    }
-  }
-  // example-viewer-source.component.scss
-  pre code {
-    display: flex;
-    align-items: flex-start;
-    background-color: var(--surface-bg, #0f172a);
-    color: var(--surface-text, #e2e8f0);
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 0.875rem;
-    line-height: 1.6;
-    padding-left: 1rem;
-    padding-right: 1rem;
-    border-radius: 8px;
-    white-space: pre;
-    overflow-x: auto;
-    tab-size: 2;
-
-    transition: box-shadow 0.3s ease;
-    &:hover {
-      box-shadow: 0 0 8px rgba(25, 118, 210, 0.4);
     }
   }
 }

@@ -20,6 +20,12 @@
     "ngvault",
     "zoneless"
   ],
+  "files": [
+    "src/assets/brand/",
+    "src/assets/favicons/",
+    "public/favicon.ico",
+    "README.md"
+  ],
   "scripts": {
     "build": "ng build",
     "build:all": "npm run build:dev-tools && npm run build:core",

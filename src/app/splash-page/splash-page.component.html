@@ -1,22 +1,30 @@
 <div class="splash-container">
   <div class="splash-content">
-    <h1 class="title">{{ appName }}</h1>
-    <div class="sub-title">Reactive State, Secured by Design.</div>
-    <div class="about-container">
-      <p>This is the ngVault Demo — an interactive showcase of reactive state management for Angular.</p>
-
-      <p>
-        Here, you can explore how signals, stores, and state synchronization come together to power dynamic
-        applications.
-      </p>
-      <p>
-        Use the Examples section to view live user and car data, see instant updates, and understand how ngVault
-        connects related entities in real time.
-      </p>
-      <p>
-        Then open the Dev Tools panel to inspect what’s happening under the hood — every event, patch, and state change
-        — giving you a clear, hands-on view of how ngVault manages and reacts to application state.
-      </p>
+    <div class="logo-block">
+      <ngvault-logo logo="ngvault-landscape.svg" tooltip="ngVault — Secure State. Reactive by Design." />
+      <div class="sub-title">Secure State. Reactive by Design.</div>
     </div>
+
+    <div class="about-container">
+      <p>Welcome to the <strong>ngVault Demo</strong> — a showcase of secure, reactive state management for Angular.</p>
+      <p>
+        Explore how <strong>signals</strong>, <strong>stores</strong>, and <strong>state synchronization</strong> come
+        together to power dynamic applications.
+      </p>
+      <p>Use the <strong>Examples</strong> section to view live data and watch ngVault react in real time.</p>
+      <p>Then open the <strong>Dev Tools</strong> panel to inspect every event, patch, and state transition.</p>
+    </div>
+
+    <ngvault-example-viewer title="Reactive Fetch (Users)" subTitle="Fetched from User Store" exampleId="user-list">
+      <div source>
+        <ngvault-example-viewer-source [displayExamples]="true" exampleId="user-list">
+          @for (code of userListSourceCode; track code.type) {
+            <ngvault-example-viewer-tab [label]="code.label">
+              {{ code.code }}
+            </ngvault-example-viewer-tab>
+          }
+        </ngvault-example-viewer-source>
+      </div>
+    </ngvault-example-viewer>
   </div>
 </div>

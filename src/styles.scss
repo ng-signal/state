@@ -186,3 +186,13 @@ html[data-theme='dark'] {
 .mat-mdc-list-item.active {
   background-color: color-mix(in srgb, var(--ngvault-primary, #1976d2) 18%, transparent) !important;
 }
+
+.mat-toolbar {
+  border-radius: 0 !important;
+}
+
+mat-sidenav,
+.mat-sidenav,
+.mat-drawer {
+  border-radius: 0 !important;
+}

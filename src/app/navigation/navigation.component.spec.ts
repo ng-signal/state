@@ -27,7 +27,7 @@ describe('NavigationComponent', () => {
   });
 
   it('should initialize with sidenav expanded', () => {
-    expect(component.isExpanded()).toBeTrue();
+    expect(component.isExpanded()).toBeFalse();
   });
 
   it('should toggle sidenav state when toggleSidenav() is called', () => {

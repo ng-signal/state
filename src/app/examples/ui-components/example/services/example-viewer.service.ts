@@ -21,6 +21,11 @@ export class ExampleViewerService {
     this.getVisibilitySignal(exampleId).set(true);
   }
 
+  setDefaultVisibility(exampleId: string, isVisible: boolean): void {
+    const sig = this.getVisibilitySignal(exampleId);
+    sig.set(isVisible);
+  }
+
   hide(exampleId: string): void {
     this.getVisibilitySignal(exampleId).set(false);
   }

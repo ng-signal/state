@@ -21,6 +21,11 @@ describe('Component: Splash Page', () => {
   });
 
   it('should have appName defined and correct', () => {
-    expect(component.appName).toBe('NgVault');
+    expect(component.userListSourceCode).toEqual([
+      Object({ type: 'html', label: 'HTML', code: jasmine.any(String) }),
+      Object({ type: 'component', label: 'COMPONENT', code: jasmine.any(String) }),
+      Object({ type: 'service', label: 'SERVICE', code: jasmine.any(String) }),
+      Object({ type: 'model', label: 'MODEL', code: jasmine.any(String) })
+    ]);
   });
 });

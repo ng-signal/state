@@ -9,6 +9,5 @@ import { Component, TemplateRef, ViewChild, input } from '@angular/core';
 export class ExampleViewerTabComponent {
   readonly label = input<string>('Untitled');
 
-  // ✅ Correct for templates declared inside this component
   @ViewChild('tpl', { static: true }) template!: TemplateRef<unknown>;
 }

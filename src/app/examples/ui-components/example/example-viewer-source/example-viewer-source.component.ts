@@ -6,7 +6,9 @@ import {
   ElementRef,
   QueryList,
   ViewChildren,
+  effect,
   inject,
+  input,
   signal
 } from '@angular/core';
 import { MatIconModule } from '@angular/material/icon';
@@ -14,6 +16,7 @@ import { MatSnackBar } from '@angular/material/snack-bar';
 import { MatTabsModule } from '@angular/material/tabs';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { ExampleViewerTabComponent } from '../example-viewer-tab/example-viewer-source-tab.component';
+import { ExampleViewerService } from '../services/example-viewer.service';
 
 @Component({
   selector: 'ngvault-example-viewer-source',
@@ -25,6 +28,20 @@ import { ExampleViewerTabComponent } from '../example-viewer-tab/example-viewer-
 export class ExampleViewerSourceComponent implements AfterContentInit {
   @ContentChildren(ExampleViewerTabComponent) tabComponents!: QueryList<ExampleViewerTabComponent>;
   @ViewChildren('codeBlock', { read: ElementRef }) codeBlocks!: QueryList<ElementRef>;
+  readonly displayExamples = input<boolean>(false);
+  readonly exampleId = input<string>('');
+  #exampleService = inject(ExampleViewerService);
+
+  constructor() {
+    effect(() => {
+      const id = this.exampleId();
+      const visible = this.displayExamples();
+
+      if (id) {
+        this.#exampleService.setDefaultVisibility(id, visible);
+      }
+    });
+  }
 
   readonly tabs = signal<ExampleViewerTabComponent[]>([]);
   private readonly snackBar = inject(MatSnackBar);

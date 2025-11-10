@@ -1,9 +1,9 @@
 <mat-sidenav-container class="sidenav-container">
   <mat-sidenav #sidenav mode="side" [(opened)]="isExpanded" class="sidenav">
     <div class="sidenav-content">
-      <mat-toolbar color="primary" class="sidenav-header">
+      <mat-toolbar class="sidenav-header">
         <mat-icon>menu_book</mat-icon>
-        <span class="ml-2">Examples</span>
+        <span>Examples</span>
       </mat-toolbar>
 
       <mat-nav-list class="navigation-list">
@@ -31,7 +31,7 @@
     <router-outlet></router-outlet>
   </mat-sidenav-content>
 </mat-sidenav-container>
-<div class="bottom-left-box" (click)="sidenav.toggle()">
+<div class="bottom-left-box" (click)="sidenav.toggle()" matTooltip="Site Navigation">
   @if (isExpanded()) {
     <mat-icon>arrow_back_ios_new</mat-icon>
   } @else {
