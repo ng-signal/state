@@ -1,8 +1,14 @@
 import { CommonModule } from '@angular/common';
+import { provideHttpClient } from '@angular/common/http';
+import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { provideZonelessChangeDetection } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { MatIconModule } from '@angular/material/icon';
 import { provideRouter } from '@angular/router';
+import { provideFeatureCell } from '@ngvault/core';
+import { provideVaultTesting } from '@ngvault/testing';
+import { CarService } from '../examples/cars/services/car.service';
+import { UserCellManualService } from '../examples/users/user-cell-manual/services/user-cell-manual.service';
 import { SplashPageComponent } from './splash-page.component';
 
 describe('Component: Splash Page', () => {
@@ -12,7 +18,15 @@ describe('Component: Splash Page', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [CommonModule, MatIconModule, SplashPageComponent],
-      providers: [provideZonelessChangeDetection(), provideRouter([])]
+      providers: [
+        provideVaultTesting(),
+        provideHttpClient(),
+        provideHttpClientTesting(),
+        provideZonelessChangeDetection(),
+        provideRouter([]),
+        provideFeatureCell(UserCellManualService, { key: 'userManual', initial: [] }, []),
+        provideFeatureCell(CarService, { key: 'cars', initial: [] }, [])
+      ]
     }).compileComponents();
 
     fixture = TestBed.createComponent(SplashPageComponent);

@@ -34,8 +34,11 @@
     display: flex;
     flex-wrap: wrap;
     gap: global.$spacing-md;
-    justify-content: center;
-    align-items: center;
+    justify-content: flex-start;
+    align-items: flex-start;
+    flex: 1 1 auto;
+    height: 480px;
+    width: 100%;
 
     background-color: var(--surface-bg, global.$ngvault-surface-light);
     border: 1px solid var(--surface-outline, global.$ngvault-primary-light);

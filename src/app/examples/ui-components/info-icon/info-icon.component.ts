@@ -1,5 +1,7 @@
 import { Component, computed, inject, input } from '@angular/core';
 import { MatIconModule } from '@angular/material/icon';
+import { CarModel } from '../../models/car.model';
+import { UserModel } from '../../models/user.model';
 import { InfoDialogService } from '../services/info-dialog.service';
 
 @Component({
@@ -11,7 +13,23 @@ import { InfoDialogService } from '../services/info-dialog.service';
 })
 export class InfoIconComponent {
   icon = input<string>('info');
-  data = input.required();
+  data = input.required<CarModel | UserModel>();
+
+  display = computed(() => {
+    const userData = this.data() as UserModel;
+
+    if (userData.name) {
+      return userData.name;
+    }
+
+    const carData = userData as unknown as CarModel;
+
+    if (carData.model) {
+      return carData.model;
+    }
+
+    return 'unknown';
+  });
 
   displayClass = computed(() => {
     const name = this.icon();

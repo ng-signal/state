@@ -1,5 +1,6 @@
 import { provideZonelessChangeDetection, signal } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { provideRouter } from '@angular/router';
 import { ThemeService } from '../theme/theme.service';
 import { ToolbarComponent } from './toolbar.component';
 
@@ -16,7 +17,7 @@ describe('ToolbarComponent', () => {
 
     await TestBed.configureTestingModule({
       imports: [ToolbarComponent],
-      providers: [{ provide: ThemeService, useValue: themeSpy }, provideZonelessChangeDetection()]
+      providers: [{ provide: ThemeService, useValue: themeSpy }, provideZonelessChangeDetection(), provideRouter([])]
     }).compileComponents();
 
     fixture = TestBed.createComponent(ToolbarComponent);

@@ -29,7 +29,8 @@ export abstract class UserService<T> {
       return {
         ...user,
         firstName,
-        lastName
+        lastName,
+        display: firstName
       };
     });
   });
