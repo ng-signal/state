@@ -3,11 +3,12 @@
 .splash-container {
   display: flex;
   justify-content: center;
-  align-items: center;
+  align-items: flex-start;
   height: calc(100vh - #{global.$footer-height} - #{global.$toolbar-height});
   background-color: var(--surface-bg);
   color: var(--surface-text);
   text-align: center;
+  overflow-y: auto;
 
   .splash-content {
     display: flex;
@@ -44,7 +45,7 @@
     }
 
     .example-container {
-      width: 840px;
+      max-width: 840px;
     }
 
     .about-container {

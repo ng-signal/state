@@ -10,7 +10,7 @@
   align-items: stretch;
   justify-content: flex-start;
   max-width: 1024px;
-  height: 600px;
+  // max-height: 800px;
   margin: 0 auto; // keep it centered
   transition:
     width 0.3s ease,
@@ -90,12 +90,14 @@
       transform: translateY(0);
     }
 
+    /*
     &:not(.visible) {
       max-height: 0;
       opacity: 0;
       transform: translateY(-4px);
       transition-delay: 0s, 0.05s, 0s; // same "magic line" for smooth fade
     }
+      */
   }
 
   /* --------------------------------------
