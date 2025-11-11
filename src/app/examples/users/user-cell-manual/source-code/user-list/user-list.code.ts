@@ -1,5 +1,6 @@
 // table-basic-code.ts
 
+import { getUserData } from 'src/testing/data/user.data';
 import { SourceCodeModel } from '../models/source-code.model';
 import { USER_MODEL } from '../models/user.model';
 
@@ -85,6 +86,10 @@ export abstract class UserService<T> {
 }
 `;
 
+const DATA = `
+${JSON.stringify(getUserData(), null, 2)}
+`;
+
 export const userListSourceCodeModel: SourceCodeModel[] = [
   {
     type: 'html',
@@ -105,5 +110,10 @@ export const userListSourceCodeModel: SourceCodeModel[] = [
     type: 'model',
     label: 'MODEL',
     code: USER_MODEL
+  },
+  {
+    type: 'data',
+    label: 'DATA',
+    code: DATA
   }
 ];

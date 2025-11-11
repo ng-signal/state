@@ -9,6 +9,7 @@ import { UserListDirective } from '../examples/users/directive/user-list-base.di
 import { UserCellManualService } from '../examples/users/user-cell-manual/services/user-cell-manual.service';
 import { userListSourceCodeModel } from '../examples/users/user-cell-manual/source-code/user-list/user-list.code';
 import { NgvaultLogoComponent } from '../helpers/logo/logo.component';
+import { NavigationService } from '../navigation/service/navigation.service';
 
 @Component({
   selector: 'ngvault-splash-page',
@@ -27,8 +28,13 @@ import { NgvaultLogoComponent } from '../helpers/logo/logo.component';
 })
 export class SplashPageComponent extends UserListDirective {
   userListSourceCode = userListSourceCodeModel;
+  #navigationService = inject(NavigationService);
 
   constructor() {
     super(inject(UserCellManualService));
+  }
+
+  openMenu() {
+    this.#navigationService.show();
   }
 }

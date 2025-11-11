@@ -1,6 +1,6 @@
 import { ScrollingModule } from '@angular/cdk/scrolling';
 import { CommonModule } from '@angular/common';
-import { Component, HostListener, signal } from '@angular/core';
+import { Component, effect, HostListener, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCheckboxModule } from '@angular/material/checkbox';
@@ -10,6 +10,7 @@ import { MatSidenavModule } from '@angular/material/sidenav';
 import { MatToolbarModule } from '@angular/material/toolbar';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
+import { NavigationService } from './service/navigation.service';
 
 @Component({
   selector: 'ngvault-navigation',
@@ -36,20 +37,29 @@ export class NavigationComponent {
   /** Controls sidenav open/closed state */
   isExpanded = signal<boolean>(this.restoreSidenavState());
 
-  constructor() {
+  constructor(private navigationService: NavigationService) {
     // Initialize based on window size if no saved state
     if (localStorage.getItem('ngvault-sidenav') === null) {
       this.isExpanded.set(window.innerWidth >= 1200);
     }
+
+    effect(() => {
+      const open = this.navigationService.isOpen();
+      this.#updateExpanded(open);
+    });
+  }
+
+  #updateExpanded(force?: boolean) {
+    this.isExpanded.update((value) => {
+      const next = force ?? !value;
+      localStorage.setItem('ngvault-sidenav', JSON.stringify(next));
+      return next;
+    });
   }
 
   /** Toggles the sidenav and persists the setting */
   toggleSidenav(): void {
-    this.isExpanded.update((value) => {
-      const next = !value;
-      localStorage.setItem('ngvault-sidenav', JSON.stringify(next));
-      return next;
-    });
+    this.#updateExpanded();
   }
 
   /** Handle window resize */

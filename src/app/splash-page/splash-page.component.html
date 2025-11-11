@@ -31,8 +31,8 @@
       </p>
 
       <p>
-        Then, open the <strong>Dev Tools</strong> panel to dive deeper. You’ll see every <em>event</em>, <em>patch</em>,
-        and <em>state change</em>
+        Then, open the <strong><span (click)="openMenu()" class="pointer success">Dev Tools</span></strong> panel to
+        dive deeper. You’ll see every <em>event</em>, <em>patch</em>, and <em>state change</em>
         logged in sequence — a transparent view into the vault’s reactive core.
       </p>
 
@@ -55,7 +55,7 @@
         </div>
 
         <div source>
-          <ngvault-example-viewer-source [displayExamples]="true" exampleId="user-list">
+          <ngvault-example-viewer-source [displayExamples]="true" exampleId="reactive-fetch-users">
             @for (code of userListSourceCode; track code.type) {
               <ngvault-example-viewer-tab [label]="code.label">
                 {{ code.code }}

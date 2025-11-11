@@ -17,6 +17,7 @@
     gap: global.$spacing-lg;
     padding: global.$spacing-2xl;
     animation: fadeIn 0.8s ease-in-out;
+    overflow-x: hidden;
 
     // 🔷 Default light logo
     .logo {
@@ -45,7 +46,9 @@
     }
 
     .example-container {
+      flex: 1 1 auto;
       max-width: 840px;
+      min-width: 780px;
     }
 
     .about-container {

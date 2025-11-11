@@ -6,6 +6,7 @@ import { MatSidenavModule } from '@angular/material/sidenav';
 import { By } from '@angular/platform-browser';
 import { provideRouter } from '@angular/router';
 import { NavigationComponent } from './navigation.component';
+import { NavigationService } from './service/navigation.service';
 
 describe('NavigationComponent', () => {
   let fixture: ComponentFixture<NavigationComponent>;
@@ -77,5 +78,13 @@ describe('NavigationComponent', () => {
         component.toggleSidenav();
       }
     }).not.toThrow();
+  });
+
+  it('should handle an isOpen effect', () => {
+    const service = TestBed.inject(NavigationService);
+    expect(component.isExpanded()).toBeFalse();
+    service.show();
+    TestBed.tick();
+    expect(component.isExpanded()).toBeTrue();
   });
 });
