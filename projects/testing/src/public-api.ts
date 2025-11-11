@@ -7,3 +7,4 @@ export * from './lib/mocks/with-dev-tools-behavior.mock';
 export * from './lib/provider/provide-vault-testing';
 export * from './lib/service/ngvault-sync-queue.service';
 export * from './lib/util/flush-async-queue.util';
+export * from './lib/util/flush-microtasks-zoneless.util';

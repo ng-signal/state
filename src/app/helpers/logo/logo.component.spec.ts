@@ -74,6 +74,20 @@ describe('NgvaultLogoComponent', () => {
       expect(img.getAttribute('src')).toContain('assets/brand/changed.png');
       expect(img.getAttribute('role')).toBe('img');
       expect(img.getAttribute('class')).toContain('ngvault-logo');
+
+      // The updates
+
+      fixture.componentRef.setInput('tooltip', '');
+      fixture.detectChanges();
+
+      expect(img.width).toBe(300);
+      expect(img.height).toBe(120);
+      expect(img.getAttribute('alt')).toBe('ngVault Logo');
+      expect(img.getAttribute('aria-label')).toBe('');
+      expect(tooltipDirective.message).toBe('');
+      expect(img.getAttribute('src')).toContain('assets/brand/changed.png');
+      expect(img.getAttribute('role')).toBe('img');
+      expect(img.getAttribute('class')).toContain('ngvault-logo');
     });
 
     it('should resolve dark variant when theme is dark', async () => {

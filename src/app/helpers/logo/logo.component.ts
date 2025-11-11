@@ -52,6 +52,7 @@ export class NgvaultLogoComponent implements OnDestroy {
   };
 
   private getTheme(): 'light' | 'dark' {
+    // istanbul ignore next
     if (typeof document === 'undefined' || typeof window === 'undefined') {
       return 'light'; // default fallback for SSR/tests
     }

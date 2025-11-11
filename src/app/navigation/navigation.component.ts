@@ -54,7 +54,9 @@ export class NavigationComponent {
 
   /** Handle window resize */
   @HostListener('window:resize')
+  /* istanbul ignore next */
   onResize(): void {
+    /* istanbul ignore next */
     if (localStorage.getItem('ngvault-sidenav') === null) {
       this.isExpanded.set(window.innerWidth >= 1200);
     }

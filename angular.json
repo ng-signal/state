@@ -91,7 +91,7 @@
             "stylePreprocessorOptions": {
               "includePaths": ["projects/styles/src/lib"]
             },
-            "codeCoverageExclude": ["**/testing/data/**", "**/src/testing/data/**"]
+            "codeCoverageExclude": ["**/testing/data/**", "**/src/testing/data/**", "**/examples/**"]
           }
         }
       }

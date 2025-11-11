@@ -29,6 +29,9 @@ export interface VaultBehavior<T = unknown, E extends VaultBehaviorExtension<T> 
 
   // Return an object whose values are extension functions (or nothing)
   extendCellAPI?(): E | void;
+
+  // eslint-disable-next-line
+  run?(ctx: VaultBehaviorContext<T>, current: T | undefined): any;
 }
 
 // Factory interface — note: same E constraint as behavior
