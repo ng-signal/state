@@ -1,10 +1,11 @@
 import { Directive, inject, Signal } from '@angular/core';
 import { VaultSignalRef } from '@ngvault/shared';
+import { getUserData } from 'src/testing/data/user.data';
 import { CarService } from '../../cars/services/car.service';
 import { UserCarFacadeService } from '../../facades/car-user-facade.service';
 import { CarModel } from '../../models/car.model';
 import { UserModel } from '../../models/user.model';
-import { ExampleServiceInterface } from '../interfaces/example-service.interface';
+import { ExampleUserServiceInterface } from '../interfaces/example-user.service.interface';
 
 @Directive()
 export abstract class UserListDirective {
@@ -16,9 +17,10 @@ export abstract class UserListDirective {
   /**
    * Injected instance of the user feature store service.
    */
-  protected readonly userService!: ExampleServiceInterface;
+  protected readonly userService!: ExampleUserServiceInterface<UserModel[]>;
   readonly userList: VaultSignalRef<UserModel[]>;
   readonly usersWithName: Signal<UserModel[]>;
+  readonly staticUsers = getUserData() as UserModel[];
 
   protected readonly carService = inject(CarService);
   readonly cars = this.carService.cars();
@@ -30,7 +32,7 @@ export abstract class UserListDirective {
   readonly carsWithoutUsers = this.userCarFacadeService.carsWithoutUsers;
   readonly groupedByMake = this.userCarFacadeService.groupedByMake;
 
-  constructor(userCellService: ExampleServiceInterface) {
+  constructor(userCellService: ExampleUserServiceInterface<UserModel[]>) {
     this.userService = userCellService;
     this.userList = this.userService.users();
     this.usersWithName = this.userService.usersWithNames;
@@ -44,6 +46,10 @@ export abstract class UserListDirective {
    * - Reactively updates as cell changes.
    */
 
+  loadUser(id: string): void {
+    this.userService.loadUser(id);
+  }
+
   /**
    * Retry handler for re-fetching users after an error.
    */
@@ -51,24 +57,24 @@ export abstract class UserListDirective {
     this.userService.loadUsers();
   }
 
-  resetUsers() {
-    this.userService.resetUsers();
+  resetUsers(setSpinner: boolean = true) {
+    this.userService.resetUsers(setSpinner);
   }
 
-  reloadUsers() {
-    this.userService.reloadUsers();
+  reloadUsers(setSpinner: boolean = true) {
+    this.userService.reloadUsers(setSpinner);
   }
 
   reactiveReloadUsers() {
     this.userService.reactiveReloadUsers();
   }
 
-  resetCars() {
-    this.carService.resetCars();
+  resetCars(setSpinner: boolean = true) {
+    this.carService.resetCars(setSpinner);
   }
 
-  reloadCars() {
-    this.carService.reloadCars();
+  reloadCars(setSpinner: boolean = true) {
+    this.carService.reloadCars(setSpinner);
   }
 
   reactiveReloadCars() {

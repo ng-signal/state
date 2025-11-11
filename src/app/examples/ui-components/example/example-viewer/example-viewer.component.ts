@@ -1,4 +1,5 @@
 import { Component, computed, inject, input } from '@angular/core';
+import { VaultSignalRef } from '@ngvault/shared';
 import { ExampleViewerBodyComponent } from '../example-viewer-body/example-viewer-body.component';
 import { ExampleViewerHeaderComponent } from '../example-viewer-header/example-viewer-header.component';
 import { ExampleViewerService } from '../services/example-viewer.service';
@@ -14,6 +15,8 @@ export class ExampleViewerComponent {
   readonly title = input<string>('');
   readonly subTitle = input<string>('');
   readonly exampleId = input<string>('');
+  // eslint-disable-next-line
+  readonly state = input.required<VaultSignalRef<any>>();
 
   private readonly service = inject(ExampleViewerService);
 

@@ -5,6 +5,7 @@ import { MatMenuModule } from '@angular/material/menu';
 import { MatToolbarModule } from '@angular/material/toolbar';
 import { RouterLink } from '@angular/router';
 import { NgvaultLogoComponent } from '../helpers/logo/logo.component';
+import { NavigationService } from '../navigation/service/navigation.service';
 import { ThemeService } from '../theme/theme.service';
 
 /**
@@ -19,6 +20,7 @@ import { ThemeService } from '../theme/theme.service';
 })
 export class ToolbarComponent {
   #themeService = inject(ThemeService);
+  #navigationService = inject(NavigationService);
 
   // Reactive computed signals for UI state
   readonly theme = computed(() => this.#themeService.theme());
@@ -39,5 +41,9 @@ export class ToolbarComponent {
 
   toggleDirection(): void {
     this.#themeService.toggleDirection();
+  }
+
+  openNavigation(): void {
+    this.#navigationService.show();
   }
 }

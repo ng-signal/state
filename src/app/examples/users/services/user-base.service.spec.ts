@@ -18,6 +18,11 @@ class TestUserService extends UserService<UserModel[]> {
     this['isLoaded'].set(true);
     super.loadUsers();
   }
+
+  override loadUser(id: string): void {
+    this['isLoaded'].set(true);
+    super.loadUser(id);
+  }
 }
 
 describe('Service: User Base', () => {
@@ -192,14 +197,35 @@ describe('Service: User Base', () => {
     });
   });
 
-  it('should handle a resetUsers', async () => {
-    spyOn(service['vault'], 'reset');
-    expect(service['isLoaded']()).toBeFalse();
+  describe('getUser()', () => {
+    it('should set loading to true, then set a single user on success', () => {
+      expect((service as any).isLoaded()).toBeFalse();
 
-    service.resetUsers();
+      service.loadUser('1');
+      expect((service as any).isLoaded()).toBeTrue();
+    });
+  });
 
-    expect(service['vault'].reset).toHaveBeenCalledWith();
-    expect(service['isLoaded']()).toBeFalse();
+  describe('resetUsers', () => {
+    it('should handle a resetUsers', async () => {
+      spyOn(service['vault'], 'setState');
+      expect(service['isLoaded']()).toBeFalse();
+
+      service.resetUsers();
+
+      expect(service['vault'].setState).toHaveBeenCalledWith({ loading: true, value: [] });
+      expect(service['isLoaded']()).toBeFalse();
+    });
+
+    it('should handle a resetUsers', async () => {
+      spyOn(service['vault'], 'setState');
+      expect(service['isLoaded']()).toBeFalse();
+
+      service.resetUsers(false);
+
+      expect(service['vault'].setState).toHaveBeenCalledWith({ loading: false, value: [] });
+      expect(service['isLoaded']()).toBeFalse();
+    });
   });
 
   it('should handle a reloadUser', async () => {

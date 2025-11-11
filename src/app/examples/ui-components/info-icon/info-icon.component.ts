@@ -14,6 +14,7 @@ import { InfoDialogService } from '../services/info-dialog.service';
 export class InfoIconComponent {
   icon = input<string>('info');
   data = input.required<CarModel | UserModel>();
+  disableClick = input<boolean>(false);
 
   display = computed(() => {
     const userData = this.data() as UserModel;
@@ -64,6 +65,8 @@ export class InfoIconComponent {
   private infoDialog = inject(InfoDialogService);
 
   open() {
-    this.infoDialog.open(this.data());
+    if (!this.disableClick()) {
+      this.infoDialog.open(this.data());
+    }
   }
 }

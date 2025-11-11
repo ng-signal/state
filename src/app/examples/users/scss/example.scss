@@ -6,6 +6,10 @@ $header-height: 70px;
 $action-container-height: 76px;
 $top-height: calc($header-height + $action-container-height);
 $height: calc(100vh - #{$layout-vertical} - #{$layout-vertical-padding} - $top-height);
+$tab-action-data-height: 80px;
+$tab-action-row-height: 30px;
+$tab-action-spacing: calc(global.$spacing-md * 2 + global.$spacing-sm * 2 + global.$spacing-sm + global.$spacing-md);
+$tab-action-container-height: calc($tab-action-row-height + $tab-action-row-height + $tab-action-spacing);
 
 /*
 .list-container {
@@ -224,6 +228,69 @@ $height: calc(100vh - #{$layout-vertical} - #{$layout-vertical-padding} - $top-h
       transition:
         box-shadow 0.3s ease,
         background-color 0.3s ease;
+
+      .tab-action-container {
+        margin-top: global.$spacing-md;
+        height: $tab-action-container-height;
+        flex: 1 1 auto;
+        border: 1px solid red;
+
+        .action-row {
+          height: $tab-action-row-height;
+          border: 1px solid red;
+
+          .row-instructions {
+            height: $tab-action-row-height;
+            display: flex;
+            flex-direction: row;
+            align-items: flex-start;
+            justify-content: flex-start;
+            border: 1px solid red;
+            margin-bottom: global.$spacing-xs;
+
+            .method {
+              height: $tab-action-row-height;
+              display: flex;
+              align-items: center;
+              justify-content: flex-start;
+              width: 150px;
+              border: 1px solid red;
+              margin-bottom: global.$spacing-xs;
+            }
+
+            .description {
+              height: $tab-action-row-height;
+              display: flex;
+              align-items: center;
+              justify-content: flex-start;
+              flex: 1 1 auto;
+              border: 1px solid red;
+              margin-bottom: global.$spacing-xs;
+            }
+
+            .refresh {
+              height: $tab-action-row-height;
+              width: 50px;
+              display: flex;
+              align-items: center;
+              justify-content: center;
+              border: 1px solid red;
+              margin-bottom: global.$spacing-xs;
+              color: global.$ngvault-success-base;
+            }
+          }
+
+          .row-data {
+            width: calc(100% - global.$spacing-sm * 2);
+            height: $tab-action-data-height;
+            display: flex;
+            flex-direction: row;
+            border: 1px solid red;
+            gap: global.$spacing-md;
+            padding: global.$spacing-sm;
+          }
+        }
+      }
 
       &:hover {
         @include global.ngvault-elevate(hover);

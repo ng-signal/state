@@ -31,7 +31,7 @@ export class UserCarFacadeService {
     const users = this._userValue();
 
     const assignedIds = new Set(users.filter((u) => u.car).map((u) => String(u.car!.id)));
-    return cars.filter((car) => !assignedIds.has(String(car.id)));
+    return cars.filter((car: CarModel) => !assignedIds.has(String(car.id)));
   });
 
   /** Derived: Users without cars (reactive) */

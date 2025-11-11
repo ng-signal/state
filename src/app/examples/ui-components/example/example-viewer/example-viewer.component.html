@@ -6,7 +6,7 @@
     <ng-content select="[source]"></ng-content>
   </div>
 
-  <ngvault-example-viewer-body class="example-viewer-body">
+  <ngvault-example-viewer-body class="example-viewer-body" [state]="state()">
     <ng-content select="[example]"></ng-content>
   </ngvault-example-viewer-body>
 

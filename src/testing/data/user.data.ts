@@ -7,6 +7,10 @@ const Data: UserModel[] = [
   { id: '4', name: 'Kai Nagato' }
 ];
 
+export function getInMemoryUserData(): UserModel[] {
+  return structuredClone(Data);
+}
+
 export function getUserData(index?: number, asArray = false): UserModel | UserModel[] {
   if (index !== undefined && index >= 0 && index < Data.length) {
     const item = structuredClone(Data[index]);

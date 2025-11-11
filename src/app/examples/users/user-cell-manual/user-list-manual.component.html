@@ -58,24 +58,18 @@
         <p>{{ userList.error()?.message }}</p>
         <button mat-flat-button color="primary" (click)="retry()">Retry</button>
       </div>
-    }
-
-    @if (userList.isLoading()) {
-      <div class="loading-state">
-        <mat-spinner diameter="50"></mat-spinner>
-        <p>Loading users ({{ spinnerTitle }}) ...</p>
-      </div>
     } @else {
       <div class="ngvault-tab-container">
-        <mat-tab-group animationDuration="150ms" mat-stretch-tabs="false" class="ngvault-tabs">
+        <mat-tab-group animationDuration="150ms" mat-stretch-tabs="false" class="ngvault-tabs" [selectedIndex]="1">
           <mat-tab label="Hydrate State">
             <div class="tab-panel">
               <div class="tab-panel-subtitle">How Vault loads and hydrates reactive state from external sources.</div>
               <ng-content select="[retrieve]">
                 <ngvault-example-viewer
                   title="Reactive Fetch (Users)"
-                  subTitle="Fetched from User Store"
-                  exampleId="reactive-fetch-users">
+                  subTitle="Fetched from User Cell"
+                  exampleId="reactive-fetch-users"
+                  [state]="userList">
                   <div example>
                     @for (user of userList.value(); track user.id) {
                       <ngvault-info-icon [data]="user" [icon]="'person'" class="info-icon" />
@@ -107,6 +101,56 @@
             </div>
           </mat-tab>
 
+          <mat-tab label="Mutate State">
+            <div class="tab-panel">
+              <div class="tab-panel-subtitle">
+                How Vault creates, updates, and synchronizes reactive state with external sources.
+              </div>
+              <ng-content select="[retrieve]">
+                <div class="tab-action-container">
+                  <div class="action-row">
+                    <div class="row-instructions">
+                      <div class="method">GET (Single)</div>
+                      <div class="description">Select a user to load their individual state.</div>
+                      <div class="refresh">
+                        <mat-icon class="pointer" (click)="reloadUsers(false)">refresh</mat-icon>
+                      </div>
+                    </div>
+                    <div class="row-data">
+                      @for (user of staticUsers; track user.id) {
+                        <div class="pointer" (click)="loadUser(user.id)">
+                          <ngvault-info-icon [data]="user" [icon]="'person'" class="info-icon" [disableClick]="true" />
+                        </div>
+                      }
+                    </div>
+                  </div>
+                </div>
+                {{ userList.isLoading() }}
+
+                <ngvault-example-viewer
+                  title="Reactive Cell State Mutation"
+                  subTitle="View of the User Cell state"
+                  exampleId="reactive-fetch-users"
+                  [state]="userList">
+                  <div example>
+                    @for (user of userList.value(); track user.id) {
+                      <ngvault-info-icon [data]="user" [icon]="'person'" class="info-icon" />
+                    }
+                  </div>
+
+                  <div source>
+                    <ngvault-example-viewer-source>
+                      @for (code of userListSourceCode; track code.type) {
+                        <ngvault-example-viewer-tab [label]="code.label">
+                          {{ code.code }}
+                        </ngvault-example-viewer-tab>
+                      }
+                    </ngvault-example-viewer-source>
+                  </div>
+                </ngvault-example-viewer>
+              </ng-content>
+            </div>
+          </mat-tab>
           <mat-tab label="Selectors">
             <div class="tab-panel">
               <div class="tab-panel-subtitle">
@@ -128,7 +172,8 @@
                 <ngvault-example-viewer
                   title="Reactive Fetch (Cars)"
                   subTitle="Fetched from Car Store"
-                  exampleId="rreactive-fetch-cars">
+                  exampleId="reactive-fetch-cars"
+                  [state]="cars">
                   <div example>
                     @for (car of carsWithDescriptions(); track car.id) {
                       <p>

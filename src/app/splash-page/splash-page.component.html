@@ -47,7 +47,8 @@
       <ngvault-example-viewer
         title="Reactive Fetch (Users)"
         subTitle="Fetched from User Store"
-        exampleId="reactive-fetch-users">
+        exampleId="reactive-fetch-users"
+        [state]="userList">
         <div example>
           @for (user of userList.value(); track user.id) {
             <ngvault-info-icon [data]="user" [icon]="'person'" class="info-icon" />

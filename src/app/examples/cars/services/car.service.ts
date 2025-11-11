@@ -2,33 +2,21 @@ import { HttpClient } from '@angular/common/http';
 import { computed, DestroyRef, inject, Injectable, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FeatureCell, injectVault } from '@ngvault/core';
-import { VaultSignalRef } from '@ngvault/shared';
-import { map, take } from 'rxjs';
+import { VaultDataType, VaultSignalRef } from '@ngvault/shared';
+import { take } from 'rxjs';
 import { CarModel } from '../../models/car.model';
+import { ExampleCarServiceInterface } from '../../users/interfaces/example-car.service.interface';
 
 @FeatureCell<CarModel[]>('cars')
 @Injectable({
   providedIn: 'root'
 })
-export class CarService {
+export class CarService implements ExampleCarServiceInterface<CarModel[]> {
   private readonly vault = injectVault<CarModel[]>(CarService);
   readonly #destroyRef = inject(DestroyRef);
   private readonly isLoaded = signal(false);
 
   private readonly http = inject(HttpClient);
-
-  resetCars() {
-    this.vault.reset();
-  }
-
-  reloadCars(): void {
-    this.isLoaded.set(false);
-  }
-
-  reactiveReloadCars(): void {
-    this.isLoaded.set(false);
-    this.vault.reset();
-  }
 
   readonly carsWithDescriptions = computed(() => {
     const cars = this.vault.state.value() as CarModel[] | undefined;
@@ -60,11 +48,7 @@ export class CarService {
         loading: true,
         error: null
       });
-      const source$ = this.http.get<CarModel[]>('/api/cars').pipe(
-        take(1),
-        takeUntilDestroyed(this.#destroyRef),
-        map((list: CarModel[]) => list)
-      );
+      const source$ = this.http.get<CarModel[]>('/api/cars').pipe(take(1), takeUntilDestroyed(this.#destroyRef));
       this.vault.fromObservable!(source$)
         .pipe(take(1))
         .subscribe({
@@ -83,5 +67,22 @@ export class CarService {
           }
         });
     }
+  }
+
+  resetCars(setSpinner: boolean = true) {
+    this.vault.setState({
+      loading: setSpinner,
+      value: [] as VaultDataType<CarModel[]>
+    });
+  }
+
+  reloadCars(setSpinner: boolean = true): void {
+    this.isLoaded.set(false);
+    this.resetCars(setSpinner);
+  }
+
+  reactiveReloadCars(): void {
+    this.isLoaded.set(false);
+    this.vault.reset();
   }
 }

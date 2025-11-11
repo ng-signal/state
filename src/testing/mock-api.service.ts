@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { InMemoryDbService } from 'angular-in-memory-web-api';
 import { getCarData } from './data/car.data';
-import { getUserData } from './data/user.data';
+import { getInMemoryUserData } from './data/user.data';
 
 /**
  * Mock in-memory API for development and demos.
@@ -11,6 +11,6 @@ import { getUserData } from './data/user.data';
 @Injectable()
 export class MockApiService implements InMemoryDbService {
   createDb() {
-    return { users: getUserData(), cars: getCarData() };
+    return { users: getInMemoryUserData(), cars: getCarData() };
   }
 }

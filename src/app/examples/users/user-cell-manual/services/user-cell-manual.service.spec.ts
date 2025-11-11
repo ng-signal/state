@@ -7,6 +7,7 @@ import { provideHttpClient } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { provideFeatureCell } from '@ngvault/core';
 import { provideVaultTesting } from '@ngvault/testing';
+import { getUserData } from 'src/testing/data/user.data';
 
 describe('Service: User Cell Manual', () => {
   let service: UserCellManualService;
@@ -85,6 +86,60 @@ describe('Service: User Cell Manual', () => {
       expect(err?.status).toBe(500);
       expect(err?.statusText).toBe('Server Error');
       expect(err?.message).toBe('Http failure response for /api/users: 500 Server Error');
+      expect(err?.details).toEqual(Object({ message: 'Internal Server Error' }));
+    });
+  });
+
+  describe('loadUser()', () => {
+    it('should set loading to true, then set user on success', async () => {
+      service.loadUser('1');
+
+      const state = service.users();
+
+      expect(state.value()).toBeUndefined();
+      expect(state.isLoading()).toBeTrue();
+      expect(state.error()).toBeNull();
+
+      const result = mockHttpClient.expectOne('/api/users/1');
+      expect(result.request.method).toBe('GET');
+      result.flush(getUserData(0, false));
+
+      expect(state.value()).toEqual([Object({ id: '1', name: 'Ada Lovelace', carId: 2 })]);
+      expect(state.hasValue()).toBeTrue();
+
+      expect(state.isLoading()).toBeFalse();
+      expect(state.error()).toBeNull();
+    });
+
+    it('should set error when http fails', async () => {
+      service.loadUser('1');
+
+      const state = service.users();
+      TestBed.tick();
+
+      expect(state.value()).toBeUndefined();
+      expect(state.isLoading()).toBeTrue();
+      expect(state.error()).toBeNull();
+      expect(state.hasValue()).toBeFalse();
+
+      const result = mockHttpClient.expectOne('/api/users/1');
+      expect(result.request.method).toBe('GET');
+
+      result.flush(
+        { message: 'Internal Server Error' }, // response body
+        {
+          status: 500,
+          statusText: 'Server Error'
+        }
+      );
+
+      expect(state.value()).toBeUndefined();
+      expect(state.isLoading()).toBeFalse();
+      expect(state.hasValue()).toBeFalse();
+      const err = state.error();
+      expect(err?.status).toBe(500);
+      expect(err?.statusText).toBe('Server Error');
+      expect(err?.message).toBe('Http failure response for /api/users/1: 500 Server Error');
       expect(err?.details).toEqual(Object({ message: 'Internal Server Error' }));
     });
   });

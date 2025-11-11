@@ -1,24 +1,25 @@
 import { Signal } from '@angular/core';
 import { VaultSignalRef } from '@ngvault/shared';
-import { UserModel } from '../../models/user.model';
 
 /**
  * Defines the standard shape of an ngVault feature service
  * so base directives and components can be generically typed.
  */
-export interface ExampleServiceInterface {
+export interface ExampleCarServiceInterface<T> {
   /** Returns the reactive resource state (data, loading, error) */
-  users(): VaultSignalRef<UserModel[]>;
+  cars(): VaultSignalRef<T>;
 
   /** Reactive computed selector that transforms or derives data */
-  usersWithNames: Signal<UserModel[]>;
+  carsWithDescriptions: Signal<T>;
 
   /** Loads or refreshes the data from backend or cache */
-  loadUsers(): void;
+  loadCars(): void;
 
-  resetUsers(): void;
+  loadCars(id: string): void;
 
-  reloadUsers(): void;
+  resetCars(setSpinner: boolean): void;
 
-  reactiveReloadUsers(): void;
+  reloadCars(setSpinner: boolean): void;
+
+  reactiveReloadCars(): void;
 }

@@ -49,8 +49,8 @@ export abstract class UserService<T> {
   protected readonly http = inject(HttpClient);
   private vault = injectVault<UserModel[]>(UserService);
 
-  users(): VaultSignalRef<UserModel[]> {
-    if (!this.isLoaded()) {
+  users(): VaultSignalRef<T> {
+    if (!this.isLoaded() && !this.vault.state.hasValue()) {
       this.isLoaded.set(true);
       this.loadUsers();
     }

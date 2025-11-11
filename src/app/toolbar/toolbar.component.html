@@ -15,6 +15,11 @@
   </button>
 
   <mat-menu #menu="matMenu">
+    <button mat-menu-item (click)="openNavigation()">
+      <mat-icon>menu_book</mat-icon>
+      <span>Examples</span>
+    </button>
+
     <button mat-menu-item (click)="toggleTheme()">
       <mat-icon>{{ themeIcon() }}</mat-icon>
       <span>{{ themeLabel() }}</span>
