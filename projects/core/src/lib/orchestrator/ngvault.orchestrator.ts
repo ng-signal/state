@@ -185,30 +185,36 @@ export class VaultOrchestrator<T> {
     for (const behavior of stageBehaviors) {
       let next: T | void | undefined;
 
-      switch (stage) {
-        case 'state':
-          if (typeof (behavior as VaultStateBehavior<T>).computeState === 'function') {
-            next = await (behavior as VaultStateBehavior<T>).computeState(ctx);
-          }
-          break;
+      try {
+        switch (stage) {
+          case 'state':
+            if (typeof (behavior as VaultStateBehavior<T>).computeState === 'function') {
+              next = await (behavior as VaultStateBehavior<T>).computeState(ctx);
+            }
+            break;
 
-        case 'reduce':
-          if (typeof (behavior as VaultReducerBehavior<T>).applyReducers === 'function') {
-            next = await (behavior as VaultReducerBehavior<T>).applyReducers(ctx, current!);
-          }
-          break;
+          case 'reduce':
+            if (typeof (behavior as VaultReducerBehavior<T>).applyReducers === 'function') {
+              next = await (behavior as VaultReducerBehavior<T>).applyReducers(ctx, current!);
+            }
+            break;
 
-        case 'encrypt':
-          if (typeof (behavior as VaultEncryptionBehavior<T>).encryptState === 'function') {
-            next = await (behavior as VaultEncryptionBehavior<T>).encryptState(ctx, current!);
-          }
-          break;
+          case 'encrypt':
+            if (typeof (behavior as VaultEncryptionBehavior<T>).encryptState === 'function') {
+              next = await (behavior as VaultEncryptionBehavior<T>).encryptState(ctx, current!);
+            }
+            break;
 
-        case 'persist':
-          if (typeof (behavior as VaultPersistenceBehavior<T>).persistState === 'function') {
-            await (behavior as VaultPersistenceBehavior<T>).persistState(ctx, current!);
-          }
-          break;
+          case 'persist':
+            if (typeof (behavior as VaultPersistenceBehavior<T>).persistState === 'function') {
+              await (behavior as VaultPersistenceBehavior<T>).persistState(ctx, current!);
+            }
+            break;
+        }
+      } catch (err) {
+        ctx.error?.set(resourceError(err));
+        ctx.isLoading?.set(false);
+        throw err;
       }
 
       if (next !== undefined) current = next;

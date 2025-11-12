@@ -16,7 +16,7 @@ describe('Orcestrator: Vault', () => {
     calls = [];
 
     mockCtx = {
-      incoming: Object({ loading: true, value: 'incoming data' }),
+      incoming: Object({ value: null }),
       isLoading: signal<any>(false),
       error: signal<any>(null),
       value: signal<any>(null)
@@ -68,7 +68,7 @@ describe('Orcestrator: Vault', () => {
     await flushMicrotasksZoneless();
 
     expect(calls).toEqual(['state', 'reduce', 'encrypt', 'persist']);
-    expect(mockCtx.isLoading?.()).toBeTrue();
+    expect(mockCtx.isLoading?.()).toBeFalse();
     expect(mockCtx.error?.()).toBeNull();
     expect(mockCtx.value?.()).toEqual({ reduce: true });
   });
@@ -129,7 +129,7 @@ describe('Orcestrator: Vault', () => {
     const err = mockCtx.error?.();
 
     expect(err).toEqual(
-      jasmine.objectContaining({
+      Object({
         message: 'Http failure response for /api/users/error: 500 Internal Server Error',
         status: 500,
         statusText: 'Internal Server Error',
@@ -159,7 +159,7 @@ describe('Orcestrator: Vault', () => {
     await flushMicrotasksZoneless();
 
     expect(calls).toEqual(['state', 'encrypt']);
-    expect(mockCtx.isLoading?.()).toBeTrue();
+    expect(mockCtx.isLoading?.()).toBeFalse();
     expect(mockCtx.error?.()).toBeNull();
     expect(mockCtx.value?.()).toEqual({ id: 1 });
   });
@@ -188,8 +188,286 @@ describe('Orcestrator: Vault', () => {
     await flushMicrotasksZoneless();
 
     expect(calls).toEqual(['state']);
-    expect(mockCtx.isLoading?.()).toBeTrue();
+    expect(mockCtx.isLoading?.()).toBeFalse();
     expect(mockCtx.error?.()).toBeNull();
     expect(mockCtx.value?.()).toEqual({ ok: true });
+  });
+
+  describe('runStage failures - one of each', () => {
+    it('should stop execution on a state event', async () => {
+      const errorBehavior = makeBehavior('state');
+      errorBehavior.computeState = async () => {
+        throw new Error('Test error');
+      };
+      const behaviors = [errorBehavior, makeBehavior('reduce'), makeBehavior('encrypt'), makeBehavior('persist')];
+
+      runInInjectionContext(injector, () => {
+        dispatcher = new VaultOrchestrator<any>(behaviors, injector);
+      });
+
+      dispatcher.dispatchSet(mockCtx);
+      await flushMicrotasksZoneless();
+
+      expect(calls).toEqual([]);
+      expect(mockCtx.isLoading?.()).toBeFalse();
+      expect(mockCtx.error?.()).toEqual(
+        Object({
+          message: 'Test error',
+          details: jasmine.any(String)
+        })
+      );
+      expect(mockCtx.value?.()).toBeNull();
+    });
+
+    it('should stop execution on a reduce event', async () => {
+      const errorBehavior = makeBehavior('reduce');
+      errorBehavior.applyReducers = async () => {
+        throw new Error('Test error');
+      };
+      const behaviors = [makeBehavior('state'), errorBehavior, makeBehavior('encrypt'), makeBehavior('persist')];
+
+      runInInjectionContext(injector, () => {
+        dispatcher = new VaultOrchestrator<any>(behaviors, injector);
+      });
+
+      dispatcher.dispatchSet(mockCtx);
+      await flushMicrotasksZoneless();
+
+      expect(calls).toEqual(['state']);
+      expect(mockCtx.isLoading?.()).toBeFalse();
+      expect(mockCtx.error?.()).toEqual(
+        Object({
+          message: 'Test error',
+          details: jasmine.any(String)
+        })
+      );
+      expect(mockCtx.value?.()).toBeNull();
+    });
+
+    it('should stop execution on an encrypt event', async () => {
+      const errorBehavior = makeBehavior('encrypt');
+      errorBehavior.encryptState = async () => {
+        throw new Error('Test error');
+      };
+      const behaviors = [makeBehavior('state'), makeBehavior('reduce'), errorBehavior, makeBehavior('persist')];
+
+      runInInjectionContext(injector, () => {
+        dispatcher = new VaultOrchestrator<any>(behaviors, injector);
+      });
+
+      dispatcher.dispatchSet(mockCtx);
+      await flushMicrotasksZoneless();
+
+      expect(calls).toEqual(['state', 'reduce']);
+      expect(mockCtx.isLoading?.()).toBeFalse();
+      expect(mockCtx.error?.()).toEqual(
+        Object({
+          message: 'Test error',
+          details: jasmine.any(String)
+        })
+      );
+      expect(mockCtx.value?.()).toBeNull();
+    });
+
+    it('should stop execution on a persist event', async () => {
+      const errorBehavior = makeBehavior('persist');
+      errorBehavior.persistState = async () => {
+        throw new Error('Test error');
+      };
+      const behaviors = [makeBehavior('state'), makeBehavior('reduce'), makeBehavior('encrypt'), errorBehavior];
+
+      runInInjectionContext(injector, () => {
+        dispatcher = new VaultOrchestrator<any>(behaviors, injector);
+      });
+
+      dispatcher.dispatchSet(mockCtx);
+      await flushMicrotasksZoneless();
+
+      expect(calls).toEqual(['state', 'reduce', 'encrypt']);
+      expect(mockCtx.isLoading?.()).toBeFalse();
+      expect(mockCtx.error?.()).toEqual(
+        Object({
+          message: 'Test error',
+          details: jasmine.any(String)
+        })
+      );
+      expect(mockCtx.value?.()).toBeNull();
+    });
+  });
+
+  describe('runStage failures - two of each', () => {
+    it('should stop execution on a state event', async () => {
+      const errorBehavior = makeBehavior('state');
+      errorBehavior.computeState = async () => {
+        throw new Error('Test error');
+      };
+      const behaviors = [
+        makeBehavior('state'),
+        errorBehavior,
+        makeBehavior('reduce'),
+        makeBehavior('encrypt'),
+        makeBehavior('persist')
+      ];
+
+      runInInjectionContext(injector, () => {
+        dispatcher = new VaultOrchestrator<any>(behaviors, injector);
+      });
+
+      dispatcher.dispatchSet(mockCtx);
+      await flushMicrotasksZoneless();
+
+      expect(calls).toEqual(['state']);
+      expect(mockCtx.isLoading?.()).toBeFalse();
+      expect(mockCtx.error?.()).toEqual(
+        Object({
+          message: 'Test error',
+          details: jasmine.any(String)
+        })
+      );
+      expect(mockCtx.value?.()).toBeNull();
+    });
+
+    it('should stop execution on a reduce event', async () => {
+      const errorBehavior = makeBehavior('reduce');
+      errorBehavior.applyReducers = async () => {
+        throw new Error('Test error');
+      };
+      const behaviors = [
+        makeBehavior('state'),
+        makeBehavior('reduce'),
+        errorBehavior,
+        makeBehavior('encrypt'),
+        makeBehavior('persist')
+      ];
+
+      runInInjectionContext(injector, () => {
+        dispatcher = new VaultOrchestrator<any>(behaviors, injector);
+      });
+
+      dispatcher.dispatchSet(mockCtx);
+      await flushMicrotasksZoneless();
+
+      expect(calls).toEqual(['state', 'reduce']);
+      expect(mockCtx.isLoading?.()).toBeFalse();
+      expect(mockCtx.error?.()).toEqual(
+        Object({
+          message: 'Test error',
+          details: jasmine.any(String)
+        })
+      );
+      expect(mockCtx.value?.()).toBeNull();
+    });
+
+    it('should stop execution on an encrypt event', async () => {
+      const errorBehavior = makeBehavior('encrypt');
+      errorBehavior.encryptState = async () => {
+        throw new Error('Test error');
+      };
+      const behaviors = [
+        makeBehavior('state'),
+        makeBehavior('reduce'),
+        makeBehavior('encrypt'),
+        errorBehavior,
+        makeBehavior('persist')
+      ];
+
+      runInInjectionContext(injector, () => {
+        dispatcher = new VaultOrchestrator<any>(behaviors, injector);
+      });
+
+      dispatcher.dispatchSet(mockCtx);
+      await flushMicrotasksZoneless();
+
+      expect(calls).toEqual(['state', 'reduce', 'encrypt']);
+      expect(mockCtx.isLoading?.()).toBeFalse();
+      expect(mockCtx.error?.()).toEqual(
+        Object({
+          message: 'Test error',
+          details: jasmine.any(String)
+        })
+      );
+      expect(mockCtx.value?.()).toBeNull();
+    });
+
+    it('should stop execution on a persist event', async () => {
+      const errorBehavior = makeBehavior('persist');
+      errorBehavior.persistState = async () => {
+        throw new Error('Test error');
+      };
+      const behaviors = [
+        makeBehavior('state'),
+        makeBehavior('reduce'),
+        makeBehavior('encrypt'),
+        makeBehavior('persist'),
+        errorBehavior
+      ];
+
+      runInInjectionContext(injector, () => {
+        dispatcher = new VaultOrchestrator<any>(behaviors, injector);
+      });
+
+      dispatcher.dispatchSet(mockCtx);
+      await flushMicrotasksZoneless();
+
+      expect(calls).toEqual(['state', 'reduce', 'encrypt', 'persist']);
+      expect(mockCtx.isLoading?.()).toBeFalse();
+      expect(mockCtx.error?.()).toEqual(
+        Object({
+          message: 'Test error',
+          details: jasmine.any(String)
+        })
+      );
+      expect(mockCtx.value?.()).toBeNull();
+    });
+  });
+
+  describe('runStage failures nothing before', () => {
+    it('should stop execution on a reduce event', async () => {
+      const behaviors = [makeBehavior('state'), makeBehavior('reduce')];
+
+      runInInjectionContext(injector, () => {
+        dispatcher = new VaultOrchestrator<any>(behaviors, injector);
+      });
+
+      dispatcher.dispatchSet(mockCtx);
+      await flushMicrotasksZoneless();
+
+      expect(calls).toEqual(['state', 'reduce']);
+      expect(mockCtx.isLoading?.()).toBeFalse();
+      expect(mockCtx.error?.()).toBeNull();
+      expect(mockCtx.value?.()).toEqual(Object({ reduce: true }));
+    });
+
+    it('should stop execution on an encrypt event', async () => {
+      const behaviors = [makeBehavior('state'), makeBehavior('encrypt')];
+
+      runInInjectionContext(injector, () => {
+        dispatcher = new VaultOrchestrator<any>(behaviors, injector);
+      });
+
+      dispatcher.dispatchSet(mockCtx);
+      await flushMicrotasksZoneless();
+
+      expect(calls).toEqual(['state', 'encrypt']);
+      expect(mockCtx.isLoading?.()).toBeFalse();
+      expect(mockCtx.error?.()).toBeNull();
+      expect(mockCtx.value?.()).toEqual(Object({ state: true }));
+    });
+
+    it('should stop execution on a persist event', async () => {
+      const behaviors = [makeBehavior('state'), makeBehavior('persist')];
+
+      runInInjectionContext(injector, () => {
+        dispatcher = new VaultOrchestrator<any>(behaviors, injector);
+      });
+
+      dispatcher.dispatchSet(mockCtx);
+      await flushMicrotasksZoneless();
+
+      expect(calls).toEqual(['state', 'persist']);
+      expect(mockCtx.isLoading?.()).toBeFalse();
+      expect(mockCtx.error?.()).toBeNull();
+      expect(mockCtx.value?.()).toEqual(Object({ state: true }));
+    });
   });
 });
