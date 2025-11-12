@@ -1,77 +1,70 @@
 import { inject, Injectable } from '@angular/core';
-import {
-  NgVaultEventBus,
-  NgVaultEventModel,
-  registerNgVault,
-  unregisterNgVault,
-  VaultEventType
-} from '@ngvault/dev-tools';
-import {
-  defineNgVaultBehaviorKey,
-  NgVaultDevModeService,
-  VaultBehaviorContext,
-  VaultStateSnapshot
-} from '@ngvault/shared';
+import { NgVaultEventBus, NgVaultEventModel } from '@ngvault/dev-tools';
+import { defineNgVaultBehaviorKey, VaultBehaviorContext, VaultStateSnapshot } from '@ngvault/shared';
 
 @Injectable({ providedIn: 'root' })
 export class NgVaultMonitor {
-  #devModeService = inject(NgVaultDevModeService);
-  #registered = new Set<string>();
   #eventBus = inject(NgVaultEventBus);
-  #initialized = new Set<string>();
   public readonly key = defineNgVaultBehaviorKey('DevTools', 'Telemetry');
 
-  onInit<T>(vaultKey: string, serviceName: string, ctx: Readonly<VaultBehaviorContext<T>>): void {
-    if (!this.#devModeService.isDevMode || this.#registered.has(vaultKey)) return;
-    this.#registered.add(vaultKey);
+  #serializeName(name: string): string {
+    const lower = name.toLowerCase();
+    const phase = lower.startsWith('start') ? 'start' : lower.startsWith('end') ? 'end' : 'error';
 
-    this.#initialized.add(vaultKey);
+    const domain = /(replace|merge)/.test(lower)
+      ? 'lifecycle'
+      : /(state|reduce|encrypt|persist)/.test(lower)
+        ? 'stage'
+        : 'lifecycle';
 
-    registerNgVault({ key: vaultKey, service: serviceName, state: ctx });
-    this.#emitEvent(vaultKey, ctx.state, 'init');
+    const operation = lower.replace(/^(start|end|error)/, '');
+    return `${domain}:${phase}:${operation || 'unknown'}`;
   }
 
-  onLoad<T>(key: string, ctx: Readonly<VaultBehaviorContext<T>>): void {
-    this.#emitEvent(key, ctx.state, 'load');
+  startReplace<T>(cell: string, behaviorId: string, ctx: Readonly<VaultBehaviorContext<T>>): void {
+    this.#emitEvent(cell, behaviorId, 'startReplace', ctx.state);
   }
 
-  onSet<T>(key: string, ctx: Readonly<VaultBehaviorContext<T>>): void {
-    this.#emitEvent(key, ctx.state, 'set');
+  endReplace<T>(cell: string, behaviorId: string, ctx: Readonly<VaultBehaviorContext<T>>): void {
+    this.#emitEvent(cell, behaviorId, 'endReplace', ctx.state);
   }
 
-  onPatch<T>(key: string, ctx: Readonly<VaultBehaviorContext<T>>): void {
-    this.#emitEvent(key, ctx.state, 'patch');
+  startMerge<T>(cell: string, behaviorId: string, ctx: Readonly<VaultBehaviorContext<T>>): void {
+    this.#emitEvent(cell, behaviorId, 'startMerge', ctx.state);
   }
 
-  onReset<T>(key: string, ctx: Readonly<VaultBehaviorContext<T>>): void {
-    this.#emitEvent(key, ctx.state, 'reset');
+  endMerge<T>(cell: string, behaviorId: string, ctx: Readonly<VaultBehaviorContext<T>>): void {
+    this.#emitEvent(cell, behaviorId, 'endMerge', ctx.state);
   }
 
-  onError<T>(key: string, ctx: Readonly<VaultBehaviorContext<T>>): void {
-    this.#emitEvent(key, ctx.state, 'error', ctx.message);
+  startState<T>(cell: string, behaviorId: string, ctx: Readonly<VaultBehaviorContext<T>>): void {
+    this.#emitEvent(cell, behaviorId, 'startState', ctx.state);
   }
 
-  onDestroy<T>(key: string, ctx: Readonly<VaultBehaviorContext<T>>): void {
-    this.#emitEvent(key, ctx.state, 'destroy');
-    if (this.#registered.has(key)) {
-      unregisterNgVault(key);
-    }
+  endState<T>(cell: string, behaviorId: string, ctx: Readonly<VaultBehaviorContext<T>>): void {
+    this.#emitEvent(cell, behaviorId, 'endState', ctx.state);
   }
 
-  onDispose<T>(key: string, ctx: Readonly<VaultBehaviorContext<T>>): void {
-    this.#emitEvent(key, ctx.state, 'dispose');
+  error<T>(cell: string, behaviorId: string, ctx: Readonly<VaultBehaviorContext<T>>, err: unknown): void {
+    this.#emitEvent(cell, behaviorId, 'error', ctx.state, 'error', err instanceof Error ? err.message : String(err));
   }
 
-  #emitEvent<T>(key: string, ctx: Readonly<VaultStateSnapshot<T>>, type: VaultEventType, error?: string): void {
-    if (!this.#initialized.has(key)) {
-      throw new Error(`[NgVault] Behavior "${this.constructor.name}" used before onInit() for "${key}".`);
-    }
-
+  #emitEvent<T>(
+    cell: string,
+    behaviorId: string,
+    type: string,
+    ctx: Readonly<VaultStateSnapshot<T>>,
+    payload?: unknown,
+    error?: string
+  ): void {
     const event = {
-      key,
-      type,
+      id: crypto.randomUUID(),
+      cell,
+      behaviorId: behaviorId,
+      type: this.#serializeName(type),
       timestamp: Date.now(),
-      state: ctx
+      state: ctx,
+      ...(payload ? { payload } : {})
     } as NgVaultEventModel;
 
     if (error) {
