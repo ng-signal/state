@@ -1,5 +1,5 @@
 import { Signal } from '@angular/core';
-import { VaultBehaviorRunner } from '@ngvault/shared';
+import { VaultBehaviorRunner, VaultStateInputType } from '@ngvault/shared';
 import { Observable } from 'rxjs';
 import { ResourceStateError } from '../models/resource-state-error.model';
 import { VaultStateSnapshot } from '../models/vault-state-snapshot.model';
@@ -13,9 +13,11 @@ export interface VaultBehaviorContext<T> {
 
   next?: Readonly<VaultStateType<T>> | null;
   patch?: Readonly<VaultStateType<T>> | null;
-
+  incoming?: VaultStateInputType<T>;
   state: Readonly<VaultStateSnapshot<T>>;
   behaviorRunner?: VaultBehaviorRunner<T>;
+
+  operation?: 'replace' | 'merge';
 
   destroyed$?: Observable<void>;
   reset$?: Observable<void>;

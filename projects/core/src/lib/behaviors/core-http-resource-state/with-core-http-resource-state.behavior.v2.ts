@@ -17,7 +17,7 @@ import { resourceError } from '../../utils/resource-error.util';
 export class CoreHttpResourceStateBehaviorV2<T> implements VaultStateBehavior<T> {
   readonly type = 'state';
   public readonly critical = true;
-  public readonly key = defineNgVaultBehaviorKey('CoreHttpResource', 'State');
+  public readonly key = defineNgVaultBehaviorKey('CoreHttpResource', 'StateV2');
 
   constructor(
     readonly behaviorId: string,
@@ -25,11 +25,15 @@ export class CoreHttpResourceStateBehaviorV2<T> implements VaultStateBehavior<T>
     private readonly destroyRef: DestroyRef
   ) {}
 
+  onInit(key: string, service: string, ctx: VaultBehaviorContext<T>): void {
+    ctx.behaviorRunner?.onInit?.(this.behaviorId, this.key, service, ctx);
+  }
+
   async computeState(ctx: VaultBehaviorContext<T>): Promise<T | undefined> {
     ngVaultDebug('http resource state v2');
 
-    if (NGVAULT_EXPERIMENTAL_HTTP_RESOURCE && ctx.next && isHttpResourceRef<T>(ctx.next)) {
-      const resource = ctx.next as HttpResourceRef<T>;
+    if (NGVAULT_EXPERIMENTAL_HTTP_RESOURCE && ctx.incoming && isHttpResourceRef<T>(ctx.incoming)) {
+      const resource = ctx.incoming as HttpResourceRef<T>;
 
       devWarnExperimentalHttpResource();
 

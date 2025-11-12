@@ -10,6 +10,9 @@ export interface FeatureCell<T> extends SignalVaultModel<T> {
 
   patchState(partial: Partial<VaultStateInputType<T>>): void;
 
+  replaceState(incoming: VaultStateInputType<T>): void;
+  mergeState(incoming: VaultStateInputType<T>): void;
+
   fromObservable?(source$: Observable<T>): Observable<VaultSignalRef<T>>;
 
   reset(): void;

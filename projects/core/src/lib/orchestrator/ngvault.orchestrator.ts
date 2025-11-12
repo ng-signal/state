@@ -9,71 +9,131 @@ import {
   VaultEncryptionBehavior,
   VaultPersistenceBehavior,
   VaultReducerBehavior,
-  VaultStateBehavior
+  VaultStateBehavior,
+  VaultStateInputType,
+  VaultStateType
 } from '@ngvault/shared';
 import { NGVAULT_QUEUE } from '../tokens/ngvault-queue.token';
 import { applyNgVaultValueMergev2 } from '../utils/apply-vault-merge.util';
+import { isHttpResourceRef } from '../utils/is-http-resource.util';
 import { resourceError } from '../utils/resource-error.util';
 
-/**
- * Core async dispatcher that drives the vault lifecycle:
- *   state → reduce → encrypt → persist → commit
- */
 export class VaultOrchestrator<T> {
-  // Deterministic async queue
   #queue = inject(NGVAULT_QUEUE);
 
   constructor(private readonly behaviors: VaultBehavior<T>[]) {}
 
+  #ensureIncoming(ctx: VaultBehaviorContext<T>): VaultStateInputType<T> | null {
+    const incoming = ctx.incoming;
+
+    if (incoming == null) {
+      ctx.isLoading?.set(false);
+      ctx.error?.set(null);
+      ctx.value?.set(undefined);
+      return null;
+    }
+
+    return incoming;
+  }
+
+  async #finishPipeline(ctx: VaultBehaviorContext<T>, working?: T): Promise<T | undefined> {
+    // Stage 1: reduce
+    let pipelineDataFlow = await this.#runStage('reduce', ctx, working);
+
+    // Clone AFTER reduce for purity
+    const stateData = structuredClone(pipelineDataFlow);
+
+    // Stage 2: encrypt
+    pipelineDataFlow = await this.#runStage('encrypt', ctx, pipelineDataFlow);
+
+    // Stage 3: persist
+    await this.#runStage('persist', ctx, pipelineDataFlow);
+
+    // Commit the *cloned* pre-encrypted snapshot to signals
+    return stateData;
+  }
+  // ──────────────────────────────
+  // dispatchSet with proper narrowing
+  // ──────────────────────────────
   dispatchSet(ctx: VaultBehaviorContext<T>): void {
     this.#queue.enqueue(async () => {
+      ctx.operation = 'replace';
+
+      const incoming = this.#ensureIncoming(ctx);
+      if (!incoming) return;
+
       this.#safeAsync(async () => {
-        let pipelineDataFlow = await this.#runStage('state', ctx);
+        const stateResult = await this.#runStage('state', ctx);
 
-        pipelineDataFlow = await this.#runStage('reduce', ctx, pipelineDataFlow);
-
-        const stateData = structuredClone(pipelineDataFlow);
-
-        pipelineDataFlow = await this.#runStage('encrypt', ctx, pipelineDataFlow);
-
-        await this.#runStage('persist', ctx, pipelineDataFlow);
-
-        return stateData;
+        return await this.#finishPipeline(ctx, stateResult);
       }, ctx);
     });
   }
 
   dispatchPatch(ctx: VaultBehaviorContext<T>): void {
     this.#queue.enqueue(async () => {
+      ctx.operation = 'merge';
+
+      const incoming = this.#ensureIncoming(ctx);
+      if (!incoming) return;
+
       this.#safeAsync(async () => {
         const current = ctx.value?.() ?? ({} as T);
 
         const partial = await this.#runStage('state', ctx);
 
-        let pipelineDataFlow = structuredClone(applyNgVaultValueMergev2<T>(ctx, current, partial));
+        const stateResult = structuredClone(applyNgVaultValueMergev2<T>(ctx, current, partial));
 
-        pipelineDataFlow = await this.#runStage('reduce', ctx, pipelineDataFlow);
-
-        const stateData = structuredClone(pipelineDataFlow);
-
-        pipelineDataFlow = await this.#runStage('encrypt', ctx, pipelineDataFlow);
-
-        await this.#runStage('persist', ctx, pipelineDataFlow);
-
-        return stateData;
+        return await this.#finishPipeline(ctx, stateResult);
       }, ctx);
     });
   }
 
-  async #safeAsync(fn: () => Promise<VaultDataType<T>>, ctx: VaultBehaviorContext<T>): Promise<void> {
+  async #safeAsync(
+    fn: () => Promise<VaultDataType<T> | void | Partial<VaultStateType<T>> | null>,
+    ctx: VaultBehaviorContext<T>
+  ): Promise<void> {
     try {
-      ctx.isLoading?.set(true);
-      ctx.error?.set(null);
-      const stateData = await fn();
+      const incoming = ctx.incoming;
+      const isPlainState = incoming != null && typeof incoming === 'object' && !isHttpResourceRef(incoming);
+      const incomingState = isPlainState ? (incoming as Partial<VaultStateType<T>>) : {};
+      const isReplace = ctx.operation === 'replace';
+
+      if (incomingState.loading !== undefined) ctx.isLoading?.set(incomingState.loading);
+      if (incomingState.error !== undefined) ctx.error?.set(incomingState.error);
+
+      const result = await fn();
+
       queueMicrotask(() => {
-        ctx.value?.set(stateData);
-        ctx.isLoading?.set(false);
-        ctx.error?.set(null);
+        let normalized: Partial<VaultStateType<T>> = {};
+
+        if (result == null) {
+          normalized = incomingState;
+        } else {
+          normalized = { value: result as T };
+        }
+
+        if (normalized.value !== undefined) {
+          ctx.value?.set(normalized.value);
+        } else if (isReplace) {
+          ctx.value?.set(undefined);
+        }
+
+        if (normalized.loading !== undefined) {
+          ctx.isLoading?.set(normalized.loading);
+        } else if (incomingState.loading !== undefined) {
+          ctx.isLoading?.set(incomingState.loading);
+        } else if (isReplace) {
+          ctx.isLoading?.set(false);
+        }
+
+        if (normalized.error !== undefined) {
+          ctx.error?.set(normalized.error);
+        } else if (incomingState.error !== undefined) {
+          ctx.error?.set(incomingState.error);
+        } else if (isReplace) {
+          ctx.error?.set(null);
+        }
       });
     } catch (err) {
       ctx.error?.set(resourceError(err));
@@ -94,19 +154,27 @@ export class VaultOrchestrator<T> {
 
       switch (stage) {
         case 'state':
-          next = await (behavior as VaultStateBehavior<T>).computeState(ctx);
+          if (typeof (behavior as VaultStateBehavior<T>).computeState === 'function') {
+            next = await (behavior as VaultStateBehavior<T>).computeState(ctx);
+          }
           break;
 
         case 'reduce':
-          next = await (behavior as VaultReducerBehavior<T>).applyReducers(ctx, current!);
+          if (typeof (behavior as VaultReducerBehavior<T>).applyReducers === 'function') {
+            next = await (behavior as VaultReducerBehavior<T>).applyReducers(ctx, current!);
+          }
           break;
 
         case 'encrypt':
-          next = await (behavior as VaultEncryptionBehavior<T>).encryptState(ctx, current!);
+          if (typeof (behavior as VaultEncryptionBehavior<T>).encryptState === 'function') {
+            next = await (behavior as VaultEncryptionBehavior<T>).encryptState(ctx, current!);
+          }
           break;
 
         case 'persist':
-          await (behavior as VaultPersistenceBehavior<T>).persistState(ctx, current!);
+          if (typeof (behavior as VaultPersistenceBehavior<T>).persistState === 'function') {
+            await (behavior as VaultPersistenceBehavior<T>).persistState(ctx, current!);
+          }
           break;
       }
 

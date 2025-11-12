@@ -145,7 +145,7 @@ describe('Service: Car State', () => {
       const testcars = getCarData() as any;
 
       // Act: update vault (this is the real reactive store)
-      service['vault'].setState({
+      service['vault'].replaceState({
         loading: false,
         value: testcars,
         error: null
@@ -169,7 +169,7 @@ describe('Service: Car State', () => {
     });
 
     it('should handle no cars gracefully', () => {
-      service['vault'].setState({
+      service['vault'].replaceState({
         loading: false,
         value: [],
         error: null
@@ -181,7 +181,7 @@ describe('Service: Car State', () => {
     });
 
     it('should handle null cars gracefully', () => {
-      service['vault'].setState({
+      service['vault'].replaceState({
         loading: false,
         value: undefined,
         error: null
@@ -193,7 +193,7 @@ describe('Service: Car State', () => {
     });
 
     it('should recompute reactively when vault data changes', () => {
-      service['vault'].setState({
+      service['vault'].replaceState({
         loading: false,
         value: [{ id: '1', make: 'Ada Lovelace' } as any],
         error: null
@@ -203,7 +203,7 @@ describe('Service: Car State', () => {
       expect(first[0].make).toBe('Ada Lovelace');
 
       // Update real vault again — signal change should propagate
-      service['vault'].setState({
+      service['vault'].replaceState({
         loading: false,
         value: [{ id: '2', make: 'Alan Turing' } as any],
         error: null

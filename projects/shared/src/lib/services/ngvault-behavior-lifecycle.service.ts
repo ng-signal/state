@@ -14,7 +14,7 @@ import { validateNgVaultBehaviorKey } from '../utils/define-ngvault-behavior-key
 class VaultBehaviorRunnerClass implements VaultBehaviorRunner {
   readonly #typeOrder = [...VaultBehaviorTypeOrder];
   // eslint-disable-next-line
-  #behaviors: VaultBehavior<any>[] = [];
+  behaviors: VaultBehavior<any>[] = [];
   readonly #behaviorIds = new Map<VaultBehavior['type'], string>();
   readonly #idToType = new Map<string, VaultBehavior['type']>();
   #initialized = false;
@@ -84,11 +84,11 @@ class VaultBehaviorRunnerClass implements VaultBehaviorRunner {
     serviceName?: string
   ): void {
     this.#verifyInitialized();
-    if (!(this.#behaviors?.length && this.#isKnownBehaviorId(behaviorId))) return;
+    if (!(this.behaviors?.length && this.#isKnownBehaviorId(behaviorId))) return;
 
     this.#queue.enqueue(() => {
       // 1) system-first (dev-tools, events)
-      const systemBehaviors = this.#behaviors.filter((b) => b.type === 'dev-tools' || b.type === 'events');
+      const systemBehaviors = this.behaviors.filter((b) => b.type === 'dev-tools' || b.type === 'events');
       this.#lifeCycle(hook, vaultKey, ctx, systemBehaviors, serviceName);
 
       // 2) then the next run-level derived from caller
@@ -107,7 +107,7 @@ class VaultBehaviorRunnerClass implements VaultBehaviorRunner {
 }
   */
 
-      const nextBehaviors = this.#behaviors.filter((b) => b.type === next.type);
+      const nextBehaviors = this.behaviors.filter((b) => b.type === next.type);
       this.#lifeCycle(hook, vaultKey, ctx, nextBehaviors, serviceName);
     });
   }
@@ -144,7 +144,7 @@ class VaultBehaviorRunnerClass implements VaultBehaviorRunner {
 
     const seenKeys = new Set<string>();
 
-    this.#behaviors = behaviors
+    this.behaviors = behaviors
       .map((factory) => {
         let isCritical = false;
         try {
@@ -216,7 +216,7 @@ class VaultBehaviorRunnerClass implements VaultBehaviorRunner {
   }
 
   applyBehaviorExtensions<T>(cell: FeatureCell<T>): void {
-    for (const behavior of this.#behaviors) {
+    for (const behavior of this.behaviors) {
       const extensions = behavior.extendCellAPI?.();
       if (!extensions || typeof extensions !== 'object') continue;
 

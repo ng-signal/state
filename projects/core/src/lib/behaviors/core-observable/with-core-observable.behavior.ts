@@ -48,7 +48,7 @@ class CoreObservableBehavior<T> implements VaultBehavior<T, ObservableBehaviorEx
     return {
       fromObservable: (key, ctx, source$) =>
         new Observable<VaultSignalRef<T>>((observer) => {
-          ngVaultDebug('fromObservable → start', 1);
+          ngVaultDebug('fromObservable → start');
 
           // tie to lifecycle signals for reset & destroy
           const destroy$ = ctx.destroyed$ ?? EMPTY;
@@ -60,9 +60,9 @@ class CoreObservableBehavior<T> implements VaultBehavior<T, ObservableBehaviorEx
           const _valueSignal = signal<VaultDataType<T>>(undefined);
           const _hasValue = signal(false);
 
-          ngVaultDebug('fromObservable → creating signals', 2);
+          ngVaultDebug('fromObservable → creating signals');
           ctx.behaviorRunner?.onLoad?.(self.behaviorId, self.key, ctx);
-          ngVaultDebug('fromObservable → onLoad called', 3);
+          ngVaultDebug('fromObservable → onLoad called');
 
           const subscription = source$.pipe(takeUntil(reset$), takeUntil(destroy$), take(1)).subscribe({
             next: (value) => {

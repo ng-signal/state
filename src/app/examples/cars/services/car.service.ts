@@ -44,7 +44,7 @@ export class CarService implements ExampleCarServiceInterface<CarModel[]> {
     const state = this.vault.state;
 
     if (!state.hasValue() && !state.isLoading()) {
-      this.vault.setState({
+      this.vault.replaceState({
         loading: true,
         error: null
       });
@@ -53,14 +53,14 @@ export class CarService implements ExampleCarServiceInterface<CarModel[]> {
         .pipe(take(1))
         .subscribe({
           next: (state: VaultSignalRef<CarModel[]>) => {
-            this.vault.setState({
+            this.vault.replaceState({
               loading: false,
               value: state.value(),
               error: null
             });
           },
           error: (err) => {
-            this.vault.setState({
+            this.vault.replaceState({
               loading: false,
               error: err
             });

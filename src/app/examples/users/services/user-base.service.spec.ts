@@ -50,7 +50,7 @@ describe('Service: User Base', () => {
     });
 
     it('should compute reversed names when vault state is populated', () => {
-      // Arrange: simulate a setState (real method)
+      // Arrange: simulate a replaceState (real method)
       const testUsers: UserModel[] = [
         { id: '1', name: 'Ada Lovelace', firstName: '', lastName: '' },
         { id: '2', name: 'Alan Turing', firstName: '', lastName: '' },
@@ -58,7 +58,7 @@ describe('Service: User Base', () => {
       ];
 
       // Act: update vault (this is the real reactive store)
-      service['vault'].setState({
+      service['vault'].replaceState({
         loading: false,
         value: testUsers,
         error: null
@@ -97,7 +97,7 @@ describe('Service: User Base', () => {
     });
 
     it('should handle no users gracefully', () => {
-      service['vault'].setState({
+      service['vault'].replaceState({
         loading: false,
         value: [],
         error: null
@@ -109,7 +109,7 @@ describe('Service: User Base', () => {
     });
 
     it('should handle null users gracefully', () => {
-      service['vault'].setState({
+      service['vault'].replaceState({
         loading: false,
         value: undefined,
         error: null
@@ -121,7 +121,7 @@ describe('Service: User Base', () => {
     });
 
     it('should handle single-word names gracefully', () => {
-      service['vault'].setState({
+      service['vault'].replaceState({
         loading: false,
         value: [{ id: '4', name: 'Cher', firstName: '', lastName: '' }],
         error: null
@@ -135,7 +135,7 @@ describe('Service: User Base', () => {
     });
 
     it('should recompute reactively when vault data changes', () => {
-      service['vault'].setState({
+      service['vault'].replaceState({
         loading: false,
         value: [{ id: '1', name: 'Ada Lovelace', firstName: '', lastName: '' }],
         error: null
@@ -145,7 +145,7 @@ describe('Service: User Base', () => {
       expect(first[0].name).toBe('Ada Lovelace');
 
       // Update real vault again — signal change should propagate
-      service['vault'].setState({
+      service['vault'].replaceState({
         loading: false,
         value: [{ id: '2', name: 'Alan Turing', firstName: '', lastName: '' }],
         error: null
@@ -156,7 +156,7 @@ describe('Service: User Base', () => {
     });
 
     it('should handle no name', () => {
-      service['vault'].setState({
+      service['vault'].replaceState({
         loading: false,
         value: [{ id: '1', name: '', firstName: '', lastName: '' }],
         error: null
@@ -166,7 +166,7 @@ describe('Service: User Base', () => {
       expect(first[0].name).toBe('');
 
       // Update real vault again — signal change should propagate
-      service['vault'].setState({
+      service['vault'].replaceState({
         loading: false,
         value: [{ id: '2', name: '', firstName: '', lastName: '' }],
         error: null

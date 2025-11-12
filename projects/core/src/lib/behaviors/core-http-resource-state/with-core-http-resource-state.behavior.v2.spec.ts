@@ -40,7 +40,7 @@ describe('Behavior: CoreHttpResourceStateBehaviorV2', () => {
       isLoading: signal(false),
       error: signal(null),
       value: signal(undefined),
-      next: null
+      incoming: null
     };
 
     runInInjectionContext(injector, () => {
@@ -65,7 +65,7 @@ describe('Behavior: CoreHttpResourceStateBehaviorV2', () => {
 
   it('should resolve a successful HttpResourceRef value', async () => {
     const id = signal(0);
-    ctx.next = httpResource<TestModel[]>(() => `/api/users/${id()}`, { injector });
+    ctx.incoming = httpResource<TestModel[]>(() => `/api/users/${id()}`, { injector });
 
     // call computeState() before backend flush
     let promise = behavior.computeState(ctx);
@@ -89,7 +89,7 @@ describe('Behavior: CoreHttpResourceStateBehaviorV2', () => {
   });
 
   it('should reject with a ResourceError when HttpResourceRef fails', async () => {
-    ctx.next = httpResource<TestModel[]>(() => `/api/fail`, { injector });
+    ctx.incoming = httpResource<TestModel[]>(() => `/api/fail`, { injector });
 
     const promise = behavior.computeState(ctx);
     TestBed.tick();
@@ -115,8 +115,8 @@ describe('Behavior: CoreHttpResourceStateBehaviorV2', () => {
     expect(warnSpy).toHaveBeenCalledTimes(1);
   });
 
-  it('should skip when ctx.next is not an HttpResourceRef', async () => {
-    const ctx = { next: { fake: true } } as unknown as VaultBehaviorContext<TestModel[]>;
+  it('should skip when ctx.incoming is not an HttpResourceRef', async () => {
+    const ctx = { incoming: { fake: true } } as unknown as VaultBehaviorContext<TestModel[]>;
     const result = await behavior.computeState(ctx);
     expect(result).toBeUndefined();
     expect(warnSpy).toHaveBeenCalledTimes(0);
@@ -124,13 +124,13 @@ describe('Behavior: CoreHttpResourceStateBehaviorV2', () => {
 
   it('should handle multiple concurrent HttpResourceRefs independently', async () => {
     const ctx1 = {
-      next: httpResource<TestModel[]>(() => `/api/u1`, { injector }),
+      incoming: httpResource<TestModel[]>(() => `/api/u1`, { injector }),
       isLoading: signal(false),
       error: signal(null)
     } as unknown as VaultBehaviorContext<TestModel[]>;
 
     const ctx2 = {
-      next: httpResource<TestModel[]>(() => `/api/u2`, { injector }),
+      incoming: httpResource<TestModel[]>(() => `/api/u2`, { injector }),
       isLoading: signal(false),
       error: signal(null)
     } as unknown as VaultBehaviorContext<TestModel[]>;
@@ -150,7 +150,7 @@ describe('Behavior: CoreHttpResourceStateBehaviorV2', () => {
   });
 
   it('should cleanup effect when DestroyRef is triggered', async () => {
-    ctx.next = httpResource<TestModel[]>(() => `/api/users`, { injector });
+    ctx.incoming = httpResource<TestModel[]>(() => `/api/users`, { injector });
 
     const promise = behavior.computeState(ctx);
     TestBed.tick();

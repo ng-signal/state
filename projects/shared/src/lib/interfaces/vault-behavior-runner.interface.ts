@@ -2,6 +2,7 @@ import { Injector } from '@angular/core';
 import { VaultBehaviorContext } from '../contexts/vault-behavior.context';
 import { FeatureCell } from '../models/feature-cell.model';
 import { VaultBehaviorFactory } from '../types/vault-behavior-factory.type';
+import { VaultBehavior } from './vault-behavior.interface';
 
 // eslint-disable-next-line
 export interface VaultBehaviorRunner<T = any> {
@@ -20,4 +21,7 @@ export interface VaultBehaviorRunner<T = any> {
   onReset(behaviorId: string, vaultKey: string, ctx: VaultBehaviorContext<T>): void;
   onDestroy(behaviorId: string, vaultKey: string, ctx: VaultBehaviorContext<T>): void;
   onDispose(behaviorId: string, vaultKey: string, ctx: VaultBehaviorContext<T>): void;
+
+  // eslint-disable-next-line
+  behaviors: VaultBehavior<any>[];
 }

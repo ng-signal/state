@@ -63,7 +63,7 @@ export abstract class UserService<T> {
     const state = this.vault.state;
 
     if (!state.hasValue() && !state.isLoading()) {
-      this.vault.setState({ loading: true, error: null });
+      this.vault.replaceState({ loading: true, error: null });
 
       const source$ = this.http.get<UserModel[]>('/api/users');
 
@@ -71,14 +71,14 @@ export abstract class UserService<T> {
         .pipe(take(1), takeUntilDestroyed(this.destroyRef))
         .subscribe({
           next: (state: VaultSignalRef<UserModel[]>) => {
-            this.vault.setState({
+            this.vault.replaceState({
               loading: false,
               value: state.value(),
               error: null
             });
           },
           error: (err) => {
-            this.vault.setState({ loading: false, error: err });
+            this.vault.replaceState({ loading: false, error: err });
           }
         });
     }
