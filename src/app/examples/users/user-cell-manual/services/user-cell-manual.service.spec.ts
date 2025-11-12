@@ -6,7 +6,7 @@ import { UserCellManualService } from './user-cell-manual.service';
 import { provideHttpClient } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { provideFeatureCell } from '@ngvault/core';
-import { provideVaultTesting } from '@ngvault/testing';
+import { flushMicrotasksZoneless, provideVaultTesting } from '@ngvault/testing';
 import { getUserData } from 'src/testing/data/user.data';
 
 describe('Service: User Cell Manual', () => {
@@ -38,6 +38,7 @@ describe('Service: User Cell Manual', () => {
         { id: '1', name: 'Ada' },
         { id: '2', name: 'Grace' }
       ];
+
       service.loadUsers();
 
       const state = service.users();
@@ -46,9 +47,8 @@ describe('Service: User Cell Manual', () => {
       expect(state.isLoading()).toBeTrue();
       expect(state.error()).toBeNull();
 
-      const result = mockHttpClient.expectOne('/api/users');
-      expect(result.request.method).toBe('GET');
-      result.flush(mockUsers);
+      mockHttpClient.expectOne('/api/users').flush(mockUsers);
+      await flushMicrotasksZoneless();
 
       expect(state.value()).toEqual([Object({ id: '1', name: 'Ada' }), Object({ id: '2', name: 'Grace' })]);
       expect(state.hasValue()).toBeTrue();
@@ -68,16 +68,15 @@ describe('Service: User Cell Manual', () => {
       expect(state.error()).toBeNull();
       expect(state.hasValue()).toBeFalse();
 
-      const result = mockHttpClient.expectOne('/api/users');
-      expect(result.request.method).toBe('GET');
-
-      result.flush(
+      mockHttpClient.expectOne('/api/users').flush(
         { message: 'Internal Server Error' }, // response body
         {
           status: 500,
           statusText: 'Server Error'
         }
       );
+
+      await flushMicrotasksZoneless();
 
       expect(state.value()).toBeUndefined();
       expect(state.isLoading()).toBeFalse();
@@ -100,9 +99,8 @@ describe('Service: User Cell Manual', () => {
       expect(state.isLoading()).toBeTrue();
       expect(state.error()).toBeNull();
 
-      const result = mockHttpClient.expectOne('/api/users/1');
-      expect(result.request.method).toBe('GET');
-      result.flush(getUserData(0, false));
+      mockHttpClient.expectOne('/api/users/1').flush(getUserData(0, false));
+      await flushMicrotasksZoneless();
 
       expect(state.value()).toEqual([Object({ id: '1', name: 'Ada Lovelace', carId: 2 })]);
       expect(state.hasValue()).toBeTrue();

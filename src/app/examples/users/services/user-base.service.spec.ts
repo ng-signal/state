@@ -6,7 +6,7 @@ import { UserService } from './user-base.service';
 import { provideHttpClient } from '@angular/common/http';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { FeatureCell, injectVault, provideFeatureCell } from '@ngvault/core';
-import { provideVaultTesting } from '@ngvault/testing';
+import { flushMicrotasksZoneless, provideVaultTesting } from '@ngvault/testing';
 
 @FeatureCell<UserModel[]>('userManual')
 class TestUserService extends UserService<UserModel[]> {
@@ -49,7 +49,7 @@ describe('Service: User Base', () => {
       expect(result).toEqual([]);
     });
 
-    it('should compute reversed names when vault state is populated', () => {
+    it('should compute reversed names when vault state is populated', async () => {
       // Arrange: simulate a replaceState (real method)
       const testUsers: UserModel[] = [
         { id: '1', name: 'Ada Lovelace', firstName: '', lastName: '' },
@@ -63,7 +63,7 @@ describe('Service: User Base', () => {
         value: testUsers,
         error: null
       });
-      TestBed.tick();
+      await flushMicrotasksZoneless();
 
       // Assert: computed selector should reflect reversed names
       const result = service.usersWithNames();
@@ -96,12 +96,13 @@ describe('Service: User Base', () => {
       );
     });
 
-    it('should handle no users gracefully', () => {
+    it('should handle no users gracefully', async () => {
       service['vault'].replaceState({
         loading: false,
         value: [],
         error: null
       });
+      await flushMicrotasksZoneless();
 
       const result = service.usersWithNames();
 
@@ -120,12 +121,13 @@ describe('Service: User Base', () => {
       expect(result.length).toBe(0);
     });
 
-    it('should handle single-word names gracefully', () => {
+    it('should handle single-word names gracefully', async () => {
       service['vault'].replaceState({
         loading: false,
         value: [{ id: '4', name: 'Cher', firstName: '', lastName: '' }],
         error: null
       });
+      await flushMicrotasksZoneless();
 
       const result = service.usersWithNames();
 
@@ -134,12 +136,13 @@ describe('Service: User Base', () => {
       expect(result[0].lastName).toBe('');
     });
 
-    it('should recompute reactively when vault data changes', () => {
+    it('should recompute reactively when vault data changes', async () => {
       service['vault'].replaceState({
         loading: false,
         value: [{ id: '1', name: 'Ada Lovelace', firstName: '', lastName: '' }],
         error: null
       });
+      await flushMicrotasksZoneless();
 
       const first = service.usersWithNames();
       expect(first[0].name).toBe('Ada Lovelace');
@@ -150,17 +153,19 @@ describe('Service: User Base', () => {
         value: [{ id: '2', name: 'Alan Turing', firstName: '', lastName: '' }],
         error: null
       });
+      await flushMicrotasksZoneless();
 
       const second = service.usersWithNames();
       expect(second[0].name).toBe('Alan Turing');
     });
 
-    it('should handle no name', () => {
+    it('should handle no name', async () => {
       service['vault'].replaceState({
         loading: false,
         value: [{ id: '1', name: '', firstName: '', lastName: '' }],
         error: null
       });
+      await flushMicrotasksZoneless();
 
       const first = service.usersWithNames();
       expect(first[0].name).toBe('');

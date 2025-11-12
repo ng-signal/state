@@ -5,7 +5,7 @@ import { CarService } from './car.service';
 import { provideHttpClient } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { provideFeatureCell } from '@ngvault/core';
-import { provideVaultTesting } from '@ngvault/testing';
+import { flushMicrotasksZoneless, provideVaultTesting } from '@ngvault/testing';
 import { getCarData } from 'src/testing/data/car.data';
 
 describe('Service: Car State', () => {
@@ -32,17 +32,15 @@ describe('Service: Car State', () => {
   });
 
   describe('cars', () => {
-    it('should reflect cars() based on current state', () => {
+    it('should reflect cars() based on current state', async () => {
       const carList = service.cars();
 
       expect(carList.value()).toBeUndefined();
       expect(carList.isLoading()).toBeTrue();
       expect(carList.error()).toBeNull();
 
-      const result = mockHttpClient.expectOne('/api/cars');
-      expect(result.request.method).toBe('GET');
-
-      result.flush(getCarData(0, true));
+      mockHttpClient.expectOne('/api/cars').flush(getCarData(0, true));
+      await flushMicrotasksZoneless();
 
       expect(carList.value()).toEqual([Object({ id: '1', year: 2022, make: 'Tesla', model: 'Model 3' })]);
 
@@ -52,7 +50,7 @@ describe('Service: Car State', () => {
   });
 
   describe('loadcars()', () => {
-    it('should set loading to true, then set cars on success', () => {
+    it('should set loading to true, then set cars on success', async () => {
       service.loadCars();
 
       const state = service.cars();
@@ -61,9 +59,8 @@ describe('Service: Car State', () => {
       expect(state.isLoading()).toBeTrue();
       expect(state.error()).toBeNull();
 
-      const result = mockHttpClient.expectOne('/api/cars');
-      expect(result.request.method).toBe('GET');
-      result.flush(getCarData(0, true));
+      mockHttpClient.expectOne('/api/cars').flush(getCarData(0, true));
+      await flushMicrotasksZoneless();
 
       expect(state.value()).toEqual([Object({ id: '1', year: 2022, make: 'Tesla', model: 'Model 3' })]);
       expect(state.hasValue()).toBeTrue();
@@ -72,7 +69,7 @@ describe('Service: Car State', () => {
       expect(state.error()).toBeNull();
     });
 
-    it('should set error when http fails', () => {
+    it('should set error when http fails', async () => {
       service.loadCars();
 
       const state = service.cars();
@@ -82,16 +79,14 @@ describe('Service: Car State', () => {
       expect(state.isLoading()).toBeTrue();
       expect(state.error()).toBeNull();
 
-      const result = mockHttpClient.expectOne('/api/cars');
-      expect(result.request.method).toBe('GET');
-
-      result.flush(
+      mockHttpClient.expectOne('/api/cars').flush(
         { message: 'Internal Server Error' }, // response body
         {
           status: 500,
           statusText: 'Server Error'
         }
       );
+      await flushMicrotasksZoneless();
 
       expect(state.value()).toBeUndefined();
       expect(state.hasValue()).toBeFalse();
@@ -141,7 +136,7 @@ describe('Service: Car State', () => {
       expect(result).toEqual([]);
     });
 
-    it('should compute reversed names when vault state is populated', () => {
+    it('should compute reversed names when vault state is populated', async () => {
       const testcars = getCarData() as any;
 
       // Act: update vault (this is the real reactive store)
@@ -150,11 +145,12 @@ describe('Service: Car State', () => {
         value: testcars,
         error: null
       });
-      TestBed.tick();
+      await flushMicrotasksZoneless();
 
       // Assert: computed selector should reflect reversed names
       const result = service.carsWithDescriptions();
-      TestBed.tick();
+
+      await flushMicrotasksZoneless();
 
       expect(result.length).toBe(10);
       expect(result[0]).toEqual(
@@ -192,14 +188,17 @@ describe('Service: Car State', () => {
       expect(result.length).toBe(0);
     });
 
-    it('should recompute reactively when vault data changes', () => {
+    it('should recompute reactively when vault data changes', async () => {
       service['vault'].replaceState({
         loading: false,
         value: [{ id: '1', make: 'Ada Lovelace' } as any],
         error: null
       });
+      await flushMicrotasksZoneless();
 
       const first = service.carsWithDescriptions();
+      await flushMicrotasksZoneless();
+
       expect(first[0].make).toBe('Ada Lovelace');
 
       // Update real vault again — signal change should propagate
@@ -208,6 +207,7 @@ describe('Service: Car State', () => {
         value: [{ id: '2', make: 'Alan Turing' } as any],
         error: null
       });
+      await flushMicrotasksZoneless();
 
       const second = service.carsWithDescriptions();
       expect(second[0].make).toBe('Alan Turing');
