@@ -1,6 +1,6 @@
 import { Injector, provideZonelessChangeDetection, runInInjectionContext } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
-import { VaultBehavior, VaultBehaviorContext, VaultBehaviorType } from '@ngvault/shared';
+import { VaultBehaviorContext, VaultBehaviorType } from '@ngvault/shared';
 import { flushMicrotasksZoneless, provideVaultTesting } from '@ngvault/testing';
 import { VaultOrchestrator } from './ngvault.orchestrator';
 
@@ -37,12 +37,23 @@ describe('Orchestrator: Vault (dispatchPatch)', () => {
   });
 
   /** Utility factory to create test behaviors */
-  function makeBehavior(type: string, returnValue?: any): VaultBehavior<any> {
+  function makeBehavior(type: string, returnValue?: any): any {
     return {
       type: type as VaultBehaviorType,
       behaviorId: `${type}-id`,
-      onInit: () => {},
-      run: async () => {
+      computeState: async () => {
+        calls.push(type);
+        return returnValue ?? { [`${type}`]: true };
+      },
+      applyReducers: async () => {
+        calls.push(type);
+        return returnValue ?? { [`${type}`]: true };
+      },
+      encryptState: async () => {
+        calls.push(type);
+        return returnValue ?? { [`${type}`]: true };
+      },
+      persistState: async () => {
         calls.push(type);
         return returnValue ?? { [`${type}`]: true };
       }
@@ -96,7 +107,7 @@ describe('Orchestrator: Vault (dispatchPatch)', () => {
 
   it('should handle errors gracefully and set resourceError', async () => {
     const errorBehavior = makeBehavior('state');
-    errorBehavior.run = async () => {
+    errorBehavior.computeState = async () => {
       throw new Error('Patch error test');
     };
 
@@ -117,7 +128,7 @@ describe('Orchestrator: Vault (dispatchPatch)', () => {
   it('should skip undefined results and continue processing later stages', async () => {
     const behaviors = [
       makeBehavior('state', { id: 1 }),
-      { ...makeBehavior('reduce'), run: async () => undefined },
+      { ...makeBehavior('reduce'), applyReducers: async () => undefined },
       makeBehavior('encrypt')
     ];
 

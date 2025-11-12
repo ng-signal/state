@@ -1,10 +1,11 @@
 import { provideZonelessChangeDetection, signal } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideRouter } from '@angular/router';
+import { NavigationService } from '../navigation/service/navigation.service';
 import { ThemeService } from '../theme/theme.service';
 import { ToolbarComponent } from './toolbar.component';
 
-describe('ToolbarComponent', () => {
+describe('Component: Toolbar', () => {
   let fixture: ComponentFixture<ToolbarComponent>;
   let component: ToolbarComponent;
   let themeService: jasmine.SpyObj<ThemeService>;
@@ -26,8 +27,11 @@ describe('ToolbarComponent', () => {
     fixture.detectChanges();
   });
 
-  it('should create the component', () => {
-    expect(component).toBeTruthy();
+  it('should openNavigation', () => {
+    const navigationService = TestBed.inject(NavigationService);
+    spyOn(navigationService, 'show');
+    component.openNavigation();
+    expect(navigationService.show).toHaveBeenCalledWith();
   });
 
   it('should expose default computed values for light/LTR state', () => {

@@ -5,9 +5,9 @@ export const VaultBehaviorTypeOrder = Object.freeze([
   'events', // 1
   'core', // 2
   'state', // 3
-  'reduce',
   'persistence', // 4
-  'encryption' // 5
+  'encryption', // 5
+  'reduce'
 ] as const);
 
 export type VaultBehaviorType = (typeof VaultBehaviorTypeOrder)[number];

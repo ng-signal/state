@@ -208,13 +208,11 @@ describe('Service: User Base', () => {
 
   describe('resetUsers', () => {
     it('should handle a resetUsers', async () => {
-      spyOn(service['vault'], 'setState');
-      expect(service['isLoaded']()).toBeFalse();
+      spyOn(service['vault'], 'reset');
 
       service.resetUsers();
 
-      expect(service['vault'].setState).toHaveBeenCalledWith({ loading: true, value: [] });
-      expect(service['isLoaded']()).toBeFalse();
+      expect(service['vault'].reset).toHaveBeenCalledWith();
     });
   });
 
@@ -225,8 +223,8 @@ describe('Service: User Base', () => {
     service.reloadUsers();
     TestBed.tick();
 
-    expect(service['vault'].reset).not.toHaveBeenCalled();
-    expect(service['isLoaded']()).toBeFalse();
+    expect(service['vault'].reset).toHaveBeenCalledWith();
+    expect(service['isLoaded']()).toBeTrue();
   });
 
   it('should handle a reactiveReloadUsers', async () => {
@@ -235,7 +233,7 @@ describe('Service: User Base', () => {
 
     service.reactiveReloadUsers();
 
-    expect(service['vault'].reset).toHaveBeenCalledWith();
+    expect(service['vault'].reset).not.toHaveBeenCalled();
     expect(service['isLoaded']()).toBeFalse();
   });
 });

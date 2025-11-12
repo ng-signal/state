@@ -122,7 +122,7 @@ describe('Service: Car State', () => {
     TestBed.tick();
 
     expect(service['vault'].reset).not.toHaveBeenCalled();
-    expect(service['isLoaded']()).toBeFalse();
+    expect(service['isLoaded']()).toBeTrue();
   });
 
   it('should handle a reactiveReloadCars', async () => {

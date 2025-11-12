@@ -24,7 +24,7 @@ describe('Behavior: withCoreState: Set', () => {
   it('should have default attributes', () => {
     expect(behavior.critical).toBeTrue();
     expect(behavior.key).toBe('NgVault::Core::State');
-    expect(behavior.type).toBe('state');
+    expect(behavior.type).toBe('core');
   });
 
   it('should safely return when patch is null or not an object', () => {
