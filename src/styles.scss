@@ -61,6 +61,8 @@ body {
   --ngvault-bg-dark: #{global.$ngvault-surface-dark};
   --ngvault-bg-light: #{global.$ngvault-surface-light};
 
+  --ngvault-border-radius: #{global.$border-radius-lg};
+
   //  Text Colors
   --ngvault-text-primary: #{global.$ngvault-text-primary};
   --ngvault-text-secondary: #{global.$ngvault-text-secondary};

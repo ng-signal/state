@@ -17,9 +17,9 @@ export interface ExampleUserServiceInterface<T> {
 
   loadUser(id: string): void;
 
-  resetUsers(setSpinner: boolean): void;
+  resetUsers(): void;
 
-  reloadUsers(setSpinner: boolean): void;
+  reloadUsers(): void;
 
   reactiveReloadUsers(): void;
 }

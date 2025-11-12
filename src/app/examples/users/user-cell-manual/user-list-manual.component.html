@@ -107,26 +107,6 @@
                 How Vault creates, updates, and synchronizes reactive state with external sources.
               </div>
               <ng-content select="[retrieve]">
-                <div class="tab-action-container">
-                  <div class="action-row">
-                    <div class="row-instructions">
-                      <div class="method">GET (Single)</div>
-                      <div class="description">Select a user to load their individual state.</div>
-                      <div class="refresh">
-                        <mat-icon class="pointer" (click)="reloadUsers(false)">refresh</mat-icon>
-                      </div>
-                    </div>
-                    <div class="row-data">
-                      @for (user of staticUsers; track user.id) {
-                        <div class="pointer" (click)="loadUser(user.id)">
-                          <ngvault-info-icon [data]="user" [icon]="'person'" class="info-icon" [disableClick]="true" />
-                        </div>
-                      }
-                    </div>
-                  </div>
-                </div>
-                {{ userList.isLoading() }}
-
                 <ngvault-example-viewer
                   title="Reactive Cell State Mutation"
                   subTitle="View of the User Cell state"
@@ -148,6 +128,107 @@
                     </ngvault-example-viewer-source>
                   </div>
                 </ngvault-example-viewer>
+
+                <div class="tab-panel-subtitle">Mutate State Methods</div>
+
+                <div class="tab-action-container">
+                  <div class="action-row">
+                    <div class="row-instructions">
+                      <div class="method">GET (Single Patch)</div>
+                      <div class="description">Select a user to load and patch their individual state.</div>
+                      <div class="refresh">
+                        <mat-icon class="pointer" (click)="reloadUsers()">refresh</mat-icon>
+                      </div>
+                    </div>
+                    <div class="row-data">
+                      @for (user of staticUsers; track user.id) {
+                        <div class="pointer" (click)="loadUser(user.id)">
+                          <ngvault-info-icon [data]="user" [icon]="'person'" class="info-icon" [disableClick]="true" />
+                        </div>
+                      }
+                    </div>
+                  </div>
+                  <div class="action-row">
+                    <div class="row-instructions">
+                      <div class="method">GET (Single Set)</div>
+                      <div class="description">Select a user to load and set their individual state.</div>
+                      <div class="refresh">
+                        <mat-icon class="pointer" (click)="reloadUsers()">refresh</mat-icon>
+                      </div>
+                    </div>
+                    <div class="row-data">
+                      @for (user of staticUsers; track user.id) {
+                        <div class="pointer" (click)="loadUser(user.id)">
+                          <ngvault-info-icon [data]="user" [icon]="'person'" class="info-icon" [disableClick]="true" />
+                        </div>
+                      }
+                    </div>
+                  </div>
+                  <div class="action-row">
+                    <div class="row-instructions">
+                      <div class="method">GET (Single Set)</div>
+                      <div class="description">Select a user to load and set their individual state.</div>
+                      <div class="refresh">
+                        <mat-icon class="pointer" (click)="reloadUsers()">refresh</mat-icon>
+                      </div>
+                    </div>
+                    <div class="row-data">
+                      @for (user of staticUsers; track user.id) {
+                        <div class="pointer" (click)="loadUser(user.id)">
+                          <ngvault-info-icon [data]="user" [icon]="'person'" class="info-icon" [disableClick]="true" />
+                        </div>
+                      }
+                    </div>
+                  </div>
+                  <div class="action-row">
+                    <div class="row-instructions">
+                      <div class="method">GET (Single Set)</div>
+                      <div class="description">Select a user to load and set their individual state.</div>
+                      <div class="refresh">
+                        <mat-icon class="pointer" (click)="reloadUsers()">refresh</mat-icon>
+                      </div>
+                    </div>
+                    <div class="row-data">
+                      @for (user of staticUsers; track user.id) {
+                        <div class="pointer" (click)="loadUser(user.id)">
+                          <ngvault-info-icon [data]="user" [icon]="'person'" class="info-icon" [disableClick]="true" />
+                        </div>
+                      }
+                    </div>
+                  </div>
+                  <div class="action-row">
+                    <div class="row-instructions">
+                      <div class="method">GET (Single Set)</div>
+                      <div class="description">Select a user to load and set their individual state.</div>
+                      <div class="refresh">
+                        <mat-icon class="pointer" (click)="reloadUsers()">refresh</mat-icon>
+                      </div>
+                    </div>
+                    <div class="row-data">
+                      @for (user of staticUsers; track user.id) {
+                        <div class="pointer" (click)="loadUser(user.id)">
+                          <ngvault-info-icon [data]="user" [icon]="'person'" class="info-icon" [disableClick]="true" />
+                        </div>
+                      }
+                    </div>
+                  </div>
+                  <div class="action-row">
+                    <div class="row-instructions">
+                      <div class="method">GET (Single Set)</div>
+                      <div class="description">Select a user to load and set their individual state.</div>
+                      <div class="refresh">
+                        <mat-icon class="pointer" (click)="reloadUsers()">refresh</mat-icon>
+                      </div>
+                    </div>
+                    <div class="row-data">
+                      @for (user of staticUsers; track user.id) {
+                        <div class="pointer" (click)="loadUser(user.id)">
+                          <ngvault-info-icon [data]="user" [icon]="'person'" class="info-icon" [disableClick]="true" />
+                        </div>
+                      }
+                    </div>
+                  </div>
+                </div>
               </ng-content>
             </div>
           </mat-tab>

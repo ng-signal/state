@@ -216,16 +216,6 @@ describe('Service: User Base', () => {
       expect(service['vault'].setState).toHaveBeenCalledWith({ loading: true, value: [] });
       expect(service['isLoaded']()).toBeFalse();
     });
-
-    it('should handle a resetUsers', async () => {
-      spyOn(service['vault'], 'setState');
-      expect(service['isLoaded']()).toBeFalse();
-
-      service.resetUsers(false);
-
-      expect(service['vault'].setState).toHaveBeenCalledWith({ loading: false, value: [] });
-      expect(service['isLoaded']()).toBeFalse();
-    });
   });
 
   it('should handle a reloadUser', async () => {

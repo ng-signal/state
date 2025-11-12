@@ -83,7 +83,7 @@ class CoreStateBehavior<T> implements VaultBehavior<T> {
 }
 
 export const withCoreStateBehavior = ((context: VaultBehaviorFactoryContext): VaultBehavior => {
-  return new CoreStateBehavior(context.behaviorId, 'state', context.injector);
+  return new CoreStateBehavior(context.behaviorId, context.type, context.injector);
 }) as VaultBehaviorFactory;
 
 withCoreStateBehavior.type = 'state';

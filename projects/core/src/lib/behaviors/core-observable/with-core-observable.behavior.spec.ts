@@ -67,7 +67,7 @@ describe('Behavior: withCoreObservableBehavior', () => {
       }
     } as any;
 
-    behavior.onInit('fake-key', 'fake-service', ctx);
+    behavior.onInit?.('fake-key', 'fake-service', ctx);
 
     expect(ctx.behaviorRunner!.onInit).toHaveBeenCalledWith(
       'test-id',

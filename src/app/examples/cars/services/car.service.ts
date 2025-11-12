@@ -2,7 +2,7 @@ import { HttpClient } from '@angular/common/http';
 import { computed, DestroyRef, inject, Injectable, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FeatureCell, injectVault } from '@ngvault/core';
-import { VaultDataType, VaultSignalRef } from '@ngvault/shared';
+import { VaultSignalRef } from '@ngvault/shared';
 import { take } from 'rxjs';
 import { CarModel } from '../../models/car.model';
 import { ExampleCarServiceInterface } from '../../users/interfaces/example-car.service.interface';
@@ -69,20 +69,16 @@ export class CarService implements ExampleCarServiceInterface<CarModel[]> {
     }
   }
 
-  resetCars(setSpinner: boolean = true) {
-    this.vault.setState({
-      loading: setSpinner,
-      value: [] as VaultDataType<CarModel[]>
-    });
+  resetCars() {
+    this.vault.reset();
   }
 
-  reloadCars(setSpinner: boolean = true): void {
-    this.isLoaded.set(false);
-    this.resetCars(setSpinner);
+  reloadCars(): void {
+    this.loadCars();
   }
 
   reactiveReloadCars(): void {
-    this.isLoaded.set(false);
     this.vault.reset();
+    this.isLoaded.set(false);
   }
 }

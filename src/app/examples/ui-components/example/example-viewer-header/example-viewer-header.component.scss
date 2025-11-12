@@ -11,7 +11,7 @@
   align-items: center;
   justify-content: space-between;
   padding: global.$spacing-sm global.$spacing-md;
-  border-radius: global.$border-radius-md;
+  border-radius: var(--ngvault-border-radius);
   margin-bottom: global.$spacing-sm;
 
   // Surface & typography use CSS variables (switchable via data-theme)

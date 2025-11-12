@@ -44,7 +44,7 @@ export class UserCellManualService extends UserService<UserModel[]> {
     const state = this.vault.state;
 
     if (!state.isLoading()) {
-      this.vault.setState({ loading: false, error: null });
+      this.vault.setState({ loading: true, error: null });
 
       const source$ = this.http.get<UserModel>(`/api/users/${id}`).pipe(map((user) => [user]));
 
@@ -52,7 +52,7 @@ export class UserCellManualService extends UserService<UserModel[]> {
         .pipe(take(1), takeUntilDestroyed(this.destroyRef))
         .subscribe({
           next: (state: VaultSignalRef<UserModel[]>) => {
-            this.vault.setState({
+            this.vault.patchState({
               loading: false,
               value: state.value(),
               error: null

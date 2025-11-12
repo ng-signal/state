@@ -1,5 +1,6 @@
 @use 'global' as global;
 
+$height: 200px;
 // ===============================================
 // ngVault Example Viewer Body
 // ===============================================
@@ -8,7 +9,8 @@
   flex-wrap: wrap;
   align-items: center;
   justify-content: flex-start;
-  min-height: 25px;
+  min-height: $height;
+  flex: 1 1 auto;
 
   gap: global.$spacing-md;
   padding: global.$spacing-xs;
@@ -27,6 +29,21 @@
     // gap: global.$spacing-sm;
     // padding: global.$spacing-sm;
   }
+
+  .loading-state {
+    display: flex;
+    width: 100%;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: calc(#{$height} + global.$spacing-md * 2 + 2px);
+    text-align: center;
+
+    mat-icon {
+      font-size: global.$font-size-lg;
+      margin-bottom: global.$spacing-md;
+    }
+  }
 }
 
 :host {
@@ -37,12 +54,12 @@
     justify-content: flex-start;
     align-items: flex-start;
     flex: 1 1 auto;
-    height: 200px;
+    min-height: $height;
     width: 100%;
 
     background-color: var(--surface-bg, global.$ngvault-surface-light);
     border: 1px solid var(--surface-outline, global.$ngvault-primary-light);
-    border-radius: global.$border-radius-md;
+    border-radius: var(--ngvault-border-radius);
     padding: global.$spacing-md;
     transition:
       background-color 0.3s ease,

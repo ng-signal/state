@@ -11,23 +11,11 @@ $tab-action-row-height: 30px;
 $tab-action-spacing: calc(global.$spacing-md * 2 + global.$spacing-sm * 2 + global.$spacing-sm + global.$spacing-md);
 $tab-action-container-height: calc($tab-action-row-height + $tab-action-row-height + $tab-action-spacing);
 
-/*
-.list-container {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  padding: global.$spacing-md;
-  gap: global.$spacing-md;
-  overflow: hidden;
-  */
-
 .list-container {
   display: flex;
   flex-direction: column;
   gap: global.$spacing-lg;
   padding: global.$spacing-lg;
-  border-radius: global.$border-radius-lg;
-  background-color: var(--surface-bg, global.$ngvault-surface-dark);
   color: var(--surface-text, global.$ngvault-text-primary);
   border: 1px solid var(--surface-outline, global.$ngvault-primary-light);
   box-shadow: global.$ngvault-shadow-base;
@@ -45,7 +33,7 @@ $tab-action-container-height: calc($tab-action-row-height + $tab-action-row-heig
   .header {
     width: calc(100% - global.$spacing-md * 2);
     padding: global.$spacing-sm global.$spacing-md;
-    border-radius: global.$border-radius-md;
+    border-radius: var(--ngvault-border-radius);
     background: linear-gradient(
       to right,
       var(--mat-sys-primary, global.$ngvault-primary-base),
@@ -93,10 +81,10 @@ $tab-action-container-height: calc($tab-action-row-height + $tab-action-row-heig
   .action-container {
     display: flex;
     flex-direction: column;
-    gap: global.$spacing-lg;
+    gap: global.$spacing-sm;
     width: calc(100% - global.$spacing-md * 2);
     padding: global.$spacing-md;
-    border-radius: global.$border-radius-md;
+    border-radius: var(--ngvault-border-radius);
     background-color: var(--surface-bg, global.$ngvault-surface-darker);
     box-shadow: inset 0 0 0 1px var(--surface-outline, rgba(255, 255, 255, 0.1));
 
@@ -107,103 +95,105 @@ $tab-action-container-height: calc($tab-action-row-height + $tab-action-row-heig
       gap: global.$spacing-lg;
       justify-content: space-between;
       align-items: flex-start;
+      height: 65px;
 
       &.statistics {
         border-top: 1px solid var(--surface-outline, rgba(255, 255, 255, 0.1));
-        padding-top: global.$spacing-md;
-      }
-    }
-
-    .action-group {
-      flex: 1;
-      display: flex;
-      flex-direction: column;
-      align-items: flex-start;
-      gap: global.$spacing-sm;
-
-      .group-label {
-        @include global.ngvault-text(var(--surface-text, global.$ngvault-text-primary), global.$font-weight-semibold);
-        font-size: global.$font-size-md;
-        margin-bottom: global.$spacing-xs;
-        text-transform: uppercase;
-        letter-spacing: 0.02em;
+        margin-top: global.$spacing-sm;
       }
 
-      .action-container-row {
-        width: 100%;
+      .action-group {
+        flex: 1;
         display: flex;
-        flex-direction: row;
-        align-items: center;
-        justify-content: space-evenly;
-        flex-wrap: wrap;
-        gap: global.$spacing-xs;
+        flex-direction: column;
+        align-items: flex-start;
 
-        .button-container {
+        .group-label {
+          @include global.ngvault-text(var(--surface-text, global.$ngvault-text-primary), global.$font-weight-semibold);
+          width: 100%;
+          font-size: global.$font-size-sm;
+          margin-bottom: global.$spacing-xs;
+          text-transform: uppercase;
+          letter-spacing: 0.02em;
+        }
+
+        .action-container-row {
+          width: 100%;
           display: flex;
-          justify-content: center;
+          flex-direction: row;
+          align-items: center;
+          justify-content: space-evenly;
+          flex-wrap: wrap;
+          gap: global.$spacing-xs;
 
-          .ngvault-button {
-            @include global.button-base(
-              global.$ngvault-text-white,
-              global.$ngvault-primary-base,
-              global.$ngvault-primary-light
-            );
+          .button-container {
+            display: flex;
+            justify-content: center;
 
-            &.sm {
-              min-width: 70px !important;
+            .ngvault-button {
+              @include global.button-base(
+                global.$ngvault-text-white,
+                global.$ngvault-primary-base,
+                global.$ngvault-primary-light
+              );
+
+              &.sm {
+                min-width: 70px !important;
+              }
+
+              transition:
+                transform 0.2s ease,
+                box-shadow 0.2s ease;
+
+              &:hover {
+                transform: translateY(-2px);
+                @include global.ngvault-elevate(hover);
+              }
+
+              &:active {
+                transform: translateY(0);
+                @include global.ngvault-elevate(active);
+              }
             }
+          }
 
-            transition:
-              transform 0.2s ease,
-              box-shadow 0.2s ease;
+          &.stats {
+            justify-content: flex-start;
+            gap: global.$spacing-lg;
+            padding-left: global.$spacing-sm;
 
-            &:hover {
-              transform: translateY(-2px);
-              @include global.ngvault-elevate(hover);
-            }
+            .stat-item {
+              @include global.ngvault-font-body(global.$font-size-md);
+              color: var(--surface-text, global.$ngvault-text-primary);
+              background-color: rgba(global.$ngvault-primary-base, 0.08);
+              border: 1px solid var(--surface-outline, rgba(255, 255, 255, 0.1));
+              border-radius: global.$border-radius-md;
+              padding: global.$spacing-xs global.$spacing-md;
+              min-width: 80px;
+              text-align: center;
+              font-size: global.$font-size-sm;
 
-            &:active {
-              transform: translateY(0);
-              @include global.ngvault-elevate(active);
+              .stat-label {
+                font-weight: global.$font-weight-semibold;
+                margin-right: global.$spacing-xs;
+              }
             }
           }
         }
 
-        &.stats {
-          justify-content: flex-start;
-          gap: global.$spacing-lg;
-
-          .stat-item {
-            @include global.ngvault-font-body(global.$font-size-md);
-            color: var(--surface-text, global.$ngvault-text-primary);
-            background-color: rgba(global.$ngvault-primary-base, 0.08);
-            border: 1px solid var(--surface-outline, rgba(255, 255, 255, 0.1));
-            border-radius: global.$border-radius-sm;
-            padding: global.$spacing-xs global.$spacing-md;
-            min-width: 120px;
-            text-align: center;
-
-            .stat-label {
-              font-weight: global.$font-weight-semibold;
-              margin-right: global.$spacing-xs;
-            }
-          }
+        &.full-width {
+          width: 100%;
         }
-      }
-
-      &.full-width {
-        width: 100%;
       }
     }
   }
 
   .data-container {
-    height: $height;
+    min-height: $height;
     overflow-y: scroll;
     overflow-x: hidden;
     padding-bottom: 5px;
 
-    .loading-state,
     .error-state {
       display: flex;
       flex-direction: column;
@@ -221,7 +211,7 @@ $tab-action-container-height: calc($tab-action-row-height + $tab-action-row-heig
     .ngvault-tab-container {
       display: flex;
       flex-direction: column;
-      border-radius: global.$border-radius-lg;
+      border-radius: var(--ngvault-border-radius);
       background-color: var(--surface-bg, global.$ngvault-surface-dark);
       border: 1px solid var(--surface-outline, global.$ngvault-primary-light);
       box-shadow: global.$ngvault-shadow-base;
@@ -231,13 +221,16 @@ $tab-action-container-height: calc($tab-action-row-height + $tab-action-row-heig
 
       .tab-action-container {
         margin-top: global.$spacing-md;
-        height: $tab-action-container-height;
+        padding: global.$spacing-sm;
+        min-height: $tab-action-container-height;
+        max-height: calc($tab-action-container-height * 3);
         flex: 1 1 auto;
-        border: 1px solid red;
+        border: 1px solid global.$ngvault-border-color;
+        border-radius: var(--ngvault-border-radius);
+        overflow-y: auto;
 
         .action-row {
-          height: $tab-action-row-height;
-          border: 1px solid red;
+          height: $tab-action-container-height;
 
           .row-instructions {
             height: $tab-action-row-height;
@@ -245,8 +238,8 @@ $tab-action-container-height: calc($tab-action-row-height + $tab-action-row-heig
             flex-direction: row;
             align-items: flex-start;
             justify-content: flex-start;
-            border: 1px solid red;
             margin-bottom: global.$spacing-xs;
+            border-bottom: 1px solid global.$ngvault-border-color;
 
             .method {
               height: $tab-action-row-height;
@@ -254,7 +247,6 @@ $tab-action-container-height: calc($tab-action-row-height + $tab-action-row-heig
               align-items: center;
               justify-content: flex-start;
               width: 150px;
-              border: 1px solid red;
               margin-bottom: global.$spacing-xs;
             }
 
@@ -264,7 +256,6 @@ $tab-action-container-height: calc($tab-action-row-height + $tab-action-row-heig
               align-items: center;
               justify-content: flex-start;
               flex: 1 1 auto;
-              border: 1px solid red;
               margin-bottom: global.$spacing-xs;
             }
 
@@ -274,7 +265,6 @@ $tab-action-container-height: calc($tab-action-row-height + $tab-action-row-heig
               display: flex;
               align-items: center;
               justify-content: center;
-              border: 1px solid red;
               margin-bottom: global.$spacing-xs;
               color: global.$ngvault-success-base;
             }
@@ -285,7 +275,6 @@ $tab-action-container-height: calc($tab-action-row-height + $tab-action-row-heig
             height: $tab-action-data-height;
             display: flex;
             flex-direction: row;
-            border: 1px solid red;
             gap: global.$spacing-md;
             padding: global.$spacing-sm;
           }
@@ -339,7 +328,7 @@ $tab-action-container-height: calc($tab-action-row-height + $tab-action-row-heig
         font-family: global.$ngvault-font-family;
         background-color: var(--surface-bg, global.$ngvault-surface-darker);
         color: var(--surface-text, global.$ngvault-text-primary);
-        border-top: 1px solid var(--surface-outline, global.$ngvault-primary-light);
+        border-radius: var(--ngvault-border-radius);
         transition:
           background-color 0.3s ease,
           color 0.3s ease;

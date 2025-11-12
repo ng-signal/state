@@ -2,7 +2,15 @@
 // vault-dispatcher.ts
 // ─────────────────────────────────────────────────────────────
 import { inject } from '@angular/core';
-import { VaultBehavior, VaultBehaviorContext, VaultDataType } from '@ngvault/shared';
+import {
+  VaultBehavior,
+  VaultBehaviorContext,
+  VaultDataType,
+  VaultEncryptionBehavior,
+  VaultPersistenceBehavior,
+  VaultReducerBehavior,
+  VaultStateBehavior
+} from '@ngvault/shared';
 import { NGVAULT_QUEUE } from '../tokens/ngvault-queue.token';
 import { applyNgVaultValueMergev2 } from '../utils/apply-vault-merge.util';
 import { resourceError } from '../utils/resource-error.util';
@@ -73,9 +81,6 @@ export class VaultOrchestrator<T> {
     }
   }
 
-  // ────────────────────────────────────────────────
-  // Core stage executor
-  // ────────────────────────────────────────────────
   async #runStage(
     stage: 'state' | 'reduce' | 'encrypt' | 'persist',
     ctx: VaultBehaviorContext<T>,
@@ -85,7 +90,26 @@ export class VaultOrchestrator<T> {
     let current = working;
 
     for (const behavior of stageBehaviors) {
-      const next = await behavior.run?.(ctx, current);
+      let next: T | void | undefined;
+
+      switch (stage) {
+        case 'state':
+          next = await (behavior as VaultStateBehavior<T>).computeState(ctx);
+          break;
+
+        case 'reduce':
+          next = await (behavior as VaultReducerBehavior<T>).applyReducers(ctx, current!);
+          break;
+
+        case 'encrypt':
+          next = await (behavior as VaultEncryptionBehavior<T>).encryptState(ctx, current!);
+          break;
+
+        case 'persist':
+          await (behavior as VaultPersistenceBehavior<T>).persistState(ctx, current!);
+          break;
+      }
+
       if (next !== undefined) current = next;
     }
 

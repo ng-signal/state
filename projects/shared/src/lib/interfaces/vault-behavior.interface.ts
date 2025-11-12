@@ -15,7 +15,17 @@ export interface VaultBehavior<T = unknown, E extends VaultBehaviorExtension<T> 
   readonly key?: string;
   readonly behaviorId: string;
 
-  onInit(key: string, service: string, ctx: VaultBehaviorContext<T>): void;
+  // Optional override policy for colliding keys
+  allowOverride?: string[];
+
+  // Return an object whose values are extension functions (or nothing)
+  extendCellAPI?(): E | void;
+
+  /**
+   * TODO Delete v1
+   */
+
+  onInit?(key: string, service: string, ctx: VaultBehaviorContext<T>): void;
   onLoad?(key: string, ctx: VaultBehaviorContext<T>): void;
   onSet?(key: string, ctx: VaultBehaviorContext<T>): void;
   onPatch?(key: string, ctx: VaultBehaviorContext<T>): void;
@@ -23,12 +33,6 @@ export interface VaultBehavior<T = unknown, E extends VaultBehaviorExtension<T> 
   onError?(key: string, ctx: VaultBehaviorContext<T>): void;
   onDestroy?(key: string, ctx: VaultBehaviorContext<T>): void;
   onDispose?(key: string, ctx: VaultBehaviorContext<T>): void;
-
-  // Optional override policy for colliding keys
-  allowOverride?: string[];
-
-  // Return an object whose values are extension functions (or nothing)
-  extendCellAPI?(): E | void;
 
   // eslint-disable-next-line
   run?(ctx: VaultBehaviorContext<T>, current: T | undefined): any;

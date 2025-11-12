@@ -1,6 +1,6 @@
 import { HttpClient } from '@angular/common/http';
 import { computed, DestroyRef, inject, signal } from '@angular/core';
-import { FeatureCell, VaultDataType, VaultSignalRef } from '@ngvault/shared';
+import { FeatureCell, VaultSignalRef } from '@ngvault/shared';
 import { UserModel } from '../../models/user.model';
 
 export abstract class UserService<T> {
@@ -11,7 +11,7 @@ export abstract class UserService<T> {
   constructor(protected readonly vault: FeatureCell<T>) {}
 
   users(): VaultSignalRef<T> {
-    if (!this.isLoaded() && !this.vault.state.hasValue()) {
+    if (!this.isLoaded()) {
       this.isLoaded.set(true);
       this.loadUsers();
     }
@@ -39,20 +39,16 @@ export abstract class UserService<T> {
 
   loadUser(_id: string): void {}
 
-  resetUsers(setSpinner: boolean = true) {
-    this.vault.setState({
-      loading: setSpinner,
-      value: [] as VaultDataType<T>
-    });
+  resetUsers() {
+    this.vault.reset();
   }
 
-  reloadUsers(setSpinner: boolean = true): void {
-    this.isLoaded.set(false);
-    this.resetUsers(setSpinner);
+  reloadUsers(): void {
+    this.resetUsers();
+    this.loadUsers();
   }
 
   reactiveReloadUsers(): void {
     this.isLoaded.set(false);
-    this.vault.reset();
   }
 }

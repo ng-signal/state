@@ -14,7 +14,7 @@
     align-items: flex-start;
     justify-content: space-between;
     background-color: var(--surface-bg, global.$ngvault-surface-light);
-    border-radius: global.$border-radius-md;
+    border-radius: var(--ngvault-border-radius);
     box-shadow: global.$ngvault-shadow-base;
     transition:
       box-shadow 0.25s ease,
@@ -48,7 +48,7 @@
         font-family: 'JetBrains Mono', monospace;
         font-size: global.$font-size-sm;
         line-height: global.$line-height;
-        border-radius: global.$border-radius-md;
+        border-radius: var(--ngvault-border-radius);
         white-space: pre;
         overflow: scroll;
         tab-size: 2;

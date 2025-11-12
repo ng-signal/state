@@ -19,7 +19,7 @@ table {
   overflow: auto;
   background-color: global.$ngvault-surface-darker;
   border: 1px solid global.$ngvault-surface-outline;
-  border-radius: global.$border-radius-sm;
+  border-radius: var(--ngvault-border-radius);
 
   .child-table,
   .child-table-border {

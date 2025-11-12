@@ -57,24 +57,24 @@ export abstract class UserListDirective {
     this.userService.loadUsers();
   }
 
-  resetUsers(setSpinner: boolean = true) {
-    this.userService.resetUsers(setSpinner);
+  resetUsers() {
+    this.userService.resetUsers();
   }
 
-  reloadUsers(setSpinner: boolean = true) {
-    this.userService.reloadUsers(setSpinner);
+  reloadUsers() {
+    this.userService.reloadUsers();
   }
 
   reactiveReloadUsers() {
     this.userService.reactiveReloadUsers();
   }
 
-  resetCars(setSpinner: boolean = true) {
-    this.carService.resetCars(setSpinner);
+  resetCars() {
+    this.carService.resetCars();
   }
 
-  reloadCars(setSpinner: boolean = true) {
-    this.carService.reloadCars(setSpinner);
+  reloadCars() {
+    this.carService.reloadCars();
   }
 
   reactiveReloadCars() {

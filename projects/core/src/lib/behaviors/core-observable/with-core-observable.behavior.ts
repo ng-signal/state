@@ -108,7 +108,7 @@ class CoreObservableBehavior<T> implements VaultBehavior<T, ObservableBehaviorEx
 export const withCoreObservableBehavior: VaultBehaviorFactory<unknown, ObservableBehaviorExtension<unknown>> = (
   context: VaultBehaviorFactoryContext
 ) => {
-  return new CoreObservableBehavior(context.behaviorId, 'state', context.injector);
+  return new CoreObservableBehavior(context.behaviorId, context.type, context.injector);
 };
 
 withCoreObservableBehavior.type = 'state';

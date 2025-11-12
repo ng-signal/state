@@ -16,7 +16,7 @@
   color: var(--surface-text);
 
   padding: global.$spacing-md;
-  border-radius: global.$border-radius-lg;
+  border-radius: var(--ngvault-border-radius);
   font-family: global.$ngvault-font-family;
 
   /* Fills available height minus toolbar + footer */
@@ -34,8 +34,8 @@
 
   &::-webkit-scrollbar-thumb {
     background-color: var(--ngvault-surface-outline);
-    border-radius: global.$border-radius-sm;
-    border-radius: global.$border-radius-lg;
+    border-radius: var(--ngvault-border-radius);
+    border-radius: var(--ngvault-border-radius);
   }
 
   &::-webkit-scrollbar-track {
@@ -67,7 +67,7 @@
       align-items: center;
       justify-content: center;
       background: var(--sidenav-bg);
-      border-radius: global.$border-radius-md;
+      border-radius: var(--ngvault-border-radius);
       padding: global.$spacing-sm global.$spacing-md;
       transition: background 0.2s ease-in-out;
 
@@ -96,7 +96,7 @@
       display: flex;
       flex-direction: column;
       background: var(--sidenav-bg);
-      border-radius: global.$border-radius-lg;
+      border-radius: var(--ngvault-border-radius);
       padding: global.$spacing-md;
       overflow: hidden;
       height: calc(100% - 20px);
@@ -114,7 +114,7 @@
         overflow-y: auto;
         height: calc(100% - 50px);
         background: var(--surface-bg);
-        border-radius: global.$border-radius-md;
+        border-radius: var(--ngvault-border-radius);
         padding: global.$spacing-sm;
 
         div {
@@ -126,7 +126,7 @@
         pre {
           background: global.$ngvault-primary-light;
           color: var(--surface-text);
-          border-radius: global.$border-radius-xs;
+          border-radius: var(--ngvault-border-radius);
           padding: global.$spacing-sm;
           overflow-x: auto;
         }
