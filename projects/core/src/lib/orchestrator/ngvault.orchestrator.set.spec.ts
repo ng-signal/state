@@ -1,4 +1,6 @@
-import { Injector, provideZonelessChangeDetection, runInInjectionContext } from '@angular/core';
+import { httpResource, provideHttpClient } from '@angular/common/http';
+import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
+import { Injector, provideZonelessChangeDetection, runInInjectionContext, signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { VaultBehaviorContext, VaultBehaviorType } from '@ngvault/shared';
 import { flushMicrotasksZoneless, provideVaultTesting } from '@ngvault/testing';
@@ -13,19 +15,20 @@ describe('Orcestrator: Vault', () => {
   beforeEach(() => {
     calls = [];
 
-    // mock ctx signals
-    const isLoading = jasmine.createSpyObj('Signal', ['set']);
-    const error = jasmine.createSpyObj('Signal', ['set']);
-    const value = jasmine.createSpyObj('Signal', ['set']);
-
     mockCtx = {
-      isLoading,
-      error,
-      value
+      incoming: Object({ loading: true, value: 'incoming data' }),
+      isLoading: signal<any>(false),
+      error: signal<any>(null),
+      value: signal<any>(null)
     } as unknown as VaultBehaviorContext<any>;
 
     TestBed.configureTestingModule({
-      providers: [provideVaultTesting(), provideZonelessChangeDetection()]
+      providers: [
+        provideVaultTesting(),
+        provideZonelessChangeDetection(),
+        provideHttpClient(),
+        provideHttpClientTesting()
+      ]
     });
 
     injector = TestBed.inject(Injector);
@@ -58,17 +61,16 @@ describe('Orcestrator: Vault', () => {
     const behaviors = [makeBehavior('state'), makeBehavior('reduce'), makeBehavior('encrypt'), makeBehavior('persist')];
 
     runInInjectionContext(injector, () => {
-      dispatcher = new VaultOrchestrator<any>(behaviors);
+      dispatcher = new VaultOrchestrator<any>(behaviors, injector);
     });
 
     dispatcher.dispatchSet(mockCtx);
     await flushMicrotasksZoneless();
 
     expect(calls).toEqual(['state', 'reduce', 'encrypt', 'persist']);
-    expect(mockCtx.isLoading?.set).toHaveBeenCalledWith(true);
-    expect(mockCtx.error?.set).toHaveBeenCalledWith(null);
-    expect(mockCtx.value?.set).toHaveBeenCalledWith({ reduce: true });
-    expect(mockCtx.isLoading?.set).toHaveBeenCalledWith(false);
+    expect(mockCtx.isLoading?.()).toBeTrue();
+    expect(mockCtx.error?.()).toBeNull();
+    expect(mockCtx.value?.()).toEqual({ reduce: true });
   });
 
   it('should handle errors and set resourceError', async () => {
@@ -79,22 +81,67 @@ describe('Orcestrator: Vault', () => {
 
     const behaviors = [errorBehavior];
     runInInjectionContext(injector, () => {
-      dispatcher = new VaultOrchestrator<any>(behaviors);
+      dispatcher = new VaultOrchestrator<any>(behaviors, injector);
     });
 
     dispatcher.dispatchSet(mockCtx);
     await flushMicrotasksZoneless();
 
     // Verify error handling logic
-    expect(mockCtx.error?.set).toHaveBeenCalledWith(
+    expect(mockCtx.error?.()).toEqual(
       Object({
         message: 'Test error',
         details: jasmine.any(String)
       })
     );
-    expect(mockCtx.isLoading?.set).toHaveBeenCalledWith(true);
-    expect(mockCtx.value?.set).not.toHaveBeenCalled();
-    expect(mockCtx.isLoading?.set).toHaveBeenCalledWith(false);
+    expect(calls).toEqual([]);
+    expect(mockCtx.isLoading?.()).toBeFalse();
+    expect(mockCtx.error?.()).toEqual(Object({ message: 'Test error', details: jasmine.any(String) }));
+    expect(mockCtx.value?.()).toBeNull();
+  });
+
+  it('should handle HttpResourceRef errors and propagate resourceError', async () => {
+    // Arrange: create mock API backend and inject dependencies
+    const mockBackend = TestBed.inject(HttpTestingController);
+    const injector = TestBed.inject(Injector);
+
+    const behaviors = [makeBehavior('state')];
+
+    runInInjectionContext(injector, () => {
+      dispatcher = new VaultOrchestrator<any>(behaviors, injector);
+    });
+
+    // Create HttpResourceRef (this will call the mock backend)
+    mockCtx.incoming = httpResource<any[]>(() => '/api/users/error', { injector }) as any;
+
+    // Act: trigger the orchestrator to process the resource
+    dispatcher.dispatchSet(mockCtx);
+    TestBed.tick();
+
+    // Simulate a network error
+    const req = mockBackend.expectOne('/api/users/error');
+    req.flush('Boom!', { status: 500, statusText: 'Internal Server Error' });
+
+    // Flush any queued microtasks
+    await flushMicrotasksZoneless();
+
+    // Assert: verify that safeAsync and HttpResourceRef updated the signals
+    const err = mockCtx.error?.();
+
+    expect(err).toEqual(
+      jasmine.objectContaining({
+        message: 'Http failure response for /api/users/error: 500 Internal Server Error',
+        status: 500,
+        statusText: 'Internal Server Error',
+        details: 'Boom!'
+      })
+    );
+
+    expect(mockCtx.isLoading?.()).toBeFalse();
+    expect(mockCtx.value?.()).toBeNull();
+
+    // Clean up
+    mockBackend.verify();
   });
 
   it('should skip undefined stage results and maintain working state', async () => {
@@ -105,39 +152,44 @@ describe('Orcestrator: Vault', () => {
     ];
 
     runInInjectionContext(injector, () => {
-      dispatcher = new VaultOrchestrator<any>(behaviors);
+      dispatcher = new VaultOrchestrator<any>(behaviors, injector);
     });
 
     dispatcher.dispatchSet(mockCtx);
     await flushMicrotasksZoneless();
 
-    expect(mockCtx.value?.set).toHaveBeenCalledWith({ id: 1 });
     expect(calls).toEqual(['state', 'encrypt']);
+    expect(mockCtx.isLoading?.()).toBeTrue();
+    expect(mockCtx.error?.()).toBeNull();
+    expect(mockCtx.value?.()).toEqual({ id: 1 });
   });
 
   it('should not throw if optional ctx signals are undefined', async () => {
     const behaviors = [makeBehavior('state')];
 
     runInInjectionContext(injector, () => {
-      dispatcher = new VaultOrchestrator<any>(behaviors);
+      dispatcher = new VaultOrchestrator<any>(behaviors, injector);
     });
 
     const minimalCtx = {} as VaultBehaviorContext<any>; // no signals
     expect(() => dispatcher.dispatchSet(minimalCtx)).not.toThrow();
+    expect(calls).toEqual([]);
   });
 
   it('should set signals correctly after microtask flush', async () => {
     const behaviors = [makeBehavior('state', { ok: true })];
     runInInjectionContext(injector, () => {
-      dispatcher = new VaultOrchestrator<any>(behaviors);
+      dispatcher = new VaultOrchestrator<any>(behaviors, injector);
     });
 
     dispatcher.dispatchSet(mockCtx);
+    TestBed.tick();
 
     await flushMicrotasksZoneless();
 
-    expect(mockCtx.value?.set).toHaveBeenCalledWith({ ok: true });
-    expect(mockCtx.isLoading?.set).toHaveBeenCalledWith(false);
-    expect(mockCtx.error?.set).toHaveBeenCalledWith(null);
+    expect(calls).toEqual(['state']);
+    expect(mockCtx.isLoading?.()).toBeTrue();
+    expect(mockCtx.error?.()).toBeNull();
+    expect(mockCtx.value?.()).toEqual({ ok: true });
   });
 });

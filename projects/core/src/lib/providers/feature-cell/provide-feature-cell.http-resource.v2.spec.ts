@@ -2,7 +2,7 @@ import { httpResource, provideHttpClient } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { ApplicationRef, Injector, provideZonelessChangeDetection } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
-import { getTestBehavior, provideVaultTesting, withTestBehavior } from '@ngvault/testing';
+import { flushMicrotasksZoneless, getTestBehavior, provideVaultTesting, withTestBehavior } from '@ngvault/testing';
 import { FeatureCell } from '../../decorators/feature-cell.decorator';
 import { injectVault } from '../../injectors/feature-vault.injector';
 import { resetWarnExperimentalHttpResourceTestingOnly } from '../../utils/dev-warning.util';
@@ -49,20 +49,29 @@ describe('Provider: Feature Cell Resource', () => {
     resetWarnExperimentalHttpResourceTestingOnly();
   });
 
-  describe('setState', () => {
+  describe('replaceState', () => {
     it('should emit events from the httpResource lifecycle', async () => {
       let response = httpResource<TestModel[]>(() => '/data', { injector });
 
-      vault.setState(response);
+      vault.replaceState(response);
       TestBed.tick();
 
+      expect(vault.state.value()).toEqual([]);
+      expect(vault.state.isLoading()).toBeTrue();
+      expect(vault.state.error()).toBeNull();
+      expect(vault.state.hasValue()).toBeTrue();
+
       mockBackend.expectOne('/data').flush([{ id: 1, name: 'Ada' }]);
-      await TestBed.inject(ApplicationRef).whenStable();
+      TestBed.tick();
+      await flushMicrotasksZoneless();
 
       expect(vault.state.value()).toEqual([{ id: 1, name: 'Ada' }]);
+      expect(vault.state.isLoading()).toBeFalse();
+      expect(vault.state.error()).toBeNull();
+      expect(vault.state.hasValue()).toBeTrue();
 
-      vault.setState(undefined);
-      await TestBed.inject(ApplicationRef).whenStable();
+      vault.replaceState(undefined);
+      TestBed.tick();
 
       expect(vault.state.value()).toBeUndefined();
       expect(vault.state.isLoading()).toBeFalse();
@@ -71,15 +80,17 @@ describe('Provider: Feature Cell Resource', () => {
 
       response = httpResource<TestModel[]>(() => '/data', { injector });
 
-      vault.setState(response);
+      vault.replaceState(response);
       TestBed.tick();
 
       mockBackend.expectOne('/data').flush([{ id: 2, name: 'Kai' }]);
-      await TestBed.inject(ApplicationRef).whenStable();
+      await flushMicrotasksZoneless();
 
       expect(vault.state.value()).toEqual([{ id: 2, name: 'Kai' }]);
 
       vault.destroy();
+      TestBed.tick();
+      await flushMicrotasksZoneless();
 
       expect(getTestBehavior().getEvents()).toEqual([
         'onInit:cars',
@@ -88,17 +99,6 @@ describe('Provider: Feature Cell Resource', () => {
         'onInit:NgVault::CoreHttpResource::State',
         'onInit:NgVault::CoreHttpResource::StateV2',
         'onInit:NgVault::Core::FromObservable',
-        'onSet:cars:{"isLoading":false,"value":[],"error":null,"hasValue":true}',
-        'onSet:NgVault::CoreHttpResource::State:{"isLoading":false,"value":[{"id":1,"name":"Ada"}],"error":null,"hasValue":true}',
-        'onReset:cars',
-        'onReset:cars',
-
-        'onSet:cars:{"isLoading":false,"error":null,"hasValue":false}',
-
-        'onSet:NgVault::CoreHttpResource::State:{"isLoading":true,"value":[{"id":1,"name":"Ada"}],"error":null,"hasValue":true}',
-
-        'onSet:NgVault::CoreHttpResource::State:{"isLoading":false,"value":[{"id":2,"name":"Kai"}],"error":null,"hasValue":true}',
-
         'onReset:cars',
         'onReset:cars',
         'onDestroy:cars',
@@ -111,14 +111,14 @@ describe('Provider: Feature Cell Resource', () => {
     });
   });
 
-  describe('patchState', () => {
+  describe('mergeState', () => {
     it('should emit events from the httpResource lifecycle', async () => {
       // Arrange
       const mockBackend = TestBed.inject(HttpTestingController);
       const response = httpResource<number>(() => '/primitive', { injector });
 
-      // Use patchState to go through the experimental HttpResourceRef branch
-      vault.patchState(response);
+      // Use mergeState to go through the experimental HttpResourceRef branch
+      vault.mergeState(response);
       TestBed.tick();
 
       // Before response arrives, value() throws → _data should remain undefined
@@ -154,11 +154,7 @@ describe('Provider: Feature Cell Resource', () => {
         'onInit:NgVault::Core::StateV2',
         'onInit:NgVault::CoreHttpResource::State',
         'onInit:NgVault::CoreHttpResource::StateV2',
-        'onInit:NgVault::Core::FromObservable',
-        'onPatch:cars:{"isLoading":false,"value":[],"error":null,"hasValue":true}',
-        'onPatch:NgVault::CoreHttpResource::State:{"isLoading":false,"value":42,"error":null,"hasValue":true}',
-        'onPatch:NgVault::CoreHttpResource::State:{"isLoading":true,"value":42,"error":null,"hasValue":true}',
-        'onPatch:NgVault::CoreHttpResource::State:{"isLoading":false,"value":7,"error":null,"hasValue":true}'
+        'onInit:NgVault::Core::FromObservable'
       ]);
 
       expect(warnSpy).toHaveBeenCalledWith(

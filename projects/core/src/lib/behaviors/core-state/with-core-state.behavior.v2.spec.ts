@@ -35,7 +35,7 @@ describe('Behavior: CoreStateBehaviorV2', () => {
   it('should have default properties', () => {
     expect(behavior.critical).toBeTrue();
     expect(behavior.type).toBe('state');
-    expect(behavior.key).toBe('NgVault::Core::State');
+    expect(behavior.key).toBe('NgVault::Core::StateV2');
   });
 
   it('should skip when ctx.incoming is null', async () => {

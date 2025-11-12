@@ -438,7 +438,9 @@ describe('Provider: Feature Cell (core vault functionality)', () => {
       expect(testBehavior.getEvents()).toEqual([
         'onInit:devtools-test',
         'onInit:NgVault::Core::State',
+        'onInit:NgVault::Core::StateV2',
         'onInit:NgVault::CoreHttpResource::State',
+        'onInit:NgVault::CoreHttpResource::StateV2',
         'onInit:NgVault::Core::FromObservable'
       ]);
     });
@@ -455,7 +457,9 @@ describe('Provider: Feature Cell (core vault functionality)', () => {
       expect(testBehavior.getEvents()).toEqual([
         'onInit:devtools-test',
         'onInit:NgVault::Core::State',
+        'onInit:NgVault::Core::StateV2',
         'onInit:NgVault::CoreHttpResource::State',
+        'onInit:NgVault::CoreHttpResource::StateV2',
         'onInit:NgVault::Core::FromObservable',
         'onReset:devtools-test',
         'onReset:devtools-test',
@@ -484,7 +488,9 @@ describe('Provider: Feature Cell (core vault functionality)', () => {
       expect(testBehavior.getEvents()).toEqual([
         'onInit:devtools-test',
         'onInit:NgVault::Core::State',
+        'onInit:NgVault::Core::StateV2',
         'onInit:NgVault::CoreHttpResource::State',
+        'onInit:NgVault::CoreHttpResource::StateV2',
         'onInit:NgVault::Core::FromObservable',
         'onSet:devtools-test:{"isLoading":false,"value":[],"error":null,"hasValue":true}',
         'onSet:NgVault::Core::State:{"isLoading":true,"value":[1,2,3],"error":null,"hasValue":true}',

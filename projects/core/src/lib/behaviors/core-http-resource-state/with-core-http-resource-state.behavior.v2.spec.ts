@@ -59,7 +59,7 @@ describe('Behavior: CoreHttpResourceStateBehaviorV2', () => {
 
   it('should have default attributes', () => {
     expect(behavior.critical).toBeTrue();
-    expect(behavior.key).toBe('NgVault::CoreHttpResource::State');
+    expect(behavior.key).toBe('NgVault::CoreHttpResource::StateV2');
     expect(behavior.type).toBe('state');
   });
 

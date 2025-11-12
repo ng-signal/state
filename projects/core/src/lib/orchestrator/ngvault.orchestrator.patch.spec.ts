@@ -1,4 +1,4 @@
-import { Injector, provideZonelessChangeDetection, runInInjectionContext } from '@angular/core';
+import { Injector, provideZonelessChangeDetection, runInInjectionContext, signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { VaultBehaviorContext, VaultBehaviorType } from '@ngvault/shared';
 import { flushMicrotasksZoneless, provideVaultTesting } from '@ngvault/testing';
@@ -13,22 +13,12 @@ describe('Orchestrator: Vault (dispatchPatch)', () => {
   beforeEach(() => {
     calls = [];
 
-    // Mock signals
-    const isLoading = jasmine.createSpyObj('Signal', ['set']);
-    const error = jasmine.createSpyObj('Signal', ['set']);
-    const value = jasmine.createSpyObj('Signal', ['set']);
-    value.and = { callFake: () => ({ id: 1, existing: true }) }; // simulate .value() accessor
-
     mockCtx = {
-      isLoading,
-      error,
-      value: Object.assign(jasmine.createSpy('value'), {
-        set: value.set,
-        // mock current value signal return
-        call: () => ({ current: true })
-      })
+      incoming: Object({ loading: true, value: 'incoming data' }),
+      isLoading: signal<any>(false),
+      error: signal<any>(null),
+      value: signal<any>(null)
     } as unknown as VaultBehaviorContext<any>;
-
     TestBed.configureTestingModule({
       providers: [provideVaultTesting(), provideZonelessChangeDetection()]
     });
@@ -69,24 +59,23 @@ describe('Orchestrator: Vault (dispatchPatch)', () => {
     ];
 
     runInInjectionContext(injector, () => {
-      dispatcher = new VaultOrchestrator<any>(behaviors);
+      dispatcher = new VaultOrchestrator<any>(behaviors, injector);
     });
 
     dispatcher.dispatchPatch(mockCtx);
     await flushMicrotasksZoneless();
 
     expect(calls).toEqual(['state', 'reduce', 'encrypt', 'persist']);
-    expect(mockCtx.isLoading?.set).toHaveBeenCalledWith(true);
-    expect(mockCtx.error?.set).toHaveBeenCalledWith(null);
-    expect(mockCtx.value?.set).toHaveBeenCalledWith({ reduce: true });
-    expect(mockCtx.isLoading?.set).toHaveBeenCalledWith(false);
+    expect(mockCtx.isLoading?.()).toBeTrue();
+    expect(mockCtx.error?.()).toBeNull();
+    expect(mockCtx.value?.()).toEqual({ reduce: true });
   });
 
   it('should correctly merge current and partial patch state', async () => {
     const behaviors = [makeBehavior('state', { newKey: true })];
 
     runInInjectionContext(injector, () => {
-      dispatcher = new VaultOrchestrator<any>(behaviors);
+      dispatcher = new VaultOrchestrator<any>(behaviors, injector);
     });
 
     const currentValue = { id: 1, existing: true };
@@ -102,7 +91,10 @@ describe('Orchestrator: Vault (dispatchPatch)', () => {
     dispatcher.dispatchPatch(mockCtx);
     await flushMicrotasksZoneless();
 
-    expect(mockCtx.value?.set).toHaveBeenCalledWith(jasmine.objectContaining({ newKey: true }));
+    expect(calls).toEqual(['state']);
+    expect(mockCtx.isLoading?.()).toBeTrue();
+    expect(mockCtx.error?.()).toBeNull();
+    expect(mockCtx.value?.set).toHaveBeenCalledWith(Object({ newKey: true }));
   });
 
   it('should handle errors gracefully and set resourceError', async () => {
@@ -113,16 +105,16 @@ describe('Orchestrator: Vault (dispatchPatch)', () => {
 
     const behaviors = [errorBehavior];
     runInInjectionContext(injector, () => {
-      dispatcher = new VaultOrchestrator<any>(behaviors);
+      dispatcher = new VaultOrchestrator<any>(behaviors, injector);
     });
 
     dispatcher.dispatchPatch(mockCtx);
     await flushMicrotasksZoneless();
 
-    expect(mockCtx.error?.set).toHaveBeenCalledWith(
-      jasmine.objectContaining({ message: 'Patch error test', details: jasmine.any(String) })
-    );
-    expect(mockCtx.isLoading?.set).toHaveBeenCalledWith(false);
+    expect(calls).toEqual([]);
+    expect(mockCtx.isLoading?.()).toBeFalse();
+    expect(mockCtx.error?.()).toEqual(Object({ message: 'Patch error test', details: jasmine.any(String) }));
+    expect(mockCtx.value?.()).toBeNull();
   });
 
   it('should skip undefined results and continue processing later stages', async () => {
@@ -133,39 +125,46 @@ describe('Orchestrator: Vault (dispatchPatch)', () => {
     ];
 
     runInInjectionContext(injector, () => {
-      dispatcher = new VaultOrchestrator<any>(behaviors);
+      dispatcher = new VaultOrchestrator<any>(behaviors, injector);
     });
 
     dispatcher.dispatchPatch(mockCtx);
     await flushMicrotasksZoneless();
 
     expect(calls).toEqual(['state', 'encrypt']);
-    expect(mockCtx.value?.set).toHaveBeenCalledWith({ id: 1 });
+    expect(mockCtx.isLoading?.()).toBeTrue();
+    expect(mockCtx.error?.()).toBeNull();
+    expect(mockCtx.value?.()).toEqual({ id: 1 });
   });
 
   it('should not throw if ctx signals are missing', async () => {
     const behaviors = [makeBehavior('state')];
 
     runInInjectionContext(injector, () => {
-      dispatcher = new VaultOrchestrator<any>(behaviors);
+      dispatcher = new VaultOrchestrator<any>(behaviors, injector);
     });
 
     const minimalCtx = {} as VaultBehaviorContext<any>;
     expect(() => dispatcher.dispatchPatch(minimalCtx)).not.toThrow();
+    expect(calls).toEqual([]);
+    expect(mockCtx.isLoading?.()).toBeFalse();
+    expect(mockCtx.error?.()).toBeNull();
+    expect(mockCtx.value?.()).toBeNull();
   });
 
   it('should update signals correctly after microtask flush', async () => {
     const behaviors = [makeBehavior('state', { ok: true })];
 
     runInInjectionContext(injector, () => {
-      dispatcher = new VaultOrchestrator<any>(behaviors);
+      dispatcher = new VaultOrchestrator<any>(behaviors, injector);
     });
 
     dispatcher.dispatchPatch(mockCtx);
     await flushMicrotasksZoneless();
 
-    expect(mockCtx.value?.set).toHaveBeenCalledWith({ ok: true });
-    expect(mockCtx.isLoading?.set).toHaveBeenCalledWith(false);
-    expect(mockCtx.error?.set).toHaveBeenCalledWith(null);
+    expect(calls).toEqual(['state']);
+    expect(mockCtx.isLoading?.()).toBeTrue();
+    expect(mockCtx.error?.()).toBeNull();
+    expect(mockCtx.value?.()).toEqual({ ok: true });
   });
 });

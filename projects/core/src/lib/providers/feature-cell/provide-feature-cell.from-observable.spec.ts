@@ -171,7 +171,9 @@ describe('ResourceVaultModel (setState, patchState, fromObservable)', () => {
     expect(getTestBehavior().getEvents()).toEqual([
       'onInit:http',
       'onInit:NgVault::Core::State',
+      'onInit:NgVault::Core::StateV2',
       'onInit:NgVault::CoreHttpResource::State',
+      'onInit:NgVault::CoreHttpResource::StateV2',
       'onInit:NgVault::Core::FromObservable',
       'onLoad:NgVault::Core::FromObservable',
       'onSet:NgVault::Core::FromObservable:{"isLoading":false,"value":[],"error":null,"hasValue":true}',

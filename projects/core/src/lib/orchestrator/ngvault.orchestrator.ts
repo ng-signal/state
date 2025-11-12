@@ -1,7 +1,8 @@
 // ─────────────────────────────────────────────────────────────
 // vault-dispatcher.ts
 // ─────────────────────────────────────────────────────────────
-import { inject } from '@angular/core';
+import { HttpResourceRef } from '@angular/common/http';
+import { effect, inject, Injector, runInInjectionContext } from '@angular/core';
 import {
   VaultBehavior,
   VaultBehaviorContext,
@@ -21,7 +22,10 @@ import { resourceError } from '../utils/resource-error.util';
 export class VaultOrchestrator<T> {
   #queue = inject(NGVAULT_QUEUE);
 
-  constructor(private readonly behaviors: VaultBehavior<T>[]) {}
+  constructor(
+    private readonly behaviors: VaultBehavior<T>[],
+    private readonly injector: Injector
+  ) {}
 
   #ensureIncoming(ctx: VaultBehaviorContext<T>): VaultStateInputType<T> | null {
     const incoming = ctx.incoming;
@@ -95,6 +99,35 @@ export class VaultOrchestrator<T> {
   ): Promise<void> {
     try {
       const incoming = ctx.incoming;
+
+      if (isHttpResourceRef(incoming)) {
+        const resource = incoming as HttpResourceRef<T>;
+
+        // Run inside injector to attach Angular reactivity
+        runInInjectionContext(this.injector, () => {
+          const stop = effect(() => {
+            // Always mirror current resource state
+            ctx.isLoading?.set(resource.isLoading());
+
+            try {
+              if (resource.value() !== undefined) {
+                ctx.value?.set(resource.value());
+                ctx.error?.set(null);
+              }
+            } catch {
+              ctx.error?.set(resourceError(resource.error()));
+            }
+          });
+
+          // Destroy effect when FeatureCell is destroyed
+          ctx.destroyed$?.subscribe(() => stop.destroy());
+        });
+
+        // Let the behavior’s pipeline continue
+        await fn();
+        return;
+      }
+
       const isPlainState = incoming != null && typeof incoming === 'object' && !isHttpResourceRef(incoming);
       const incomingState = isPlainState ? (incoming as Partial<VaultStateType<T>>) : {};
       const isReplace = ctx.operation === 'replace';
