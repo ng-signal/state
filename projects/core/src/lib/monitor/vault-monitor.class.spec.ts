@@ -1,14 +1,21 @@
 import { Injector, provideZonelessChangeDetection, runInInjectionContext } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
-import { NgVaultDevModeService, VaultBehavior } from '@ngvault/shared';
-import { NgVaultDebuggerService } from '../services/ngvault-insight.service';
-import { withDevtoolsBehavior } from './with-devtools.behavior';
+import { NgVaultEventBus, NgVaultEventModel } from '@ngvault/dev-tools';
+import { NgVaultDevModeService } from '@ngvault/shared';
+import { Subscription } from 'rxjs';
+import { NgVaultMonitor } from './vault-monitor.class';
 
-describe('Behavior: withDevtools', () => {
-  let behavior: VaultBehavior;
+describe('Class: Vault Monitor', () => {
+  let vaultMonitor: NgVaultMonitor;
   const emitted: any[] = [];
   let stopListening: any;
   let ctx: any;
+  let eventBus: any;
+
+  function listen(hook: (event: NgVaultEventModel) => void): () => void {
+    const subscription: Subscription = eventBus.asObservable().subscribe(hook);
+    return () => subscription.unsubscribe();
+  }
 
   describe('development', () => {
     beforeEach(() => {
@@ -22,7 +29,7 @@ describe('Behavior: withDevtools', () => {
       } as any;
 
       TestBed.configureTestingModule({
-        providers: [NgVaultDebuggerService, provideZonelessChangeDetection()]
+        providers: [NgVaultMonitor, provideZonelessChangeDetection()]
       }).overrideProvider(NgVaultDevModeService, {
         useValue: { isDevMode: true }
       });
@@ -32,11 +39,11 @@ describe('Behavior: withDevtools', () => {
       emitted.length = 0;
 
       // Subscribe to all vault events via the official hook
-      const debuggerService = TestBed.inject(NgVaultDebuggerService);
-      stopListening = debuggerService.listen((event) => emitted.push(event));
+      eventBus = TestBed.inject(NgVaultEventBus);
+      stopListening = listen((event) => emitted.push(event));
 
       runInInjectionContext(injector, () => {
-        behavior = withDevtoolsBehavior({ type: 'dev-tools', injector, behaviorId: 'id' });
+        vaultMonitor = TestBed.inject(NgVaultMonitor);
       });
     });
 
@@ -46,7 +53,7 @@ describe('Behavior: withDevtools', () => {
 
     it('should register, emit init and prevent double registration', () => {
       ctx.message = 'this is the message';
-      behavior.onInit?.('vault1', 'TestService', ctx);
+      vaultMonitor.onInit?.('vault1', 'TestService', ctx);
 
       expect(emitted).toEqual([
         Object({
@@ -60,7 +67,7 @@ describe('Behavior: withDevtools', () => {
 
       // Second call should be ignored (already registered)
 
-      behavior.onInit?.('vault1', 'TestService', ctx);
+      vaultMonitor.onInit?.('vault1', 'TestService', ctx);
 
       expect(emitted).toEqual([
         Object({
@@ -72,13 +79,13 @@ describe('Behavior: withDevtools', () => {
         })
       ]);
 
-      behavior.onLoad?.('vault1', ctx);
-      behavior.onPatch?.('vault1', ctx);
-      behavior.onReset?.('vault1', ctx);
-      behavior.onSet?.('vault1', ctx);
-      behavior.onDestroy?.('vault1', ctx);
-      behavior.onDispose?.('vault1', ctx);
-      behavior.onError?.('vault1', ctx);
+      vaultMonitor.onLoad?.('vault1', ctx);
+      vaultMonitor.onPatch?.('vault1', ctx);
+      vaultMonitor.onReset?.('vault1', ctx);
+      vaultMonitor.onSet?.('vault1', ctx);
+      vaultMonitor.onDestroy?.('vault1', ctx);
+      vaultMonitor.onDispose?.('vault1', ctx);
+      vaultMonitor.onError?.('vault1', ctx);
 
       expect(emitted).toEqual([
         Object({
@@ -142,8 +149,8 @@ describe('Behavior: withDevtools', () => {
     });
 
     it('should handle multiple vaults independently', () => {
-      behavior.onInit?.('vault1', 'TestService', ctx);
-      behavior.onInit?.('vault2', 'TestService', ctx);
+      vaultMonitor.onInit?.('vault1', 'TestService', ctx);
+      vaultMonitor.onInit?.('vault2', 'TestService', ctx);
 
       expect(emitted).toEqual([
         Object({
@@ -163,13 +170,13 @@ describe('Behavior: withDevtools', () => {
       ]);
 
       try {
-        behavior.onDestroy?.('A', ctx);
+        vaultMonitor.onDestroy?.('A', ctx);
         expect('this is an error').toBe('fix me');
       } catch (error) {
-        expect((error as any).message).toBe('[NgVault] Behavior "DevtoolsBehavior" used before onInit() for "A".');
+        expect((error as any).message).toBe('[NgVault] Behavior "NgVaultMonitor2" used before onInit() for "A".');
       }
 
-      behavior.onDestroy?.('vault1', ctx);
+      vaultMonitor.onDestroy?.('vault1', ctx);
 
       expect(emitted).toEqual([
         Object({
@@ -207,7 +214,7 @@ describe('Behavior: withDevtools', () => {
       };
 
       TestBed.configureTestingModule({
-        providers: [NgVaultDebuggerService, provideZonelessChangeDetection()]
+        providers: [NgVaultMonitor, provideZonelessChangeDetection()]
       }).overrideProvider(NgVaultDevModeService, {
         useValue: { isDevMode: false }
       });
@@ -217,11 +224,11 @@ describe('Behavior: withDevtools', () => {
       emitted.length = 0;
 
       // Subscribe to all vault events via the official hook
-      const debuggerService = TestBed.inject(NgVaultDebuggerService);
-      stopListening = debuggerService.listen((event) => emitted.push(event));
+      eventBus = TestBed.inject(NgVaultEventBus);
+      stopListening = listen((event) => emitted.push(event));
 
       runInInjectionContext(injector, () => {
-        behavior = withDevtoolsBehavior({ injector, behaviorId: 'id', type: 'dev-tools' });
+        vaultMonitor = TestBed.inject(NgVaultMonitor);
       });
     });
 
@@ -230,8 +237,8 @@ describe('Behavior: withDevtools', () => {
     });
 
     it('should not register', () => {
-      behavior.onInit?.('vault1', 'TestService', ctx);
-      behavior.onInit?.('vault2', 'TestService', ctx);
+      vaultMonitor.onInit?.('vault1', 'TestService', ctx);
+      vaultMonitor.onInit?.('vault2', 'TestService', ctx);
 
       expect(emitted).toEqual([]);
     });

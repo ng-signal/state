@@ -189,7 +189,9 @@ export class VaultOrchestrator<T> {
         switch (stage) {
           case 'state':
             if (typeof (behavior as VaultStateBehavior<T>).computeState === 'function') {
+              // start log
               next = await (behavior as VaultStateBehavior<T>).computeState(ctx);
+              // end log
             }
             break;
 

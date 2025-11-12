@@ -2,19 +2,19 @@ import { provideZonelessChangeDetection } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { NgVaultEventModel } from '../models/ngvault-event.model';
 import { NgVaultEventBus } from '../utils/ngvault-event-bus';
-import { NgVaultDebuggerService } from './ngvault-debugger.service';
+import { NgVaultInsightService } from './ngvault-insight.service';
 
-describe('createNgVaultDebuggerHook', () => {
+describe('Service: NgVaultInsightService', () => {
   let bus: NgVaultEventBus;
   const received: NgVaultEventModel[] = [];
-  let hook: NgVaultDebuggerService;
+  let hook: NgVaultInsightService;
 
   beforeEach(() => {
     TestBed.configureTestingModule({
       providers: [NgVaultEventBus, provideZonelessChangeDetection()]
     });
     bus = TestBed.inject(NgVaultEventBus);
-    hook = TestBed.inject(NgVaultDebuggerService);
+    hook = TestBed.inject(NgVaultInsightService);
   });
 
   describe('listen', () => {

@@ -4,7 +4,7 @@ import { NgVaultEventModel } from '../models/ngvault-event.model';
 import { NgVaultEventBus } from '../utils/ngvault-event-bus';
 
 @Injectable({ providedIn: 'root' })
-export class NgVaultDebuggerService {
+export class NgVaultInsightService {
   constructor(private readonly eventBus: NgVaultEventBus) {}
 
   listen$() {
