@@ -2,9 +2,7 @@ import { inject, Injectable } from '@angular/core';
 import { NgVaultEventBus, NgVaultEventModel } from '@ngvault/dev-tools';
 import {
   defineNgVaultBehaviorKey,
-  VaultBehavior,
   VaultBehaviorContext,
-  VaultBehaviorType,
   VaultInsightDefinition,
   VaultStateSnapshot
 } from '@ngvault/shared';
@@ -63,25 +61,13 @@ export class NgVaultMonitor {
     this.#emitEvent(cell, behaviorId, 'error', ctx.state, 'error', err instanceof Error ? err.message : String(err));
   }
 
-  // eslint-disable-next-line
-  registerCell(cellKey: string, behaviors: VaultBehavior<any>[]): void {
-    // Extract insight behaviors
-    const insights = behaviors
-      .filter((b) => b.type === VaultBehaviorType.Insights)
-      // eslint-disable-next-line
-      .map((b) => (b as any).insight as VaultInsightDefinition)
-      .filter((i): i is VaultInsightDefinition => !!i);
+  registerCell(cellKey: string, insight?: VaultInsightDefinition): void {
+    const hasInsight = !!insight;
 
-    // Store insight metadata for this cell
     this.#cellRegistry.set(cellKey, {
-      hasInsight: insights.length > 0,
-      insights
+      hasInsight,
+      insights: hasInsight ? [insight!] : []
     });
-
-    // Call lifecycle hooks on each insight
-    for (const insight of insights) {
-      insight.onCellRegistered?.(cellKey);
-    }
   }
 
   #emitEvent<T>(
@@ -94,29 +80,33 @@ export class NgVaultMonitor {
   ): void {
     const config = this.#cellRegistry.get(cell);
 
-    if (!config) return;
+    if (!config || !config.hasInsight) return;
 
-    for (const insight of config.insights) {
-      const serializedType = this.#serializeName(type);
-      if (insight.filterEventType && !insight.filterEventType(serializedType)) continue;
+    // We know there is exactly ONE insight definition if enabled
+    const insight = config.insights[0];
 
-      const shouldEmitState = insight.wantsState ?? false;
-      const shouldEmitPayload = insight.wantsPayload ?? false;
-      const shouldEmitErrors = insight.wantsErrors ?? false;
+    const serializedType = this.#serializeName(type);
 
-      const event: NgVaultEventModel = {
-        id: crypto.randomUUID(),
-        cell,
-        behaviorId,
-        type: serializedType,
-        timestamp: Date.now()
-      };
+    const event: NgVaultEventModel = {
+      id: crypto.randomUUID(),
+      cell,
+      behaviorId,
+      type: serializedType,
+      timestamp: Date.now()
+    };
 
-      if (shouldEmitState) event.state = ctx;
-      if (shouldEmitPayload && payload !== undefined) event.payload = payload;
-      if (shouldEmitErrors && error) event.error = error;
-
-      this.#eventBus.next(event);
+    if (insight.wantsState) {
+      event.state = ctx;
     }
+
+    if (insight.wantsPayload && payload !== undefined) {
+      event.payload = payload;
+    }
+
+    if (insight.wantsErrors && error) {
+      event.error = error;
+    }
+
+    this.#eventBus.next(event);
   }
 }

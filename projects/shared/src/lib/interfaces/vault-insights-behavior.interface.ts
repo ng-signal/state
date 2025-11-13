@@ -1,42 +1,22 @@
 export interface VaultInsightDefinition {
   /**
-   * Unique identifier for the insight behavior.
+   * Unique identifier for the insight definition.
+   * Example: "manual-insights"
    */
   id: string;
 
   /**
-   * Human-friendly display name (DevTools, Analytics, Sentry, Datadog…)
-   */
-  label?: string;
-
-  /**
-   * If true, NgVaultMonitor must include full VaultStateSnapshot<T> in events.
+   * If true, include the full state snapshot in events.
    */
   wantsState?: boolean;
 
   /**
-   * If true, NgVaultMonitor will attach payloads (reducers, encryption info, etc.)
+   * If true, include payload data (reducers, patches, operations).
    */
   wantsPayload?: boolean;
 
   /**
-   * If true, NgVaultMonitor will attach error messages.
+   * If true, include error messages.
    */
   wantsErrors?: boolean;
-
-  /**
-   * Called when the cell is created.
-   */
-  onCellRegistered?(cellKey: string): void;
-
-  /**
-   * Called when the cell is destroyed.
-   */
-  onCellDestroyed?(cellKey: string): void;
-
-  /**
-   * Optional lifecycle event filter:
-   * Return false to ignore certain event types.
-   */
-  filterEventType?(type: string): boolean;
 }

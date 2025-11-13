@@ -1,9 +1,8 @@
 import { Injector, provideZonelessChangeDetection, runInInjectionContext } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { NgVaultEventBus } from '@ngvault/dev-tools';
-import { VaultBehaviorType } from '@ngvault/shared';
 import { createTestEventListener } from '@ngvault/testing';
-import { NgVaultMonitor } from './vault-monitor.service';
+import { NgVaultMonitor } from './ngvault-monitor.service';
 
 describe('Service: Vault Monitor', () => {
   let vaultMonitor: NgVaultMonitor;
@@ -11,7 +10,7 @@ describe('Service: Vault Monitor', () => {
   let stopListening: any;
   let ctx: any;
   let eventBus: any;
-  let behavior: any;
+  let insightsOptions: any;
 
   beforeEach(() => {
     ctx = {
@@ -21,6 +20,13 @@ describe('Service: Vault Monitor', () => {
         error: null,
         hasValue: false
       }
+    } as any;
+
+    insightsOptions = {
+      id: 'manual-insights',
+      wantsState: true,
+      wantsPayload: true,
+      wantsErrors: true
     } as any;
 
     TestBed.configureTestingModule({
@@ -38,22 +44,6 @@ describe('Service: Vault Monitor', () => {
     runInInjectionContext(injector, () => {
       vaultMonitor = TestBed.inject(NgVaultMonitor);
     });
-
-    behavior = {
-      type: VaultBehaviorType.Insights,
-      behaviorId: `insights-id`,
-      insight: {
-        onCellRegistered: jasmine.createSpy('onCellRegistered'),
-
-        // ✔ allow all events
-        filterEventType: () => true,
-
-        // ✔ request full state, payloads, and errors
-        wantsState: true,
-        wantsPayload: true,
-        wantsErrors: true
-      }
-    };
   });
 
   afterEach(() => {
@@ -62,8 +52,7 @@ describe('Service: Vault Monitor', () => {
 
   describe('with insight behavior', () => {
     it('should register, emit init and prevent double registration', () => {
-      //ctx.message = 'this is the message';
-      vaultMonitor.registerCell('vault1', [behavior]);
+      vaultMonitor.registerCell('vault1', insightsOptions);
       vaultMonitor.startReplace('vault1', 'state key', ctx);
 
       expect(emitted).toEqual([
@@ -76,8 +65,6 @@ describe('Service: Vault Monitor', () => {
           state: Object({ isLoading: true, value: 'hello', error: null, hasValue: false })
         })
       ]);
-
-      expect(behavior.insight.onCellRegistered).toHaveBeenCalledWith('vault1');
 
       vaultMonitor.endReplace?.('vault1', 'end key', ctx);
       vaultMonitor.startMerge?.('vault1', 'start merge', ctx);
@@ -160,8 +147,8 @@ describe('Service: Vault Monitor', () => {
     });
 
     it('should handle multiple vaults independently', () => {
-      vaultMonitor.registerCell('vault1', [behavior]);
-      vaultMonitor.registerCell('vault2', [behavior]);
+      vaultMonitor.registerCell('vault1', insightsOptions);
+      vaultMonitor.registerCell('vault2', insightsOptions);
       vaultMonitor.startMerge?.('vault1', 'TestService', ctx);
       vaultMonitor.startMerge?.('vault2', 'TestService', ctx);
       vaultMonitor.startMerge?.('vault3', 'TestService', ctx);
@@ -185,11 +172,26 @@ describe('Service: Vault Monitor', () => {
         })
       ]);
     });
+
+    it('should not emit with insight behaviors', () => {
+      vaultMonitor.registerCell('vault1', {} as any);
+      vaultMonitor.startMerge?.('vault1', 'TestService', ctx);
+
+      expect(emitted).toEqual([
+        Object({
+          id: jasmine.any(String),
+          cell: 'vault1',
+          behaviorId: 'TestService',
+          type: 'lifecycle:start:merge',
+          timestamp: jasmine.any(Number)
+        })
+      ]);
+    });
   });
 
   describe('No emits', () => {
     it('should not emit with wrong cell', () => {
-      vaultMonitor.registerCell('wrong', [behavior]);
+      vaultMonitor.registerCell('wrong', insightsOptions);
       vaultMonitor.startMerge?.('vault1', 'TestService', ctx);
 
       expect(emitted).toEqual([]);
@@ -202,24 +204,20 @@ describe('Service: Vault Monitor', () => {
     });
 
     it('should not emit with insight behaviors', () => {
-      vaultMonitor.registerCell('vault1', []);
+      vaultMonitor.registerCell('vault1');
       vaultMonitor.startMerge?.('vault1', 'TestService', ctx);
 
       expect(emitted).toEqual([]);
     });
 
     it('should display state, errors or payload with explicit', () => {
-      behavior.insight.wantsState = false;
-      behavior.insight.wantsPayload = false;
-      behavior.insight.wantsErrors = false;
-      behavior.insight.filterEventType = (type: string) => !type.includes('merge');
-      vaultMonitor.registerCell('vault1', [behavior]);
+      insightsOptions.wantsState = false;
+      insightsOptions.wantsPayload = false;
+      insightsOptions.wantsErrors = false;
+      vaultMonitor.registerCell('vault1', insightsOptions);
 
       vaultMonitor.startReplace('vault1', 'state key', ctx);
-      vaultMonitor.startMerge?.('vault1', 'end key', ctx);
       vaultMonitor.error?.('vault1', 'error string', ctx, 'this is the error');
-
-      expect(behavior.insight.onCellRegistered).toHaveBeenCalledWith('vault1');
 
       expect(emitted).toEqual([
         Object({
@@ -240,15 +238,13 @@ describe('Service: Vault Monitor', () => {
     });
 
     it('should display state, errors or payload with implicit', () => {
-      delete behavior.insight.wantsState;
-      delete behavior.insight.wantsPayload;
-      delete behavior.insight.wantsErrors;
-      vaultMonitor.registerCell('vault1', [behavior]);
+      delete insightsOptions.wantsState;
+      delete insightsOptions.wantsPayload;
+      delete insightsOptions.wantsErrors;
+      vaultMonitor.registerCell('vault1', insightsOptions);
 
       vaultMonitor.startReplace('vault1', 'state key', ctx);
       vaultMonitor.error?.('vault1', 'error string', ctx, 'this is the error');
-
-      expect(behavior.insight.onCellRegistered).toHaveBeenCalledWith('vault1');
 
       expect(emitted).toEqual([
         Object({

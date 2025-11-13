@@ -588,13 +588,23 @@ describe('Provider: Feature Cell (core vault functionality)', () => {
     let testBehavior: any;
 
     let vault: FeatureCell<any>;
+    let insightsOptions: any;
 
     beforeEach(() => {
+      insightsOptions = {
+        id: 'manual-insights',
+        wantsState: true,
+        wantsPayload: true,
+        wantsErrors: true
+      } as any;
+
       testBehavior?.resetEvents();
       runInInjectionContext(injector, () => {
-        providers = provideFeatureCell(class TestService {}, { key: 'devtools-test', initial: [] }, [
-          withTestBehaviorV2
-        ]);
+        providers = provideFeatureCell(
+          class TestService {},
+          { key: 'devtools-test', initial: [], insights: insightsOptions },
+          [withTestBehaviorV2]
+        );
       });
       factory = (providers[0] as any).useFactory;
     });

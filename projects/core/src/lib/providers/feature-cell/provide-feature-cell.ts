@@ -65,7 +65,12 @@ export function provideFeatureCell<Service, T>(
       ];
       const _allBehaviors: VaultBehaviorFactory<T>[] = [..._defaultBehaviors, ...behaviors];
       const _coreId = _behaviorRunner.initializeBehaviors(_injector, _allBehaviors)!;
-      const _orchestrator = new VaultOrchestrator(_coreId, _behaviorRunner.behaviors, _injector);
+      const _orchestrator = new VaultOrchestrator(
+        _coreId,
+        _behaviorRunner.behaviors,
+        _injector,
+        featureCellDescriptor.insights
+      );
 
       const _value = signal<VaultDataType<T>>(
         featureCellDescriptor.initial === null || featureCellDescriptor.initial === undefined

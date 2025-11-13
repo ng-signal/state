@@ -91,7 +91,12 @@ describe('Orcestrator: Vault', () => {
     ];
 
     runInInjectionContext(injector, () => {
-      dispatcher = new VaultOrchestrator<any>('cell key', behaviors, injector);
+      dispatcher = new VaultOrchestrator<any>('cell key', behaviors, injector, {
+        id: 'manual-insights',
+        wantsState: true,
+        wantsPayload: true,
+        wantsErrors: true
+      } as any);
     });
 
     dispatcher.dispatchSet(mockCtx);

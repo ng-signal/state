@@ -8,13 +8,14 @@ import {
   VaultBehaviorContext,
   VaultDataType,
   VaultEncryptionBehavior,
+  VaultInsightDefinition,
   VaultPersistenceBehavior,
   VaultReducerBehavior,
   VaultStateBehavior,
   VaultStateInputType,
   VaultStateType
 } from '@ngvault/shared';
-import { NgVaultMonitor } from '../monitor/vault-monitor.service';
+import { NgVaultMonitor } from '../monitor/ngvault-monitor.service';
 import { NGVAULT_QUEUE } from '../tokens/ngvault-queue.token';
 import { applyNgVaultValueMergev2 } from '../utils/apply-vault-merge.util';
 import { isHttpResourceRef } from '../utils/is-http-resource.util';
@@ -27,9 +28,10 @@ export class VaultOrchestrator<T> {
   constructor(
     private cellKey: string,
     private readonly behaviors: VaultBehavior<T>[],
-    private readonly injector: Injector
+    private readonly injector: Injector,
+    readonly vaultMonitorOptions?: VaultInsightDefinition
   ) {
-    this.#ngVaultMonitor.registerCell(this.cellKey, behaviors);
+    this.#ngVaultMonitor.registerCell(this.cellKey, vaultMonitorOptions);
   }
 
   #ensureIncoming(ctx: VaultBehaviorContext<T>): VaultStateInputType<T> | null {
