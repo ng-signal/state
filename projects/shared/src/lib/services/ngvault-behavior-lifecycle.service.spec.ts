@@ -334,7 +334,10 @@ describe('Service: VaultBehaviorLifecycle', () => {
         0.67 // → 'n'
       ];
 
-      const dates = [1000, 2000, 3000, 4000, 5000, 6000, 7000];
+      const dates: any = [];
+      for (let i = 1; i < 20; i++) {
+        dates.push(i * 1000);
+      }
 
       spyOn(Math, 'random').and.callFake(() => math.shift() as any);
       spyOn(Date, 'now').and.callFake(() => dates.shift() as any);
