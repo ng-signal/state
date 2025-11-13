@@ -2,6 +2,7 @@ import { inject, Injectable } from '@angular/core';
 import { NgVaultEventBus, NgVaultEventModel } from '@ngvault/dev-tools';
 import {
   defineNgVaultBehaviorKey,
+  NgVaultDevModeService,
   VaultBehaviorContext,
   VaultInsightDefinition,
   VaultStateSnapshot
@@ -9,6 +10,9 @@ import {
 
 @Injectable({ providedIn: 'root' })
 export class NgVaultMonitor {
+  #devModeService = inject(NgVaultDevModeService);
+  #globalInsightOverride: VaultInsightDefinition | null = null;
+
   #eventBus = inject(NgVaultEventBus);
   #cellRegistry = new Map<
     string,
@@ -78,12 +82,19 @@ export class NgVaultMonitor {
     payload?: unknown,
     error?: string
   ): void {
-    const config = this.#cellRegistry.get(cell);
+    if (!this.#devModeService.isDevMode) return;
 
-    if (!config || !config.hasInsight) return;
+    let insight: VaultInsightDefinition;
 
-    // We know there is exactly ONE insight definition if enabled
-    const insight = config.insights[0];
+    if (this.#globalInsightOverride) {
+      insight = this.#globalInsightOverride;
+    } else {
+      const config = this.#cellRegistry.get(cell);
+
+      if (!config || !config.hasInsight) return;
+
+      insight = config.insights[0];
+    }
 
     const serializedType = this.#serializeName(type);
 
@@ -108,5 +119,9 @@ export class NgVaultMonitor {
     }
 
     this.#eventBus.next(event);
+  }
+
+  activateGlobalInsights(def: VaultInsightDefinition): void {
+    this.#globalInsightOverride = def;
   }
 }
