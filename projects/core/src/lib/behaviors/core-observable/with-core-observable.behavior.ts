@@ -3,7 +3,6 @@ import {
   defineNgVaultBehaviorKey,
   ResourceStateError,
   VaultBehavior,
-  VaultBehaviorContext,
   VaultBehaviorFactory,
   VaultBehaviorFactoryContext,
   VaultBehaviorType,
@@ -20,14 +19,9 @@ class CoreObservableBehavior<T> implements VaultBehavior<T, ObservableBehaviorEx
   public readonly critical = false;
 
   constructor(
-    public readonly behaviorId: string,
     readonly type: VaultBehaviorType,
     private readonly injector: VaultBehaviorFactoryContext['injector']
   ) {}
-
-  onInit(key: string, service: string, ctx: VaultBehaviorContext<T>): void {
-    ctx.behaviorRunner?.onInit?.(this.behaviorId, this.key, service, ctx);
-  }
 
   extendCellAPI(): ObservableBehaviorExtension<T> {
     // eslint-disable-next-line
@@ -61,7 +55,6 @@ class CoreObservableBehavior<T> implements VaultBehavior<T, ObservableBehaviorEx
           const _hasValue = signal(false);
 
           ngVaultDebug('fromObservable → creating signals');
-          ctx.behaviorRunner?.onLoad?.(self.behaviorId, self.key, ctx);
           ngVaultDebug('fromObservable → onLoad called');
 
           const subscription = source$.pipe(takeUntil(reset$), takeUntil(destroy$), take(1)).subscribe({
@@ -77,21 +70,17 @@ class CoreObservableBehavior<T> implements VaultBehavior<T, ObservableBehaviorEx
                 error: _errorSignal.asReadonly(),
                 hasValue: _hasValue.asReadonly()
               });
-
-              ctx.behaviorRunner?.onSet?.(self.behaviorId, self.key, ctx);
             },
 
             error: (err) => {
               ngVaultError('fromObservable → error()');
               observer.error(resourceError(err));
               ctx.message = err.message;
-              ctx.behaviorRunner?.onError?.(self.behaviorId, self.key, ctx);
             },
 
             complete: () => {
               ngVaultLog('fromObservable → complete()');
               _loadingSignal.set(false);
-              ctx.behaviorRunner?.onDispose?.(self.behaviorId, self.key, ctx);
               observer.complete();
             }
           });
@@ -108,7 +97,7 @@ class CoreObservableBehavior<T> implements VaultBehavior<T, ObservableBehaviorEx
 export const withCoreObservableBehavior: VaultBehaviorFactory<unknown, ObservableBehaviorExtension<unknown>> = (
   context: VaultBehaviorFactoryContext
 ) => {
-  return new CoreObservableBehavior(context.behaviorId, context.type, context.injector);
+  return new CoreObservableBehavior(context.type, context.injector);
 };
 
 withCoreObservableBehavior.type = 'state';

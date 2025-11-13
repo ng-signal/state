@@ -121,6 +121,7 @@ export const withTestBehaviorV2: any = (context: any): any => {
 (withTestBehaviorV2 as any).critical = true;
 
 export const createTestEventListener = (eventBus: any, emitted: any[]) => {
+  emitted.length = 0;
   const subscription = eventBus.asObservable().subscribe((event: any) => {
     // Normalize / sanitize fields
     event.id = jasmine.any(String);

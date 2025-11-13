@@ -62,7 +62,7 @@ describe('Service: Vault Monitor', () => {
         Object({
           id: jasmine.any(String),
           cell: 'vault1',
-          behaviorId: 'state key',
+          behaviorKey: 'state key',
           type: 'lifecycle:start:replace',
           timestamp: jasmine.any(Number),
           state: Object({ isLoading: true, value: 'hello', error: null, hasValue: false })
@@ -81,7 +81,7 @@ describe('Service: Vault Monitor', () => {
         Object({
           id: jasmine.any(String),
           cell: 'vault1',
-          behaviorId: 'state key',
+          behaviorKey: 'state key',
           type: 'lifecycle:start:replace',
           timestamp: jasmine.any(Number),
           state: Object({ isLoading: true, value: 'hello', error: null, hasValue: false })
@@ -89,7 +89,7 @@ describe('Service: Vault Monitor', () => {
         Object({
           id: jasmine.any(String),
           cell: 'vault1',
-          behaviorId: 'end key',
+          behaviorKey: 'end key',
           type: 'lifecycle:end:replace',
           timestamp: jasmine.any(Number),
           state: Object({ isLoading: true, value: 'hello', error: null, hasValue: false })
@@ -97,7 +97,7 @@ describe('Service: Vault Monitor', () => {
         Object({
           id: jasmine.any(String),
           cell: 'vault1',
-          behaviorId: 'start merge',
+          behaviorKey: 'start merge',
           type: 'lifecycle:start:merge',
           timestamp: jasmine.any(Number),
           state: Object({ isLoading: true, value: 'hello', error: null, hasValue: false })
@@ -105,7 +105,7 @@ describe('Service: Vault Monitor', () => {
         Object({
           id: jasmine.any(String),
           cell: 'vault1',
-          behaviorId: 'end merge',
+          behaviorKey: 'end merge',
           type: 'lifecycle:end:merge',
           timestamp: jasmine.any(Number),
           state: Object({ isLoading: true, value: 'hello', error: null, hasValue: false })
@@ -113,7 +113,7 @@ describe('Service: Vault Monitor', () => {
         Object({
           id: jasmine.any(String),
           cell: 'vault1',
-          behaviorId: 'error string',
+          behaviorKey: 'error string',
           type: 'lifecycle:error:unknown',
           timestamp: jasmine.any(Number),
           state: Object({ isLoading: true, value: 'hello', error: null, hasValue: false }),
@@ -123,7 +123,7 @@ describe('Service: Vault Monitor', () => {
         Object({
           id: jasmine.any(String),
           cell: 'vault1',
-          behaviorId: 'error error',
+          behaviorKey: 'error error',
           type: 'lifecycle:error:unknown',
           timestamp: jasmine.any(Number),
           state: Object({ isLoading: true, value: 'hello', error: null, hasValue: false }),
@@ -133,7 +133,7 @@ describe('Service: Vault Monitor', () => {
         Object({
           id: jasmine.any(String),
           cell: 'vault1',
-          behaviorId: 'start state',
+          behaviorKey: 'start state',
           type: 'stage:start:state',
           timestamp: jasmine.any(Number),
           state: Object({ isLoading: true, value: 'hello', error: null, hasValue: false })
@@ -141,7 +141,7 @@ describe('Service: Vault Monitor', () => {
         Object({
           id: jasmine.any(String),
           cell: 'vault1',
-          behaviorId: 'end state',
+          behaviorKey: 'end state',
           type: 'stage:end:state',
           timestamp: jasmine.any(Number),
           state: Object({ isLoading: true, value: 'hello', error: null, hasValue: false })
@@ -160,7 +160,7 @@ describe('Service: Vault Monitor', () => {
         Object({
           id: jasmine.any(String),
           cell: 'vault1',
-          behaviorId: 'TestService',
+          behaviorKey: 'TestService',
           type: 'lifecycle:start:merge',
           timestamp: jasmine.any(Number),
           state: Object({ isLoading: true, value: 'hello', error: null, hasValue: false })
@@ -168,7 +168,7 @@ describe('Service: Vault Monitor', () => {
         Object({
           id: jasmine.any(String),
           cell: 'vault2',
-          behaviorId: 'TestService',
+          behaviorKey: 'TestService',
           type: 'lifecycle:start:merge',
           timestamp: jasmine.any(Number),
           state: Object({ isLoading: true, value: 'hello', error: null, hasValue: false })
@@ -184,7 +184,7 @@ describe('Service: Vault Monitor', () => {
         Object({
           id: jasmine.any(String),
           cell: 'vault1',
-          behaviorId: 'TestService',
+          behaviorKey: 'TestService',
           type: 'lifecycle:start:merge',
           timestamp: jasmine.any(Number)
         })
@@ -225,14 +225,14 @@ describe('Service: Vault Monitor', () => {
           Object({
             id: jasmine.any(String),
             cell: 'vault1',
-            behaviorId: 'state key',
+            behaviorKey: 'state key',
             type: 'lifecycle:start:replace',
             timestamp: jasmine.any(Number)
           }),
           Object({
             id: jasmine.any(String),
             cell: 'vault1',
-            behaviorId: 'error string',
+            behaviorKey: 'error string',
             type: 'lifecycle:error:unknown',
             timestamp: jasmine.any(Number)
           })
@@ -252,14 +252,14 @@ describe('Service: Vault Monitor', () => {
           Object({
             id: jasmine.any(String),
             cell: 'vault1',
-            behaviorId: 'state key',
+            behaviorKey: 'state key',
             type: 'lifecycle:start:replace',
             timestamp: jasmine.any(Number)
           }),
           Object({
             id: jasmine.any(String),
             cell: 'vault1',
-            behaviorId: 'error string',
+            behaviorKey: 'error string',
             type: 'lifecycle:error:unknown',
             timestamp: jasmine.any(Number)
           })
@@ -341,7 +341,7 @@ describe('Service: Vault Monitor', () => {
         Object({
           id: jasmine.any(String),
           cell: 'vault1',
-          behaviorId: 'state key',
+          behaviorKey: 'state key',
           type: 'lifecycle:start:replace',
           timestamp: jasmine.any(Number)
         })
@@ -368,7 +368,7 @@ describe('Service: Vault Monitor', () => {
         Object({
           id: jasmine.any(String),
           cell: 'vault1',
-          behaviorId: 'state key',
+          behaviorKey: 'state key',
           type: 'lifecycle:start:replace',
           timestamp: jasmine.any(Number),
           state: Object({ isLoading: true, value: 'hello', error: null, hasValue: false })
@@ -376,7 +376,7 @@ describe('Service: Vault Monitor', () => {
         Object({
           id: jasmine.any(String),
           cell: 'vault1',
-          behaviorId: 'error string',
+          behaviorKey: 'error string',
           type: 'lifecycle:error:unknown',
           timestamp: jasmine.any(Number),
           state: Object({ isLoading: true, value: 'hello', error: null, hasValue: false }),
@@ -386,7 +386,7 @@ describe('Service: Vault Monitor', () => {
         Object({
           id: jasmine.any(String),
           cell: 'vault1',
-          behaviorId: 'error error',
+          behaviorKey: 'error error',
           type: 'lifecycle:error:unknown',
           timestamp: jasmine.any(Number),
           state: Object({ isLoading: true, value: 'hello', error: null, hasValue: false }),
@@ -443,7 +443,7 @@ describe('Service: Vault Monitor', () => {
         Object({
           id: jasmine.any(String),
           cell: 'vault1',
-          behaviorId: 'state key',
+          behaviorKey: 'state key',
           type: 'lifecycle:start:replace',
           timestamp: jasmine.any(Number),
           state: Object({ isLoading: true, value: 'hello', error: null, hasValue: false })
@@ -478,7 +478,7 @@ describe('Service: Vault Monitor', () => {
         Object({
           id: jasmine.any(String),
           cell: 'vault1',
-          behaviorId: 'state key',
+          behaviorKey: 'state key',
           type: 'lifecycle:start:replace',
           timestamp: jasmine.any(Number),
           state: Object({ isLoading: true, value: 'hello', error: null, hasValue: false })
@@ -486,7 +486,7 @@ describe('Service: Vault Monitor', () => {
         Object({
           id: jasmine.any(String),
           cell: 'vault1',
-          behaviorId: 'error string',
+          behaviorKey: 'error string',
           type: 'lifecycle:error:unknown',
           timestamp: jasmine.any(Number),
           state: Object({ isLoading: true, value: 'hello', error: null, hasValue: false }),
@@ -496,7 +496,7 @@ describe('Service: Vault Monitor', () => {
         Object({
           id: jasmine.any(String),
           cell: 'vault1',
-          behaviorId: 'error object',
+          behaviorKey: 'error object',
           type: 'lifecycle:error:unknown',
           timestamp: jasmine.any(Number),
           state: Object({ isLoading: true, value: 'hello', error: null, hasValue: false }),

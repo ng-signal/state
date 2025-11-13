@@ -19,7 +19,7 @@ export class NgVaultEventBus {
 
   next(event: NgVaultEventModel): void {
     if (!this.#devModeService.isDevMode || !event) return;
-    this.#bus.next({ id: this.#generateGuid(), ...event });
+    this.#bus.next(event);
   }
 
   asObservable() {

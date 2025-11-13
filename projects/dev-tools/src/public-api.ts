@@ -2,7 +2,6 @@
  * Public API Surface of devtools
  */
 
-export * from './lib/behaviors/with-devtools.behavior';
 export * from './lib/helpers/use-devtools-event-emitter.helper';
 export * from './lib/models/ngvault-event.model';
 export * from './lib/models/ngvault-registry-item.model';

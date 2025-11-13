@@ -46,7 +46,6 @@ describe('Behavior: CoreHttpResourceStateBehaviorV2', () => {
     runInInjectionContext(injector, () => {
       behavior = withCoreHttpResourceStateBehaviorV2({
         type: 'state',
-        behaviorId: 'bhv-1',
         injector
       });
     });

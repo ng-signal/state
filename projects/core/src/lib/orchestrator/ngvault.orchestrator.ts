@@ -203,9 +203,9 @@ export class VaultOrchestrator<T> {
         switch (stage) {
           case 'state':
             if (typeof (behavior as VaultStateBehavior<T>).computeState === 'function') {
-              this.#ngVaultMonitor.startState(this.cellKey, behavior.behaviorId, ctx);
+              this.#ngVaultMonitor.startState(this.cellKey, behavior.key, ctx);
               next = await (behavior as VaultStateBehavior<T>).computeState(ctx);
-              this.#ngVaultMonitor.endState(this.cellKey, behavior.behaviorId, ctx);
+              this.#ngVaultMonitor.endState(this.cellKey, behavior.key, ctx);
             }
             break;
 

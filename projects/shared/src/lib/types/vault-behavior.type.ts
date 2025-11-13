@@ -5,9 +5,7 @@
  * No JS enum bloat and works with tree-shaking.
  */
 export const VaultBehaviorType = {
-  DevTools: 'dev-tools',
   Insights: 'insights',
-  Core: 'core',
   State: 'state',
   Persistence: 'persistence',
   Encryption: 'encryption',
@@ -25,9 +23,7 @@ export type VaultBehaviorType = (typeof VaultBehaviorType)[keyof typeof VaultBeh
  * (this uses the *values* of the enum-like object)
  */
 export const VaultBehaviorTypeOrder: readonly VaultBehaviorType[] = [
-  VaultBehaviorType.DevTools,
   VaultBehaviorType.Insights,
-  VaultBehaviorType.Core,
   VaultBehaviorType.State,
   VaultBehaviorType.Persistence,
   VaultBehaviorType.Encryption,

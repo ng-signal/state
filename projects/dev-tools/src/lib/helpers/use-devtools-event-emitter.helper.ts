@@ -7,8 +7,14 @@ export function useDevtoolsEventEmitter() {
   const _isDevMode = inject(NgVaultDevModeService);
   const _eventBus = inject(NgVaultEventBus);
 
-  return (key: string, type: VaultEventType) => {
+  return (cell: string, type: VaultEventType) => {
     if (!_isDevMode.isDevMode) return;
-    _eventBus.next({ key, type, timestamp: Date.now() });
+    _eventBus.next({
+      id: crypto.randomUUID(),
+      behaviorKey: 'dev-tools',
+      cell,
+      type,
+      timestamp: Date.now()
+    });
   };
 }

@@ -18,7 +18,7 @@
               [class.text-red-400]="event.type === 'error'">
               {{ event.type.toUpperCase() }}
             </strong>
-            <span class="text-slate-400 ml-2">{{ event.key }}</span>
+            <span class="text-slate-400 ml-2">{{ event.cell }}</span>
             <span class="text-slate-500 ml-2 text-xs">
               {{ event.timestamp | date: 'mediumTime' }}
             </span>

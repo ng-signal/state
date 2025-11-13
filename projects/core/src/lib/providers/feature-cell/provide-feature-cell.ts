@@ -16,13 +16,11 @@ import { VaultDataType } from '@ngvault/shared/types/vault-data.type';
 import { VaultStateInputType } from '@ngvault/shared/types/vault-state-input.type';
 import { VaultStateType } from '@ngvault/shared/types/vault-state.type';
 import { Subject } from 'rxjs';
-import { withCoreHttpResourceStateBehavior } from '../../behaviors/core-http-resource-state/with-core-http-resource-state.behavior';
 import { withCoreObservableBehavior } from '../../behaviors/core-observable/with-core-observable.behavior';
-import { withCoreStateBehavior } from '../../behaviors/core-state/with-core-state.behavior';
 import { FeatureCellDescriptorModel } from '../../models/feature-cell-descriptor.model';
 import { FEATURE_CELL_REGISTRY } from '../../tokens/feature-cell-registry.token';
 import { isHttpResourceRef } from '../../utils/is-http-resource.util';
-import { ngVaultDebug, ngVaultWarn } from '../../utils/ngvault-logger.util';
+import { ngVaultWarn } from '../../utils/ngvault-logger.util';
 
 export function provideFeatureCell<Service, T>(
   service: Type<Service>,
@@ -57,17 +55,14 @@ export function provideFeatureCell<Service, T>(
       }
 
       const _defaultBehaviors: VaultBehaviorFactory<T>[] = [
-        withCoreStateBehavior,
         withCoreStateBehaviorV2,
-        withCoreHttpResourceStateBehavior,
         withCoreHttpResourceStateBehaviorV2,
         withCoreObservableBehavior
       ];
       const _allBehaviors: VaultBehaviorFactory<T>[] = [..._defaultBehaviors, ...behaviors];
-      const _coreId = _behaviorRunner.initializeBehaviors(_injector, _allBehaviors)!;
       const _orchestrator = new VaultOrchestrator(
-        _coreId,
-        _behaviorRunner.behaviors,
+        featureCellDescriptor.key,
+        _behaviorRunner.initializeBehaviors(_injector, _allBehaviors)!,
         _injector,
         featureCellDescriptor.insights
       );
@@ -101,15 +96,12 @@ export function provideFeatureCell<Service, T>(
         }
       } as VaultBehaviorContext<T>;
 
-      _behaviorRunner.onInit(_coreId, featureCellDescriptor.key, service.name, ctx);
-
       const _reset = (): void => {
         ngVaultWarn('feature cell _reset');
         _isLoading.set(false);
         _error.set(null);
         _value.set(undefined);
         _reset$.next();
-        _behaviorRunner.onReset(_coreId, featureCellDescriptor.key, ctx);
       };
 
       const _destroy = (): void => {
@@ -118,35 +110,10 @@ export function provideFeatureCell<Service, T>(
         _destroyed$.complete();
 
         _reset();
-        _behaviorRunner.onDestroy(_coreId, featureCellDescriptor.key, ctx);
       };
 
       // Angular DI teardown
       _destroyRef.onDestroy(() => _destroy());
-
-      const _set = (next: VaultStateInputType<T>): void => {
-        ngVaultDebug('feature cell _set');
-        ctx.patch = null;
-        if (next == null) {
-          _reset();
-          return;
-        }
-
-        ctx.next = next as VaultStateType<T>;
-        _behaviorRunner.onSet(_coreId, featureCellDescriptor.key, ctx);
-      };
-
-      const _patch = (patch: VaultStateInputType<T>): void => {
-        ngVaultDebug('feature cell _patch');
-        ctx.next = null;
-        if (patch == null) {
-          _reset();
-          return;
-        }
-
-        ctx.patch = patch as VaultStateType<T>;
-        _behaviorRunner.onPatch(_coreId, featureCellDescriptor.key, ctx);
-      };
 
       function normalizeIncoming<T>(incoming: VaultStateInputType<T>): VaultStateType<T> | HttpResourceRef<T> | null {
         if (!incoming) return null;
@@ -173,8 +140,6 @@ export function provideFeatureCell<Service, T>(
         },
         replaceState: _replaceState,
         mergeState: _mergeState,
-        setState: _set,
-        patchState: _patch,
         reset: _reset,
         destroy: _destroy,
         destroyed$: _destroyed$.asObservable(),

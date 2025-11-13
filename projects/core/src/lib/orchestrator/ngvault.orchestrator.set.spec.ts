@@ -50,7 +50,7 @@ describe('Orcestrator: Vault', () => {
   function makeBehavior(type: string, returnValue?: any): any {
     return {
       type: type as VaultBehaviorType,
-      behaviorId: `${type}-id`,
+      key: `${type}-id`,
       computeState: async () => {
         calls.push(type);
         return returnValue ?? { [`${type}`]: true };
@@ -66,17 +66,6 @@ describe('Orcestrator: Vault', () => {
       persistState: async () => {
         calls.push(type);
         return returnValue ?? { [`${type}`]: true };
-      },
-      insight: {
-        onCellRegistered: jasmine.createSpy('onCellRegistered'),
-
-        // ✔ allow all events
-        filterEventType: () => true,
-
-        // ✔ request full state, payloads, and errors
-        wantsState: true,
-        wantsPayload: true,
-        wantsErrors: true
       }
     };
   }
@@ -111,7 +100,7 @@ describe('Orcestrator: Vault', () => {
       Object({
         id: jasmine.any(String),
         cell: 'cell key',
-        behaviorId: 'vault-orchestrator',
+        behaviorKey: 'vault-orchestrator',
         type: 'lifecycle:start:replace',
         timestamp: jasmine.any(Number),
         state: 22
@@ -119,7 +108,7 @@ describe('Orcestrator: Vault', () => {
       Object({
         id: jasmine.any(String),
         cell: 'cell key',
-        behaviorId: 'state-id',
+        behaviorKey: 'state-id',
         type: 'stage:start:state',
         timestamp: jasmine.any(Number),
         state: 22
@@ -127,7 +116,7 @@ describe('Orcestrator: Vault', () => {
       Object({
         id: jasmine.any(String),
         cell: 'cell key',
-        behaviorId: 'state-id',
+        behaviorKey: 'state-id',
         type: 'stage:end:state',
         timestamp: jasmine.any(Number),
         state: 22
@@ -135,7 +124,7 @@ describe('Orcestrator: Vault', () => {
       Object({
         id: jasmine.any(String),
         cell: 'cell key',
-        behaviorId: 'vault-orchestrator',
+        behaviorKey: 'vault-orchestrator',
         type: 'lifecycle:end:replace',
         timestamp: jasmine.any(Number),
         state: 22

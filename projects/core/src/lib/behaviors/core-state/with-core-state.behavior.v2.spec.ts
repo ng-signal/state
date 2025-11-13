@@ -26,7 +26,6 @@ describe('Behavior: CoreStateBehaviorV2', () => {
     runInInjectionContext(injector, () => {
       behavior = withCoreStateBehaviorV2({
         type: 'state',
-        behaviorId: 'bhv-1',
         injector
       });
     });

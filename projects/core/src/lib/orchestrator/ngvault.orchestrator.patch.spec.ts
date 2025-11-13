@@ -42,7 +42,7 @@ describe('Orchestrator: Vault (dispatchPatch)', () => {
   function makeBehavior(type: string, returnValue?: any): any {
     return {
       type: type as VaultBehaviorType,
-      behaviorId: `${type}-id`,
+      key: `${type}-id`,
       computeState: async () => {
         calls.push(type);
         return returnValue ?? { [`${type}`]: true };
@@ -103,7 +103,7 @@ describe('Orchestrator: Vault (dispatchPatch)', () => {
       Object({
         id: jasmine.any(String),
         cell: 'cell key',
-        behaviorId: 'vault-orchestrator',
+        behaviorKey: 'vault-orchestrator',
         type: 'lifecycle:start:merge',
         timestamp: jasmine.any(Number),
         state: 22
@@ -111,7 +111,7 @@ describe('Orchestrator: Vault (dispatchPatch)', () => {
       Object({
         id: jasmine.any(String),
         cell: 'cell key',
-        behaviorId: 'state-id',
+        behaviorKey: 'state-id',
         type: 'stage:start:state',
         timestamp: jasmine.any(Number),
         state: 22
@@ -119,7 +119,7 @@ describe('Orchestrator: Vault (dispatchPatch)', () => {
       Object({
         id: jasmine.any(String),
         cell: 'cell key',
-        behaviorId: 'state-id',
+        behaviorKey: 'state-id',
         type: 'stage:end:state',
         timestamp: jasmine.any(Number),
         state: 22
@@ -127,7 +127,7 @@ describe('Orchestrator: Vault (dispatchPatch)', () => {
       Object({
         id: jasmine.any(String),
         cell: 'cell key',
-        behaviorId: 'vault-orchestrator',
+        behaviorKey: 'vault-orchestrator',
         type: 'lifecycle:end:merge',
         timestamp: jasmine.any(Number),
         state: 22

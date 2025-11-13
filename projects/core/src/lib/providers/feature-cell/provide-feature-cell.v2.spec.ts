@@ -14,8 +14,7 @@ import {
   createTestEventListener,
   flushMicrotasksZoneless,
   getTestBehavior,
-  provideVaultTesting,
-  withTestBehaviorV2
+  provideVaultTesting
 } from '@ngvault/testing';
 import { FEATURE_CELL_REGISTRY } from '../../tokens/feature-cell-registry.token';
 import { provideFeatureCell } from './provide-feature-cell';
@@ -29,19 +28,23 @@ describe('Provider: Feature Cell (core vault functionality)', () => {
   let eventBus: any;
 
   beforeEach(() => {
-    emitted.length = 0;
     TestBed.configureTestingModule({
       providers: [
         provideZonelessChangeDetection(),
         provideVaultTesting(),
-        { provide: FEATURE_CELL_REGISTRY, multi: true, useValue: { key: 'user', token: {} } }
+        { provide: FEATURE_CELL_REGISTRY, multi: true, useValue: { key: 'user', token: {}, insights: {} as any } }
       ]
     });
 
     injector = TestBed.inject(Injector);
 
     runInInjectionContext(injector, () => {
-      providers = provideFeatureCell(class TestService {}, { key: 'http', initial: [] });
+      providers = provideFeatureCell(
+        class TestService {
+          behaviorKey = 'behavior-id';
+        },
+        { key: 'http', initial: [] }
+      );
     });
 
     eventBus = TestBed.inject(NgVaultEventBus);
@@ -72,7 +75,7 @@ describe('Provider: Feature Cell (core vault functionality)', () => {
 
     expect(Array.isArray(registry)).toBeTrue();
     expect(registry.length).toBe(2);
-    expect(registry[1]).toEqual({ key: 'user', token: {} });
+    expect(registry[1]).toEqual({ key: 'user', token: {}, insights: {} });
   });
 
   it('should throw an error if desc.initial contains a "data" field (resource-like object)', () => {
@@ -455,7 +458,7 @@ describe('Provider: Feature Cell (core vault functionality)', () => {
       return {
         type: 'state' as const,
         critical: true,
-        behaviorId: 'behavior-id',
+        behaviorKey: 'behavior-id',
         key: 'NgVault::Test::ThrowBehavior',
         onInit: () => false,
         async computeState() {
@@ -603,7 +606,7 @@ describe('Provider: Feature Cell (core vault functionality)', () => {
         providers = provideFeatureCell(
           class TestService {},
           { key: 'devtools-test', initial: [], insights: insightsOptions },
-          [withTestBehaviorV2]
+          []
         );
       });
       factory = (providers[0] as any).useFactory;
@@ -651,160 +654,160 @@ describe('Provider: Feature Cell (core vault functionality)', () => {
       expect(emitted).toEqual([
         Object({
           id: '9821de50-8156-4857-a524-0a8eb4217d4e',
-          cell: '4bbdc44d-8106-46f7-9e51-0015d0f5c260',
-          behaviorId: 'vault-orchestrator',
+          cell: 'devtools-test',
+          behaviorKey: 'vault-orchestrator',
           type: 'lifecycle:start:replace',
           timestamp: 1763046299711,
           state: Object({ isLoading: false, value: [], error: null, hasValue: true })
         }),
         Object({
           id: 'ba58f5f7-dd2a-445b-8998-046c644adc08',
-          cell: '4bbdc44d-8106-46f7-9e51-0015d0f5c260',
-          behaviorId: '21537620-f71f-4dec-bce3-5460b6c7fcc4',
+          cell: 'devtools-test',
+          behaviorKey: 'NgVault::Core::StateV2',
           type: 'stage:start:state',
           timestamp: 1763046299711,
           state: Object({ isLoading: true, value: [], error: Object({ message: 'fail' }), hasValue: true })
         }),
         Object({
           id: '617ca5a5-f8a1-4c27-876a-fff89504e7d8',
-          cell: '4bbdc44d-8106-46f7-9e51-0015d0f5c260',
-          behaviorId: 'vault-orchestrator',
+          cell: 'devtools-test',
+          behaviorKey: 'vault-orchestrator',
           type: 'lifecycle:start:merge',
           timestamp: 1763046299711,
           state: Object({ isLoading: false, value: undefined, error: null, hasValue: false })
         }),
         Object({
           id: 'fa0f7266-c270-4c59-952b-4612e557d82d',
-          cell: '4bbdc44d-8106-46f7-9e51-0015d0f5c260',
-          behaviorId: '21537620-f71f-4dec-bce3-5460b6c7fcc4',
+          cell: 'devtools-test',
+          behaviorKey: 'NgVault::Core::StateV2',
           type: 'stage:start:state',
           timestamp: 1763046299711,
           state: Object({ isLoading: true, value: undefined, error: Object({ message: 'fail' }), hasValue: false })
         }),
         Object({
           id: '87b28ce7-bff6-49b8-ad89-8022c1b20489',
-          cell: '4bbdc44d-8106-46f7-9e51-0015d0f5c260',
-          behaviorId: 'vault-orchestrator',
+          cell: 'devtools-test',
+          behaviorKey: 'vault-orchestrator',
           type: 'lifecycle:start:merge',
           timestamp: 1763046299712,
           state: Object({ isLoading: true, value: undefined, error: Object({ message: 'fail' }), hasValue: false })
         }),
         Object({
           id: '31214e26-1012-4781-bfe7-beb6aad175d7',
-          cell: '4bbdc44d-8106-46f7-9e51-0015d0f5c260',
-          behaviorId: 'vault-orchestrator',
+          cell: 'devtools-test',
+          behaviorKey: 'vault-orchestrator',
           type: 'lifecycle:start:replace',
           timestamp: 1763046299712,
           state: Object({ isLoading: false, value: undefined, error: null, hasValue: false })
         }),
         Object({
           id: 'd369f404-016f-45a3-9563-207a13638ef7',
-          cell: '4bbdc44d-8106-46f7-9e51-0015d0f5c260',
-          behaviorId: '21537620-f71f-4dec-bce3-5460b6c7fcc4',
+          cell: 'devtools-test',
+          behaviorKey: 'NgVault::Core::StateV2',
           type: 'stage:start:state',
           timestamp: 1763046299712,
           state: Object({ isLoading: true, value: undefined, error: Object({ message: 'fail' }), hasValue: false })
         }),
         Object({
           id: '7046bf45-c692-42e9-9e2d-9ee5eb6b521d',
-          cell: '4bbdc44d-8106-46f7-9e51-0015d0f5c260',
-          behaviorId: 'vault-orchestrator',
+          cell: 'devtools-test',
+          behaviorKey: 'vault-orchestrator',
           type: 'lifecycle:start:replace',
           timestamp: 1763046299712,
           state: Object({ isLoading: true, value: undefined, error: Object({ message: 'fail' }), hasValue: false })
         }),
         Object({
           id: 'e1b62a11-a5ca-4398-8ee7-391a3b9a0fb0',
-          cell: '4bbdc44d-8106-46f7-9e51-0015d0f5c260',
-          behaviorId: '21537620-f71f-4dec-bce3-5460b6c7fcc4',
+          cell: 'devtools-test',
+          behaviorKey: 'NgVault::Core::StateV2',
           type: 'stage:end:state',
           timestamp: 1763046299712,
           state: Object({ isLoading: false, value: undefined, error: null, hasValue: false })
         }),
         Object({
           id: '725ac42c-03cb-4577-bc63-d15ab88e5f59',
-          cell: '4bbdc44d-8106-46f7-9e51-0015d0f5c260',
-          behaviorId: '21537620-f71f-4dec-bce3-5460b6c7fcc4',
+          cell: 'devtools-test',
+          behaviorKey: 'NgVault::CoreHttpResource::StateV2',
           type: 'stage:start:state',
           timestamp: 1763046299712,
           state: Object({ isLoading: false, value: undefined, error: null, hasValue: false })
         }),
         Object({
           id: '622d18d8-356a-48dc-837e-8395e1362806',
-          cell: '4bbdc44d-8106-46f7-9e51-0015d0f5c260',
-          behaviorId: '21537620-f71f-4dec-bce3-5460b6c7fcc4',
+          cell: 'devtools-test',
+          behaviorKey: 'NgVault::Core::StateV2',
           type: 'stage:end:state',
           timestamp: 1763046299712,
           state: Object({ isLoading: false, value: undefined, error: null, hasValue: false })
         }),
         Object({
           id: '4c55ead1-13fa-4704-8fe2-9006140e1273',
-          cell: '4bbdc44d-8106-46f7-9e51-0015d0f5c260',
-          behaviorId: '21537620-f71f-4dec-bce3-5460b6c7fcc4',
+          cell: 'devtools-test',
+          behaviorKey: 'NgVault::CoreHttpResource::StateV2',
           type: 'stage:start:state',
           timestamp: 1763046299712,
           state: Object({ isLoading: false, value: undefined, error: null, hasValue: false })
         }),
         Object({
           id: 'a6a1357b-d07c-4a08-aee8-ac6b410a4176',
-          cell: '4bbdc44d-8106-46f7-9e51-0015d0f5c260',
-          behaviorId: '21537620-f71f-4dec-bce3-5460b6c7fcc4',
+          cell: 'devtools-test',
+          behaviorKey: 'NgVault::Core::StateV2',
           type: 'stage:end:state',
           timestamp: 1763046299712,
           state: Object({ isLoading: false, value: undefined, error: null, hasValue: false })
         }),
         Object({
           id: '743c486b-abf7-4074-b715-3edaa1b4aa16',
-          cell: '4bbdc44d-8106-46f7-9e51-0015d0f5c260',
-          behaviorId: '21537620-f71f-4dec-bce3-5460b6c7fcc4',
+          cell: 'devtools-test',
+          behaviorKey: 'NgVault::CoreHttpResource::StateV2',
           type: 'stage:start:state',
           timestamp: 1763046299712,
           state: Object({ isLoading: false, value: undefined, error: null, hasValue: false })
         }),
         Object({
           id: '1550db02-959c-400b-9e44-ac01d3cf8726',
-          cell: '4bbdc44d-8106-46f7-9e51-0015d0f5c260',
-          behaviorId: '21537620-f71f-4dec-bce3-5460b6c7fcc4',
+          cell: 'devtools-test',
+          behaviorKey: 'NgVault::CoreHttpResource::StateV2',
           type: 'stage:end:state',
           timestamp: 1763046299712,
           state: Object({ isLoading: false, value: undefined, error: null, hasValue: false })
         }),
         Object({
           id: 'ec4809a9-feab-45f3-a294-a30490b89d9b',
-          cell: '4bbdc44d-8106-46f7-9e51-0015d0f5c260',
-          behaviorId: '21537620-f71f-4dec-bce3-5460b6c7fcc4',
+          cell: 'devtools-test',
+          behaviorKey: 'NgVault::CoreHttpResource::StateV2',
           type: 'stage:end:state',
           timestamp: 1763046299712,
           state: Object({ isLoading: false, value: undefined, error: null, hasValue: false })
         }),
         Object({
           id: '39926254-70e2-4760-b98f-1461677b77bb',
-          cell: '4bbdc44d-8106-46f7-9e51-0015d0f5c260',
-          behaviorId: '21537620-f71f-4dec-bce3-5460b6c7fcc4',
+          cell: 'devtools-test',
+          behaviorKey: 'NgVault::CoreHttpResource::StateV2',
           type: 'stage:end:state',
           timestamp: 1763046299712,
           state: Object({ isLoading: false, value: undefined, error: null, hasValue: false })
         }),
         Object({
           id: 'd16f92ab-b81c-4bf4-99b9-029fa57f7c9e',
-          cell: '4bbdc44d-8106-46f7-9e51-0015d0f5c260',
-          behaviorId: 'vault-orchestrator',
+          cell: 'devtools-test',
+          behaviorKey: 'vault-orchestrator',
           type: 'lifecycle:end:replace',
           timestamp: 1763046299712,
           state: Object({ isLoading: false, value: undefined, error: null, hasValue: false })
         }),
         Object({
           id: '4f8556b1-fe9c-438e-8e81-df8a9a91b94c',
-          cell: '4bbdc44d-8106-46f7-9e51-0015d0f5c260',
-          behaviorId: 'vault-orchestrator',
+          cell: 'devtools-test',
+          behaviorKey: 'vault-orchestrator',
           type: 'lifecycle:end:merge',
           timestamp: 1763046299712,
           state: Object({ isLoading: false, value: undefined, error: null, hasValue: false })
         }),
         Object({
           id: 'e3b328a5-0c15-4992-b01c-8defee36df1a',
-          cell: '4bbdc44d-8106-46f7-9e51-0015d0f5c260',
-          behaviorId: 'vault-orchestrator',
+          cell: 'devtools-test',
+          behaviorKey: 'vault-orchestrator',
           type: 'lifecycle:end:replace',
           timestamp: 1763046299712,
           state: Object({ isLoading: false, value: undefined, error: null, hasValue: false })
@@ -841,7 +844,7 @@ describe('Provider: Feature Cell (core vault functionality)', () => {
       const withCustomBehavior = (ctx: any) => ({
         type: 'state',
         key: 'NgVault::Testing::CustomBehavior',
-        behaviorId: 'custom-id',
+        behaviorKey: 'custom-id',
         onInit: () => {},
         extendCellAPI: () => ({
           sayHello: (key: string, _ctx: any, name: string) => `Hello ${name} from ${key}`
@@ -886,7 +889,7 @@ describe('Provider: Feature Cell (core vault functionality)', () => {
       const behaviorA = () => ({
         type: 'state',
         key: 'NgVault::Testing::BehaviorA',
-        behaviorId: 'A-id',
+        behaviorKey: 'A-id',
         onInit: () => {},
         extendCellAPI: () => ({
           shared: () => 'shared-A'
@@ -898,7 +901,7 @@ describe('Provider: Feature Cell (core vault functionality)', () => {
       const behaviorB = () => ({
         type: 'state',
         key: 'NgVault::Testing::BehaviorB',
-        behaviorId: 'B-id',
+        behaviorKey: 'B-id',
         onInit: () => {},
         extendCellAPI: () => ({
           shared: () => 'shared-B'
@@ -931,7 +934,7 @@ describe('Provider: Feature Cell (core vault functionality)', () => {
       const behaviorA = () => ({
         type: 'state',
         key: 'NgVault::Testing::BehaviorA',
-        behaviorId: 'A-id',
+        behaviorKey: 'A-id',
         onInit: () => {},
         extendCellAPI: () => ({
           shared: (key: string, _ctx: any) => `shared-A from ${key}`
@@ -944,7 +947,7 @@ describe('Provider: Feature Cell (core vault functionality)', () => {
       const behaviorB = () => ({
         type: 'state',
         key: 'NgVault::Testing::BehaviorB',
-        behaviorId: 'B-id',
+        behaviorKey: 'B-id',
         allowOverride: ['shared'],
         onInit: () => {},
         extendCellAPI: () => ({

@@ -2,8 +2,14 @@ import { provideHttpClient } from '@angular/common/http';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { Injector, provideZonelessChangeDetection, runInInjectionContext, signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
+import { NgVaultEventBus } from '@ngvault/dev-tools';
 import { FeatureCell, VaultSignalRef } from '@ngvault/shared';
-import { flushMicrotasksZoneless, getTestBehavior, provideVaultTesting, withTestBehavior } from '@ngvault/testing';
+import {
+  createTestEventListener,
+  flushMicrotasksZoneless,
+  provideVaultTesting,
+  withTestBehavior
+} from '@ngvault/testing';
 import { Subject } from 'rxjs';
 import { provideFeatureCell } from './provide-feature-cell';
 
@@ -16,6 +22,9 @@ describe('ResourceVaultModel (replaceState, mergeState, fromObservable) v2', () 
   let vault: FeatureCell<TestModel[] | TestModel>;
   let subject: Subject<TestModel[]>;
   const calls: any = [];
+  const emitted: any[] = [];
+  let stopListening: any;
+  let eventBus: any;
 
   beforeEach(() => {
     subject = new Subject<TestModel[]>();
@@ -31,12 +40,20 @@ describe('ResourceVaultModel (replaceState, mergeState, fromObservable) v2', () 
     });
 
     const injector = TestBed.inject(Injector);
-    const providers = provideFeatureCell(class TestService {}, { key: 'http', initial: [] }, [withTestBehavior]);
+    const providers = provideFeatureCell(class TestService {}, { key: 'http', initial: [], insights: {} as any }, [
+      withTestBehavior
+    ]);
     const vaultFactory = (providers[0] as any).useFactory;
 
     runInInjectionContext(injector, () => {
       vault = vaultFactory();
     });
+    eventBus = TestBed.inject(NgVaultEventBus);
+    stopListening = createTestEventListener(eventBus, emitted);
+  });
+
+  afterEach(() => {
+    stopListening();
   });
 
   it('should set state fully with replaceState()', async () => {
@@ -178,16 +195,6 @@ describe('ResourceVaultModel (replaceState, mergeState, fromObservable) v2', () 
     expect(lastRef.error()).toBeNull();
     await flushMicrotasksZoneless();
 
-    expect(getTestBehavior().getEvents()).toEqual([
-      'onInit:http',
-      'onInit:NgVault::Core::State',
-      'onInit:NgVault::Core::StateV2',
-      'onInit:NgVault::CoreHttpResource::State',
-      'onInit:NgVault::CoreHttpResource::StateV2',
-      'onInit:NgVault::Core::FromObservable',
-      'onLoad:NgVault::Core::FromObservable',
-      'onSet:NgVault::Core::FromObservable:{"isLoading":false,"value":[],"error":null,"hasValue":true}',
-      'onDispose:NgVault::Core::FromObservable'
-    ]);
+    expect(emitted).toEqual([]);
   });
 });

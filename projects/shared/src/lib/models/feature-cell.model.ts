@@ -6,9 +6,6 @@ import { SignalVaultModel } from './signal-vault.model';
 
 export interface FeatureCell<T> extends SignalVaultModel<T> {
   state: VaultSignalRef<T>;
-  setState(next: Partial<VaultStateInputType<T>>): void;
-
-  patchState(partial: Partial<VaultStateInputType<T>>): void;
 
   replaceState(incoming: VaultStateInputType<T>): void;
   mergeState(incoming: VaultStateInputType<T>): void;

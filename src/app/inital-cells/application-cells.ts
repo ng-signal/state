@@ -1,5 +1,4 @@
 import { provideFeatureCell } from '@ngvault/core';
-import { withDevtoolsBehavior } from '@ngvault/dev-tools';
 import { CarService } from '../examples/cars/services/car.service';
 import { CarModel } from '../examples/models/car.model';
 import { UserModel } from '../examples/models/user.model';
@@ -12,10 +11,45 @@ const initialCars: CarModel[] | null = null;
 export const NGVAULT_CELLS = [
   provideFeatureCell(
     UserCellNoCacheService,
-    { key: 'userNoCache', initial: initialUsers },
+    {
+      key: 'userNoCache',
+      initial: initialUsers,
+      insights: {
+        id: 'manual-insights',
+        wantsState: true,
+        wantsPayload: true,
+        wantsErrors: true
+      }
+    },
 
-    [withDevtoolsBehavior]
+    []
   ),
-  provideFeatureCell(UserCellManualService, { key: 'userManual', initial: initialUsers }, [withDevtoolsBehavior]),
-  provideFeatureCell(CarService, { key: 'cars', initial: initialCars }, [withDevtoolsBehavior])
+  provideFeatureCell(
+    UserCellManualService,
+    {
+      key: 'userManual',
+      initial: initialUsers,
+      insights: {
+        id: 'manual-insights',
+        wantsState: true,
+        wantsPayload: true,
+        wantsErrors: true
+      }
+    },
+    []
+  ),
+  provideFeatureCell(
+    CarService,
+    {
+      key: 'cars',
+      initial: initialCars,
+      insights: {
+        id: 'manual-insights',
+        wantsState: true,
+        wantsPayload: true,
+        wantsErrors: true
+      }
+    },
+    []
+  )
 ];

@@ -15,14 +15,7 @@ export class CoreStateBehaviorV2<T> implements VaultStateBehavior<T> {
   readonly critical = true;
   readonly key = defineNgVaultBehaviorKey('Core', 'StateV2');
 
-  constructor(
-    readonly behaviorId: string,
-    private readonly injector: VaultBehaviorFactoryContext['injector']
-  ) {}
-
-  onInit(key: string, service: string, ctx: VaultBehaviorContext<T>): void {
-    ctx.behaviorRunner?.onInit?.(this.behaviorId, this.key, service, ctx);
-  }
+  constructor(private readonly _injector: VaultBehaviorFactoryContext['injector']) {}
 
   async computeState(ctx: VaultBehaviorContext<T>): Promise<T | undefined> {
     ngVaultDebug('core-state');
@@ -45,7 +38,7 @@ export class CoreStateBehaviorV2<T> implements VaultStateBehavior<T> {
 }
 
 export const withCoreStateBehaviorV2 = ((context: VaultBehaviorFactoryContext): VaultBehavior => {
-  return new CoreStateBehaviorV2(context.behaviorId, context.injector);
+  return new CoreStateBehaviorV2(context.injector);
 }) as VaultBehaviorFactory;
 
 withCoreStateBehaviorV2.type = 'state';

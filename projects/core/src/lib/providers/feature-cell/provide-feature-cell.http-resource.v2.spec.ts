@@ -2,7 +2,13 @@ import { httpResource, provideHttpClient } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { ApplicationRef, Injector, provideZonelessChangeDetection } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
-import { flushMicrotasksZoneless, getTestBehavior, provideVaultTesting, withTestBehavior } from '@ngvault/testing';
+import { NgVaultEventBus } from '@ngvault/dev-tools';
+import {
+  createTestEventListener,
+  flushMicrotasksZoneless,
+  provideVaultTesting,
+  withTestBehavior
+} from '@ngvault/testing';
 import { FeatureCell } from '../../decorators/feature-cell.decorator';
 import { injectVault } from '../../injectors/feature-vault.injector';
 import { resetWarnExperimentalHttpResourceTestingOnly } from '../../utils/dev-warning.util';
@@ -24,6 +30,10 @@ describe('Provider: Feature Cell Resource', () => {
   let warnSpy: any;
   let mockBackend: any;
 
+  const emitted: any[] = [];
+  let stopListening: any;
+  let eventBus: any;
+
   beforeEach(() => {
     warnSpy = spyOn(console, 'warn');
 
@@ -43,10 +53,15 @@ describe('Provider: Feature Cell Resource', () => {
 
     const testService = TestBed.inject(TestService);
     vault = testService.vault;
+
+    eventBus = TestBed.inject(NgVaultEventBus);
+    stopListening = createTestEventListener(eventBus, emitted);
   });
 
   afterEach(() => {
     resetWarnExperimentalHttpResourceTestingOnly();
+
+    stopListening();
   });
 
   describe('replaceState', () => {
@@ -92,18 +107,7 @@ describe('Provider: Feature Cell Resource', () => {
       TestBed.tick();
       await flushMicrotasksZoneless();
 
-      expect(getTestBehavior().getEvents()).toEqual([
-        'onInit:cars',
-        'onInit:NgVault::Core::State',
-        'onInit:NgVault::Core::StateV2',
-        'onInit:NgVault::CoreHttpResource::State',
-        'onInit:NgVault::CoreHttpResource::StateV2',
-        'onInit:NgVault::Core::FromObservable',
-        'onReset:cars',
-        'onReset:cars',
-        'onDestroy:cars',
-        'onDestroy:cars'
-      ]);
+      expect(emitted).toEqual([]);
 
       expect(warnSpy).toHaveBeenCalledWith(
         '[NgVault] Experimental HttpResource support enabled — may change in Angular 21+.'
@@ -148,14 +152,7 @@ describe('Provider: Feature Cell Resource', () => {
       expect(vault.state.isLoading()).toBeFalse();
       expect(vault.state.hasValue()).toBeTrue();
 
-      expect(getTestBehavior().getEvents()).toEqual([
-        'onInit:cars',
-        'onInit:NgVault::Core::State',
-        'onInit:NgVault::Core::StateV2',
-        'onInit:NgVault::CoreHttpResource::State',
-        'onInit:NgVault::CoreHttpResource::StateV2',
-        'onInit:NgVault::Core::FromObservable'
-      ]);
+      expect(emitted).toEqual([]);
 
       expect(warnSpy).toHaveBeenCalledWith(
         '[NgVault] Experimental HttpResource support enabled — may change in Angular 21+.'

@@ -20,14 +20,9 @@ export class CoreHttpResourceStateBehaviorV2<T> implements VaultStateBehavior<T>
   public readonly key = defineNgVaultBehaviorKey('CoreHttpResource', 'StateV2');
 
   constructor(
-    readonly behaviorId: string,
     private readonly injector: VaultBehaviorFactoryContext['injector'],
     private readonly destroyRef: DestroyRef
   ) {}
-
-  onInit(key: string, service: string, ctx: VaultBehaviorContext<T>): void {
-    ctx.behaviorRunner?.onInit?.(this.behaviorId, this.key, service, ctx);
-  }
 
   async computeState(ctx: VaultBehaviorContext<T>): Promise<T | undefined> {
     ngVaultDebug('http resource state v2');
@@ -72,7 +67,7 @@ export class CoreHttpResourceStateBehaviorV2<T> implements VaultStateBehavior<T>
 export const withCoreHttpResourceStateBehaviorV2 = ((context: VaultBehaviorFactoryContext): VaultBehavior => {
   const destroyRef = context.injector.get(DestroyRef);
 
-  return new CoreHttpResourceStateBehaviorV2(context.behaviorId, context.injector, destroyRef);
+  return new CoreHttpResourceStateBehaviorV2(context.injector, destroyRef);
 }) as VaultBehaviorFactory;
 
 // Required metadata for discovery

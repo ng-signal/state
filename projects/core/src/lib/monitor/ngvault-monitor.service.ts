@@ -37,32 +37,32 @@ export class NgVaultMonitor {
     return `${domain}:${phase}:${operation || 'unknown'}`;
   }
 
-  startReplace<T>(cell: string, behaviorId: string, ctx: Readonly<VaultBehaviorContext<T>>): void {
-    this.#emitEvent(cell, behaviorId, 'startReplace', ctx.state);
+  startReplace<T>(cell: string, behaviorKey: string, ctx: Readonly<VaultBehaviorContext<T>>): void {
+    this.#emitEvent(cell, behaviorKey, 'startReplace', ctx.state);
   }
 
-  endReplace<T>(cell: string, behaviorId: string, ctx: Readonly<VaultBehaviorContext<T>>): void {
-    this.#emitEvent(cell, behaviorId, 'endReplace', ctx.state);
+  endReplace<T>(cell: string, behaviorKey: string, ctx: Readonly<VaultBehaviorContext<T>>): void {
+    this.#emitEvent(cell, behaviorKey, 'endReplace', ctx.state);
   }
 
-  startMerge<T>(cell: string, behaviorId: string, ctx: Readonly<VaultBehaviorContext<T>>): void {
-    this.#emitEvent(cell, behaviorId, 'startMerge', ctx.state);
+  startMerge<T>(cell: string, behaviorKey: string, ctx: Readonly<VaultBehaviorContext<T>>): void {
+    this.#emitEvent(cell, behaviorKey, 'startMerge', ctx.state);
   }
 
-  endMerge<T>(cell: string, behaviorId: string, ctx: Readonly<VaultBehaviorContext<T>>): void {
-    this.#emitEvent(cell, behaviorId, 'endMerge', ctx.state);
+  endMerge<T>(cell: string, behaviorKey: string, ctx: Readonly<VaultBehaviorContext<T>>): void {
+    this.#emitEvent(cell, behaviorKey, 'endMerge', ctx.state);
   }
 
-  startState<T>(cell: string, behaviorId: string, ctx: Readonly<VaultBehaviorContext<T>>): void {
-    this.#emitEvent(cell, behaviorId, 'startState', ctx.state);
+  startState<T>(cell: string, behaviorKey: string, ctx: Readonly<VaultBehaviorContext<T>>): void {
+    this.#emitEvent(cell, behaviorKey, 'startState', ctx.state);
   }
 
-  endState<T>(cell: string, behaviorId: string, ctx: Readonly<VaultBehaviorContext<T>>): void {
-    this.#emitEvent(cell, behaviorId, 'endState', ctx.state);
+  endState<T>(cell: string, behaviorKey: string, ctx: Readonly<VaultBehaviorContext<T>>): void {
+    this.#emitEvent(cell, behaviorKey, 'endState', ctx.state);
   }
 
-  error<T>(cell: string, behaviorId: string, ctx: Readonly<VaultBehaviorContext<T>>, err: unknown): void {
-    this.#emitEvent(cell, behaviorId, 'error', ctx.state, 'error', err instanceof Error ? err.message : String(err));
+  error<T>(cell: string, behaviorKey: string, ctx: Readonly<VaultBehaviorContext<T>>, err: unknown): void {
+    this.#emitEvent(cell, behaviorKey, 'error', ctx.state, 'error', err instanceof Error ? err.message : String(err));
   }
 
   registerCell(cellKey: string, insight?: VaultInsightDefinition): void {
@@ -76,7 +76,7 @@ export class NgVaultMonitor {
 
   #emitEvent<T>(
     cell: string,
-    behaviorId: string,
+    behaviorKey: string,
     type: string,
     ctx: Readonly<VaultStateSnapshot<T>>,
     payload?: unknown,
@@ -101,7 +101,7 @@ export class NgVaultMonitor {
     const event: NgVaultEventModel = {
       id: crypto.randomUUID(),
       cell,
-      behaviorId,
+      behaviorKey,
       type: serializedType,
       timestamp: Date.now()
     };
