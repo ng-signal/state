@@ -5,8 +5,8 @@ import { VaultBehaviorFactoryContext } from '../contexts/vault-behavior-factory.
 import { VaultBehaviorContext } from '../contexts/vault-behavior.context';
 import { VaultBehaviorRunner } from '../interfaces/vault-behavior-runner.interface';
 import { VaultBehavior } from '../interfaces/vault-behavior.interface';
-import { FeatureCell } from '../models/feature-cell.model';
-import { VaultBehaviorFactory } from '../types/vault-behavior-factory.type';
+import { NgVaultFeatureCell } from '../models/feature-cell.model';
+import { NgVaultBehaviorFactory } from '../types/ngvault-behavior-factory.type';
 import { validateNgVaultBehaviorKey } from '../utils/define-ngvault-behavior-key.util';
 
 class VaultBehaviorRunnerClass implements VaultBehaviorRunner {
@@ -14,7 +14,7 @@ class VaultBehaviorRunnerClass implements VaultBehaviorRunner {
   #behaviors: VaultBehavior<any>[] = [];
   #initialized = false;
 
-  initializeBehaviors<T>(injector: Injector, behaviors: Array<VaultBehaviorFactory<T>>): VaultBehavior<T>[] {
+  initializeBehaviors<T>(injector: Injector, behaviors: Array<NgVaultBehaviorFactory<T>>): VaultBehavior<T>[] {
     if (this.#initialized)
       throw new Error('[NgVault] VaultBehaviorRunner already initialized — cannot reissue core behavior ID.');
 
@@ -86,13 +86,13 @@ class VaultBehaviorRunnerClass implements VaultBehaviorRunner {
     return this.#behaviors;
   }
 
-  applyBehaviorExtensions<T>(cell: FeatureCell<T>): void {
+  applyBehaviorExtensions<T>(cell: NgVaultFeatureCell<T>): void {
     for (const behavior of this.#behaviors) {
       const extensions = behavior.extendCellAPI?.();
       if (!extensions || typeof extensions !== 'object') continue;
 
       for (const [key, fn] of Object.entries(extensions)) {
-        const alreadyDefined = cell[key as keyof FeatureCell<T>] !== undefined;
+        const alreadyDefined = cell[key as keyof NgVaultFeatureCell<T>] !== undefined;
         const canOverride =
           //eslint-disable-next-line
           Array.isArray((behavior as any).allowOverride) && (behavior as any).allowOverride.includes(key);

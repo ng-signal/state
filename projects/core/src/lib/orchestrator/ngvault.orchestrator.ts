@@ -4,16 +4,17 @@
 import { HttpResourceRef } from '@angular/common/http';
 import { effect, inject, Injector, runInInjectionContext } from '@angular/core';
 import {
+  NgVaultDataType,
+  NgVaultReducerFunction,
+  NgVaultStateInputType,
+  NrVaultStateType,
   VaultBehavior,
   VaultBehaviorContext,
-  VaultDataType,
   VaultEncryptionBehavior,
   VaultInsightDefinition,
   VaultPersistenceBehavior,
   VaultReducerBehavior,
-  VaultStateBehavior,
-  VaultStateInputType,
-  VaultStateType
+  VaultStateBehavior
 } from '@ngvault/shared';
 import { NgVaultMonitor } from '../monitor/ngvault-monitor.service';
 import { NGVAULT_QUEUE } from '../tokens/ngvault-queue.token';
@@ -28,13 +29,14 @@ export class VaultOrchestrator<T> {
   constructor(
     private cellKey: string,
     private readonly behaviors: VaultBehavior<T>[],
+    private readonly reducers: NgVaultReducerFunction<T>[],
     private readonly injector: Injector,
     readonly vaultMonitorOptions?: VaultInsightDefinition
   ) {
     this.#ngVaultMonitor.registerCell(this.cellKey, vaultMonitorOptions);
   }
 
-  #ensureIncoming(ctx: VaultBehaviorContext<T>): VaultStateInputType<T> | null {
+  #ensureIncoming(ctx: VaultBehaviorContext<T>): NgVaultStateInputType<T> | null {
     const incoming = ctx.incoming;
 
     if (incoming == null) {
@@ -63,6 +65,7 @@ export class VaultOrchestrator<T> {
     // Commit the *cloned* pre-encrypted snapshot to signals
     return stateData;
   }
+
   // ──────────────────────────────
   // dispatchSet with proper narrowing
   // ──────────────────────────────
@@ -98,7 +101,7 @@ export class VaultOrchestrator<T> {
 
         const partial = await this.#runStage('state', ctx);
 
-        const stateResult = structuredClone(applyNgVaultValueMerge<T>(ctx, current, partial));
+        const stateResult = structuredClone(applyNgVaultValueMerge<T>(current, partial));
 
         const finalState = await this.#finishPipeline(ctx, stateResult);
         this.#ngVaultMonitor.endMerge(this.cellKey, 'vault-orchestrator', ctx);
@@ -108,7 +111,7 @@ export class VaultOrchestrator<T> {
   }
 
   async #safeAsync(
-    fn: () => Promise<VaultDataType<T> | void | Partial<VaultStateType<T>> | null>,
+    fn: () => Promise<NgVaultDataType<T> | void | Partial<NrVaultStateType<T>> | null>,
     ctx: VaultBehaviorContext<T>
   ): Promise<void> {
     try {
@@ -143,7 +146,7 @@ export class VaultOrchestrator<T> {
       }
 
       const isPlainState = incoming != null && typeof incoming === 'object' && !isHttpResourceRef(incoming);
-      const incomingState = isPlainState ? (incoming as Partial<VaultStateType<T>>) : {};
+      const incomingState = isPlainState ? (incoming as Partial<NrVaultStateType<T>>) : {};
       const isReplace = ctx.operation === 'replace';
 
       if (incomingState.loading !== undefined) ctx.isLoading?.set(incomingState.loading);
@@ -152,7 +155,7 @@ export class VaultOrchestrator<T> {
       const result = await fn();
 
       queueMicrotask(() => {
-        let normalized: Partial<VaultStateType<T>> = {};
+        let normalized: Partial<NrVaultStateType<T>> = {};
 
         if (result == null) {
           normalized = incomingState;
@@ -210,8 +213,20 @@ export class VaultOrchestrator<T> {
             break;
 
           case 'reduce':
-            if (typeof (behavior as VaultReducerBehavior<T>).applyReducers === 'function') {
-              next = await (behavior as VaultReducerBehavior<T>).applyReducers(ctx, current!);
+            if (typeof (behavior as VaultReducerBehavior<T>).applyReducer === 'function') {
+              if (current === undefined) {
+                throw new Error(`[NgVault] Reducer stage received undefined state in cell "${this.cellKey}".`);
+              }
+
+              for (const reducer of this.reducers) {
+                this.#ngVaultMonitor.startReducer(this.cellKey, behavior.key, ctx);
+                const nextValue = (behavior as VaultReducerBehavior<T>).applyReducer(current, reducer);
+
+                this.#ngVaultMonitor.endReducer(this.cellKey, behavior.key, ctx);
+                if (nextValue !== undefined) {
+                  current = nextValue;
+                }
+              }
             }
             break;
 
@@ -230,6 +245,7 @@ export class VaultOrchestrator<T> {
       } catch (err) {
         ctx.error?.set(resourceError(err));
         ctx.isLoading?.set(false);
+        this.#ngVaultMonitor.error(this.cellKey, behavior.key, ctx, err);
         throw err;
       }
 

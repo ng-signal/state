@@ -1,6 +1,6 @@
 import { HttpClient } from '@angular/common/http';
 import { computed, DestroyRef, inject, signal } from '@angular/core';
-import { FeatureCell, VaultSignalRef } from '@ngvault/shared';
+import { NgVaultFeatureCell, VaultSignalRef } from '@ngvault/shared';
 import { UserModel } from '../../models/user.model';
 
 export abstract class UserService<T> {
@@ -8,7 +8,7 @@ export abstract class UserService<T> {
   private readonly isLoaded = signal(false);
   protected readonly http = inject(HttpClient);
 
-  constructor(protected readonly vault: FeatureCell<T>) {}
+  constructor(protected readonly vault: NgVaultFeatureCell<T>) {}
 
   users(): VaultSignalRef<T> {
     if (!this.isLoaded()) {

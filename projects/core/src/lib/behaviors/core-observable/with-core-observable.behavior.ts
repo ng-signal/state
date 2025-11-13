@@ -1,12 +1,12 @@
 import { signal } from '@angular/core';
 import {
   defineNgVaultBehaviorKey,
-  ResourceStateError,
+  NgVaultBehaviorType,
+  NgVaultDataType,
+  NgVaultResourceStateError,
   VaultBehavior,
   VaultBehaviorFactory,
   VaultBehaviorFactoryContext,
-  VaultBehaviorType,
-  VaultDataType,
   VaultSignalRef
 } from '@ngvault/shared';
 import { EMPTY, Observable, take, takeUntil } from 'rxjs';
@@ -19,7 +19,7 @@ class CoreObservableBehavior<T> implements VaultBehavior<T, ObservableBehaviorEx
   public readonly critical = false;
 
   constructor(
-    readonly type: VaultBehaviorType,
+    readonly type: NgVaultBehaviorType,
     private readonly injector: VaultBehaviorFactoryContext['injector']
   ) {}
 
@@ -50,8 +50,8 @@ class CoreObservableBehavior<T> implements VaultBehavior<T, ObservableBehaviorEx
 
           // reactive signals for Vault state reflection
           const _loadingSignal = signal(true);
-          const _errorSignal = signal<ResourceStateError | null>(null);
-          const _valueSignal = signal<VaultDataType<T>>(undefined);
+          const _errorSignal = signal<NgVaultResourceStateError | null>(null);
+          const _valueSignal = signal<NgVaultDataType<T>>(undefined);
           const _hasValue = signal(false);
 
           ngVaultDebug('fromObservable → creating signals');

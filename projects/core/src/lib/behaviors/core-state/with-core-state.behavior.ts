@@ -1,19 +1,20 @@
+import { ngVaultDebug } from '@ngvault/core/utils/ngvault-logger.util';
 import {
   defineNgVaultBehaviorKey,
+  NgVaultBehaviorType,
+  NgVaultDataType,
   VaultBehavior,
   VaultBehaviorContext,
   VaultBehaviorFactory,
   VaultBehaviorFactoryContext,
-  VaultDataType,
   VaultStateBehavior
 } from '@ngvault/shared';
 import { isHttpResourceRef } from '../../utils/is-http-resource.util';
-import { ngVaultDebug } from '../../utils/ngvault-logger.util';
 
 class CoreStateBehavior<T> implements VaultStateBehavior<T> {
-  readonly type = 'state';
+  readonly type = NgVaultBehaviorType.State;
   readonly critical = true;
-  readonly key = defineNgVaultBehaviorKey('Core', 'StateV2');
+  readonly key = defineNgVaultBehaviorKey('Core', 'State');
 
   constructor(private readonly _injector: VaultBehaviorFactoryContext['injector']) {}
 
@@ -26,7 +27,7 @@ class CoreStateBehavior<T> implements VaultStateBehavior<T> {
       return;
     }
 
-    const { value } = incoming as { value?: VaultDataType<T> };
+    const { value } = incoming as { value?: NgVaultDataType<T> };
     if (value === undefined) return;
 
     if (value === null) return null as unknown as T;
@@ -41,5 +42,5 @@ export const withCoreStateBehavior = ((context: VaultBehaviorFactoryContext): Va
   return new CoreStateBehavior(context.injector);
 }) as VaultBehaviorFactory;
 
-withCoreStateBehavior.type = 'state';
+withCoreStateBehavior.type = NgVaultBehaviorType.State;
 withCoreStateBehavior.critical = true;

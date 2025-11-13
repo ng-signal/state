@@ -1,14 +1,15 @@
+import { NgVaultReducerFunction } from '@ngvault/shared';
 import { Observable } from 'rxjs';
 import { VaultBehaviorContext } from '../contexts/vault-behavior.context';
 import { VaultSignalRef } from '../references/vault-signal.reference';
-import { VaultStateInputType } from '../types/vault-state-input.type';
+import { NgVaultStateInputType } from '../types/ngvault-state-input.type';
 import { SignalVaultModel } from './signal-vault.model';
 
-export interface FeatureCell<T> extends SignalVaultModel<T> {
+export interface NgVaultFeatureCell<T> extends SignalVaultModel<T> {
   state: VaultSignalRef<T>;
 
-  replaceState(incoming: VaultStateInputType<T>): void;
-  mergeState(incoming: VaultStateInputType<T>): void;
+  replaceState(incoming: NgVaultStateInputType<T>): void;
+  mergeState(incoming: NgVaultStateInputType<T>): void;
 
   fromObservable?(source$: Observable<T>): Observable<VaultSignalRef<T>>;
 
@@ -23,4 +24,6 @@ export interface FeatureCell<T> extends SignalVaultModel<T> {
   readonly ctx?: VaultBehaviorContext<T>;
   /** @internal – the unique feature key for this cell */
   readonly key?: string;
+
+  initialize(reducers?: NgVaultReducerFunction<T>[]): void;
 }

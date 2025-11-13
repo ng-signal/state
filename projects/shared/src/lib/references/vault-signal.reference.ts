@@ -1,10 +1,10 @@
 import { Signal } from '@angular/core';
-import { ResourceStateError } from '../models/resource-state-error.model';
-import { VaultDataType } from '../types/vault-data.type';
+import { NgVaultResourceStateError } from '../models/ngvault-resource-state-error.model';
+import { NgVaultDataType } from '../types/ngvault-data.type';
 
 export interface VaultSignalRef<T> {
   isLoading: Signal<boolean>;
-  value: Signal<VaultDataType<T | undefined>>;
-  error: Signal<ResourceStateError | null>;
+  value: Signal<NgVaultDataType<T | undefined>>;
+  error: Signal<NgVaultResourceStateError | null>;
   hasValue: Signal<boolean>;
 }

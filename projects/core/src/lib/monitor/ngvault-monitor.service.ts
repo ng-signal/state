@@ -61,6 +61,14 @@ export class NgVaultMonitor {
     this.#emitEvent(cell, behaviorKey, 'endState', ctx.state);
   }
 
+  startReducer<T>(cell: string, behaviorKey: string, ctx: Readonly<VaultBehaviorContext<T>>): void {
+    this.#emitEvent(cell, behaviorKey, 'startReducer', ctx.state);
+  }
+
+  endReducer<T>(cell: string, behaviorKey: string, ctx: Readonly<VaultBehaviorContext<T>>): void {
+    this.#emitEvent(cell, behaviorKey, 'endReducer', ctx.state);
+  }
+
   error<T>(cell: string, behaviorKey: string, ctx: Readonly<VaultBehaviorContext<T>>, err: unknown): void {
     this.#emitEvent(cell, behaviorKey, 'error', ctx.state, 'error', err instanceof Error ? err.message : String(err));
   }

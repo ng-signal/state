@@ -3,7 +3,7 @@ import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { Injector, provideZonelessChangeDetection, runInInjectionContext, signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { NgVaultEventBus } from '@ngvault/dev-tools';
-import { FeatureCell, VaultSignalRef } from '@ngvault/shared';
+import { NgVaultFeatureCell, VaultSignalRef } from '@ngvault/shared';
 import { createTestEventListener, flushMicrotasksZoneless, provideVaultTesting } from '@ngvault/testing';
 import { Subject } from 'rxjs';
 import { provideFeatureCell } from './provide-feature-cell';
@@ -14,7 +14,7 @@ interface TestModel {
 }
 
 describe('Provider: Feature Cell: fromObservable', () => {
-  let vault: FeatureCell<TestModel[] | TestModel>;
+  let vault: NgVaultFeatureCell<TestModel[] | TestModel>;
   let subject: Subject<TestModel[]>;
   const calls: any = [];
   const emitted: any[] = [];
@@ -95,7 +95,7 @@ describe('Provider: Feature Cell: fromObservable', () => {
 
     const provider = providers.find((p: any) => typeof p.useFactory === 'function');
 
-    let vault!: FeatureCell<any>;
+    let vault!: NgVaultFeatureCell<any>;
 
     runInInjectionContext(TestBed.inject(Injector), () => {
       vault = (provider as any).useFactory();

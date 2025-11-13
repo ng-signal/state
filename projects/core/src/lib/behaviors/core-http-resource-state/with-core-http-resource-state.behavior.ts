@@ -17,7 +17,7 @@ import { resourceError } from '../../utils/resource-error.util';
 class CoreHttpResourceStateBehavior<T> implements VaultStateBehavior<T> {
   readonly type = 'state';
   public readonly critical = true;
-  public readonly key = defineNgVaultBehaviorKey('CoreHttpResource', 'StateV2');
+  public readonly key = defineNgVaultBehaviorKey('CoreHttpResource', 'State');
 
   constructor(
     private readonly injector: VaultBehaviorFactoryContext['injector'],
@@ -25,7 +25,7 @@ class CoreHttpResourceStateBehavior<T> implements VaultStateBehavior<T> {
   ) {}
 
   async computeState(ctx: VaultBehaviorContext<T>): Promise<T | undefined> {
-    ngVaultDebug('http resource state v2');
+    ngVaultDebug('http resource state');
 
     if (NGVAULT_EXPERIMENTAL_HTTP_RESOURCE && ctx.incoming && isHttpResourceRef<T>(ctx.incoming)) {
       const resource = ctx.incoming as HttpResourceRef<T>;
@@ -58,7 +58,7 @@ class CoreHttpResourceStateBehavior<T> implements VaultStateBehavior<T> {
         });
       });
     } else {
-      ngVaultDebug('http resource state v2', 'skipped — not an HttpResourceRef');
+      ngVaultDebug('http resource state', 'skipped — not an HttpResourceRef');
       return;
     }
   }

@@ -3,7 +3,7 @@ import { HttpTestingController, provideHttpClientTesting } from '@angular/common
 import { Injector, provideZonelessChangeDetection, runInInjectionContext, signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { NgVaultEventBus } from '@ngvault/dev-tools';
-import { VaultBehaviorContext, VaultBehaviorType } from '@ngvault/shared';
+import { NgVaultBehaviorType, VaultBehaviorContext } from '@ngvault/shared';
 import { createTestEventListener, flushMicrotasksZoneless, provideVaultTesting } from '@ngvault/testing';
 import { VaultOrchestrator } from './ngvault.orchestrator';
 
@@ -49,7 +49,7 @@ describe('Orcestrator: Vault', () => {
 
   function makeBehavior(type: string, returnValue?: any): any {
     return {
-      type: type as VaultBehaviorType,
+      type: type as NgVaultBehaviorType,
       key: `${type}-id`,
       computeState: async () => {
         calls.push(type);
@@ -70,17 +70,26 @@ describe('Orcestrator: Vault', () => {
     };
   }
 
-  it('should execute state → reduce → encrypt → persist in order', async () => {
+  it('should execute state → reduce (2 reducers) → encrypt → persist in order', async () => {
+    // Two reducer functions
+    const reducer1 = () => calls.push('reducer 1');
+    const reducer2 = () => calls.push('reducer 2');
+
+    // Make behaviors using the helper + real reducer behavior
     const behaviors = [
       makeBehavior('state'),
-      makeBehavior('reduce'),
+      {
+        ...makeBehavior('reduce'),
+        applyReducer: (current: any, reducerFn: any) => reducerFn(current)
+      },
       makeBehavior('encrypt'),
       makeBehavior('persist'),
-      makeBehavior(VaultBehaviorType.Insights)
+      makeBehavior(NgVaultBehaviorType.Insights)
     ];
 
+    // Create orchestrator
     runInInjectionContext(injector, () => {
-      dispatcher = new VaultOrchestrator<any>('cell key', behaviors, injector, {
+      dispatcher = new VaultOrchestrator<any>('cell key', behaviors, [reducer1, reducer2], injector, {
         id: 'manual-insights',
         wantsState: true,
         wantsPayload: true,
@@ -88,14 +97,19 @@ describe('Orcestrator: Vault', () => {
       } as any);
     });
 
+    // Act — trigger reducer pipeline
     dispatcher.dispatchSet(mockCtx);
     await flushMicrotasksZoneless();
 
-    expect(calls).toEqual(['state', 'reduce', 'encrypt', 'persist']);
+    // Reducer pipeline order + other behaviors
+    expect(calls).toEqual(['state', 'reducer 1', 'reducer 2', 'encrypt', 'persist']);
+
+    // Verify final state after reducer pipeline
     expect(mockCtx.isLoading?.()).toBeFalse();
     expect(mockCtx.error?.()).toBeNull();
-    expect(mockCtx.value?.()).toEqual({ reduce: true });
+    expect(mockCtx.value?.()).toEqual(3);
 
+    // Verify event pipeline
     expect(emitted).toEqual([
       Object({
         id: jasmine.any(String),
@@ -105,6 +119,125 @@ describe('Orcestrator: Vault', () => {
         timestamp: jasmine.any(Number),
         state: 22
       }),
+
+      // STATE behavior (start + end)
+      Object({
+        id: jasmine.any(String),
+        cell: 'cell key',
+        behaviorKey: 'state-id',
+        type: 'stage:start:state',
+        timestamp: jasmine.any(Number),
+        state: 22
+      }),
+      Object({
+        id: jasmine.any(String),
+        cell: 'cell key',
+        behaviorKey: 'state-id',
+        type: 'stage:end:state',
+        timestamp: jasmine.any(Number),
+        state: 22
+      }),
+
+      // REDUCER #1 (start + end)
+      Object({
+        id: jasmine.any(String),
+        cell: 'cell key',
+        behaviorKey: 'reduce-id',
+        type: 'stage:start:reducer',
+        timestamp: jasmine.any(Number),
+        state: 22
+      }),
+      Object({
+        id: jasmine.any(String),
+        cell: 'cell key',
+        behaviorKey: 'reduce-id',
+        type: 'stage:end:reducer',
+        timestamp: jasmine.any(Number),
+        state: 22
+      }),
+
+      // REDUCER #2 (start + end)
+      Object({
+        id: jasmine.any(String),
+        cell: 'cell key',
+        behaviorKey: 'reduce-id',
+        type: 'stage:start:reducer',
+        timestamp: jasmine.any(Number),
+        state: 22
+      }),
+      Object({
+        id: jasmine.any(String),
+        cell: 'cell key',
+        behaviorKey: 'reduce-id',
+        type: 'stage:end:reducer',
+        timestamp: jasmine.any(Number),
+        state: 22
+      }),
+
+      // END REPLACE
+      Object({
+        id: jasmine.any(String),
+        cell: 'cell key',
+        behaviorKey: 'vault-orchestrator',
+        type: 'lifecycle:end:replace',
+        timestamp: jasmine.any(Number),
+        state: 22
+      })
+    ]);
+  });
+
+  it('should throw an error with undefined state', async () => {
+    const stateBehavior = makeBehavior('state');
+
+    (stateBehavior as any).computeState = async () => {
+      return undefined;
+    };
+
+    // Two reducer functions
+    const reducer1 = () => calls.push('reducer 1');
+    const reducer2 = () => calls.push('reducer 2');
+
+    // Make behaviors usng the helper + real reducer behavior
+    const behaviors = [
+      stateBehavior,
+      {
+        ...makeBehavior('reduce'),
+        applyReducer: (current: any, reducerFn: any) => reducerFn(current)
+      }
+    ];
+
+    // Create orchestrator
+    runInInjectionContext(injector, () => {
+      dispatcher = new VaultOrchestrator<any>('cell key', behaviors, [reducer1, reducer2], injector, {
+        id: 'manual-insights',
+        wantsState: true,
+        wantsPayload: true,
+        wantsErrors: true
+      } as any);
+    });
+
+    // Act — trigger reducer pipeline
+    dispatcher.dispatchSet(mockCtx);
+    TestBed.tick();
+    await flushMicrotasksZoneless();
+
+    // Verify final state after reducer pipeline
+    expect(mockCtx.isLoading?.()).toBeFalse();
+    expect(mockCtx.error?.()?.message).toContain('Reducer stage received undefined state');
+    expect(mockCtx.value?.()).toBeNull();
+
+    // Verify event pipeline
+    expect(emitted).toEqual([
+      Object({
+        id: jasmine.any(String),
+        cell: 'cell key',
+        behaviorKey: 'vault-orchestrator',
+        type: 'lifecycle:start:replace',
+        timestamp: jasmine.any(Number),
+        state: 22
+      }),
+
+      // STATE behavior (start + end)
       Object({
         id: jasmine.any(String),
         cell: 'cell key',
@@ -124,10 +257,22 @@ describe('Orcestrator: Vault', () => {
       Object({
         id: jasmine.any(String),
         cell: 'cell key',
-        behaviorKey: 'vault-orchestrator',
-        type: 'lifecycle:end:replace',
+        behaviorKey: 'reduce-id',
+        type: 'lifecycle:error:unknown',
         timestamp: jasmine.any(Number),
-        state: 22
+        state: 22,
+        payload: 'error',
+        error: '[NgVault] Reducer stage received undefined state in cell "cell key".'
+      }),
+      Object({
+        id: jasmine.any(String),
+        cell: 'cell key',
+        behaviorKey: 'reduce-id',
+        type: 'lifecycle:error:unknown',
+        timestamp: jasmine.any(Number),
+        state: 22,
+        payload: 'error',
+        error: '[NgVault] Reducer stage received undefined state in cell "cell key".'
       })
     ]);
   });
@@ -140,7 +285,7 @@ describe('Orcestrator: Vault', () => {
 
     const behaviors = [errorBehavior];
     runInInjectionContext(injector, () => {
-      dispatcher = new VaultOrchestrator<any>('cell key', behaviors, injector);
+      dispatcher = new VaultOrchestrator<any>('cell key', behaviors, [], injector);
     });
 
     dispatcher.dispatchSet(mockCtx);
@@ -167,7 +312,7 @@ describe('Orcestrator: Vault', () => {
     const behaviors = [makeBehavior('state')];
 
     runInInjectionContext(injector, () => {
-      dispatcher = new VaultOrchestrator<any>('cell key', behaviors, injector);
+      dispatcher = new VaultOrchestrator<any>('cell key', behaviors, [], injector);
     });
 
     // Create HttpResourceRef (this will call the mock backend)
@@ -211,7 +356,7 @@ describe('Orcestrator: Vault', () => {
     ];
 
     runInInjectionContext(injector, () => {
-      dispatcher = new VaultOrchestrator<any>('cell key', behaviors, injector);
+      dispatcher = new VaultOrchestrator<any>('cell key', behaviors, [], injector);
     });
 
     dispatcher.dispatchSet(mockCtx);
@@ -227,7 +372,7 @@ describe('Orcestrator: Vault', () => {
     const behaviors = [makeBehavior('state')];
 
     runInInjectionContext(injector, () => {
-      dispatcher = new VaultOrchestrator<any>('cell key', behaviors, injector);
+      dispatcher = new VaultOrchestrator<any>('cell key', behaviors, [], injector);
     });
 
     const minimalCtx = {} as VaultBehaviorContext<any>; // no signals
@@ -238,7 +383,7 @@ describe('Orcestrator: Vault', () => {
   it('should set signals correctly after microtask flush', async () => {
     const behaviors = [makeBehavior('state', { ok: true })];
     runInInjectionContext(injector, () => {
-      dispatcher = new VaultOrchestrator<any>('cell key', behaviors, injector);
+      dispatcher = new VaultOrchestrator<any>('cell key', behaviors, [], injector);
     });
 
     dispatcher.dispatchSet(mockCtx);
@@ -261,7 +406,7 @@ describe('Orcestrator: Vault', () => {
       const behaviors = [errorBehavior, makeBehavior('reduce'), makeBehavior('encrypt'), makeBehavior('persist')];
 
       runInInjectionContext(injector, () => {
-        dispatcher = new VaultOrchestrator<any>('cell key', behaviors, injector);
+        dispatcher = new VaultOrchestrator<any>('cell key', behaviors, [], injector);
       });
 
       dispatcher.dispatchSet(mockCtx);
@@ -286,7 +431,7 @@ describe('Orcestrator: Vault', () => {
       const behaviors = [makeBehavior('state'), errorBehavior, makeBehavior('encrypt'), makeBehavior('persist')];
 
       runInInjectionContext(injector, () => {
-        dispatcher = new VaultOrchestrator<any>('cell key', behaviors, injector);
+        dispatcher = new VaultOrchestrator<any>('cell key', behaviors, [], injector);
       });
 
       dispatcher.dispatchSet(mockCtx);
@@ -311,7 +456,7 @@ describe('Orcestrator: Vault', () => {
       const behaviors = [makeBehavior('state'), makeBehavior('reduce'), errorBehavior, makeBehavior('persist')];
 
       runInInjectionContext(injector, () => {
-        dispatcher = new VaultOrchestrator<any>('cell key', behaviors, injector);
+        dispatcher = new VaultOrchestrator<any>('cell key', behaviors, [], injector);
       });
 
       dispatcher.dispatchSet(mockCtx);
@@ -336,7 +481,7 @@ describe('Orcestrator: Vault', () => {
       const behaviors = [makeBehavior('state'), makeBehavior('reduce'), makeBehavior('encrypt'), errorBehavior];
 
       runInInjectionContext(injector, () => {
-        dispatcher = new VaultOrchestrator<any>('cell key', behaviors, injector);
+        dispatcher = new VaultOrchestrator<any>('cell key', behaviors, [], injector);
       });
 
       dispatcher.dispatchSet(mockCtx);
@@ -369,7 +514,7 @@ describe('Orcestrator: Vault', () => {
       ];
 
       runInInjectionContext(injector, () => {
-        dispatcher = new VaultOrchestrator<any>('cell key', behaviors, injector);
+        dispatcher = new VaultOrchestrator<any>('cell key', behaviors, [], injector);
       });
 
       dispatcher.dispatchSet(mockCtx);
@@ -400,7 +545,7 @@ describe('Orcestrator: Vault', () => {
       ];
 
       runInInjectionContext(injector, () => {
-        dispatcher = new VaultOrchestrator<any>('cell key', behaviors, injector);
+        dispatcher = new VaultOrchestrator<any>('cell key', behaviors, [], injector);
       });
 
       dispatcher.dispatchSet(mockCtx);
@@ -431,7 +576,7 @@ describe('Orcestrator: Vault', () => {
       ];
 
       runInInjectionContext(injector, () => {
-        dispatcher = new VaultOrchestrator<any>('cell key', behaviors, injector);
+        dispatcher = new VaultOrchestrator<any>('cell key', behaviors, [], injector);
       });
 
       dispatcher.dispatchSet(mockCtx);
@@ -462,7 +607,7 @@ describe('Orcestrator: Vault', () => {
       ];
 
       runInInjectionContext(injector, () => {
-        dispatcher = new VaultOrchestrator<any>('cell key', behaviors, injector);
+        dispatcher = new VaultOrchestrator<any>('cell key', behaviors, [], injector);
       });
 
       dispatcher.dispatchSet(mockCtx);
@@ -485,7 +630,7 @@ describe('Orcestrator: Vault', () => {
       const behaviors = [makeBehavior('state'), makeBehavior('reduce')];
 
       runInInjectionContext(injector, () => {
-        dispatcher = new VaultOrchestrator<any>('cell key', behaviors, injector);
+        dispatcher = new VaultOrchestrator<any>('cell key', behaviors, [], injector);
       });
 
       dispatcher.dispatchSet(mockCtx);
@@ -501,7 +646,7 @@ describe('Orcestrator: Vault', () => {
       const behaviors = [makeBehavior('state'), makeBehavior('encrypt')];
 
       runInInjectionContext(injector, () => {
-        dispatcher = new VaultOrchestrator<any>('cell key', behaviors, injector);
+        dispatcher = new VaultOrchestrator<any>('cell key', behaviors, [], injector);
       });
 
       dispatcher.dispatchSet(mockCtx);
@@ -517,7 +662,7 @@ describe('Orcestrator: Vault', () => {
       const behaviors = [makeBehavior('state'), makeBehavior('persist')];
 
       runInInjectionContext(injector, () => {
-        dispatcher = new VaultOrchestrator<any>('cell key', behaviors, injector);
+        dispatcher = new VaultOrchestrator<any>('cell key', behaviors, [], injector);
       });
 
       dispatcher.dispatchSet(mockCtx);

@@ -2,7 +2,7 @@ import { HttpClient, provideHttpClient } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { Injector, provideZonelessChangeDetection, runInInjectionContext, signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
-import { ResourceStateError, VaultBehaviorContext } from '@ngvault/shared';
+import { NgVaultResourceStateError, VaultBehaviorContext } from '@ngvault/shared';
 import { flushMicrotasksZoneless, provideVaultTesting } from '@ngvault/testing';
 import { of, throwError } from 'rxjs';
 import { withCoreObservableBehavior } from './with-core-observable.behavior';
@@ -36,7 +36,7 @@ describe('Behavior: withCoreObservableBehavior', () => {
 
     ctx = {
       isLoading: signal(false),
-      error: signal<ResourceStateError | null>(null),
+      error: signal<NgVaultResourceStateError | null>(null),
       value: signal<TestModel[] | undefined>(undefined)
     } as any;
 

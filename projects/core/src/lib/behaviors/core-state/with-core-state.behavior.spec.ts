@@ -4,7 +4,7 @@ import { VaultBehaviorContext } from '@ngvault/shared';
 import { provideVaultTesting } from '@ngvault/testing';
 import { withCoreStateBehavior } from './with-core-state.behavior';
 
-describe('Behavior: CoreStateBehaviorV2', () => {
+describe('Behavior: CoreStateBehavior', () => {
   let behavior: any;
   let injector: Injector;
   let ctx: VaultBehaviorContext<any>;
@@ -34,7 +34,7 @@ describe('Behavior: CoreStateBehaviorV2', () => {
   it('should have default properties', () => {
     expect(behavior.critical).toBeTrue();
     expect(behavior.type).toBe('state');
-    expect(behavior.key).toBe('NgVault::Core::StateV2');
+    expect(behavior.key).toBe('NgVault::Core::State');
   });
 
   it('should skip when ctx.incoming is null', async () => {

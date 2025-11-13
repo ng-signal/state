@@ -1,7 +1,7 @@
 import { HttpErrorResponse } from '@angular/common/http';
-import { ResourceStateError } from '@ngvault/shared';
+import { NgVaultResourceStateError } from '@ngvault/shared';
 
-export function resourceError(err: unknown): ResourceStateError {
+export function resourceError(err: unknown): NgVaultResourceStateError {
   if (err instanceof HttpErrorResponse) {
     return {
       message: err.message || err.statusText || 'HTTP error',

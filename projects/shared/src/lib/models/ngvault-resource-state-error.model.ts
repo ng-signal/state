@@ -1,4 +1,4 @@
-export interface ResourceStateError {
+export interface NgVaultResourceStateError {
   message: string;
   status?: number;
   statusText?: string;

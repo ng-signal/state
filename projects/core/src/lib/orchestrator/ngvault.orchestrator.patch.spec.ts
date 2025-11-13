@@ -1,7 +1,7 @@
 import { Injector, provideZonelessChangeDetection, runInInjectionContext, signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { NgVaultEventBus } from '@ngvault/dev-tools';
-import { VaultBehaviorContext, VaultBehaviorType } from '@ngvault/shared';
+import { NgVaultBehaviorType, VaultBehaviorContext } from '@ngvault/shared';
 import { createTestEventListener, flushMicrotasksZoneless, provideVaultTesting } from '@ngvault/testing';
 import { VaultOrchestrator } from './ngvault.orchestrator';
 
@@ -41,7 +41,7 @@ describe('Orchestrator: Vault (dispatchPatch)', () => {
   /** Utility factory to create test behaviors */
   function makeBehavior(type: string, returnValue?: any): any {
     return {
-      type: type as VaultBehaviorType,
+      type: type as NgVaultBehaviorType,
       key: `${type}-id`,
       computeState: async () => {
         calls.push(type);
@@ -79,11 +79,11 @@ describe('Orchestrator: Vault (dispatchPatch)', () => {
       makeBehavior('reduce', { reduce: true }),
       makeBehavior('encrypt'),
       makeBehavior('persist'),
-      makeBehavior(VaultBehaviorType.Insights)
+      makeBehavior(NgVaultBehaviorType.Insights)
     ];
 
     runInInjectionContext(injector, () => {
-      dispatcher = new VaultOrchestrator<any>('cell key', behaviors, injector, {
+      dispatcher = new VaultOrchestrator<any>('cell key', behaviors, [], injector, {
         id: 'manual-insights',
         wantsState: true,
         wantsPayload: true,
@@ -139,7 +139,7 @@ describe('Orchestrator: Vault (dispatchPatch)', () => {
     const behaviors = [makeBehavior('state', { newKey: true })];
 
     runInInjectionContext(injector, () => {
-      dispatcher = new VaultOrchestrator<any>('cell key', behaviors, injector);
+      dispatcher = new VaultOrchestrator<any>('cell key', behaviors, [], injector);
     });
 
     const currentValue = { id: 1, existing: true };
@@ -169,7 +169,7 @@ describe('Orchestrator: Vault (dispatchPatch)', () => {
 
     const behaviors = [errorBehavior];
     runInInjectionContext(injector, () => {
-      dispatcher = new VaultOrchestrator<any>('cell key', behaviors, injector);
+      dispatcher = new VaultOrchestrator<any>('cell key', behaviors, [], injector);
     });
 
     dispatcher.dispatchPatch(mockCtx);
@@ -189,7 +189,7 @@ describe('Orchestrator: Vault (dispatchPatch)', () => {
     ];
 
     runInInjectionContext(injector, () => {
-      dispatcher = new VaultOrchestrator<any>('cell key', behaviors, injector);
+      dispatcher = new VaultOrchestrator<any>('cell key', behaviors, [], injector);
     });
 
     dispatcher.dispatchPatch(mockCtx);
@@ -205,7 +205,7 @@ describe('Orchestrator: Vault (dispatchPatch)', () => {
     const behaviors = [makeBehavior('state')];
 
     runInInjectionContext(injector, () => {
-      dispatcher = new VaultOrchestrator<any>('cell key', behaviors, injector);
+      dispatcher = new VaultOrchestrator<any>('cell key', behaviors, [], injector);
     });
 
     const minimalCtx = {} as VaultBehaviorContext<any>;
@@ -220,7 +220,7 @@ describe('Orchestrator: Vault (dispatchPatch)', () => {
     const behaviors = [makeBehavior('state', { ok: true })];
 
     runInInjectionContext(injector, () => {
-      dispatcher = new VaultOrchestrator<any>('cell key', behaviors, injector);
+      dispatcher = new VaultOrchestrator<any>('cell key', behaviors, [], injector);
     });
 
     dispatcher.dispatchPatch(mockCtx);

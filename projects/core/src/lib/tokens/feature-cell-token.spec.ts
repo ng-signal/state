@@ -1,5 +1,5 @@
 import { InjectionToken } from '@angular/core';
-import { FeatureCell } from '@ngvault/shared';
+import { NgVaultFeatureCell } from '@ngvault/shared';
 import { FEATURE_CELL_TOKEN } from './feature-cell-token';
 
 describe('Token: Feature Cell', () => {
@@ -24,8 +24,8 @@ describe('Token: Feature Cell', () => {
   });
 
   it('should produce distinct tokens even for the same key (by design)', () => {
-    const token1 = FEATURE_CELL_TOKEN<FeatureCell<any>>('duplicate');
-    const token2 = FEATURE_CELL_TOKEN<FeatureCell<any>>('duplicate');
+    const token1 = FEATURE_CELL_TOKEN<NgVaultFeatureCell<any>>('duplicate');
+    const token2 = FEATURE_CELL_TOKEN<NgVaultFeatureCell<any>>('duplicate');
 
     // Same key, but different instances
     expect(token1).not.toBe(token2);
@@ -40,7 +40,7 @@ describe('Token: Feature Cell', () => {
     // Runtime shape check
     expect(token.toString()).toContain('NGVAULT_FEATURE_CELL:counter');
     // TypeScript should infer correctly; this ensures compile-time safety.
-    const assign: InjectionToken<FeatureCell<TestModel>> = token;
+    const assign: InjectionToken<NgVaultFeatureCell<TestModel>> = token;
     expect(assign).toBe(token);
   });
 });

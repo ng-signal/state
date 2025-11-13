@@ -3,18 +3,21 @@ import { DestroyRef, Injector, Provider, Type, computed, inject, signal } from '
 import { getOrCreateFeatureCellToken } from '@ngvault/core';
 import { withCoreHttpResourceStateBehavior } from '@ngvault/core/behaviors/core-http-resource-state/with-core-http-resource-state.behavior';
 import { withCoreStateBehavior } from '@ngvault/core/behaviors/core-state/with-core-state.behavior';
+import { withCoreReducerBehavior } from '@ngvault/core/behaviors/reducer/with-core-reducer.behavior';
 import { VaultOrchestrator } from '@ngvault/core/orchestrator/ngvault.orchestrator';
 import {
-  FeatureCell,
   NgVaultBehaviorLifecycleService,
-  ResourceStateError,
+  NgVaultBehaviorType,
+  NgVaultFeatureCell,
+  NgVaultReducerFunction,
+  NgVaultResourceStateError,
   VaultBehaviorContext,
   VaultBehaviorFactory,
   VaultStateSnapshot
 } from '@ngvault/shared';
-import { VaultDataType } from '@ngvault/shared/types/vault-data.type';
-import { VaultStateInputType } from '@ngvault/shared/types/vault-state-input.type';
-import { VaultStateType } from '@ngvault/shared/types/vault-state.type';
+import { NgVaultDataType } from '@ngvault/shared/types/ngvault-data.type';
+import { NgVaultStateInputType } from '@ngvault/shared/types/ngvault-state-input.type';
+import { NrVaultStateType } from '@ngvault/shared/types/ngvault-state.type';
 import { Subject } from 'rxjs';
 import { withCoreObservableBehavior } from '../../behaviors/core-observable/with-core-observable.behavior';
 import { FeatureCellDescriptorModel } from '../../models/feature-cell-descriptor.model';
@@ -31,14 +34,16 @@ export function provideFeatureCell<Service, T>(
 
   const featureCellProvider: Provider = {
     provide: token,
-    useFactory: (): FeatureCell<T> => {
+    useFactory: (): NgVaultFeatureCell<T> => {
       const _isLoading = signal(false);
-      const _error = signal<ResourceStateError | null>(null);
+      const _error = signal<NgVaultResourceStateError | null>(null);
       const _behaviorRunner = NgVaultBehaviorLifecycleService();
       const _injector = inject(Injector);
       const _destroyRef = inject(DestroyRef);
       const _destroyed$ = new Subject<void>();
       const _reset$ = new Subject<void>();
+      let _initialized = false;
+      let _orchestrator: VaultOrchestrator<T>;
 
       // Prevent incorrect initialization (e.g., passing a resource object)
       if (
@@ -57,17 +62,16 @@ export function provideFeatureCell<Service, T>(
       const _defaultBehaviors: VaultBehaviorFactory<T>[] = [
         withCoreStateBehavior,
         withCoreHttpResourceStateBehavior,
-        withCoreObservableBehavior
+        withCoreObservableBehavior,
+        withCoreReducerBehavior
       ];
-      const _allBehaviors: VaultBehaviorFactory<T>[] = [..._defaultBehaviors, ...behaviors];
-      const _orchestrator = new VaultOrchestrator(
-        featureCellDescriptor.key,
-        _behaviorRunner.initializeBehaviors(_injector, _allBehaviors)!,
-        _injector,
-        featureCellDescriptor.insights
-      );
 
-      const _value = signal<VaultDataType<T>>(
+      // eslint-disable-next-line
+      const _userBehaviorsWithoutReducers = behaviors.filter((b) => (b as any).type !== NgVaultBehaviorType.Reduce);
+
+      const _allBehaviors: VaultBehaviorFactory<T>[] = [..._defaultBehaviors, ..._userBehaviorsWithoutReducers];
+
+      const _value = signal<NgVaultDataType<T>>(
         featureCellDescriptor.initial === null || featureCellDescriptor.initial === undefined
           ? undefined
           : (featureCellDescriptor.initial as T)
@@ -96,12 +100,24 @@ export function provideFeatureCell<Service, T>(
         }
       } as VaultBehaviorContext<T>;
 
-      const _reset = (): void => {
-        ngVaultWarn('feature cell _reset');
+      const _normalizeIncoming = <T>(
+        incoming: NgVaultStateInputType<T>
+      ): NrVaultStateType<T> | HttpResourceRef<T> | null => {
+        if (!incoming) return null;
+        return isHttpResourceRef(incoming) ? incoming : (incoming as NrVaultStateType<T>);
+      };
+
+      const _hardReset = () => {
         _isLoading.set(false);
         _error.set(null);
         _value.set(undefined);
+      };
+
+      const _reset = (): void => {
+        ngVaultWarn('feature cell _reset');
+        _ensureInitialized();
         _reset$.next();
+        _hardReset();
       };
 
       const _destroy = (): void => {
@@ -109,35 +125,60 @@ export function provideFeatureCell<Service, T>(
         _destroyed$.next();
         _destroyed$.complete();
 
-        _reset();
+        _hardReset();
+      };
+
+      const _replaceState = (incoming: NgVaultStateInputType<T>): void => {
+        _ensureInitialized();
+        ctx.incoming = _normalizeIncoming(incoming);
+        _orchestrator.dispatchSet(ctx);
+      };
+
+      const _mergeState = (incoming: NgVaultStateInputType<T>): void => {
+        _ensureInitialized();
+        ctx.incoming = _normalizeIncoming(incoming);
+        _orchestrator.dispatchPatch(ctx);
+      };
+
+      const _ensureInitialized = () => {
+        if (!_initialized) {
+          throw new Error(
+            `[NgVault] FeatureCell "${featureCellDescriptor.key}" has not been initialized. ` +
+              `You must call cell.initialize() before using state methods.`
+          );
+        }
+      };
+
+      const _initialize = (reducers: NgVaultReducerFunction<T>[] = []) => {
+        if (_initialized) {
+          throw new Error(`[NgVault] FeatureCell "${featureCellDescriptor.key}" already initialized.`);
+        }
+
+        _initialized = true;
+
+        _orchestrator = new VaultOrchestrator(
+          featureCellDescriptor.key,
+          _behaviorRunner.initializeBehaviors(_injector, _allBehaviors)!,
+          reducers,
+          _injector,
+          featureCellDescriptor.insights
+        );
+
+        _behaviorRunner.applyBehaviorExtensions(cell);
       };
 
       // Angular DI teardown
       _destroyRef.onDestroy(() => _destroy());
 
-      function normalizeIncoming<T>(incoming: VaultStateInputType<T>): VaultStateType<T> | HttpResourceRef<T> | null {
-        if (!incoming) return null;
-        return isHttpResourceRef(incoming) ? incoming : (incoming as VaultStateType<T>);
-      }
-
-      const _replaceState = (incoming: VaultStateInputType<T>): void => {
-        ctx.incoming = normalizeIncoming(incoming);
-        _orchestrator.dispatchSet(ctx);
-      };
-
-      const _mergeState = (incoming: VaultStateInputType<T>): void => {
-        ctx.incoming = normalizeIncoming(incoming);
-        _orchestrator.dispatchPatch(ctx);
-      };
-
       // Create the base FeatureCell instance
-      const cell: FeatureCell<T> = {
+      const cell: NgVaultFeatureCell<T> = {
         state: {
           isLoading: _isLoading.asReadonly(),
           value: _value.asReadonly(),
           error: _error.asReadonly(),
           hasValue: _hasValue
         },
+        initialize: _initialize,
         replaceState: _replaceState,
         mergeState: _mergeState,
         reset: _reset,
@@ -158,8 +199,6 @@ export function provideFeatureCell<Service, T>(
         enumerable: false,
         writable: false
       });
-
-      _behaviorRunner.applyBehaviorExtensions(cell);
 
       return cell;
     }

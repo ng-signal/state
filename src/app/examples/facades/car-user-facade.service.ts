@@ -1,5 +1,5 @@
 import { computed, effect, inject, Injectable, signal } from '@angular/core';
-import { ResourceStateError } from '@ngvault/shared';
+import { NgVaultResourceStateError } from '@ngvault/shared';
 import { CarService } from '../cars/services/car.service';
 import { CarModel } from '../models/car.model';
 import { UserModel } from '../models/user.model';
@@ -22,7 +22,7 @@ export class UserCarFacadeService {
   private readonly carState = inject(CarService);
 
   private readonly _isLoading = signal(false);
-  private readonly _error = signal<ResourceStateError | null>(null);
+  private readonly _error = signal<NgVaultResourceStateError | null>(null);
   private readonly _userValue = signal<UserWithCarModel[]>([]);
 
   /** Derived: Cars without assigned users (reactive) — opposite from the car perspective */

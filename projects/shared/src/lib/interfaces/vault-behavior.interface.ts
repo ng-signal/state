@@ -1,6 +1,6 @@
 import { VaultBehaviorFactoryContext } from '@ngvault/shared';
 import { VaultBehaviorContext } from '../contexts/vault-behavior.context';
-import { VaultBehaviorType } from '../types/vault-behavior.type';
+import { NgVaultBehaviorType } from '../types/ngvault-behavior.type';
 
 // Reusable function type each extension provides
 // eslint-disable-next-line
@@ -11,7 +11,7 @@ export type VaultBehaviorExtension<T = unknown> = Partial<Record<string, Behavio
 
 // Behavior interface
 export interface VaultBehavior<T = unknown, E extends VaultBehaviorExtension<T> = VaultBehaviorExtension<T>> {
-  readonly type: VaultBehaviorType;
+  readonly type: NgVaultBehaviorType;
   readonly key: string;
 
   // Optional override policy for colliding keys
@@ -25,5 +25,5 @@ export interface VaultBehavior<T = unknown, E extends VaultBehaviorExtension<T> 
 export interface VaultBehaviorFactory<T = unknown, E extends VaultBehaviorExtension<T> = VaultBehaviorExtension<T>> {
   (context: VaultBehaviorFactoryContext): VaultBehavior<T, E>;
   critical: boolean;
-  type: VaultBehaviorType;
+  type: NgVaultBehaviorType;
 }

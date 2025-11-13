@@ -1,9 +1,9 @@
-import { ResourceStateError } from './resource-state-error.model';
+import { NgVaultResourceStateError } from './ngvault-resource-state-error.model';
 
 export interface VaultStateSnapshot<T> {
   isLoading: boolean;
   value: T | undefined;
-  error: ResourceStateError | null;
+  error: NgVaultResourceStateError | null;
   hasValue: boolean;
   message?: string;
 }

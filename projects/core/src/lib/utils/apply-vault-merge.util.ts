@@ -1,18 +1,17 @@
-import { VaultBehaviorContext, VaultDataType } from '@ngvault/shared';
+import { NgVaultDataType } from '@ngvault/shared';
 
 export function applyNgVaultValueMerge<T>(
-  ctx: VaultBehaviorContext<T>,
-  curr: VaultDataType<T> | undefined | null,
-  next: VaultDataType<T> | undefined | null
-): VaultDataType<T> {
-  if (!ctx?.value) return;
-
-  // Nothing to merge if next is undefined
-  if (next === undefined) return;
+  curr: NgVaultDataType<T> | undefined | null,
+  next: NgVaultDataType<T> | undefined | null
+): NgVaultDataType<T> | undefined {
+  // Nothing to merge if next is undefined → preserve current
+  if (next === undefined) {
+    return curr ?? undefined;
+  }
 
   // Arrays – replace instead of merge
   if (Array.isArray(curr) && Array.isArray(next)) {
-    return [...next] as VaultDataType<T>;
+    return [...next] as NgVaultDataType<T>;
   }
 
   // Objects – shallow merge with null guards
@@ -24,9 +23,9 @@ export function applyNgVaultValueMerge<T>(
     !Array.isArray(curr) &&
     !Array.isArray(next)
   ) {
-    return { ...curr, ...next } as VaultDataType<T>;
+    return { ...curr, ...next } as NgVaultDataType<T>;
   }
 
   // Everything else – assign directly
-  return next as VaultDataType<T>;
+  return next as NgVaultDataType<T>;
 }

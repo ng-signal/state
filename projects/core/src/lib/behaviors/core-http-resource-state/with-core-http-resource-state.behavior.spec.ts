@@ -12,7 +12,7 @@ interface TestModel {
   name: string;
 }
 
-describe('Behavior: CoreHttpResourceStateBehaviorV2', () => {
+describe('Behavior: CoreHttpResourceStateBehavior', () => {
   let mockBackend: HttpTestingController;
   let behavior: any;
   let injector: Injector;
@@ -58,7 +58,7 @@ describe('Behavior: CoreHttpResourceStateBehaviorV2', () => {
 
   it('should have default attributes', () => {
     expect(behavior.critical).toBeTrue();
-    expect(behavior.key).toBe('NgVault::CoreHttpResource::StateV2');
+    expect(behavior.key).toBe('NgVault::CoreHttpResource::State');
     expect(behavior.type).toBe('state');
   });
 
