@@ -1,8 +1,8 @@
 import { Injector, provideZonelessChangeDetection, runInInjectionContext } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
-import { NgVaultEventBus, NgVaultEventModel } from '@ngvault/dev-tools';
+import { NgVaultEventBus } from '@ngvault/dev-tools';
 import { VaultBehaviorType } from '@ngvault/shared';
-import { Subscription } from 'rxjs';
+import { createTestEventListener } from '@ngvault/testing';
 import { NgVaultMonitor } from './vault-monitor.service';
 
 describe('Service: Vault Monitor', () => {
@@ -13,10 +13,6 @@ describe('Service: Vault Monitor', () => {
   let eventBus: any;
   let behavior: any;
 
-  function listen(hook: (event: NgVaultEventModel) => void): () => void {
-    const subscription: Subscription = eventBus.asObservable().subscribe(hook);
-    return () => subscription.unsubscribe();
-  }
   beforeEach(() => {
     ctx = {
       state: {
@@ -37,7 +33,7 @@ describe('Service: Vault Monitor', () => {
 
     // Subscribe to all vault events via the official hook
     eventBus = TestBed.inject(NgVaultEventBus);
-    stopListening = listen((event) => emitted.push(event));
+    stopListening = createTestEventListener(eventBus, emitted);
 
     runInInjectionContext(injector, () => {
       vaultMonitor = TestBed.inject(NgVaultMonitor);

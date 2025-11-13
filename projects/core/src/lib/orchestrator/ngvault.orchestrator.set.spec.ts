@@ -2,10 +2,9 @@ import { httpResource, provideHttpClient } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { Injector, provideZonelessChangeDetection, runInInjectionContext, signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
-import { NgVaultEventBus, NgVaultEventModel } from '@ngvault/dev-tools';
+import { NgVaultEventBus } from '@ngvault/dev-tools';
 import { VaultBehaviorContext, VaultBehaviorType } from '@ngvault/shared';
-import { flushMicrotasksZoneless, provideVaultTesting } from '@ngvault/testing';
-import { Subscription } from 'rxjs';
+import { createTestEventListener, flushMicrotasksZoneless, provideVaultTesting } from '@ngvault/testing';
 import { VaultOrchestrator } from './ngvault.orchestrator';
 
 describe('Orcestrator: Vault', () => {
@@ -17,11 +16,6 @@ describe('Orcestrator: Vault', () => {
   const emitted: any[] = [];
   let stopListening: any;
   let eventBus: any;
-
-  function listen(hook: (event: NgVaultEventModel) => void): () => void {
-    const subscription: Subscription = eventBus.asObservable().subscribe(hook);
-    return () => subscription.unsubscribe();
-  }
 
   beforeEach(() => {
     calls = [];
@@ -46,7 +40,7 @@ describe('Orcestrator: Vault', () => {
     injector = TestBed.inject(Injector);
 
     eventBus = TestBed.inject(NgVaultEventBus);
-    stopListening = listen((event) => emitted.push(event));
+    stopListening = createTestEventListener(eventBus, emitted);
   });
 
   afterEach(() => {

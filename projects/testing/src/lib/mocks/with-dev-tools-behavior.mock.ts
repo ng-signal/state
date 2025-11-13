@@ -1,4 +1,5 @@
 import { defineNgVaultBehaviorKey } from '@ngvault/shared';
+declare const jasmine: any;
 
 class TestBehavior {
   #events: any = [];
@@ -56,8 +57,49 @@ class TestBehavior {
   onSet(key: string, ctx: any): void {
     this.#events.push(`onSet:${key}:${JSON.stringify(ctx.state) || 'undefined'}`);
   }
-}
 
+  startReplace(key: string, ctx: any): void {
+    this.#events.push(`onSet:${key}:${JSON.stringify(ctx.state) || 'undefined'}`);
+  }
+
+  endReplace(key: string, ctx: any): void {
+    this.#events.push(`onSet:${key}:${JSON.stringify(ctx.state) || 'undefined'}`);
+  }
+
+  startMerge(key: string, ctx: any): void {
+    this.#events.push(`onSet:${key}:${JSON.stringify(ctx.state) || 'undefined'}`);
+  }
+
+  endMerge(key: string, ctx: any): void {
+    this.#events.push(`onSet:${key}:${JSON.stringify(ctx.state) || 'undefined'}`);
+  }
+
+  startState(key: string, ctx: any): void {
+    this.#events.push(`onSet:${key}:${JSON.stringify(ctx.state) || 'undefined'}`);
+  }
+
+  endState(key: string, ctx: any): void {
+    this.#events.push(`onSet:${key}:${JSON.stringify(ctx.state) || 'undefined'}`);
+  }
+
+  error(key: string, ctx: any): void {
+    this.#events.push(`onSet:${key}:${JSON.stringify(ctx.state) || 'undefined'}`);
+  }
+
+  insight = {
+    onCellRegistered: () => {
+      this.#events.push(`cell registered`);
+    },
+
+    // ✔ allow all events
+    filterEventType: () => true,
+
+    // ✔ request full state, payloads, and errors
+    wantsState: true,
+    wantsPayload: true,
+    wantsErrors: true
+  };
+}
 let testInstance: any;
 
 export const withTestBehavior: any = (context: any): any => {
@@ -69,4 +111,31 @@ export const withTestBehavior: any = (context: any): any => {
 
 export const getTestBehavior = () => {
   return testInstance;
+};
+
+export const withTestBehaviorV2: any = (context: any): any => {
+  testInstance = new TestBehavior(context.behaviorId, context.type || 'insights', context.critial || false);
+  return testInstance;
+};
+(withTestBehaviorV2 as any).type = 'insights';
+(withTestBehaviorV2 as any).critical = true;
+
+export const createTestEventListener = (eventBus: any, emitted: any[]) => {
+  const subscription = eventBus.asObservable().subscribe((event: any) => {
+    // Normalize / sanitize fields
+    event.id = jasmine.any(String);
+    event.timestamp = jasmine.any(Number);
+
+    if (/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(event.cell)) {
+      event.cell = jasmine.any(String);
+    }
+
+    if (/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(event.behaviorId)) {
+      event.behaviorId = jasmine.any(String);
+    }
+
+    emitted.push(event);
+  });
+
+  return () => subscription.unsubscribe();
 };
