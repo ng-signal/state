@@ -1,39 +1,6 @@
 import { VaultBehaviorContext, VaultDataType } from '@ngvault/shared';
-import { ngVaultDebug } from './ngvault-logger.util';
 
 export function applyNgVaultValueMerge<T>(
-  ctx: VaultBehaviorContext<T>,
-  curr: VaultDataType<T> | undefined,
-  next: VaultDataType<T> | undefined
-): void {
-  ngVaultDebug('apply', 1);
-  if (!ctx?.value || next === undefined) return;
-  ngVaultDebug('apply', 2);
-
-  if (Array.isArray(curr) && Array.isArray(next)) {
-    ngVaultDebug('apply', 3);
-    ctx.value.set([...next] as VaultDataType<T>);
-    return;
-  }
-
-  if (
-    curr &&
-    next &&
-    typeof curr === 'object' &&
-    typeof next === 'object' &&
-    !Array.isArray(curr) &&
-    !Array.isArray(next)
-  ) {
-    ngVaultDebug('apply', 4);
-    ctx.value.set({ ...curr, ...next } as VaultDataType<T>);
-    return;
-  }
-  ngVaultDebug('apply', 5);
-
-  ctx.value.set(next as VaultDataType<T>);
-}
-
-export function applyNgVaultValueMergev2<T>(
   ctx: VaultBehaviorContext<T>,
   curr: VaultDataType<T> | undefined | null,
   next: VaultDataType<T> | undefined | null

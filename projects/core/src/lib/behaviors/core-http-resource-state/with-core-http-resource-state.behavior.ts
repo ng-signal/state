@@ -14,7 +14,7 @@ import { isHttpResourceRef } from '../../utils/is-http-resource.util';
 import { ngVaultDebug } from '../../utils/ngvault-logger.util';
 import { resourceError } from '../../utils/resource-error.util';
 
-export class CoreHttpResourceStateBehaviorV2<T> implements VaultStateBehavior<T> {
+class CoreHttpResourceStateBehavior<T> implements VaultStateBehavior<T> {
   readonly type = 'state';
   public readonly critical = true;
   public readonly key = defineNgVaultBehaviorKey('CoreHttpResource', 'StateV2');
@@ -64,12 +64,12 @@ export class CoreHttpResourceStateBehaviorV2<T> implements VaultStateBehavior<T>
   }
 }
 
-export const withCoreHttpResourceStateBehaviorV2 = ((context: VaultBehaviorFactoryContext): VaultBehavior => {
+export const withCoreHttpResourceStateBehavior = ((context: VaultBehaviorFactoryContext): VaultBehavior => {
   const destroyRef = context.injector.get(DestroyRef);
 
-  return new CoreHttpResourceStateBehaviorV2(context.injector, destroyRef);
+  return new CoreHttpResourceStateBehavior(context.injector, destroyRef);
 }) as VaultBehaviorFactory;
 
 // Required metadata for discovery
-withCoreHttpResourceStateBehaviorV2.type = 'state';
-withCoreHttpResourceStateBehaviorV2.critical = true;
+withCoreHttpResourceStateBehavior.type = 'state';
+withCoreHttpResourceStateBehavior.critical = true;

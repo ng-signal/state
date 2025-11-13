@@ -5,7 +5,7 @@ import { TestBed } from '@angular/core/testing';
 import { resetWarnExperimentalHttpResourceTestingOnly } from '@ngvault/core/utils/dev-warning.util';
 import { VaultBehaviorContext } from '@ngvault/shared';
 import { flushMicrotasksZoneless, provideVaultTesting } from '@ngvault/testing';
-import { withCoreHttpResourceStateBehaviorV2 } from './with-core-http-resource-state.behavior.v2';
+import { withCoreHttpResourceStateBehavior } from './with-core-http-resource-state.behavior';
 
 interface TestModel {
   id: number;
@@ -44,7 +44,7 @@ describe('Behavior: CoreHttpResourceStateBehaviorV2', () => {
     };
 
     runInInjectionContext(injector, () => {
-      behavior = withCoreHttpResourceStateBehaviorV2({
+      behavior = withCoreHttpResourceStateBehavior({
         type: 'state',
         injector
       });

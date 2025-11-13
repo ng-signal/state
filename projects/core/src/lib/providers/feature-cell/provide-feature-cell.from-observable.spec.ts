@@ -4,12 +4,7 @@ import { Injector, provideZonelessChangeDetection, runInInjectionContext, signal
 import { TestBed } from '@angular/core/testing';
 import { NgVaultEventBus } from '@ngvault/dev-tools';
 import { FeatureCell, VaultSignalRef } from '@ngvault/shared';
-import {
-  createTestEventListener,
-  flushMicrotasksZoneless,
-  provideVaultTesting,
-  withTestBehavior
-} from '@ngvault/testing';
+import { createTestEventListener, flushMicrotasksZoneless, provideVaultTesting } from '@ngvault/testing';
 import { Subject } from 'rxjs';
 import { provideFeatureCell } from './provide-feature-cell';
 
@@ -18,7 +13,7 @@ interface TestModel {
   name: string;
 }
 
-describe('ResourceVaultModel (replaceState, mergeState, fromObservable) v2', () => {
+describe('Provider: Feature Cell: fromObservable', () => {
   let vault: FeatureCell<TestModel[] | TestModel>;
   let subject: Subject<TestModel[]>;
   const calls: any = [];
@@ -40,9 +35,7 @@ describe('ResourceVaultModel (replaceState, mergeState, fromObservable) v2', () 
     });
 
     const injector = TestBed.inject(Injector);
-    const providers = provideFeatureCell(class TestService {}, { key: 'http', initial: [], insights: {} as any }, [
-      withTestBehavior
-    ]);
+    const providers = provideFeatureCell(class TestService {}, { key: 'http', initial: [], insights: {} as any }, []);
     const vaultFactory = (providers[0] as any).useFactory;
 
     runInInjectionContext(injector, () => {

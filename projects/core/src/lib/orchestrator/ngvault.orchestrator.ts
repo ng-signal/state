@@ -17,7 +17,7 @@ import {
 } from '@ngvault/shared';
 import { NgVaultMonitor } from '../monitor/ngvault-monitor.service';
 import { NGVAULT_QUEUE } from '../tokens/ngvault-queue.token';
-import { applyNgVaultValueMergev2 } from '../utils/apply-vault-merge.util';
+import { applyNgVaultValueMerge } from '../utils/apply-vault-merge.util';
 import { isHttpResourceRef } from '../utils/is-http-resource.util';
 import { resourceError } from '../utils/resource-error.util';
 
@@ -98,7 +98,7 @@ export class VaultOrchestrator<T> {
 
         const partial = await this.#runStage('state', ctx);
 
-        const stateResult = structuredClone(applyNgVaultValueMergev2<T>(ctx, current, partial));
+        const stateResult = structuredClone(applyNgVaultValueMerge<T>(ctx, current, partial));
 
         const finalState = await this.#finishPipeline(ctx, stateResult);
         this.#ngVaultMonitor.endMerge(this.cellKey, 'vault-orchestrator', ctx);

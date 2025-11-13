@@ -10,12 +10,7 @@ import {
 import { TestBed } from '@angular/core/testing';
 import { NgVaultEventBus } from '@ngvault/dev-tools';
 import { FeatureCell, VaultBehaviorFactory } from '@ngvault/shared';
-import {
-  createTestEventListener,
-  flushMicrotasksZoneless,
-  getTestBehavior,
-  provideVaultTesting
-} from '@ngvault/testing';
+import { createTestEventListener, flushMicrotasksZoneless, provideVaultTesting } from '@ngvault/testing';
 import { FEATURE_CELL_REGISTRY } from '../../tokens/feature-cell-registry.token';
 import { provideFeatureCell } from './provide-feature-cell';
 
@@ -629,7 +624,6 @@ describe('Provider: Feature Cell (core vault functionality)', () => {
         vault.destroy();
       });
 
-      testBehavior = getTestBehavior();
       await flushMicrotasksZoneless();
 
       expect(emitted).toEqual([]);
@@ -648,7 +642,6 @@ describe('Provider: Feature Cell (core vault functionality)', () => {
       vault.replaceState({ loading: true, error: { message: 'fail' }, value: [1, 2, 3] });
       vault.replaceState(undefined);
 
-      testBehavior = getTestBehavior();
       await flushMicrotasksZoneless();
 
       expect(emitted).toEqual([

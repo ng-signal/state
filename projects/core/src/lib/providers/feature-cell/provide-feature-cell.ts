@@ -1,8 +1,8 @@
 import { HttpResourceRef } from '@angular/common/http';
 import { DestroyRef, Injector, Provider, Type, computed, inject, signal } from '@angular/core';
 import { getOrCreateFeatureCellToken } from '@ngvault/core';
-import { withCoreHttpResourceStateBehaviorV2 } from '@ngvault/core/behaviors/core-http-resource-state/with-core-http-resource-state.behavior.v2';
-import { withCoreStateBehaviorV2 } from '@ngvault/core/behaviors/core-state/with-core-state.behavior.v2';
+import { withCoreHttpResourceStateBehavior } from '@ngvault/core/behaviors/core-http-resource-state/with-core-http-resource-state.behavior';
+import { withCoreStateBehavior } from '@ngvault/core/behaviors/core-state/with-core-state.behavior';
 import { VaultOrchestrator } from '@ngvault/core/orchestrator/ngvault.orchestrator';
 import {
   FeatureCell,
@@ -55,8 +55,8 @@ export function provideFeatureCell<Service, T>(
       }
 
       const _defaultBehaviors: VaultBehaviorFactory<T>[] = [
-        withCoreStateBehaviorV2,
-        withCoreHttpResourceStateBehaviorV2,
+        withCoreStateBehavior,
+        withCoreHttpResourceStateBehavior,
         withCoreObservableBehavior
       ];
       const _allBehaviors: VaultBehaviorFactory<T>[] = [..._defaultBehaviors, ...behaviors];

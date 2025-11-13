@@ -10,7 +10,7 @@ import {
 import { isHttpResourceRef } from '../../utils/is-http-resource.util';
 import { ngVaultDebug } from '../../utils/ngvault-logger.util';
 
-export class CoreStateBehaviorV2<T> implements VaultStateBehavior<T> {
+class CoreStateBehavior<T> implements VaultStateBehavior<T> {
   readonly type = 'state';
   readonly critical = true;
   readonly key = defineNgVaultBehaviorKey('Core', 'StateV2');
@@ -37,9 +37,9 @@ export class CoreStateBehaviorV2<T> implements VaultStateBehavior<T> {
   }
 }
 
-export const withCoreStateBehaviorV2 = ((context: VaultBehaviorFactoryContext): VaultBehavior => {
-  return new CoreStateBehaviorV2(context.injector);
+export const withCoreStateBehavior = ((context: VaultBehaviorFactoryContext): VaultBehavior => {
+  return new CoreStateBehavior(context.injector);
 }) as VaultBehaviorFactory;
 
-withCoreStateBehaviorV2.type = 'state';
-withCoreStateBehaviorV2.critical = true;
+withCoreStateBehavior.type = 'state';
+withCoreStateBehavior.critical = true;

@@ -3,12 +3,7 @@ import { HttpTestingController, provideHttpClientTesting } from '@angular/common
 import { ApplicationRef, Injector, provideZonelessChangeDetection } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { NgVaultEventBus } from '@ngvault/dev-tools';
-import {
-  createTestEventListener,
-  flushMicrotasksZoneless,
-  provideVaultTesting,
-  withTestBehavior
-} from '@ngvault/testing';
+import { createTestEventListener, flushMicrotasksZoneless, provideVaultTesting } from '@ngvault/testing';
 import { FeatureCell } from '../../decorators/feature-cell.decorator';
 import { injectVault } from '../../injectors/feature-vault.injector';
 import { resetWarnExperimentalHttpResourceTestingOnly } from '../../utils/dev-warning.util';
@@ -44,7 +39,7 @@ describe('Provider: Feature Cell Resource', () => {
         provideHttpClientTesting(),
         provideZonelessChangeDetection(),
         TestService,
-        ...provideFeatureCell(TestService, { key: 'cars', initial: [] }, [withTestBehavior])
+        ...provideFeatureCell(TestService, { key: 'cars', initial: [] }, [])
       ]
     });
 
