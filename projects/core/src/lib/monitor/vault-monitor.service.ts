@@ -1,10 +1,24 @@
 import { inject, Injectable } from '@angular/core';
 import { NgVaultEventBus, NgVaultEventModel } from '@ngvault/dev-tools';
-import { defineNgVaultBehaviorKey, VaultBehaviorContext, VaultStateSnapshot } from '@ngvault/shared';
+import {
+  defineNgVaultBehaviorKey,
+  VaultBehavior,
+  VaultBehaviorContext,
+  VaultBehaviorType,
+  VaultInsightDefinition,
+  VaultStateSnapshot
+} from '@ngvault/shared';
 
 @Injectable({ providedIn: 'root' })
 export class NgVaultMonitor {
   #eventBus = inject(NgVaultEventBus);
+  #cellRegistry = new Map<
+    string,
+    {
+      hasInsight: boolean;
+      insights: VaultInsightDefinition[];
+    }
+  >();
   public readonly key = defineNgVaultBehaviorKey('DevTools', 'Telemetry');
 
   #serializeName(name: string): string {
@@ -49,6 +63,26 @@ export class NgVaultMonitor {
     this.#emitEvent(cell, behaviorId, 'error', ctx.state, 'error', err instanceof Error ? err.message : String(err));
   }
 
+  registerCell(cellKey: string, behaviors: VaultBehavior[]): void {
+    // Extract insight behaviors
+    const insights = behaviors
+      .filter((b) => b.type === VaultBehaviorType.Insights)
+      // eslint-disable-next-line
+      .map((b) => (b as any).insight as VaultInsightDefinition)
+      .filter((i): i is VaultInsightDefinition => !!i);
+
+    // Store insight metadata for this cell
+    this.#cellRegistry.set(cellKey, {
+      hasInsight: insights.length > 0,
+      insights
+    });
+
+    // Call lifecycle hooks on each insight
+    for (const insight of insights) {
+      insight.onCellRegistered?.(cellKey);
+    }
+  }
+
   #emitEvent<T>(
     cell: string,
     behaviorId: string,
@@ -57,123 +91,31 @@ export class NgVaultMonitor {
     payload?: unknown,
     error?: string
   ): void {
-    const event = {
-      id: crypto.randomUUID(),
-      cell,
-      behaviorId: behaviorId,
-      type: this.#serializeName(type),
-      timestamp: Date.now(),
-      state: ctx,
-      ...(payload ? { payload } : {})
-    } as NgVaultEventModel;
+    const config = this.#cellRegistry.get(cell);
 
-    if (error) {
-      event.error = error;
-    }
+    if (!config) return;
 
-    this.#eventBus.next(event);
-  }
-}
+    for (const insight of config.insights) {
+      const serializedType = this.#serializeName(type);
+      if (insight.filterEventType && !insight.filterEventType(serializedType)) continue;
 
-/*
+      const shouldEmitState = insight.wantsState ?? false;
+      const shouldEmitPayload = insight.wantsPayload ?? false;
+      const shouldEmitErrors = insight.wantsErrors ?? false;
 
-// projects/core/src/lib/services/vault-monitor.service.ts
-import { Injectable } from '@angular/core';
-import {
-  NgVaultEventBus,
-  NgVaultEventModel,
-  registerNgVault,
-  unregisterNgVault,
-  VaultEventType,
-} from '@ngvault/dev-tools';
-import { VaultBehaviorContext, VaultStateSnapshot } from '@ngvault/shared';
+      const event: NgVaultEventModel = {
+        id: crypto.randomUUID(),
+        cell,
+        behaviorId,
+        type: serializedType,
+        timestamp: Date.now()
+      };
 
-@Injectable({ providedIn: 'root' })
-export class VaultMonitor {
-  #registered = new Set<string>();
-  constructor(private readonly bus: NgVaultEventBus) {}
+      if (shouldEmitState) event.state = ctx;
+      if (shouldEmitPayload && payload !== undefined) event.payload = payload;
+      if (shouldEmitErrors && error) event.error = error;
 
-  // ──────────────────────────────────────────────
-  // Lifecycle / Setup
-  // ──────────────────────────────────────────────
-  init<T>(vaultKey: string, serviceName: string, ctx: Readonly<VaultBehaviorContext<T>>): void {
-    if (this.#registered.has(vaultKey)) return;
-    this.#registered.add(vaultKey);
-
-    registerNgVault({ key: vaultKey, service: serviceName, state: ctx });
-    this.#emit(vaultKey, ctx.state, 'init');
-  }
-
-  destroy<T>(vaultKey: string, ctx: Readonly<VaultBehaviorContext<T>>): void {
-    this.#emit(vaultKey, ctx.state, 'destroy');
-    if (this.#registered.has(vaultKey)) {
-      unregisterNgVault(vaultKey);
-      this.#registered.delete(vaultKey);
+      this.#eventBus.next(event);
     }
   }
-
-  // ──────────────────────────────────────────────
-  // Declarative operation entry points
-  // ──────────────────────────────────────────────
-  startReplace<T>(ctx: Readonly<VaultBehaviorContext<T>>): void {
-    this.#emit(ctx.state.key, ctx.state, 'lifecycle:start:replace');
-  }
-
-  endReplace<T>(ctx: Readonly<VaultBehaviorContext<T>>, value?: T): void {
-    this.#emit(ctx.state.key, ctx.state, 'lifecycle:end:replace', undefined, value);
-  }
-
-  startMerge<T>(ctx: Readonly<VaultBehaviorContext<T>>): void {
-    this.#emit(ctx.state.key, ctx.state, 'lifecycle:start:merge');
-  }
-
-  endMerge<T>(ctx: Readonly<VaultBehaviorContext<T>>, value?: T): void {
-    this.#emit(ctx.state.key, ctx.state, 'lifecycle:end:merge', undefined, value);
-  }
-
-  error<T>(ctx: Readonly<VaultBehaviorContext<T>>, err: unknown): void {
-    this.#emit(ctx.state.key, ctx.state, 'error', err instanceof Error ? err.message : String(err));
-  }
-
-  // ──────────────────────────────────────────────
-  // Stage-level events (state, reduce, encrypt, persist)
-  // ──────────────────────────────────────────────
-  startStage<T>(stage: string, ctx: Readonly<VaultBehaviorContext<T>>): void {
-    this.#emit(ctx.state.key, ctx.state, `stage:start:${stage}`);
-  }
-
-  endStage<T>(stage: string, ctx: Readonly<VaultBehaviorContext<T>>, value?: T): void {
-    this.#emit(ctx.state.key, ctx.state, `stage:end:${stage}`, undefined, value);
-  }
-
-  errorStage<T>(stage: string, ctx: Readonly<VaultBehaviorContext<T>>, err: unknown): void {
-    this.#emit(
-      ctx.state.key,
-      ctx.state,
-      `stage:error:${stage}`,
-      err instanceof Error ? err.message : String(err)
-    );
-  }
-
-  // ──────────────────────────────────────────────
-  // Private emit
-  // ──────────────────────────────────────────────
-  #emit<T>(
-    key: string,
-    ctx: Readonly<VaultStateSnapshot<T>>,
-    type: VaultEventType | string,
-    error?: string,
-    value?: unknown
-  ): void {
-    const event: NgVaultEventModel = {
-      key,
-      type: type as VaultEventType,
-      timestamp: Date.now(),
-      state: ctx,
-    };
-    if (error) event.error = error;
-    if (value !== undefined) (event as any).value = value;
-    this.bus.next(event);
-  }
 }
-  */

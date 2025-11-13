@@ -1,14 +1,36 @@
 // shared/vault-behavior-type.ts
 
-export const VaultBehaviorTypeOrder = Object.freeze([
-  'dev-tools', // 1
-  'insights', // 1
-  'core', // 2
-  'state', // 3
-  'persistence', // 4
-  'encryption', // 5
-  'reduce',
-  'events'
-] as const);
+/**
+ * Runtime-safe enum-like object.
+ * No JS enum bloat and works with tree-shaking.
+ */
+export const VaultBehaviorType = {
+  DevTools: 'dev-tools',
+  Insights: 'insights',
+  Core: 'core',
+  State: 'state',
+  Persistence: 'persistence',
+  Encryption: 'encryption',
+  Reduce: 'reduce',
+  Events: 'events'
+} as const;
 
-export type VaultBehaviorType = (typeof VaultBehaviorTypeOrder)[number];
+/**
+ * Literal union type inferred from the const object.
+ */
+export type VaultBehaviorType = (typeof VaultBehaviorType)[keyof typeof VaultBehaviorType];
+
+/**
+ * Optional ordering for orchestration
+ * (this uses the *values* of the enum-like object)
+ */
+export const VaultBehaviorTypeOrder: readonly VaultBehaviorType[] = [
+  VaultBehaviorType.DevTools,
+  VaultBehaviorType.Insights,
+  VaultBehaviorType.Core,
+  VaultBehaviorType.State,
+  VaultBehaviorType.Persistence,
+  VaultBehaviorType.Encryption,
+  VaultBehaviorType.Reduce,
+  VaultBehaviorType.Events
+] as const;

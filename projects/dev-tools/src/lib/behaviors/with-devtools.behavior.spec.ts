@@ -1,7 +1,7 @@
 import { Injector, provideZonelessChangeDetection, runInInjectionContext } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { NgVaultDevModeService, VaultBehavior } from '@ngvault/shared';
-import { NgVaultDebuggerService } from '../services/ngvault-insight.service';
+import { NgVaultInsightService } from '../services/ngvault-insight.service';
 import { withDevtoolsBehavior } from './with-devtools.behavior';
 
 describe('Behavior: withDevtools', () => {
@@ -22,7 +22,7 @@ describe('Behavior: withDevtools', () => {
       } as any;
 
       TestBed.configureTestingModule({
-        providers: [NgVaultDebuggerService, provideZonelessChangeDetection()]
+        providers: [NgVaultInsightService, provideZonelessChangeDetection()]
       }).overrideProvider(NgVaultDevModeService, {
         useValue: { isDevMode: true }
       });
@@ -32,8 +32,8 @@ describe('Behavior: withDevtools', () => {
       emitted.length = 0;
 
       // Subscribe to all vault events via the official hook
-      const debuggerService = TestBed.inject(NgVaultDebuggerService);
-      stopListening = debuggerService.listen((event) => emitted.push(event));
+      const insightService = TestBed.inject(NgVaultInsightService);
+      stopListening = insightService.listen((event) => emitted.push(event));
 
       runInInjectionContext(injector, () => {
         behavior = withDevtoolsBehavior({ type: 'dev-tools', injector, behaviorId: 'id' });
@@ -207,7 +207,7 @@ describe('Behavior: withDevtools', () => {
       };
 
       TestBed.configureTestingModule({
-        providers: [NgVaultDebuggerService, provideZonelessChangeDetection()]
+        providers: [NgVaultInsightService, provideZonelessChangeDetection()]
       }).overrideProvider(NgVaultDevModeService, {
         useValue: { isDevMode: false }
       });
@@ -217,7 +217,7 @@ describe('Behavior: withDevtools', () => {
       emitted.length = 0;
 
       // Subscribe to all vault events via the official hook
-      const debuggerService = TestBed.inject(NgVaultDebuggerService);
+      const debuggerService = TestBed.inject(NgVaultInsightService);
       stopListening = debuggerService.listen((event) => emitted.push(event));
 
       runInInjectionContext(injector, () => {

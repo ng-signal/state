@@ -14,6 +14,7 @@ import {
   VaultStateInputType,
   VaultStateType
 } from '@ngvault/shared';
+import { NgVaultMonitor } from '../monitor/vault-monitor.service';
 import { NGVAULT_QUEUE } from '../tokens/ngvault-queue.token';
 import { applyNgVaultValueMergev2 } from '../utils/apply-vault-merge.util';
 import { isHttpResourceRef } from '../utils/is-http-resource.util';
@@ -21,11 +22,15 @@ import { resourceError } from '../utils/resource-error.util';
 
 export class VaultOrchestrator<T> {
   #queue = inject(NGVAULT_QUEUE);
+  #ngVaultMonitor = inject(NgVaultMonitor);
 
   constructor(
+    private cellKey: string,
     private readonly behaviors: VaultBehavior<T>[],
     private readonly injector: Injector
-  ) {}
+  ) {
+    this.#ngVaultMonitor.registerCell(this.cellKey, behaviors);
+  }
 
   #ensureIncoming(ctx: VaultBehaviorContext<T>): VaultStateInputType<T> | null {
     const incoming = ctx.incoming;
@@ -62,6 +67,7 @@ export class VaultOrchestrator<T> {
   dispatchSet(ctx: VaultBehaviorContext<T>): void {
     this.#queue.enqueue(async () => {
       ctx.operation = 'replace';
+      this.#ngVaultMonitor.startReplace(this.cellKey, 'vault-orchestrator', ctx);
 
       const incoming = this.#ensureIncoming(ctx);
       if (!incoming) return;
@@ -69,7 +75,10 @@ export class VaultOrchestrator<T> {
       this.#safeAsync(async () => {
         const stateResult = await this.#runStage('state', ctx);
 
-        return await this.#finishPipeline(ctx, stateResult);
+        const finalState = await this.#finishPipeline(ctx, stateResult);
+
+        this.#ngVaultMonitor.endReplace(this.cellKey, 'vault-orchestrator', ctx);
+        return finalState;
       }, ctx);
     });
   }
@@ -77,6 +86,7 @@ export class VaultOrchestrator<T> {
   dispatchPatch(ctx: VaultBehaviorContext<T>): void {
     this.#queue.enqueue(async () => {
       ctx.operation = 'merge';
+      this.#ngVaultMonitor.startMerge(this.cellKey, 'vault-orchestrator', ctx);
 
       const incoming = this.#ensureIncoming(ctx);
       if (!incoming) return;
@@ -88,7 +98,9 @@ export class VaultOrchestrator<T> {
 
         const stateResult = structuredClone(applyNgVaultValueMergev2<T>(ctx, current, partial));
 
-        return await this.#finishPipeline(ctx, stateResult);
+        const finalState = await this.#finishPipeline(ctx, stateResult);
+        this.#ngVaultMonitor.endMerge(this.cellKey, 'vault-orchestrator', ctx);
+        return finalState;
       }, ctx);
     });
   }
@@ -189,9 +201,9 @@ export class VaultOrchestrator<T> {
         switch (stage) {
           case 'state':
             if (typeof (behavior as VaultStateBehavior<T>).computeState === 'function') {
-              // start log
+              this.#ngVaultMonitor.startState(this.cellKey, behavior.behaviorId, ctx);
               next = await (behavior as VaultStateBehavior<T>).computeState(ctx);
-              // end log
+              this.#ngVaultMonitor.endState(this.cellKey, behavior.behaviorId, ctx);
             }
             break;
 
