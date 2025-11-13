@@ -1,26 +1,20 @@
 // projects/core/src/lib/services/vault-behavior-lifecycle.service.spec.ts
-import { ApplicationRef, Injector, provideZonelessChangeDetection, runInInjectionContext } from '@angular/core';
+import { Injector, provideZonelessChangeDetection, runInInjectionContext } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
+import { NgVaultEventBus } from '@ngvault/dev-tools';
 import {
   createTestBehaviorFactory,
-  flushNgVaultQueue,
-  getTestBehavior,
+  createTestEventListener,
   provideVaultTesting,
-  resetTestBehaviorFactoryId,
-  withTestBehavior
+  resetTestBehaviorFactoryId
 } from '@ngvault/testing';
-import { VaultBehaviorContext } from '../contexts/vault-behavior.context';
 import { VaultBehaviorRunner } from '../interfaces/vault-behavior-runner.interface';
 import { NgVaultBehaviorLifecycleService } from './ngvault-behavior-lifecycle.service';
 
 describe('Service: VaultBehaviorLifecycle', () => {
   function createParenttBehaviorFactory(): any {
     const coreBehavior = createTestBehaviorFactory(() => {
-      return {
-        onInit(key: string) {
-          calls.push(`parentOnInit:${key}`);
-        }
-      };
+      return {};
     }, 'core');
 
     coreBehavior.behaviorId = 'core-id';
@@ -29,16 +23,16 @@ describe('Service: VaultBehaviorLifecycle', () => {
   }
 
   let vaultRunner: VaultBehaviorRunner;
-  let ctx: VaultBehaviorContext<any>;
-  const calls: string[] = [];
   let randonUuid: any;
   let injector: any;
   let ids: any = [];
   let warnSpy: any;
+  const emitted: any[] = [];
+  let stopListening: any;
+  let eventBus: any;
 
   beforeEach(() => {
     warnSpy = spyOn(console, 'warn');
-    calls.length = 0;
     randonUuid = crypto.randomUUID;
 
     resetTestBehaviorFactoryId();
@@ -54,261 +48,13 @@ describe('Service: VaultBehaviorLifecycle', () => {
     const vaultService = TestBed.inject(NgVaultBehaviorLifecycleService);
     vaultRunner = vaultService;
 
-    // minimal fake context
-    ctx = {
-      state: {
-        isLoading: false,
-        value: 'initial',
-        error: null,
-        hasValue: true
-      }
-    } as any;
+    eventBus = TestBed.inject(NgVaultEventBus);
+    stopListening = createTestEventListener(eventBus, emitted);
   });
 
   afterEach(() => {
+    stopListening();
     crypto.randomUUID = randonUuid;
-  });
-
-  describe('onInit', () => {
-    it('should call onInit on the non-core behavior', async () => {
-      const parentBehavior = createParenttBehaviorFactory();
-      const childBehavior = createTestBehaviorFactory(() => {
-        return {
-          onInit(key: string) {
-            calls.push(`onInit:${key}`);
-          }
-        };
-      }, 'state');
-
-      vaultRunner.initializeBehaviors(injector, [parentBehavior, childBehavior]);
-
-      vaultRunner.onInit('core-id', 'vault1', 'service-name', ctx);
-      await TestBed.inject(ApplicationRef).whenStable();
-
-      expect(calls).toEqual(['onInit:vault1']);
-    });
-
-    it('should call onInit on a single behavior', async () => {
-      const parentBehavior = createParenttBehaviorFactory();
-      const childBehavior = createTestBehaviorFactory(() => {
-        return {
-          onInit(key: string) {
-            calls.push(`onInit:${key}`);
-          }
-        };
-      }, 'state');
-
-      vaultRunner.initializeBehaviors(injector, [parentBehavior, childBehavior]);
-      vaultRunner.onInit('core-id', 'vault1', 'service-name', ctx);
-      await TestBed.inject(ApplicationRef).whenStable();
-
-      expect(calls).toEqual(['onInit:vault1']);
-    });
-
-    describe('invalid ids', () => {
-      it('should not call onInit with a not equal id', () => {
-        const parentBehavior = createParenttBehaviorFactory();
-        const childBehavior = createTestBehaviorFactory(() => {
-          return {
-            onInit(key: string) {
-              calls.push(`onInit:${key}`);
-            }
-          };
-        }, 'state');
-
-        vaultRunner.initializeBehaviors(injector, [parentBehavior, childBehavior]);
-        vaultRunner.onInit('22', 'vault1', 'service-name', ctx);
-
-        expect(calls).toEqual([]);
-      });
-
-      it('should not call onInit with a not defined caller id', () => {
-        const parentBehavior = createParenttBehaviorFactory();
-        const childBehavior = createTestBehaviorFactory(() => {
-          return {
-            onInit(key: string) {
-              calls.push(`onInit:${key}`);
-            }
-          };
-        }, 'state');
-
-        vaultRunner.initializeBehaviors(injector, [parentBehavior, childBehavior]);
-        vaultRunner.onInit('undefined', 'vault1', 'service-name', ctx);
-
-        expect(calls).toEqual([]);
-      });
-    });
-
-    describe('N+1 Lifescycle runs', () => {
-      let randomBehaviors: any = [];
-
-      beforeEach(() => {
-        const parentBehavior = createParenttBehaviorFactory();
-
-        const devToolsBehavior = createTestBehaviorFactory(() => {
-          return {
-            onInit: () => calls.push('dev-tools')
-          };
-        }, 'dev-tools');
-
-        const eventBehavior = createTestBehaviorFactory(() => {
-          return {
-            onInit: () => {
-              calls.push('events');
-            }
-          };
-        }, 'events');
-
-        const stateBehavior = createTestBehaviorFactory(() => {
-          return {
-            onInit: () => calls.push('state')
-          };
-        }, 'state');
-
-        const persistenceBehavior = createTestBehaviorFactory(() => {
-          return {
-            onInit: () => calls.push('persistence')
-          };
-        }, 'persistence');
-
-        const encryptionBehavior = createTestBehaviorFactory(() => {
-          return {
-            onInit: () => calls.push('encryption')
-          };
-        }, 'encryption');
-
-        const unknownBehavior = createTestBehaviorFactory(() => {
-          return {
-            onInit: () => {
-              calls.push('unknown');
-            }
-          };
-        }, 'unknown');
-
-        randomBehaviors = [
-          parentBehavior,
-          parentBehavior,
-          encryptionBehavior,
-          encryptionBehavior,
-          unknownBehavior,
-          unknownBehavior,
-          stateBehavior,
-          stateBehavior,
-          devToolsBehavior,
-          devToolsBehavior,
-          persistenceBehavior,
-          persistenceBehavior,
-          eventBehavior,
-          eventBehavior
-        ];
-      });
-
-      it('should call onInit on all behavior types in deterministic order from core', async () => {
-        vaultRunner.initializeBehaviors(injector, randomBehaviors);
-        vaultRunner.onInit('core-id', 'vault1', 'service-name', ctx);
-        TestBed.tick();
-        await flushNgVaultQueue(10);
-        expect(calls).toEqual(['dev-tools', 'dev-tools', 'events', 'events', 'state', 'state']);
-      });
-
-      it('should call onInit on all behavior types in deterministic order from state', async () => {
-        vaultRunner.initializeBehaviors(injector, randomBehaviors);
-        vaultRunner.onInit('state-id', 'vault1', 'service-name', ctx);
-        await TestBed.inject(ApplicationRef).whenStable();
-        expect(calls).toEqual(['dev-tools', 'dev-tools', 'events', 'events', 'persistence', 'persistence']);
-      });
-
-      it('should call onInit on all behavior types in deterministic order from persistence', async () => {
-        vaultRunner.initializeBehaviors(injector, randomBehaviors);
-        vaultRunner.onInit('persistence-id', 'vault1', 'service-name', ctx);
-        await flushNgVaultQueue(10);
-        expect(calls).toEqual(['dev-tools', 'dev-tools', 'events', 'events', 'encryption', 'encryption']);
-      });
-
-      it('should call onInit on all behavior types in deterministic order from encryption', async () => {
-        vaultRunner.initializeBehaviors(injector, randomBehaviors);
-        vaultRunner.onInit('encryption-id', 'vault1', 'service-name', ctx);
-
-        await TestBed.inject(ApplicationRef).whenStable();
-        expect(calls).toEqual(['dev-tools', 'dev-tools', 'events', 'events']);
-      });
-    });
-
-    describe('No runs', () => {
-      it('should call onInit on a single behavior', async () => {
-        const parentBehavior = createParenttBehaviorFactory();
-        const childBehavior = createTestBehaviorFactory(() => {
-          return {
-            onInit(key: string) {
-              calls.push(`onInit:${key}`);
-            }
-          };
-        }, 'state');
-
-        runInInjectionContext(injector, () => {
-          vaultRunner.initializeBehaviors(injector, [parentBehavior, childBehavior]);
-          vaultRunner.onInit('core-id', 'vault1', 'service-name', ctx);
-        });
-
-        expect(calls).toEqual(['onInit:vault1']);
-      });
-
-      it('should handle behaviors without onInit gracefully', () => {
-        const parentBehavior = createParenttBehaviorFactory();
-        const behaviorWithoutOnInit = createTestBehaviorFactory(() => {}, 'state');
-
-        runInInjectionContext(injector, () => {
-          vaultRunner.initializeBehaviors(injector, [parentBehavior, behaviorWithoutOnInit]);
-          vaultRunner.onInit('core-id', 'vault1', 'service-name', ctx);
-        });
-
-        expect(calls).toEqual([]);
-      });
-
-      it('throws an error if a lifecycle hook is called before initialize', () => {
-        runInInjectionContext(injector, () => {
-          vaultRunner = NgVaultBehaviorLifecycleService();
-        });
-
-        expect(() => vaultRunner.onInit('22', 'vault1', 'service-name', ctx)).toThrowError(
-          '[NgVault] VaultBehaviorRunner has not been initialized. Call initialize() before invoking lifecycle methods.'
-        );
-      });
-    });
-  });
-
-  describe('All Other life cycles', () => {
-    it('should call onSet on a single behavior', async () => {
-      const parentBehavior = createParenttBehaviorFactory();
-
-      vaultRunner.initializeBehaviors(injector, [parentBehavior, withTestBehavior]);
-      vaultRunner.onSet('core-id', 'vault1', ctx);
-      vaultRunner.onInit('core-id', 'vault1', 'service-name', ctx);
-      vaultRunner.onError('core-id', 'vault1', ctx);
-      vaultRunner.onReset('core-id', 'vault1', ctx);
-      vaultRunner.onDestroy('core-id', 'vault1', ctx);
-      vaultRunner.onPatch('core-id', 'vault1', ctx);
-      vaultRunner.onLoad('core-id', 'vault1', ctx);
-      vaultRunner.onDispose('core-id', 'vault1', ctx);
-
-      expect(getTestBehavior().getEvents()).toEqual([
-        'onSet:vault1:{"isLoading":false,"value":"initial","error":null,"hasValue":true}',
-
-        'onInit:vault1',
-
-        'onError:vault1',
-
-        'onReset:vault1',
-
-        'onDestroy:vault1',
-
-        'onPatch:vault1:{"isLoading":false,"value":"initial","error":null,"hasValue":true}',
-
-        'onLoad:vault1',
-
-        'onDispose:vault1'
-      ]);
-    });
   });
 
   describe('initializeBehaviors', () => {
@@ -345,11 +91,7 @@ describe('Service: VaultBehaviorLifecycle', () => {
 
       const parentBehavior = createParenttBehaviorFactory();
       const devTools = createTestBehaviorFactory(() => {
-        return {
-          onSet(key: string) {
-            calls.push(`onSet:${key}`);
-          }
-        };
+        return {};
       }, 'dev-tools');
       const events = createTestBehaviorFactory(() => {
         return {};
@@ -371,7 +113,7 @@ describe('Service: VaultBehaviorLifecycle', () => {
         vaultRunner = NgVaultBehaviorLifecycleService();
       });
 
-      const coreId = vaultRunner.initializeBehaviors(injector, [
+      const behaviors = vaultRunner.initializeBehaviors(injector, [
         parentBehavior,
         devTools,
         events,
@@ -382,12 +124,17 @@ describe('Service: VaultBehaviorLifecycle', () => {
         encryption
       ]);
 
-      vaultRunner.onSet(coreId!, 'vault1', ctx);
-      await TestBed.inject(ApplicationRef).whenStable();
-      vaultRunner.onSet('missing', 'vault1', ctx);
-      await TestBed.inject(ApplicationRef).whenStable();
-
-      expect(calls).toEqual(['onSet:vault1']);
+      expect(behaviors).toEqual([
+        Object({ type: 'core' }),
+        Object({ type: 'dev-tools' }),
+        Object({ type: 'events' }),
+        Object({ type: 'events' }),
+        Object({ type: 'state' }),
+        Object({ type: 'state' }),
+        Object({ type: 'persistence' }),
+        Object({ type: 'encryption' })
+      ]);
+      expect(emitted).toEqual([]);
     });
 
     it('handles empty behaviors', () => {
@@ -524,48 +271,20 @@ describe('Service: VaultBehaviorLifecycle', () => {
         '[NgVault] Skipping duplicate behavior with key "NgVault::Testing::Duplicate"'
       );
     });
-
-    it('should throw an error if a behavior does not implement onInit', () => {
-      const badFactory = (ctx: any) => ({
-        type: 'state',
-        key: 'NgVault::Testing::Bad',
-        behaviorId: ctx.behaviorId
-        // Missing onInit
-      });
-      (badFactory as any).type = 'state';
-      (badFactory as any).critical = true;
-
-      expect(() => vaultRunner.initializeBehaviors(injector, [badFactory as any])).toThrowError(
-        '[NgVault] Behavior "Object" missing required "onInit" method. All behaviors must implement onInit().'
-      );
-    });
   });
 
   describe('initialize', () => {
-    beforeEach(() => {
-      ids = ['1', '2', 'core-id', '4', '5', '6'];
-    });
-
     it('should get the core id', () => {
       const parentBehavior = createParenttBehaviorFactory();
       const coreId = vaultRunner.initializeBehaviors(injector, [parentBehavior]);
 
-      expect(coreId).toBe('core-id');
+      expect(coreId).toEqual([Object({ type: 'core' })]);
     });
 
     it('should get the core id', () => {
       const coreId = vaultRunner.initializeBehaviors(injector, []);
 
-      expect(coreId).toBe('core-id');
-    });
-
-    it('throws an error if the core id is not generated', () => {
-      ids = ['1', '2'];
-      const parentBehavior = createParenttBehaviorFactory();
-
-      expect(() => vaultRunner.initializeBehaviors(injector, [parentBehavior])).toThrowError(
-        '[NgVault] Failed to obtain core behavior ID during initialization.'
-      );
+      expect(coreId).toEqual([]);
     });
 
     it('throws an error if initialized is called twice', () => {

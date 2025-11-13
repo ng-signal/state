@@ -7,7 +7,7 @@ import { MatExpansionModule } from '@angular/material/expansion';
 import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatTabsModule } from '@angular/material/tabs';
-import { NgVaultDevtoolsService } from '../../dev-tools/ui/services/ngvault-devtools.service';
+import { NgVaultDevtoolsService } from '@ngvault/dev-tools/panel/services/ngvault-devtools.service';
 import { ExampleViewerSourceComponent } from '../../ui-components/example/example-viewer-source/example-viewer-source.component';
 import { ExampleViewerTabComponent } from '../../ui-components/example/example-viewer-tab/example-viewer-source-tab.component';
 import { ExampleViewerComponent } from '../../ui-components/example/example-viewer/example-viewer.component';

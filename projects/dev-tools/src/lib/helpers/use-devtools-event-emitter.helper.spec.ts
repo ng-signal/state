@@ -2,7 +2,6 @@ import { Injector, provideZonelessChangeDetection, runInInjectionContext } from 
 import { TestBed } from '@angular/core/testing';
 import { NgVaultDevModeService } from '@ngvault/shared';
 import { take } from 'rxjs/operators';
-import { VaultEventType } from '../types/event-vault.type';
 import { NgVaultEventBus } from '../utils/ngvault-event-bus';
 import { useDevtoolsEventEmitter } from './use-devtools-event-emitter.helper';
 
@@ -46,8 +45,9 @@ describe('useDevtoolsEventEmitter', () => {
         jasmine.objectContaining([
           Object({
             id: jasmine.any(String),
-            key: 'users',
-            type: 'init' as VaultEventType,
+            behaviorKey: 'dev-tools',
+            cell: 'users',
+            type: 'init',
             timestamp: jasmine.any(Number)
           })
         ])

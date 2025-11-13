@@ -27,29 +27,29 @@ describe('Service: NgVaultInsightService', () => {
       });
 
       bus.next({
-        key: 'debug-test',
+        cell: 'debug-test',
         type: 'init',
         timestamp: Date.now(),
         state: { isLoading: false, value: [], error: null, hasValue: true }
-      });
+      } as any);
     });
   });
 
   describe('listen$', () => {
     it('should emit events through the listen$ observable', (done) => {
       const expected: NgVaultEventModel = {
-        key: 'stream-test',
+        cell: 'stream-test',
         type: 'init',
         timestamp: Date.now(),
         state: { isLoading: false, value: [], error: null, hasValue: true }
-      };
+      } as any;
 
       const received: NgVaultEventModel[] = [];
 
       hook.listen$().subscribe({
         next: (event) => {
           received.push(event);
-          expect(event.key).toBe(expected.key);
+          expect(event.cell).toBe(expected.cell);
           expect(event.type).toBe(expected.type);
           expect(event.state).toEqual(expected.state);
           expect(received.length).toBe(1);
@@ -63,11 +63,11 @@ describe('Service: NgVaultInsightService', () => {
 
     it('should support multiple subscribers independently', (done) => {
       const event: NgVaultEventModel = {
-        key: 'multi-test',
+        cell: 'multi-test',
         type: 'load',
         timestamp: Date.now(),
         state: { isLoading: true, value: [1], error: null, hasValue: true }
-      };
+      } as any;
 
       const resultsA: NgVaultEventModel[] = [];
       const resultsB: NgVaultEventModel[] = [];
@@ -79,8 +79,8 @@ describe('Service: NgVaultInsightService', () => {
       bus.next(event);
 
       setTimeout(() => {
-        expect(resultsA).toEqual([jasmine.objectContaining({ key: 'multi-test', type: 'load' })]);
-        expect(resultsB).toEqual([jasmine.objectContaining({ key: 'multi-test', type: 'load' })]);
+        expect(resultsA).toEqual([jasmine.objectContaining({ cell: 'multi-test', type: 'load' })]);
+        expect(resultsB).toEqual([jasmine.objectContaining({ cell: 'multi-test', type: 'load' })]);
 
         subA.unsubscribe();
         subB.unsubscribe();

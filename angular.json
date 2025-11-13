@@ -133,7 +133,7 @@
       "projectType": "library",
       "root": "projects/dev-tools",
       "sourceRoot": "projects/dev-tools/src",
-      "prefix": "ngvault",
+      "prefix": "ngvault-devtools",
       "architect": {
         "build": {
           "builder": "@angular/build:ng-packagr",

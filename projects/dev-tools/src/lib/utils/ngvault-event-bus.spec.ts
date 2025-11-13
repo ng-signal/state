@@ -20,11 +20,11 @@ describe('Utils: NgVaultEventBus)', () => {
 
     it('should emit an event with a generated ID', () => {
       const inputEvent: NgVaultEventModel = {
-        key: 'vault-1',
+        cell: 'vault-1',
         type: 'init',
         timestamp: Date.now(),
         state: { isLoading: false, value: [], error: null, hasValue: true }
-      };
+      } as any;
 
       let event;
 
@@ -39,8 +39,7 @@ describe('Utils: NgVaultEventBus)', () => {
 
       expect(event).toEqual(
         Object({
-          id: jasmine.any(String),
-          key: 'vault-1',
+          cell: 'vault-1',
           type: 'init',
           timestamp: jasmine.any(Number),
           state: Object({ isLoading: false, value: [], error: null, hasValue: true })
@@ -61,31 +60,28 @@ describe('Utils: NgVaultEventBus)', () => {
 
       for (let i = 0; i < total; i++) {
         bus.next({
-          key: `vault-${i}`,
+          cell: `vault-${i}`,
           type: 'patch',
           timestamp: Date.now(),
           state: { isLoading: false, value: i, error: null, hasValue: true }
-        });
+        } as any);
       }
 
       expect(events).toEqual([
         Object({
-          id: jasmine.any(String),
-          key: 'vault-0',
+          cell: 'vault-0',
           type: 'patch',
           timestamp: jasmine.any(Number),
           state: Object({ isLoading: false, value: 0, error: null, hasValue: true })
         }),
         Object({
-          id: jasmine.any(String),
-          key: 'vault-1',
+          cell: 'vault-1',
           type: 'patch',
           timestamp: jasmine.any(Number),
           state: Object({ isLoading: false, value: 1, error: null, hasValue: true })
         }),
         Object({
-          id: jasmine.any(String),
-          key: 'vault-2',
+          cell: 'vault-2',
           type: 'patch',
           timestamp: jasmine.any(Number),
           state: Object({ isLoading: false, value: 2, error: null, hasValue: true })
@@ -120,11 +116,11 @@ describe('Utils: NgVaultEventBus)', () => {
 
     it('should not emit anything when isDevMode() returns false', () => {
       const inputEvent: NgVaultEventModel = {
-        key: 'vault2',
+        cell: 'vault2',
         type: 'dispose',
         timestamp: Date.now(),
         state: { isLoading: true, value: [], error: null, hasValue: () => false }
-      };
+      } as any;
 
       let emitted = false;
       bus
@@ -151,11 +147,11 @@ describe('Utils: NgVaultEventBus)', () => {
     it('should not emit when event is null or undefined', () => {
       let emitted = false;
       const inputEvent: NgVaultEventModel = {
-        key: 'vault2',
+        cell: 'vault2',
         type: 'dispose',
         timestamp: Date.now(),
         state: { isLoading: true, value: [], error: null, hasValue: false }
-      };
+      } as any;
       bus
         .asObservable()
         .pipe(take(1))

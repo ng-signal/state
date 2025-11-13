@@ -11,15 +11,20 @@ import { validateNgVaultBehaviorKey } from '../utils/define-ngvault-behavior-key
 
 class VaultBehaviorRunnerClass implements VaultBehaviorRunner {
   // eslint-disable-next-line
-  behaviors: VaultBehavior<any>[] = [];
-  readonly #behaviorIds = new Map<VaultBehavior['type'], string>();
+  #behaviors: VaultBehavior<any>[] = [];
+  #initialized = false;
 
   initializeBehaviors<T>(injector: Injector, behaviors: Array<VaultBehaviorFactory<T>>): VaultBehavior<T>[] {
+    if (this.#initialized)
+      throw new Error('[NgVault] VaultBehaviorRunner already initialized — cannot reissue core behavior ID.');
+
+    this.#initialized = true;
+
     if (!behaviors || behaviors.length === 0) return [];
 
     const seenKeys = new Set<string>();
 
-    this.behaviors = behaviors
+    this.#behaviors = behaviors
       .map((factory) => {
         let isCritical = false;
         try {
@@ -78,11 +83,11 @@ class VaultBehaviorRunnerClass implements VaultBehaviorRunner {
       })
       .filter((b): b is VaultBehavior<T> => !!b);
 
-    return this.behaviors;
+    return this.#behaviors;
   }
 
   applyBehaviorExtensions<T>(cell: FeatureCell<T>): void {
-    for (const behavior of this.behaviors) {
+    for (const behavior of this.#behaviors) {
       const extensions = behavior.extendCellAPI?.();
       if (!extensions || typeof extensions !== 'object') continue;
 
