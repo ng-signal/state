@@ -25,7 +25,8 @@ describe('Service NgVaultDevtools', () => {
   it('should record incoming events from the event bus', () => {
     const base: NgVaultEventModel = {
       id: '1',
-      key: 'demo',
+      cell: 'cell',
+      behaviorKey: 'behavior-key',
       type: 'set',
       timestamp: Date.now(),
       state: { value: { id: 1 } }
@@ -48,7 +49,8 @@ describe('Service NgVaultDevtools', () => {
     for (let i = 0; i < 250; i++) {
       bus.next({
         id: `${i}`,
-        key: 'bulk',
+        cell: 'cell-bulk',
+        behaviorKey: 'behavior-key',
         type: 'patch',
         timestamp: Date.now(),
         state: { value: i }

@@ -1,5 +1,6 @@
 import { provideZonelessChangeDetection } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { flushMicrotasksZoneless } from '@ngvault/testing';
 import { NgVaultDevtoolsPanelComponent } from './ngvault-devtools-panel.component';
 import { NgVaultDevtoolsService } from './services/ngvault-devtools.service';
 
@@ -21,12 +22,12 @@ describe('Component: NgVaultDevtoolsPanel', () => {
     fixture.detectChanges();
   });
 
-  it('should render events and vaults from signals', () => {
+  it('should render events and vaults from signals', async () => {
     // Arrange — push a fake event and vault
     service.events.set([
       {
         id: '1',
-        key: 'user',
+        cell: 'user',
         type: 'set',
         source: 'manual',
         timestamp: Date.now(),
@@ -35,18 +36,19 @@ describe('Component: NgVaultDevtoolsPanel', () => {
     ]);
 
     // Act — trigger Angular change detection
-    fixture.detectChanges();
+    await flushMicrotasksZoneless();
 
     // Assert — verify the rendered HTML includes both
     const html = fixture.nativeElement as HTMLElement;
     expect(html.textContent).toContain('user');
   });
 
-  it('should clear events when clearEvents() is called', () => {
+  it('should clear events when clearEvents() is called', async () => {
     service.events.set([
       { id: '1', key: 'user', type: 'set', timestamp: Date.now(), source: 'manual', payload: {} } as any
     ]);
     expect(service.events().length).toBe(1);
+    await flushMicrotasksZoneless();
 
     component.clearEvents();
     expect(service.events()).toEqual([]);
@@ -70,7 +72,7 @@ describe('Component: NgVaultDevtoolsPanel', () => {
       } as any
     ]);
 
-    fixture.detectChanges();
+    await flushMicrotasksZoneless();
     html = fixture.nativeElement as HTMLElement;
     expect(html.textContent).toContain('Grace');
   });
