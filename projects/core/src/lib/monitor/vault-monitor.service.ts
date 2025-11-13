@@ -63,7 +63,8 @@ export class NgVaultMonitor {
     this.#emitEvent(cell, behaviorId, 'error', ctx.state, 'error', err instanceof Error ? err.message : String(err));
   }
 
-  registerCell(cellKey: string, behaviors: VaultBehavior[]): void {
+  // eslint-disable-next-line
+  registerCell(cellKey: string, behaviors: VaultBehavior<any>[]): void {
     // Extract insight behaviors
     const insights = behaviors
       .filter((b) => b.type === VaultBehaviorType.Insights)
