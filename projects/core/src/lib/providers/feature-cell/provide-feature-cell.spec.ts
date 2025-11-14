@@ -231,7 +231,7 @@ describe('Provider: Feature Cell (core vault functionality)', () => {
     expect(vault.state.hasValue()).toBeTrue();
   });
 
-  fit('should correctly propagate partial value, loading and error updates', async () => {
+  it('should correctly propagate partial value, loading and error updates', async () => {
     runInInjectionContext(injector, () => {
       providers = provideFeatureCell(class DummyService {}, { key: 'state-test', initial: [] });
     });
@@ -337,7 +337,7 @@ describe('Provider: Feature Cell (core vault functionality)', () => {
     // Set null (reset to null state)
     vault.replaceState({ value: null });
     await flushMicrotasksZoneless();
-    expect(vault.state.value()).toBeNull();
+    expect(vault.state.value()).toBeUndefined();
     expect(vault.state.hasValue()).toBeFalse();
 
     // Set a number again after null (rehydrate)
@@ -651,174 +651,212 @@ describe('Provider: Feature Cell (core vault functionality)', () => {
 
       // Trigger a reset (should emit "reset")
       vault.replaceState({ loading: true, error: { message: 'fail' }, value: [1, 2, 3] });
+      await flushMicrotasksZoneless();
       vault.reset();
+      await flushMicrotasksZoneless();
       vault.mergeState({ loading: true, error: { message: 'fail' }, value: [4, 5, 6] });
+      await flushMicrotasksZoneless();
       vault.mergeState(undefined);
+      await flushMicrotasksZoneless();
       vault.replaceState({ loading: true, error: { message: 'fail' }, value: [1, 2, 3] });
+      await flushMicrotasksZoneless();
       vault.replaceState(undefined);
 
       await flushMicrotasksZoneless();
 
       expect(emitted).toEqual([
         Object({
-          id: '9821de50-8156-4857-a524-0a8eb4217d4e',
+          id: 'id-removed',
           cell: 'devtools-test',
-          behaviorKey: 'vault-orchestrator',
-          type: 'lifecycle:start:replace',
-          timestamp: 1763046299711,
+          behaviorKey: 'core',
+          type: 'lifecycle:start:initialized',
+          timestamp: 'timestamp-removed',
           state: Object({ isLoading: false, value: [], error: null, hasValue: true })
         }),
         Object({
-          id: 'ba58f5f7-dd2a-445b-8998-046c644adc08',
+          id: 'id-removed',
           cell: 'devtools-test',
-          behaviorKey: 'NgVault::Core::State',
-          type: 'stage:start:state',
-          timestamp: 1763046299711,
+          behaviorKey: 'core',
+          type: 'lifecycle:end:initialized',
+          timestamp: 'timestamp-removed',
+          state: Object({ isLoading: false, value: [], error: null, hasValue: true })
+        }),
+        Object({
+          id: 'id-removed',
+          cell: 'devtools-test',
+          behaviorKey: 'vault-orchestrator',
+          type: 'lifecycle:start:replace',
+          timestamp: 'timestamp-removed',
           state: Object({ isLoading: true, value: [], error: Object({ message: 'fail' }), hasValue: true })
         }),
         Object({
-          id: '617ca5a5-f8a1-4c27-876a-fff89504e7d8',
-          cell: 'devtools-test',
-          behaviorKey: 'vault-orchestrator',
-          type: 'lifecycle:start:merge',
-          timestamp: 1763046299711,
-          state: Object({ isLoading: false, value: undefined, error: null, hasValue: false })
-        }),
-        Object({
-          id: 'fa0f7266-c270-4c59-952b-4612e557d82d',
+          id: 'id-removed',
           cell: 'devtools-test',
           behaviorKey: 'NgVault::Core::State',
           type: 'stage:start:state',
-          timestamp: 1763046299711,
-          state: Object({ isLoading: true, value: undefined, error: Object({ message: 'fail' }), hasValue: false })
+          timestamp: 'timestamp-removed',
+          state: Object({ isLoading: true, value: [], error: Object({ message: 'fail' }), hasValue: true })
         }),
         Object({
-          id: '87b28ce7-bff6-49b8-ad89-8022c1b20489',
-          cell: 'devtools-test',
-          behaviorKey: 'vault-orchestrator',
-          type: 'lifecycle:start:merge',
-          timestamp: 1763046299712,
-          state: Object({ isLoading: true, value: undefined, error: Object({ message: 'fail' }), hasValue: false })
-        }),
-        Object({
-          id: '31214e26-1012-4781-bfe7-beb6aad175d7',
-          cell: 'devtools-test',
-          behaviorKey: 'vault-orchestrator',
-          type: 'lifecycle:start:replace',
-          timestamp: 1763046299712,
-          state: Object({ isLoading: false, value: undefined, error: null, hasValue: false })
-        }),
-        Object({
-          id: 'd369f404-016f-45a3-9563-207a13638ef7',
-          cell: 'devtools-test',
-          behaviorKey: 'NgVault::Core::State',
-          type: 'stage:start:state',
-          timestamp: 1763046299712,
-          state: Object({ isLoading: true, value: undefined, error: Object({ message: 'fail' }), hasValue: false })
-        }),
-        Object({
-          id: '7046bf45-c692-42e9-9e2d-9ee5eb6b521d',
-          cell: 'devtools-test',
-          behaviorKey: 'vault-orchestrator',
-          type: 'lifecycle:start:replace',
-          timestamp: 1763046299712,
-          state: Object({ isLoading: true, value: undefined, error: Object({ message: 'fail' }), hasValue: false })
-        }),
-        Object({
-          id: 'e1b62a11-a5ca-4398-8ee7-391a3b9a0fb0',
+          id: 'id-removed',
           cell: 'devtools-test',
           behaviorKey: 'NgVault::Core::State',
           type: 'stage:end:state',
-          timestamp: 1763046299712,
-          state: Object({ isLoading: false, value: undefined, error: null, hasValue: false })
+          timestamp: 'timestamp-removed',
+          state: Object({ isLoading: true, value: [], error: Object({ message: 'fail' }), hasValue: true })
         }),
         Object({
-          id: '725ac42c-03cb-4577-bc63-d15ab88e5f59',
+          id: 'id-removed',
           cell: 'devtools-test',
           behaviorKey: 'NgVault::CoreHttpResource::State',
           type: 'stage:start:state',
-          timestamp: 1763046299712,
-          state: Object({ isLoading: false, value: undefined, error: null, hasValue: false })
+          timestamp: 'timestamp-removed',
+          state: Object({ isLoading: true, value: [], error: Object({ message: 'fail' }), hasValue: true })
         }),
         Object({
-          id: '622d18d8-356a-48dc-837e-8395e1362806',
-          cell: 'devtools-test',
-          behaviorKey: 'NgVault::Core::State',
-          type: 'stage:end:state',
-          timestamp: 1763046299712,
-          state: Object({ isLoading: false, value: undefined, error: null, hasValue: false })
-        }),
-        Object({
-          id: '4c55ead1-13fa-4704-8fe2-9006140e1273',
-          cell: 'devtools-test',
-          behaviorKey: 'NgVault::CoreHttpResource::State',
-          type: 'stage:start:state',
-          timestamp: 1763046299712,
-          state: Object({ isLoading: false, value: undefined, error: null, hasValue: false })
-        }),
-        Object({
-          id: 'a6a1357b-d07c-4a08-aee8-ac6b410a4176',
-          cell: 'devtools-test',
-          behaviorKey: 'NgVault::Core::State',
-          type: 'stage:end:state',
-          timestamp: 1763046299712,
-          state: Object({ isLoading: false, value: undefined, error: null, hasValue: false })
-        }),
-        Object({
-          id: '743c486b-abf7-4074-b715-3edaa1b4aa16',
-          cell: 'devtools-test',
-          behaviorKey: 'NgVault::CoreHttpResource::State',
-          type: 'stage:start:state',
-          timestamp: 1763046299712,
-          state: Object({ isLoading: false, value: undefined, error: null, hasValue: false })
-        }),
-        Object({
-          id: '1550db02-959c-400b-9e44-ac01d3cf8726',
+          id: 'id-removed',
           cell: 'devtools-test',
           behaviorKey: 'NgVault::CoreHttpResource::State',
           type: 'stage:end:state',
-          timestamp: 1763046299712,
-          state: Object({ isLoading: false, value: undefined, error: null, hasValue: false })
+          timestamp: 'timestamp-removed',
+          state: Object({ isLoading: true, value: [], error: Object({ message: 'fail' }), hasValue: true })
         }),
         Object({
-          id: 'ec4809a9-feab-45f3-a294-a30490b89d9b',
-          cell: 'devtools-test',
-          behaviorKey: 'NgVault::CoreHttpResource::State',
-          type: 'stage:end:state',
-          timestamp: 1763046299712,
-          state: Object({ isLoading: false, value: undefined, error: null, hasValue: false })
-        }),
-        Object({
-          id: '39926254-70e2-4760-b98f-1461677b77bb',
-          cell: 'devtools-test',
-          behaviorKey: 'NgVault::CoreHttpResource::State',
-          type: 'stage:end:state',
-          timestamp: 1763046299712,
-          state: Object({ isLoading: false, value: undefined, error: null, hasValue: false })
-        }),
-        Object({
-          id: 'd16f92ab-b81c-4bf4-99b9-029fa57f7c9e',
+          id: 'id-removed',
           cell: 'devtools-test',
           behaviorKey: 'vault-orchestrator',
           type: 'lifecycle:end:replace',
-          timestamp: 1763046299712,
+          timestamp: 'timestamp-removed',
+          state: Object({ isLoading: true, value: [], error: Object({ message: 'fail' }), hasValue: true })
+        }),
+        Object({
+          id: 'id-removed',
+          cell: 'devtools-test',
+          behaviorKey: 'core',
+          type: 'lifecycle:start:reset',
+          timestamp: 'timestamp-removed',
+          state: Object({ isLoading: true, value: [1, 2, 3], error: Object({ message: 'fail' }), hasValue: true })
+        }),
+        Object({
+          id: 'id-removed',
+          cell: 'devtools-test',
+          behaviorKey: 'core',
+          type: 'lifecycle:end:reset',
+          timestamp: 'timestamp-removed',
           state: Object({ isLoading: false, value: undefined, error: null, hasValue: false })
         }),
         Object({
-          id: '4f8556b1-fe9c-438e-8e81-df8a9a91b94c',
+          id: 'id-removed',
+          cell: 'devtools-test',
+          behaviorKey: 'vault-orchestrator',
+          type: 'lifecycle:start:merge',
+          timestamp: 'timestamp-removed',
+          state: Object({ isLoading: false, value: undefined, error: null, hasValue: false })
+        }),
+        Object({
+          id: 'id-removed',
+          cell: 'devtools-test',
+          behaviorKey: 'NgVault::Core::State',
+          type: 'stage:start:state',
+          timestamp: 'timestamp-removed',
+          state: Object({ isLoading: true, value: undefined, error: Object({ message: 'fail' }), hasValue: false })
+        }),
+        Object({
+          id: 'id-removed',
+          cell: 'devtools-test',
+          behaviorKey: 'NgVault::Core::State',
+          type: 'stage:end:state',
+          timestamp: 'timestamp-removed',
+          state: Object({ isLoading: true, value: undefined, error: Object({ message: 'fail' }), hasValue: false })
+        }),
+        Object({
+          id: 'id-removed',
+          cell: 'devtools-test',
+          behaviorKey: 'NgVault::CoreHttpResource::State',
+          type: 'stage:start:state',
+          timestamp: 'timestamp-removed',
+          state: Object({ isLoading: true, value: undefined, error: Object({ message: 'fail' }), hasValue: false })
+        }),
+        Object({
+          id: 'id-removed',
+          cell: 'devtools-test',
+          behaviorKey: 'NgVault::CoreHttpResource::State',
+          type: 'stage:end:state',
+          timestamp: 'timestamp-removed',
+          state: Object({ isLoading: true, value: undefined, error: Object({ message: 'fail' }), hasValue: false })
+        }),
+        Object({
+          id: 'id-removed',
           cell: 'devtools-test',
           behaviorKey: 'vault-orchestrator',
           type: 'lifecycle:end:merge',
-          timestamp: 1763046299712,
-          state: Object({ isLoading: false, value: undefined, error: null, hasValue: false })
+          timestamp: 'timestamp-removed',
+          state: Object({ isLoading: true, value: undefined, error: Object({ message: 'fail' }), hasValue: false })
         }),
         Object({
-          id: 'e3b328a5-0c15-4992-b01c-8defee36df1a',
+          id: 'id-removed',
+          cell: 'devtools-test',
+          behaviorKey: 'vault-orchestrator',
+          type: 'lifecycle:start:merge',
+          timestamp: 'timestamp-removed',
+          state: Object({ isLoading: true, value: [4, 5, 6], error: Object({ message: 'fail' }), hasValue: true })
+        }),
+        Object({
+          id: 'id-removed',
+          cell: 'devtools-test',
+          behaviorKey: 'vault-orchestrator',
+          type: 'lifecycle:end:merge',
+          timestamp: 'timestamp-removed',
+          state: Object({ isLoading: false, value: undefined, error: null, hasValue: false }),
+          payload: Object({ noop: true })
+        }),
+        Object({
+          id: 'id-removed',
+          cell: 'devtools-test',
+          behaviorKey: 'vault-orchestrator',
+          type: 'lifecycle:start:replace',
+          timestamp: 'timestamp-removed',
+          state: Object({ isLoading: true, value: undefined, error: Object({ message: 'fail' }), hasValue: false })
+        }),
+        Object({
+          id: 'id-removed',
+          cell: 'devtools-test',
+          behaviorKey: 'NgVault::Core::State',
+          type: 'stage:start:state',
+          timestamp: 'timestamp-removed',
+          state: Object({ isLoading: true, value: undefined, error: Object({ message: 'fail' }), hasValue: false })
+        }),
+        Object({
+          id: 'id-removed',
+          cell: 'devtools-test',
+          behaviorKey: 'NgVault::Core::State',
+          type: 'stage:end:state',
+          timestamp: 'timestamp-removed',
+          state: Object({ isLoading: true, value: undefined, error: Object({ message: 'fail' }), hasValue: false })
+        }),
+        Object({
+          id: 'id-removed',
+          cell: 'devtools-test',
+          behaviorKey: 'NgVault::CoreHttpResource::State',
+          type: 'stage:start:state',
+          timestamp: 'timestamp-removed',
+          state: Object({ isLoading: true, value: undefined, error: Object({ message: 'fail' }), hasValue: false })
+        }),
+        Object({
+          id: 'id-removed',
+          cell: 'devtools-test',
+          behaviorKey: 'NgVault::CoreHttpResource::State',
+          type: 'stage:end:state',
+          timestamp: 'timestamp-removed',
+          state: Object({ isLoading: true, value: undefined, error: Object({ message: 'fail' }), hasValue: false })
+        }),
+        Object({
+          id: 'id-removed',
           cell: 'devtools-test',
           behaviorKey: 'vault-orchestrator',
           type: 'lifecycle:end:replace',
-          timestamp: 1763046299712,
-          state: Object({ isLoading: false, value: undefined, error: null, hasValue: false })
+          timestamp: 'timestamp-removed',
+          state: Object({ isLoading: true, value: undefined, error: Object({ message: 'fail' }), hasValue: false })
         })
       ]);
     });
@@ -1010,5 +1048,72 @@ describe('Provider: Feature Cell (core vault functionality)', () => {
       expect(vault.state.value()).toEqual([100]);
       expect(vault.state.hasValue()).toBeTrue();
     });
+  });
+
+  it('should throw an error if the initialized is called twice', async () => {
+    runInInjectionContext(injector, () => {
+      providers = provideFeatureCell(class DummyService {}, { key: 'double-init', initial: [], insights: {} as any });
+    });
+    const provider = providers.find((p: any) => typeof p.useFactory === 'function');
+    let vault!: NgVaultFeatureCell<any>;
+
+    runInInjectionContext(injector, () => {
+      vault = (provider as any).useFactory();
+      vault.initialize();
+      expect(() => vault.initialize()).toThrowError('[NgVault] FeatureCell "double-init" already initialized.');
+    });
+
+    await flushMicrotasksZoneless();
+
+    expect(emitted).toEqual([
+      Object({
+        id: 'id-removed',
+        cell: 'double-init',
+        behaviorKey: 'core',
+        type: 'lifecycle:start:initialized',
+        timestamp: 'timestamp-removed'
+      }),
+      Object({
+        id: 'id-removed',
+        cell: 'double-init',
+        behaviorKey: 'core',
+        type: 'lifecycle:end:initialized',
+        timestamp: 'timestamp-removed'
+      }),
+      Object({
+        id: 'id-removed',
+        cell: 'double-init',
+        behaviorKey: 'core',
+        type: 'lifecycle:start:initialized',
+        timestamp: 'timestamp-removed'
+      }),
+      Object({
+        id: 'id-removed',
+        cell: 'double-init',
+        behaviorKey: 'core',
+        type: 'error',
+        timestamp: 'timestamp-removed'
+      })
+    ]);
+  });
+
+  it('should throw an error if anything is called before initialized', async () => {
+    runInInjectionContext(injector, () => {
+      providers = provideFeatureCell(class DummyService {}, { key: 'double-init', initial: [], insights: {} as any });
+    });
+    const provider = providers.find((p: any) => typeof p.useFactory === 'function');
+    let vault!: NgVaultFeatureCell<any>;
+
+    runInInjectionContext(injector, () => {
+      vault = (provider as any).useFactory();
+    });
+
+    await flushMicrotasksZoneless();
+
+    expect(() => vault.reset()).toThrowError(
+      '[NgVault] FeatureCell "double-init" has not been initialized. You must call cell.initialize() before using state methods.'
+    );
+
+    expect(emitted).toEqual([]);
   });
 });

@@ -60,11 +60,11 @@ describe('Service: Vault Monitor', () => {
 
       expect(emitted).toEqual([
         Object({
-          id: jasmine.any(String),
+          id: 'id-removed',
           cell: 'vault1',
           behaviorKey: 'state key',
           type: 'lifecycle:start:replace',
-          timestamp: jasmine.any(Number),
+          timestamp: 'timestamp-removed',
           state: Object({ isLoading: true, value: 'hello', error: null, hasValue: false })
         })
       ]);
@@ -72,78 +72,160 @@ describe('Service: Vault Monitor', () => {
       vaultMonitor.endReplace?.('vault1', 'end key', ctx);
       vaultMonitor.startMerge?.('vault1', 'start merge', ctx);
       vaultMonitor.endMerge?.('vault1', 'end merge', ctx);
+      vaultMonitor.endMerge?.('vault1', 'end merge', ctx, { noop: true });
       vaultMonitor.error?.('vault1', 'error string', ctx, 'this is the error');
       vaultMonitor.error?.('vault1', 'error error', ctx, new Error('this is the error'));
       vaultMonitor.startState?.('vault1', 'start state', ctx);
       vaultMonitor.endState?.('vault1', 'end state', ctx);
+      vaultMonitor.startReducer?.('vault1', 'start reducer', ctx);
+      vaultMonitor.endReducer?.('vault1', 'end reducer', ctx);
+      vaultMonitor.startReset?.('vault1', 'start reducer', ctx);
+      vaultMonitor.endReset?.('vault1', 'end reducer', ctx);
+      vaultMonitor.startDestroy?.('vault1', 'start destroy', ctx);
+      vaultMonitor.endDestroy?.('vault1', 'end destroy', ctx);
+      vaultMonitor.startInitialized?.('vault1', 'start initialized', ctx);
+      vaultMonitor.endInitialized?.('vault1', 'end initialized', ctx);
 
       expect(emitted).toEqual([
         Object({
-          id: jasmine.any(String),
+          id: 'id-removed',
           cell: 'vault1',
           behaviorKey: 'state key',
           type: 'lifecycle:start:replace',
-          timestamp: jasmine.any(Number),
+          timestamp: 'timestamp-removed',
           state: Object({ isLoading: true, value: 'hello', error: null, hasValue: false })
         }),
         Object({
-          id: jasmine.any(String),
+          id: 'id-removed',
           cell: 'vault1',
           behaviorKey: 'end key',
           type: 'lifecycle:end:replace',
-          timestamp: jasmine.any(Number),
+          timestamp: 'timestamp-removed',
           state: Object({ isLoading: true, value: 'hello', error: null, hasValue: false })
         }),
         Object({
-          id: jasmine.any(String),
+          id: 'id-removed',
           cell: 'vault1',
           behaviorKey: 'start merge',
           type: 'lifecycle:start:merge',
-          timestamp: jasmine.any(Number),
+          timestamp: 'timestamp-removed',
           state: Object({ isLoading: true, value: 'hello', error: null, hasValue: false })
         }),
         Object({
-          id: jasmine.any(String),
+          id: 'id-removed',
           cell: 'vault1',
           behaviorKey: 'end merge',
           type: 'lifecycle:end:merge',
-          timestamp: jasmine.any(Number),
+          timestamp: 'timestamp-removed',
           state: Object({ isLoading: true, value: 'hello', error: null, hasValue: false })
         }),
         Object({
-          id: jasmine.any(String),
+          id: 'id-removed',
+          cell: 'vault1',
+          behaviorKey: 'end merge',
+          type: 'lifecycle:end:merge',
+          timestamp: 'timestamp-removed',
+          state: Object({ isLoading: true, value: 'hello', error: null, hasValue: false }),
+          payload: Object({ noop: true })
+        }),
+        Object({
+          id: 'id-removed',
           cell: 'vault1',
           behaviorKey: 'error string',
-          type: 'lifecycle:error:unknown',
-          timestamp: jasmine.any(Number),
+          type: 'error',
+          timestamp: 'timestamp-removed',
           state: Object({ isLoading: true, value: 'hello', error: null, hasValue: false }),
           payload: 'error',
           error: 'this is the error'
         }),
         Object({
-          id: jasmine.any(String),
+          id: 'id-removed',
           cell: 'vault1',
           behaviorKey: 'error error',
-          type: 'lifecycle:error:unknown',
-          timestamp: jasmine.any(Number),
+          type: 'error',
+          timestamp: 'timestamp-removed',
           state: Object({ isLoading: true, value: 'hello', error: null, hasValue: false }),
           payload: 'error',
           error: 'this is the error'
         }),
         Object({
-          id: jasmine.any(String),
+          id: 'id-removed',
           cell: 'vault1',
           behaviorKey: 'start state',
           type: 'stage:start:state',
-          timestamp: jasmine.any(Number),
+          timestamp: 'timestamp-removed',
           state: Object({ isLoading: true, value: 'hello', error: null, hasValue: false })
         }),
         Object({
-          id: jasmine.any(String),
+          id: 'id-removed',
           cell: 'vault1',
           behaviorKey: 'end state',
           type: 'stage:end:state',
-          timestamp: jasmine.any(Number),
+          timestamp: 'timestamp-removed',
+          state: Object({ isLoading: true, value: 'hello', error: null, hasValue: false })
+        }),
+        Object({
+          id: 'id-removed',
+          cell: 'vault1',
+          behaviorKey: 'start reducer',
+          type: 'stage:start:reducer',
+          timestamp: 'timestamp-removed',
+          state: Object({ isLoading: true, value: 'hello', error: null, hasValue: false })
+        }),
+        Object({
+          id: 'id-removed',
+          cell: 'vault1',
+          behaviorKey: 'end reducer',
+          type: 'stage:end:reducer',
+          timestamp: 'timestamp-removed',
+          state: Object({ isLoading: true, value: 'hello', error: null, hasValue: false })
+        }),
+        Object({
+          id: 'id-removed',
+          cell: 'vault1',
+          behaviorKey: 'start reducer',
+          type: 'lifecycle:start:reset',
+          timestamp: 'timestamp-removed',
+          state: Object({ isLoading: true, value: 'hello', error: null, hasValue: false })
+        }),
+        Object({
+          id: 'id-removed',
+          cell: 'vault1',
+          behaviorKey: 'end reducer',
+          type: 'lifecycle:end:reset',
+          timestamp: 'timestamp-removed',
+          state: Object({ isLoading: true, value: 'hello', error: null, hasValue: false })
+        }),
+        Object({
+          id: 'id-removed',
+          cell: 'vault1',
+          behaviorKey: 'start destroy',
+          type: 'lifecycle:start:destroy',
+          timestamp: 'timestamp-removed',
+          state: Object({ isLoading: true, value: 'hello', error: null, hasValue: false })
+        }),
+        Object({
+          id: 'id-removed',
+          cell: 'vault1',
+          behaviorKey: 'end destroy',
+          type: 'lifecycle:end:destroy',
+          timestamp: 'timestamp-removed',
+          state: Object({ isLoading: true, value: 'hello', error: null, hasValue: false })
+        }),
+        Object({
+          id: 'id-removed',
+          cell: 'vault1',
+          behaviorKey: 'start initialized',
+          type: 'lifecycle:start:initialized',
+          timestamp: 'timestamp-removed',
+          state: Object({ isLoading: true, value: 'hello', error: null, hasValue: false })
+        }),
+        Object({
+          id: 'id-removed',
+          cell: 'vault1',
+          behaviorKey: 'end initialized',
+          type: 'lifecycle:end:initialized',
+          timestamp: 'timestamp-removed',
           state: Object({ isLoading: true, value: 'hello', error: null, hasValue: false })
         })
       ]);
@@ -158,19 +240,19 @@ describe('Service: Vault Monitor', () => {
 
       expect(emitted).toEqual([
         Object({
-          id: jasmine.any(String),
+          id: 'id-removed',
           cell: 'vault1',
           behaviorKey: 'TestService',
           type: 'lifecycle:start:merge',
-          timestamp: jasmine.any(Number),
+          timestamp: 'timestamp-removed',
           state: Object({ isLoading: true, value: 'hello', error: null, hasValue: false })
         }),
         Object({
-          id: jasmine.any(String),
+          id: 'id-removed',
           cell: 'vault2',
           behaviorKey: 'TestService',
           type: 'lifecycle:start:merge',
-          timestamp: jasmine.any(Number),
+          timestamp: 'timestamp-removed',
           state: Object({ isLoading: true, value: 'hello', error: null, hasValue: false })
         })
       ]);
@@ -182,11 +264,11 @@ describe('Service: Vault Monitor', () => {
 
       expect(emitted).toEqual([
         Object({
-          id: jasmine.any(String),
+          id: 'id-removed',
           cell: 'vault1',
           behaviorKey: 'TestService',
           type: 'lifecycle:start:merge',
-          timestamp: jasmine.any(Number)
+          timestamp: 'timestamp-removed'
         })
       ]);
     });
@@ -223,18 +305,18 @@ describe('Service: Vault Monitor', () => {
 
         expect(emitted).toEqual([
           Object({
-            id: jasmine.any(String),
+            id: 'id-removed',
             cell: 'vault1',
             behaviorKey: 'state key',
             type: 'lifecycle:start:replace',
-            timestamp: jasmine.any(Number)
+            timestamp: 'timestamp-removed'
           }),
           Object({
-            id: jasmine.any(String),
+            id: 'id-removed',
             cell: 'vault1',
             behaviorKey: 'error string',
-            type: 'lifecycle:error:unknown',
-            timestamp: jasmine.any(Number)
+            type: 'error',
+            timestamp: 'timestamp-removed'
           })
         ]);
       });
@@ -250,18 +332,18 @@ describe('Service: Vault Monitor', () => {
 
         expect(emitted).toEqual([
           Object({
-            id: jasmine.any(String),
+            id: 'id-removed',
             cell: 'vault1',
             behaviorKey: 'state key',
             type: 'lifecycle:start:replace',
-            timestamp: jasmine.any(Number)
+            timestamp: 'timestamp-removed'
           }),
           Object({
-            id: jasmine.any(String),
+            id: 'id-removed',
             cell: 'vault1',
             behaviorKey: 'error string',
-            type: 'lifecycle:error:unknown',
-            timestamp: jasmine.any(Number)
+            type: 'error',
+            timestamp: 'timestamp-removed'
           })
         ]);
       });
@@ -339,11 +421,11 @@ describe('Service: Vault Monitor', () => {
 
       expect(emitted).toEqual([
         Object({
-          id: jasmine.any(String),
+          id: 'id-removed',
           cell: 'vault1',
           behaviorKey: 'state key',
           type: 'lifecycle:start:replace',
-          timestamp: jasmine.any(Number)
+          timestamp: 'timestamp-removed'
         })
       ]);
     });
@@ -366,29 +448,29 @@ describe('Service: Vault Monitor', () => {
 
       expect(emitted).toEqual([
         Object({
-          id: jasmine.any(String),
+          id: 'id-removed',
           cell: 'vault1',
           behaviorKey: 'state key',
           type: 'lifecycle:start:replace',
-          timestamp: jasmine.any(Number),
+          timestamp: 'timestamp-removed',
           state: Object({ isLoading: true, value: 'hello', error: null, hasValue: false })
         }),
         Object({
-          id: jasmine.any(String),
+          id: 'id-removed',
           cell: 'vault1',
           behaviorKey: 'error string',
-          type: 'lifecycle:error:unknown',
-          timestamp: jasmine.any(Number),
+          type: 'error',
+          timestamp: 'timestamp-removed',
           state: Object({ isLoading: true, value: 'hello', error: null, hasValue: false }),
           payload: 'error',
           error: 'this is the error'
         }),
         Object({
-          id: jasmine.any(String),
+          id: 'id-removed',
           cell: 'vault1',
           behaviorKey: 'error error',
-          type: 'lifecycle:error:unknown',
-          timestamp: jasmine.any(Number),
+          type: 'error',
+          timestamp: 'timestamp-removed',
           state: Object({ isLoading: true, value: 'hello', error: null, hasValue: false }),
           payload: 'error',
           error: 'this is the error'
@@ -441,11 +523,11 @@ describe('Service: Vault Monitor', () => {
 
       expect(emitted).toEqual([
         Object({
-          id: jasmine.any(String),
+          id: 'id-removed',
           cell: 'vault1',
           behaviorKey: 'state key',
           type: 'lifecycle:start:replace',
-          timestamp: jasmine.any(Number),
+          timestamp: 'timestamp-removed',
           state: Object({ isLoading: true, value: 'hello', error: null, hasValue: false })
         })
       ]);
@@ -476,29 +558,29 @@ describe('Service: Vault Monitor', () => {
 
       expect(emitted).toEqual([
         Object({
-          id: jasmine.any(String),
+          id: 'id-removed',
           cell: 'vault1',
           behaviorKey: 'state key',
           type: 'lifecycle:start:replace',
-          timestamp: jasmine.any(Number),
+          timestamp: 'timestamp-removed',
           state: Object({ isLoading: true, value: 'hello', error: null, hasValue: false })
         }),
         Object({
-          id: jasmine.any(String),
+          id: 'id-removed',
           cell: 'vault1',
           behaviorKey: 'error string',
-          type: 'lifecycle:error:unknown',
-          timestamp: jasmine.any(Number),
+          type: 'error',
+          timestamp: 'timestamp-removed',
           state: Object({ isLoading: true, value: 'hello', error: null, hasValue: false }),
           payload: 'error',
           error: 'this is the error'
         }),
         Object({
-          id: jasmine.any(String),
+          id: 'id-removed',
           cell: 'vault1',
           behaviorKey: 'error object',
-          type: 'lifecycle:error:unknown',
-          timestamp: jasmine.any(Number),
+          type: 'error',
+          timestamp: 'timestamp-removed',
           state: Object({ isLoading: true, value: 'hello', error: null, hasValue: false }),
           payload: 'error',
           error: 'this is the error'

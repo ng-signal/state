@@ -78,74 +78,88 @@ describe('Provider: Feature Cell: fromObservable', () => {
 
     expect(emitted).toEqual([
       Object({
-        id: jasmine.any(String),
+        id: 'id-removed',
+        cell: 'http',
+        behaviorKey: 'core',
+        type: 'lifecycle:start:initialized',
+        timestamp: 'timestamp-removed'
+      }),
+      Object({
+        id: 'id-removed',
+        cell: 'http',
+        behaviorKey: 'core',
+        type: 'lifecycle:end:initialized',
+        timestamp: 'timestamp-removed'
+      }),
+      Object({
+        id: 'id-removed',
         cell: 'http',
         behaviorKey: 'vault-orchestrator',
         type: 'lifecycle:start:replace',
-        timestamp: jasmine.any(Number)
+        timestamp: 'timestamp-removed'
       }),
       Object({
-        id: jasmine.any(String),
+        id: 'id-removed',
         cell: 'http',
         behaviorKey: 'NgVault::Core::State',
         type: 'stage:start:state',
-        timestamp: jasmine.any(Number)
+        timestamp: 'timestamp-removed'
       }),
       Object({
-        id: jasmine.any(String),
+        id: 'id-removed',
         cell: 'http',
         behaviorKey: 'NgVault::Core::State',
         type: 'stage:end:state',
-        timestamp: jasmine.any(Number)
+        timestamp: 'timestamp-removed'
       }),
       Object({
-        id: jasmine.any(String),
+        id: 'id-removed',
         cell: 'http',
         behaviorKey: 'NgVault::CoreHttpResource::State',
         type: 'stage:start:state',
-        timestamp: jasmine.any(Number)
+        timestamp: 'timestamp-removed'
       }),
       Object({
-        id: jasmine.any(String),
+        id: 'id-removed',
         cell: 'http',
         behaviorKey: 'NgVault::CoreHttpResource::State',
         type: 'stage:end:state',
-        timestamp: jasmine.any(Number)
+        timestamp: 'timestamp-removed'
       }),
       Object({
-        id: jasmine.any(String),
+        id: 'id-removed',
         cell: 'http',
         behaviorKey: 'NgVault::Core::Reducer',
         type: 'stage:start:reducer',
-        timestamp: jasmine.any(Number)
+        timestamp: 'timestamp-removed'
       }),
       Object({
-        id: jasmine.any(String),
+        id: 'id-removed',
         cell: 'http',
         behaviorKey: 'NgVault::Core::Reducer',
         type: 'stage:end:reducer',
-        timestamp: jasmine.any(Number)
+        timestamp: 'timestamp-removed'
       }),
       Object({
-        id: jasmine.any(String),
+        id: 'id-removed',
         cell: 'http',
         behaviorKey: 'NgVault::Core::Reducer',
         type: 'stage:start:reducer',
-        timestamp: jasmine.any(Number)
+        timestamp: 'timestamp-removed'
       }),
       Object({
-        id: jasmine.any(String),
+        id: 'id-removed',
         cell: 'http',
         behaviorKey: 'NgVault::Core::Reducer',
         type: 'stage:end:reducer',
-        timestamp: jasmine.any(Number)
+        timestamp: 'timestamp-removed'
       }),
       Object({
-        id: jasmine.any(String),
+        id: 'id-removed',
         cell: 'http',
         behaviorKey: 'vault-orchestrator',
         type: 'lifecycle:end:replace',
-        timestamp: jasmine.any(Number)
+        timestamp: 'timestamp-removed'
       })
     ]);
   });

@@ -44,11 +44,11 @@ describe('useDevtoolsEventEmitter', () => {
       expect(emitted).toEqual(
         jasmine.objectContaining([
           Object({
-            id: jasmine.any(String),
+            id: 'id-removed',
             behaviorKey: 'dev-tools',
             cell: 'users',
             type: 'init',
-            timestamp: jasmine.any(Number)
+            timestamp: 'timestamp-removed'
           })
         ])
       );

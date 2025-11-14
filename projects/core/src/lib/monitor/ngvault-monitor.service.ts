@@ -25,16 +25,23 @@ export class NgVaultMonitor {
 
   #serializeName(name: string): string {
     const lower = name.toLowerCase();
+
     const phase = lower.startsWith('start') ? 'start' : lower.startsWith('end') ? 'end' : 'error';
 
-    const domain = /(replace|merge)/.test(lower)
+    let operation = lower.replace(/^(start|end|error)\s*/, '');
+    if (!operation) operation = 'unknown';
+
+    if (phase === 'error') {
+      return `error`;
+    }
+
+    const domain = /(replace|merge)/.test(operation)
       ? 'lifecycle'
-      : /(state|reduce|encrypt|persist)/.test(lower)
+      : /(state|reduce|encrypt|persist)/.test(operation)
         ? 'stage'
         : 'lifecycle';
 
-    const operation = lower.replace(/^(start|end|error)/, '');
-    return `${domain}:${phase}:${operation || 'unknown'}`;
+    return `${domain}:${phase}:${operation}`;
   }
 
   startReplace<T>(cell: string, behaviorKey: string, ctx: Readonly<VaultBehaviorContext<T>>): void {
@@ -49,8 +56,8 @@ export class NgVaultMonitor {
     this.#emitEvent(cell, behaviorKey, 'startMerge', ctx.state);
   }
 
-  endMerge<T>(cell: string, behaviorKey: string, ctx: Readonly<VaultBehaviorContext<T>>): void {
-    this.#emitEvent(cell, behaviorKey, 'endMerge', ctx.state);
+  endMerge<T>(cell: string, behaviorKey: string, ctx: Readonly<VaultBehaviorContext<T>>, payload?: unknown): void {
+    this.#emitEvent(cell, behaviorKey, 'endMerge', ctx.state, payload);
   }
 
   startState<T>(cell: string, behaviorKey: string, ctx: Readonly<VaultBehaviorContext<T>>): void {
@@ -71,6 +78,30 @@ export class NgVaultMonitor {
 
   error<T>(cell: string, behaviorKey: string, ctx: Readonly<VaultBehaviorContext<T>>, err: unknown): void {
     this.#emitEvent(cell, behaviorKey, 'error', ctx.state, 'error', err instanceof Error ? err.message : String(err));
+  }
+
+  startReset<T>(cell: string, behaviorKey: string, ctx: Readonly<VaultBehaviorContext<T>>): void {
+    this.#emitEvent(cell, behaviorKey, 'startReset', ctx.state);
+  }
+
+  endReset<T>(cell: string, behaviorKey: string, ctx: Readonly<VaultBehaviorContext<T>>): void {
+    this.#emitEvent(cell, behaviorKey, 'endReset', ctx.state);
+  }
+
+  startDestroy<T>(cell: string, behaviorKey: string, ctx: Readonly<VaultBehaviorContext<T>>): void {
+    this.#emitEvent(cell, behaviorKey, 'startDestroy', ctx.state);
+  }
+
+  endDestroy<T>(cell: string, behaviorKey: string, ctx: Readonly<VaultBehaviorContext<T>>): void {
+    this.#emitEvent(cell, behaviorKey, 'endDestroy', ctx.state);
+  }
+
+  startInitialized<T>(cell: string, behaviorKey: string, ctx: Readonly<VaultBehaviorContext<T>>): void {
+    this.#emitEvent(cell, behaviorKey, 'startInitialized', ctx.state);
+  }
+
+  endInitialized<T>(cell: string, behaviorKey: string, ctx: Readonly<VaultBehaviorContext<T>>): void {
+    this.#emitEvent(cell, behaviorKey, 'endInitialized', ctx.state);
   }
 
   registerCell(cellKey: string, insight?: VaultInsightDefinition): void {

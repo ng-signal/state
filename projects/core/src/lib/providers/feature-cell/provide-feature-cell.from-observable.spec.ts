@@ -40,6 +40,7 @@ describe('Provider: Feature Cell: fromObservable', () => {
 
     runInInjectionContext(injector, () => {
       vault = vaultFactory();
+      vault.initialize();
     });
     eventBus = TestBed.inject(NgVaultEventBus);
     stopListening = createTestEventListener(eventBus, emitted);
@@ -99,6 +100,7 @@ describe('Provider: Feature Cell: fromObservable', () => {
 
     runInInjectionContext(TestBed.inject(Injector), () => {
       vault = (provider as any).useFactory();
+      vault.initialize();
     });
 
     vault.mergeState({ value: { name: 'Grace' } as any });

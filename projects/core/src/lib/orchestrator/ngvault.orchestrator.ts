@@ -11,7 +11,6 @@ import {
   VaultBehavior,
   VaultBehaviorContext,
   VaultEncryptionBehavior,
-  VaultInsightDefinition,
   VaultPersistenceBehavior,
   VaultReducerBehavior,
   VaultStateBehavior
@@ -24,16 +23,16 @@ import { resourceError } from '../utils/resource-error.util';
 
 export class VaultOrchestrator<T> {
   #queue = inject(NGVAULT_QUEUE);
-  #ngVaultMonitor = inject(NgVaultMonitor);
+  #ngVaultMonitor!: NgVaultMonitor;
 
   constructor(
     private cellKey: string,
     private readonly behaviors: VaultBehavior<T>[],
     private readonly reducers: NgVaultReducerFunction<T>[],
     private readonly injector: Injector,
-    readonly vaultMonitorOptions?: VaultInsightDefinition
+    readonly ngVaultMonitor: NgVaultMonitor
   ) {
-    this.#ngVaultMonitor.registerCell(this.cellKey, vaultMonitorOptions);
+    this.#ngVaultMonitor = ngVaultMonitor;
   }
 
   #ensureIncoming(ctx: VaultBehaviorContext<T>): NgVaultStateInputType<T> | null {
@@ -94,7 +93,10 @@ export class VaultOrchestrator<T> {
       this.#ngVaultMonitor.startMerge(this.cellKey, 'vault-orchestrator', ctx);
 
       const incoming = this.#ensureIncoming(ctx);
-      if (!incoming) return;
+      if (!incoming) {
+        this.#ngVaultMonitor.endMerge(this.cellKey, 'vault-orchestrator', ctx, { noop: true });
+        return;
+      }
 
       this.#safeAsync(async () => {
         const current = ctx.value?.() ?? ({} as T);
@@ -145,44 +147,26 @@ export class VaultOrchestrator<T> {
         return;
       }
 
-      const isPlainState = incoming != null && typeof incoming === 'object' && !isHttpResourceRef(incoming);
-      const incomingState = isPlainState ? (incoming as Partial<NrVaultStateType<T>>) : {};
-      const isReplace = ctx.operation === 'replace';
-
-      if (incomingState.loading !== undefined) ctx.isLoading?.set(incomingState.loading);
-      if (incomingState.error !== undefined) ctx.error?.set(incomingState.error);
+      if (incoming?.loading !== undefined) ctx.isLoading?.set(incoming.loading);
+      if (incoming?.error !== undefined) ctx.error?.set(incoming.error);
 
       const result = await fn();
 
       queueMicrotask(() => {
-        let normalized: Partial<NrVaultStateType<T>> = {};
+        // Case 1: pipeline produced a real value
+        if (result !== undefined && result !== null) {
+          ctx.value?.set(result as T);
 
-        if (result == null) {
-          normalized = incomingState;
-        } else {
-          normalized = { value: result as T };
+          // DO NOT override loading/error — user set these
+          return;
         }
 
-        if (normalized.value !== undefined) {
-          ctx.value?.set(normalized.value);
-        } else if (isReplace) {
+        // Case 2: pipeline explicitly produced null → wipe value
+        if (result === null) {
           ctx.value?.set(undefined);
-        }
 
-        if (normalized.loading !== undefined) {
-          ctx.isLoading?.set(normalized.loading);
-        } else if (incomingState.loading !== undefined) {
-          ctx.isLoading?.set(incomingState.loading);
-        } else if (isReplace) {
-          ctx.isLoading?.set(false);
-        }
-
-        if (normalized.error !== undefined) {
-          ctx.error?.set(normalized.error);
-        } else if (incomingState.error !== undefined) {
-          ctx.error?.set(incomingState.error);
-        } else if (isReplace) {
-          ctx.error?.set(null);
+          // DO NOT override loading/error — user set these
+          return;
         }
       });
     } catch (err) {
@@ -197,6 +181,7 @@ export class VaultOrchestrator<T> {
     working?: T
   ): Promise<T | undefined> {
     const stageBehaviors = this.behaviors.filter((b) => b.type === stage);
+
     let current = working;
 
     for (const behavior of stageBehaviors) {
@@ -206,6 +191,7 @@ export class VaultOrchestrator<T> {
         switch (stage) {
           case 'state':
             if (typeof (behavior as VaultStateBehavior<T>).computeState === 'function') {
+              // TODO - make this better for state management
               this.#ngVaultMonitor.startState(this.cellKey, behavior.key, ctx);
               next = await (behavior as VaultStateBehavior<T>).computeState(ctx);
               this.#ngVaultMonitor.endState(this.cellKey, behavior.key, ctx);

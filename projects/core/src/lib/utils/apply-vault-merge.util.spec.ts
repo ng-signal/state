@@ -10,6 +10,10 @@ describe('Utility: applyVaultValueMerge', () => {
     expect(applyNgVaultValueMerge(curr, undefined)).toEqual([1, 2, 3]);
   });
 
+  it('should safely when next and curr is undefined', () => {
+    expect(applyNgVaultValueMerge(undefined, undefined)).toBeUndefined();
+  });
+
   describe('Arrays', () => {
     it('should append arrays together', () => {
       const curr = [1, 2];

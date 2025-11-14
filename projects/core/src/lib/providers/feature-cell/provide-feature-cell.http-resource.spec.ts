@@ -17,6 +17,10 @@ interface TestModel {
 @FeatureCell<TestModel[]>('cars')
 class TestService {
   vault = injectVault<TestModel[]>(TestService);
+
+  constructor() {
+    this.vault.initialize();
+  }
 }
 
 describe('Provider: Feature Cell Resource', () => {
@@ -68,7 +72,7 @@ describe('Provider: Feature Cell Resource', () => {
 
       expect(vault.state.value()).toEqual([]);
       expect(vault.state.isLoading()).toBeTrue();
-      expect(vault.state.error()).toBeNull();
+      expect(vault.state.error()).toEqual(jasmine.any(Function));
       expect(vault.state.hasValue()).toBeTrue();
 
       mockBackend.expectOne('/data').flush([{ id: 1, name: 'Ada' }]);

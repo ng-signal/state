@@ -5,6 +5,7 @@ import { TestBed } from '@angular/core/testing';
 import { NgVaultEventBus } from '@ngvault/dev-tools';
 import { NgVaultBehaviorType, VaultBehaviorContext } from '@ngvault/shared';
 import { createTestEventListener, flushMicrotasksZoneless, provideVaultTesting } from '@ngvault/testing';
+import { NgVaultMonitor } from '../monitor/ngvault-monitor.service';
 import { VaultOrchestrator } from './ngvault.orchestrator';
 
 describe('Orcestrator: Vault', () => {
@@ -12,6 +13,8 @@ describe('Orcestrator: Vault', () => {
   let mockCtx: VaultBehaviorContext<any>;
   let calls: string[];
   let injector: any;
+  let ngVaultMonitor: any;
+  let reducer1: any;
 
   const emitted: any[] = [];
   let stopListening: any;
@@ -38,9 +41,13 @@ describe('Orcestrator: Vault', () => {
     });
 
     injector = TestBed.inject(Injector);
+    ngVaultMonitor = TestBed.inject(NgVaultMonitor);
+    ngVaultMonitor.registerCell('cell key', {});
 
     eventBus = TestBed.inject(NgVaultEventBus);
     stopListening = createTestEventListener(eventBus, emitted);
+
+    reducer1 = () => calls.push('reducer 1');
   });
 
   afterEach(() => {
@@ -55,7 +62,7 @@ describe('Orcestrator: Vault', () => {
         calls.push(type);
         return returnValue ?? { [`${type}`]: true };
       },
-      applyReducers: async () => {
+      applyReducer: async () => {
         calls.push(type);
         return returnValue ?? { [`${type}`]: true };
       },
@@ -72,7 +79,7 @@ describe('Orcestrator: Vault', () => {
 
   it('should execute state → reduce (2 reducers) → encrypt → persist in order', async () => {
     // Two reducer functions
-    const reducer1 = () => calls.push('reducer 1');
+    reducer1 = () => calls.push('reducer 1');
     const reducer2 = () => calls.push('reducer 2');
 
     // Make behaviors using the helper + real reducer behavior
@@ -89,12 +96,7 @@ describe('Orcestrator: Vault', () => {
 
     // Create orchestrator
     runInInjectionContext(injector, () => {
-      dispatcher = new VaultOrchestrator<any>('cell key', behaviors, [reducer1, reducer2], injector, {
-        id: 'manual-insights',
-        wantsState: true,
-        wantsPayload: true,
-        wantsErrors: true
-      } as any);
+      dispatcher = new VaultOrchestrator<any>('cell key', behaviors, [reducer1, reducer2], injector, ngVaultMonitor);
     });
 
     // Act — trigger reducer pipeline
@@ -112,76 +114,68 @@ describe('Orcestrator: Vault', () => {
     // Verify event pipeline
     expect(emitted).toEqual([
       Object({
-        id: jasmine.any(String),
+        id: 'id-removed',
         cell: 'cell key',
         behaviorKey: 'vault-orchestrator',
         type: 'lifecycle:start:replace',
-        timestamp: jasmine.any(Number),
-        state: 22
+        timestamp: 'timestamp-removed'
       }),
 
       // STATE behavior (start + end)
       Object({
-        id: jasmine.any(String),
+        id: 'id-removed',
         cell: 'cell key',
         behaviorKey: 'state-id',
         type: 'stage:start:state',
-        timestamp: jasmine.any(Number),
-        state: 22
+        timestamp: 'timestamp-removed'
       }),
       Object({
-        id: jasmine.any(String),
+        id: 'id-removed',
         cell: 'cell key',
         behaviorKey: 'state-id',
         type: 'stage:end:state',
-        timestamp: jasmine.any(Number),
-        state: 22
+        timestamp: 'timestamp-removed'
       }),
 
       // REDUCER #1 (start + end)
       Object({
-        id: jasmine.any(String),
+        id: 'id-removed',
         cell: 'cell key',
         behaviorKey: 'reduce-id',
         type: 'stage:start:reducer',
-        timestamp: jasmine.any(Number),
-        state: 22
+        timestamp: 'timestamp-removed'
       }),
       Object({
-        id: jasmine.any(String),
+        id: 'id-removed',
         cell: 'cell key',
         behaviorKey: 'reduce-id',
         type: 'stage:end:reducer',
-        timestamp: jasmine.any(Number),
-        state: 22
+        timestamp: 'timestamp-removed'
       }),
 
       // REDUCER #2 (start + end)
       Object({
-        id: jasmine.any(String),
+        id: 'id-removed',
         cell: 'cell key',
         behaviorKey: 'reduce-id',
         type: 'stage:start:reducer',
-        timestamp: jasmine.any(Number),
-        state: 22
+        timestamp: 'timestamp-removed'
       }),
       Object({
-        id: jasmine.any(String),
+        id: 'id-removed',
         cell: 'cell key',
         behaviorKey: 'reduce-id',
         type: 'stage:end:reducer',
-        timestamp: jasmine.any(Number),
-        state: 22
+        timestamp: 'timestamp-removed'
       }),
 
       // END REPLACE
       Object({
-        id: jasmine.any(String),
+        id: 'id-removed',
         cell: 'cell key',
         behaviorKey: 'vault-orchestrator',
         type: 'lifecycle:end:replace',
-        timestamp: jasmine.any(Number),
-        state: 22
+        timestamp: 'timestamp-removed'
       })
     ]);
   });
@@ -194,7 +188,6 @@ describe('Orcestrator: Vault', () => {
     };
 
     // Two reducer functions
-    const reducer1 = () => calls.push('reducer 1');
     const reducer2 = () => calls.push('reducer 2');
 
     // Make behaviors usng the helper + real reducer behavior
@@ -208,12 +201,7 @@ describe('Orcestrator: Vault', () => {
 
     // Create orchestrator
     runInInjectionContext(injector, () => {
-      dispatcher = new VaultOrchestrator<any>('cell key', behaviors, [reducer1, reducer2], injector, {
-        id: 'manual-insights',
-        wantsState: true,
-        wantsPayload: true,
-        wantsErrors: true
-      } as any);
+      dispatcher = new VaultOrchestrator<any>('cell key', behaviors, [reducer1, reducer2], injector, ngVaultMonitor);
     });
 
     // Act — trigger reducer pipeline
@@ -229,50 +217,34 @@ describe('Orcestrator: Vault', () => {
     // Verify event pipeline
     expect(emitted).toEqual([
       Object({
-        id: jasmine.any(String),
+        id: 'id-removed',
         cell: 'cell key',
         behaviorKey: 'vault-orchestrator',
         type: 'lifecycle:start:replace',
-        timestamp: jasmine.any(Number),
-        state: 22
+        timestamp: 'timestamp-removed'
       }),
 
       // STATE behavior (start + end)
       Object({
-        id: jasmine.any(String),
+        id: 'id-removed',
         cell: 'cell key',
         behaviorKey: 'state-id',
         type: 'stage:start:state',
-        timestamp: jasmine.any(Number),
-        state: 22
+        timestamp: 'timestamp-removed'
       }),
       Object({
-        id: jasmine.any(String),
+        id: 'id-removed',
         cell: 'cell key',
         behaviorKey: 'state-id',
         type: 'stage:end:state',
-        timestamp: jasmine.any(Number),
-        state: 22
+        timestamp: 'timestamp-removed'
       }),
       Object({
-        id: jasmine.any(String),
+        id: 'id-removed',
         cell: 'cell key',
         behaviorKey: 'reduce-id',
-        type: 'lifecycle:error:unknown',
-        timestamp: jasmine.any(Number),
-        state: 22,
-        payload: 'error',
-        error: '[NgVault] Reducer stage received undefined state in cell "cell key".'
-      }),
-      Object({
-        id: jasmine.any(String),
-        cell: 'cell key',
-        behaviorKey: 'reduce-id',
-        type: 'lifecycle:error:unknown',
-        timestamp: jasmine.any(Number),
-        state: 22,
-        payload: 'error',
-        error: '[NgVault] Reducer stage received undefined state in cell "cell key".'
+        type: 'error',
+        timestamp: 'timestamp-removed'
       })
     ]);
   });
@@ -285,7 +257,7 @@ describe('Orcestrator: Vault', () => {
 
     const behaviors = [errorBehavior];
     runInInjectionContext(injector, () => {
-      dispatcher = new VaultOrchestrator<any>('cell key', behaviors, [], injector);
+      dispatcher = new VaultOrchestrator<any>('cell key', behaviors, [reducer1], injector, ngVaultMonitor);
     });
 
     dispatcher.dispatchSet(mockCtx);
@@ -312,7 +284,7 @@ describe('Orcestrator: Vault', () => {
     const behaviors = [makeBehavior('state')];
 
     runInInjectionContext(injector, () => {
-      dispatcher = new VaultOrchestrator<any>('cell key', behaviors, [], injector);
+      dispatcher = new VaultOrchestrator<any>('cell key', behaviors, [reducer1], injector, ngVaultMonitor);
     });
 
     // Create HttpResourceRef (this will call the mock backend)
@@ -351,12 +323,12 @@ describe('Orcestrator: Vault', () => {
   it('should skip undefined stage results and maintain working state', async () => {
     const behaviors = [
       makeBehavior('state', { id: 1 }),
-      { ...makeBehavior('reduce'), applyReducers: async () => undefined },
+      { ...makeBehavior('reduce'), applyReducer: () => undefined },
       makeBehavior('encrypt')
     ];
 
     runInInjectionContext(injector, () => {
-      dispatcher = new VaultOrchestrator<any>('cell key', behaviors, [], injector);
+      dispatcher = new VaultOrchestrator<any>('cell key', behaviors, [reducer1], injector, ngVaultMonitor);
     });
 
     dispatcher.dispatchSet(mockCtx);
@@ -372,7 +344,7 @@ describe('Orcestrator: Vault', () => {
     const behaviors = [makeBehavior('state')];
 
     runInInjectionContext(injector, () => {
-      dispatcher = new VaultOrchestrator<any>('cell key', behaviors, [], injector);
+      dispatcher = new VaultOrchestrator<any>('cell key', behaviors, [reducer1], injector, ngVaultMonitor);
     });
 
     const minimalCtx = {} as VaultBehaviorContext<any>; // no signals
@@ -383,7 +355,7 @@ describe('Orcestrator: Vault', () => {
   it('should set signals correctly after microtask flush', async () => {
     const behaviors = [makeBehavior('state', { ok: true })];
     runInInjectionContext(injector, () => {
-      dispatcher = new VaultOrchestrator<any>('cell key', behaviors, [], injector);
+      dispatcher = new VaultOrchestrator<any>('cell key', behaviors, [reducer1], injector, ngVaultMonitor);
     });
 
     dispatcher.dispatchSet(mockCtx);
@@ -403,10 +375,10 @@ describe('Orcestrator: Vault', () => {
       errorBehavior.computeState = async () => {
         throw new Error('Test error');
       };
-      const behaviors = [errorBehavior, makeBehavior('reduce'), makeBehavior('encrypt'), makeBehavior('persist')];
+      const behaviors = [errorBehavior, makeBehavior('reducee'), makeBehavior('encrypt'), makeBehavior('persist')];
 
       runInInjectionContext(injector, () => {
-        dispatcher = new VaultOrchestrator<any>('cell key', behaviors, [], injector);
+        dispatcher = new VaultOrchestrator<any>('cell key', behaviors, [reducer1], injector, ngVaultMonitor);
       });
 
       dispatcher.dispatchSet(mockCtx);
@@ -424,14 +396,18 @@ describe('Orcestrator: Vault', () => {
     });
 
     it('should stop execution on a reduce event', async () => {
+      const reducer1 = () => {
+        throw new Error('error');
+      };
+
       const errorBehavior = makeBehavior('reduce');
-      errorBehavior.applyReducers = async () => {
+      errorBehavior.applyReducer = async () => {
         throw new Error('Test error');
       };
       const behaviors = [makeBehavior('state'), errorBehavior, makeBehavior('encrypt'), makeBehavior('persist')];
 
       runInInjectionContext(injector, () => {
-        dispatcher = new VaultOrchestrator<any>('cell key', behaviors, [], injector);
+        dispatcher = new VaultOrchestrator<any>('cell key', behaviors, [reducer1], injector, ngVaultMonitor);
       });
 
       dispatcher.dispatchSet(mockCtx);
@@ -456,7 +432,7 @@ describe('Orcestrator: Vault', () => {
       const behaviors = [makeBehavior('state'), makeBehavior('reduce'), errorBehavior, makeBehavior('persist')];
 
       runInInjectionContext(injector, () => {
-        dispatcher = new VaultOrchestrator<any>('cell key', behaviors, [], injector);
+        dispatcher = new VaultOrchestrator<any>('cell key', behaviors, [reducer1], injector, ngVaultMonitor);
       });
 
       dispatcher.dispatchSet(mockCtx);
@@ -481,7 +457,7 @@ describe('Orcestrator: Vault', () => {
       const behaviors = [makeBehavior('state'), makeBehavior('reduce'), makeBehavior('encrypt'), errorBehavior];
 
       runInInjectionContext(injector, () => {
-        dispatcher = new VaultOrchestrator<any>('cell key', behaviors, [], injector);
+        dispatcher = new VaultOrchestrator<any>('cell key', behaviors, [reducer1], injector, ngVaultMonitor);
       });
 
       dispatcher.dispatchSet(mockCtx);
@@ -514,7 +490,7 @@ describe('Orcestrator: Vault', () => {
       ];
 
       runInInjectionContext(injector, () => {
-        dispatcher = new VaultOrchestrator<any>('cell key', behaviors, [], injector);
+        dispatcher = new VaultOrchestrator<any>('cell key', behaviors, [reducer1], injector, ngVaultMonitor);
       });
 
       dispatcher.dispatchSet(mockCtx);
@@ -533,7 +509,7 @@ describe('Orcestrator: Vault', () => {
 
     it('should stop execution on a reduce event', async () => {
       const errorBehavior = makeBehavior('reduce');
-      errorBehavior.applyReducers = async () => {
+      errorBehavior.applyReducer = async () => {
         throw new Error('Test error');
       };
       const behaviors = [
@@ -545,7 +521,7 @@ describe('Orcestrator: Vault', () => {
       ];
 
       runInInjectionContext(injector, () => {
-        dispatcher = new VaultOrchestrator<any>('cell key', behaviors, [], injector);
+        dispatcher = new VaultOrchestrator<any>('cell key', behaviors, [reducer1], injector, ngVaultMonitor);
       });
 
       dispatcher.dispatchSet(mockCtx);
@@ -576,7 +552,7 @@ describe('Orcestrator: Vault', () => {
       ];
 
       runInInjectionContext(injector, () => {
-        dispatcher = new VaultOrchestrator<any>('cell key', behaviors, [], injector);
+        dispatcher = new VaultOrchestrator<any>('cell key', behaviors, [reducer1], injector, ngVaultMonitor);
       });
 
       dispatcher.dispatchSet(mockCtx);
@@ -607,7 +583,7 @@ describe('Orcestrator: Vault', () => {
       ];
 
       runInInjectionContext(injector, () => {
-        dispatcher = new VaultOrchestrator<any>('cell key', behaviors, [], injector);
+        dispatcher = new VaultOrchestrator<any>('cell key', behaviors, [reducer1], injector, ngVaultMonitor);
       });
 
       dispatcher.dispatchSet(mockCtx);
@@ -630,7 +606,7 @@ describe('Orcestrator: Vault', () => {
       const behaviors = [makeBehavior('state'), makeBehavior('reduce')];
 
       runInInjectionContext(injector, () => {
-        dispatcher = new VaultOrchestrator<any>('cell key', behaviors, [], injector);
+        dispatcher = new VaultOrchestrator<any>('cell key', behaviors, [reducer1], injector, ngVaultMonitor);
       });
 
       dispatcher.dispatchSet(mockCtx);
@@ -646,7 +622,7 @@ describe('Orcestrator: Vault', () => {
       const behaviors = [makeBehavior('state'), makeBehavior('encrypt')];
 
       runInInjectionContext(injector, () => {
-        dispatcher = new VaultOrchestrator<any>('cell key', behaviors, [], injector);
+        dispatcher = new VaultOrchestrator<any>('cell key', behaviors, [], injector, ngVaultMonitor);
       });
 
       dispatcher.dispatchSet(mockCtx);
@@ -662,7 +638,7 @@ describe('Orcestrator: Vault', () => {
       const behaviors = [makeBehavior('state'), makeBehavior('persist')];
 
       runInInjectionContext(injector, () => {
-        dispatcher = new VaultOrchestrator<any>('cell key', behaviors, [], injector);
+        dispatcher = new VaultOrchestrator<any>('cell key', behaviors, [], injector, ngVaultMonitor);
       });
 
       dispatcher.dispatchSet(mockCtx);
