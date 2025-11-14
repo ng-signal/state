@@ -91,6 +91,8 @@ describe('Service: Vault Monitor', () => {
       vaultMonitor.endClearPersist?.('vault1', 'end clear persist', ctx);
       vaultMonitor.startLoadPersist?.('vault1', 'start load persist', ctx);
       vaultMonitor.endLoadPersist?.('vault1', 'end load persist', ctx);
+      vaultMonitor.startClearValue?.('vault1', 'start clear value', ctx);
+      vaultMonitor.endClearValue?.('vault1', 'end clear value', ctx);
 
       expect(emitted).toEqual([
         Object({
@@ -279,6 +281,22 @@ describe('Service: Vault Monitor', () => {
           cell: 'vault1',
           behaviorKey: 'end load persist',
           type: 'stage:end:loadpersist',
+          timestamp: 'timestamp-removed',
+          state: Object({ isLoading: true, value: 'hello', error: null, hasValue: false })
+        }),
+        Object({
+          id: 'id-removed',
+          cell: 'vault1',
+          behaviorKey: 'start clear value',
+          type: 'lifecycle:start:clearvalue',
+          timestamp: 'timestamp-removed',
+          state: Object({ isLoading: true, value: 'hello', error: null, hasValue: false })
+        }),
+        Object({
+          id: 'id-removed',
+          cell: 'vault1',
+          behaviorKey: 'end clear value',
+          type: 'lifecycle:end:clearvalue',
           timestamp: 'timestamp-removed',
           state: Object({ isLoading: true, value: 'hello', error: null, hasValue: false })
         })

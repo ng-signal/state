@@ -512,57 +512,6 @@ describe('Provider: Feature Cell (core vault functionality)', () => {
     expect(vault.state.value()).toEqual([]);
   });
 
-  describe('FeatureCell Destroy Lifecycle', () => {
-    it('should fully destroy and reset signals on destroy()', async () => {
-      runInInjectionContext(injector, () => {
-        providers = provideFeatureCell(class TestService {}, { key: 'destroy-test', initial: [] });
-      });
-
-      const vaultFactory = (providers[0] as any).useFactory;
-
-      let vault!: NgVaultFeatureCell<any>;
-      runInInjectionContext(injector, () => {
-        vault = vaultFactory();
-        vault.initialize();
-      });
-
-      vault.replaceState({ loading: true, value: [1, 2, 3], error: { message: 'oops' } as any });
-
-      expect(vault.state.isLoading()).toBeTrue();
-      await flushMicrotasksZoneless();
-      expect(vault.state.isLoading()).toBeTrue();
-      expect(vault.state.value()).toEqual([1, 2, 3]);
-      expect(vault.state.error()).toEqual(Object({ message: 'oops' }));
-
-      vault.reset();
-
-      expect(vault.state.isLoading()).toBeFalse();
-      await flushMicrotasksZoneless();
-      expect(vault.state.isLoading()).toBeFalse();
-      expect(vault.state.value()).toBeUndefined();
-      expect(vault.state.error()).toBeNull();
-
-      vault.replaceState({ loading: true, value: [1, 2, 3], error: { message: 'oops' } as any });
-      expect(vault.state.isLoading()).toBeTrue();
-      await flushMicrotasksZoneless();
-
-      expect(vault.state.isLoading()).toBeTrue();
-      expect(vault.state.value()).toEqual([1, 2, 3]);
-      expect(vault.state.error()).toEqual(Object({ message: 'oops' }));
-
-      vault.destroy();
-      await flushMicrotasksZoneless();
-
-      expect(vault.state.isLoading()).toBeFalse();
-      expect(vault.state.value()).toBeUndefined();
-      expect(vault.state.error()).toBeNull();
-
-      let completed = false;
-      vault.destroyed$?.subscribe({ complete: () => (completed = true) });
-      expect(completed).toBeTrue();
-    });
-  });
-
   it('should default to {} when incoming is not a plain object (primitive)', async () => {
     runInInjectionContext(injector, () => {
       providers = provideFeatureCell(class DummyService {}, { key: 'state-test', initial: [] });

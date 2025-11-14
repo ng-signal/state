@@ -145,9 +145,11 @@ export function provideFeatureCell<Service, T>(
         incoming = _normalizeIncoming(incoming) as NgVaultStateType<T>;
 
         if (!hasValueKey) {
+          _ngVaultMonitor.startClearValue(_cellKey, 'core', ctx);
           _isLoading.set(incoming?.loading ?? false);
           _error.set(incoming?.error ?? null);
           _value.set(undefined);
+          _ngVaultMonitor.endClearValue(_cellKey, 'core', ctx);
           return;
         }
 

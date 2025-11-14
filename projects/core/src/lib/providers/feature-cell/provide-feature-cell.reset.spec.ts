@@ -44,327 +44,961 @@ describe('Provider: Feature Cell (core vault functionality)', () => {
     stopListening();
   });
 
-  it('should gracefully reset all vault signals when replaceState(null) or mergeState(null) is used', async () => {
-    const persistBehavior = createTestBehavior(NgVaultBehaviorTypes.Persist, called);
-    runInInjectionContext(injector, () => {
-      providers = provideFeatureCell(
-        class DummyService {},
-        { key: 'reset-test', initial: null, insights: { wantsState: true } as any },
-        [persistBehavior]
-      );
+  describe('replaceState', () => {
+    it('should reset state with undefined', async () => {
+      const persistBehavior = createTestBehavior(NgVaultBehaviorTypes.Persist, called);
+      runInInjectionContext(injector, () => {
+        providers = provideFeatureCell(
+          class DummyService {},
+          { key: 'reset-test', initial: null, insights: { wantsState: true } as any },
+          [persistBehavior]
+        );
+      });
+      const provider = providers.find((p: any) => typeof p.useFactory === 'function');
+      let vault!: NgVaultFeatureCell<any>;
+
+      runInInjectionContext(injector, () => {
+        vault = (provider as any).useFactory();
+        vault.initialize();
+      });
+
+      vault.replaceState({ loading: true, error: { message: 'fail' }, value: [1, 2, 3] });
+      expect(vault.state.isLoading()).toBeTrue();
+      expect(vault.state.error()).toEqual({ message: 'fail' });
+      expect(vault.state.value()).toBeUndefined();
+      expect(vault.state.hasValue()).toBeFalse();
+
+      await flushMicrotasksZoneless();
+      expect(vault.state.isLoading()).toBeTrue();
+      expect(vault.state.error()).toEqual({ message: 'fail' });
+      expect(vault.state.value()).toEqual([1, 2, 3]);
+      expect(vault.state.hasValue()).toBeTrue();
+
+      vault.replaceState(undefined);
+      await flushMicrotasksZoneless();
+
+      expect(vault.state.isLoading()).toBeFalse();
+      expect(vault.state.error()).toBeNull();
+      expect(vault.state.value()).toBeUndefined();
+      expect(vault.state.hasValue()).toBeFalse();
+
+      expect(called).toEqual(['load', 'persist']);
+      expect(emitted).toEqual([
+        Object({
+          id: 'id-removed',
+          cell: 'reset-test',
+          behaviorKey: 'core',
+          type: 'lifecycle:start:initialized',
+          timestamp: 'timestamp-removed',
+          state: Object({ isLoading: false, value: undefined, error: null, hasValue: false })
+        }),
+        Object({
+          id: 'id-removed',
+          cell: 'reset-test',
+          behaviorKey: 'NgVault::Test::Persist',
+          type: 'stage:start:loadpersist',
+          timestamp: 'timestamp-removed',
+          state: Object({ isLoading: false, value: undefined, error: null, hasValue: false })
+        }),
+        Object({
+          id: 'id-removed',
+          cell: 'reset-test',
+          behaviorKey: 'NgVault::Test::Persist',
+          type: 'stage:end:loadpersist',
+          timestamp: 'timestamp-removed',
+          state: Object({ isLoading: false, value: undefined, error: null, hasValue: false })
+        }),
+        Object({
+          id: 'id-removed',
+          cell: 'reset-test',
+          behaviorKey: 'core',
+          type: 'lifecycle:end:initialized',
+          timestamp: 'timestamp-removed',
+          state: Object({ isLoading: false, value: undefined, error: null, hasValue: false })
+        }),
+        Object({
+          id: 'id-removed',
+          cell: 'reset-test',
+          behaviorKey: 'vault-orchestrator',
+          type: 'lifecycle:start:replace',
+          timestamp: 'timestamp-removed',
+          state: Object({ isLoading: true, value: undefined, error: Object({ message: 'fail' }), hasValue: false })
+        }),
+        Object({
+          id: 'id-removed',
+          cell: 'reset-test',
+          behaviorKey: 'NgVault::Core::State',
+          type: 'stage:start:state',
+          timestamp: 'timestamp-removed',
+          state: Object({ isLoading: true, value: undefined, error: Object({ message: 'fail' }), hasValue: false })
+        }),
+        Object({
+          id: 'id-removed',
+          cell: 'reset-test',
+          behaviorKey: 'NgVault::Core::State',
+          type: 'stage:end:state',
+          timestamp: 'timestamp-removed',
+          state: Object({ isLoading: true, value: undefined, error: Object({ message: 'fail' }), hasValue: false })
+        }),
+        Object({
+          id: 'id-removed',
+          cell: 'reset-test',
+          behaviorKey: 'NgVault::CoreHttpResource::State',
+          type: 'stage:start:state',
+          timestamp: 'timestamp-removed',
+          state: Object({ isLoading: true, value: undefined, error: Object({ message: 'fail' }), hasValue: false })
+        }),
+        Object({
+          id: 'id-removed',
+          cell: 'reset-test',
+          behaviorKey: 'NgVault::CoreHttpResource::State',
+          type: 'stage:end:state',
+          timestamp: 'timestamp-removed',
+          state: Object({ isLoading: true, value: undefined, error: Object({ message: 'fail' }), hasValue: false })
+        }),
+        Object({
+          id: 'id-removed',
+          cell: 'reset-test',
+          behaviorKey: 'NgVault::Test::Persist',
+          type: 'stage:start:persist',
+          timestamp: 'timestamp-removed',
+          state: Object({ isLoading: true, value: undefined, error: Object({ message: 'fail' }), hasValue: false })
+        }),
+        Object({
+          id: 'id-removed',
+          cell: 'reset-test',
+          behaviorKey: 'NgVault::Test::Persist',
+          type: 'stage:end:persist',
+          timestamp: 'timestamp-removed',
+          state: Object({ isLoading: true, value: undefined, error: Object({ message: 'fail' }), hasValue: false })
+        }),
+        Object({
+          id: 'id-removed',
+          cell: 'reset-test',
+          behaviorKey: 'vault-orchestrator',
+          type: 'lifecycle:end:replace',
+          timestamp: 'timestamp-removed',
+          state: Object({ isLoading: true, value: undefined, error: Object({ message: 'fail' }), hasValue: false })
+        }),
+        Object({
+          id: 'id-removed',
+          cell: 'reset-test',
+          behaviorKey: 'core',
+          type: 'lifecycle:start:clearvalue',
+          timestamp: 'timestamp-removed',
+          state: Object({ isLoading: true, value: [1, 2, 3], error: Object({ message: 'fail' }), hasValue: true })
+        }),
+        Object({
+          id: 'id-removed',
+          cell: 'reset-test',
+          behaviorKey: 'core',
+          type: 'lifecycle:end:clearvalue',
+          timestamp: 'timestamp-removed',
+          state: Object({ isLoading: false, value: undefined, error: null, hasValue: false })
+        })
+      ]);
     });
-    const provider = providers.find((p: any) => typeof p.useFactory === 'function');
-    let vault!: NgVaultFeatureCell<any>;
 
-    runInInjectionContext(injector, () => {
-      vault = (provider as any).useFactory();
-      vault.initialize();
+    it('should reset state with null', async () => {
+      const persistBehavior = createTestBehavior(NgVaultBehaviorTypes.Persist, called);
+      runInInjectionContext(injector, () => {
+        providers = provideFeatureCell(
+          class DummyService {},
+          { key: 'reset-test', initial: null, insights: { wantsState: true } as any },
+          [persistBehavior]
+        );
+      });
+      const provider = providers.find((p: any) => typeof p.useFactory === 'function');
+      let vault!: NgVaultFeatureCell<any>;
+
+      runInInjectionContext(injector, () => {
+        vault = (provider as any).useFactory();
+        vault.initialize();
+      });
+
+      vault.replaceState({ loading: true, error: { message: 'fail' }, value: [1, 2, 3] });
+      expect(vault.state.isLoading()).toBeTrue();
+      expect(vault.state.error()).toEqual({ message: 'fail' });
+      expect(vault.state.value()).toBeUndefined();
+      expect(vault.state.hasValue()).toBeFalse();
+
+      await flushMicrotasksZoneless();
+      expect(vault.state.isLoading()).toBeTrue();
+      expect(vault.state.error()).toEqual({ message: 'fail' });
+      expect(vault.state.value()).toEqual([1, 2, 3]);
+      expect(vault.state.hasValue()).toBeTrue();
+
+      vault.replaceState(null);
+      await flushMicrotasksZoneless();
+      expect(vault.state.isLoading()).toBeFalse();
+      expect(vault.state.error()).toBeNull();
+      expect(vault.state.value()).toBeUndefined();
+      expect(vault.state.hasValue()).toBeFalse();
+
+      expect(called).toEqual(['load', 'persist']);
+      expect(emitted).toEqual([
+        Object({
+          id: 'id-removed',
+          cell: 'reset-test',
+          behaviorKey: 'core',
+          type: 'lifecycle:start:initialized',
+          timestamp: 'timestamp-removed',
+          state: Object({ isLoading: false, value: undefined, error: null, hasValue: false })
+        }),
+        Object({
+          id: 'id-removed',
+          cell: 'reset-test',
+          behaviorKey: 'NgVault::Test::Persist',
+          type: 'stage:start:loadpersist',
+          timestamp: 'timestamp-removed',
+          state: Object({ isLoading: false, value: undefined, error: null, hasValue: false })
+        }),
+        Object({
+          id: 'id-removed',
+          cell: 'reset-test',
+          behaviorKey: 'NgVault::Test::Persist',
+          type: 'stage:end:loadpersist',
+          timestamp: 'timestamp-removed',
+          state: Object({ isLoading: false, value: undefined, error: null, hasValue: false })
+        }),
+        Object({
+          id: 'id-removed',
+          cell: 'reset-test',
+          behaviorKey: 'core',
+          type: 'lifecycle:end:initialized',
+          timestamp: 'timestamp-removed',
+          state: Object({ isLoading: false, value: undefined, error: null, hasValue: false })
+        }),
+        Object({
+          id: 'id-removed',
+          cell: 'reset-test',
+          behaviorKey: 'vault-orchestrator',
+          type: 'lifecycle:start:replace',
+          timestamp: 'timestamp-removed',
+          state: Object({ isLoading: true, value: undefined, error: Object({ message: 'fail' }), hasValue: false })
+        }),
+        Object({
+          id: 'id-removed',
+          cell: 'reset-test',
+          behaviorKey: 'NgVault::Core::State',
+          type: 'stage:start:state',
+          timestamp: 'timestamp-removed',
+          state: Object({ isLoading: true, value: undefined, error: Object({ message: 'fail' }), hasValue: false })
+        }),
+        Object({
+          id: 'id-removed',
+          cell: 'reset-test',
+          behaviorKey: 'NgVault::Core::State',
+          type: 'stage:end:state',
+          timestamp: 'timestamp-removed',
+          state: Object({ isLoading: true, value: undefined, error: Object({ message: 'fail' }), hasValue: false })
+        }),
+        Object({
+          id: 'id-removed',
+          cell: 'reset-test',
+          behaviorKey: 'NgVault::CoreHttpResource::State',
+          type: 'stage:start:state',
+          timestamp: 'timestamp-removed',
+          state: Object({ isLoading: true, value: undefined, error: Object({ message: 'fail' }), hasValue: false })
+        }),
+        Object({
+          id: 'id-removed',
+          cell: 'reset-test',
+          behaviorKey: 'NgVault::CoreHttpResource::State',
+          type: 'stage:end:state',
+          timestamp: 'timestamp-removed',
+          state: Object({ isLoading: true, value: undefined, error: Object({ message: 'fail' }), hasValue: false })
+        }),
+        Object({
+          id: 'id-removed',
+          cell: 'reset-test',
+          behaviorKey: 'NgVault::Test::Persist',
+          type: 'stage:start:persist',
+          timestamp: 'timestamp-removed',
+          state: Object({ isLoading: true, value: undefined, error: Object({ message: 'fail' }), hasValue: false })
+        }),
+        Object({
+          id: 'id-removed',
+          cell: 'reset-test',
+          behaviorKey: 'NgVault::Test::Persist',
+          type: 'stage:end:persist',
+          timestamp: 'timestamp-removed',
+          state: Object({ isLoading: true, value: undefined, error: Object({ message: 'fail' }), hasValue: false })
+        }),
+        Object({
+          id: 'id-removed',
+          cell: 'reset-test',
+          behaviorKey: 'vault-orchestrator',
+          type: 'lifecycle:end:replace',
+          timestamp: 'timestamp-removed',
+          state: Object({ isLoading: true, value: undefined, error: Object({ message: 'fail' }), hasValue: false })
+        }),
+        Object({
+          id: 'id-removed',
+          cell: 'reset-test',
+          behaviorKey: 'core',
+          type: 'lifecycle:start:clearvalue',
+          timestamp: 'timestamp-removed',
+          state: Object({ isLoading: true, value: [1, 2, 3], error: Object({ message: 'fail' }), hasValue: true })
+        }),
+        Object({
+          id: 'id-removed',
+          cell: 'reset-test',
+          behaviorKey: 'core',
+          type: 'lifecycle:end:clearvalue',
+          timestamp: 'timestamp-removed',
+          state: Object({ isLoading: false, value: undefined, error: null, hasValue: false })
+        })
+      ]);
     });
 
-    vault.replaceState({ loading: true, error: { message: 'fail' }, value: [1, 2, 3] });
-    expect(vault.state.isLoading()).toBeTrue();
-    expect(vault.state.error()).toEqual({ message: 'fail' });
-    expect(vault.state.value()).toBeUndefined();
-    expect(vault.state.hasValue()).toBeFalse();
+    it('should reset state with reset', async () => {
+      const persistBehavior = createTestBehavior(NgVaultBehaviorTypes.Persist, called);
+      runInInjectionContext(injector, () => {
+        providers = provideFeatureCell(
+          class DummyService {},
+          { key: 'reset-test', initial: null, insights: { wantsState: true } as any },
+          [persistBehavior]
+        );
+      });
+      const provider = providers.find((p: any) => typeof p.useFactory === 'function');
+      let vault!: NgVaultFeatureCell<any>;
 
-    await flushMicrotasksZoneless();
-    expect(vault.state.isLoading()).toBeTrue();
-    expect(vault.state.error()).toEqual({ message: 'fail' });
-    expect(vault.state.value()).toEqual([1, 2, 3]);
-    expect(vault.state.hasValue()).toBeTrue();
+      runInInjectionContext(injector, () => {
+        vault = (provider as any).useFactory();
+        vault.initialize();
+      });
 
-    vault.replaceState(undefined);
-    await flushMicrotasksZoneless();
+      vault.replaceState({ loading: true, error: { message: 'fail' }, value: [1, 2, 3] });
+      expect(vault.state.isLoading()).toBeTrue();
+      expect(vault.state.error()).toEqual({ message: 'fail' });
+      expect(vault.state.value()).toBeUndefined();
+      expect(vault.state.hasValue()).toBeFalse();
 
-    expect(vault.state.isLoading()).toBeFalse();
-    expect(vault.state.error()).toBeNull();
-    expect(vault.state.value()).toBeUndefined();
-    expect(vault.state.hasValue()).toBeFalse();
+      await flushMicrotasksZoneless();
+      expect(vault.state.isLoading()).toBeTrue();
+      expect(vault.state.error()).toEqual({ message: 'fail' });
+      expect(vault.state.value()).toEqual([1, 2, 3]);
+      expect(vault.state.hasValue()).toBeTrue();
 
-    vault.replaceState({ loading: true, error: { message: 'fail' }, value: [1, 3] });
-    expect(vault.state.isLoading()).toBeTrue();
-    await flushMicrotasksZoneless();
-    expect(vault.state.isLoading()).toBeTrue();
-    expect(vault.state.error()).toEqual({ message: 'fail' });
-    expect(vault.state.value()).toEqual([1, 3]);
-    expect(vault.state.hasValue()).toBeTrue();
+      vault.reset();
+      await flushMicrotasksZoneless();
 
-    vault.replaceState(null);
-    await flushMicrotasksZoneless();
-    expect(vault.state.isLoading()).toBeFalse();
-    expect(vault.state.error()).toBeNull();
-    expect(vault.state.value()).toBeUndefined();
-    expect(vault.state.hasValue()).toBeFalse();
+      expect(vault.state.isLoading()).toBeFalse();
+      expect(vault.state.error()).toBeNull();
+      expect(vault.state.value()).toBeUndefined([]);
+      expect(vault.state.hasValue()).toBeFalse();
 
-    vault.mergeState({ loading: true, error: { message: 'fail' }, value: [2, 3, 1] });
-    expect(vault.state.isLoading()).toBeTrue();
-    await flushMicrotasksZoneless();
-    expect(vault.state.isLoading()).toBeTrue();
-    expect(vault.state.error()).toEqual({ message: 'fail' });
-    expect(vault.state.value()).toEqual([2, 3, 1]);
-    expect(vault.state.hasValue()).toBeTrue();
+      expect(called).toEqual(['load', 'persist', 'clear']);
+      expect(emitted).toEqual([
+        Object({
+          id: 'id-removed',
+          cell: 'reset-test',
+          behaviorKey: 'core',
+          type: 'lifecycle:start:initialized',
+          timestamp: 'timestamp-removed',
+          state: Object({ isLoading: false, value: undefined, error: null, hasValue: false })
+        }),
+        Object({
+          id: 'id-removed',
+          cell: 'reset-test',
+          behaviorKey: 'NgVault::Test::Persist',
+          type: 'stage:start:loadpersist',
+          timestamp: 'timestamp-removed',
+          state: Object({ isLoading: false, value: undefined, error: null, hasValue: false })
+        }),
+        Object({
+          id: 'id-removed',
+          cell: 'reset-test',
+          behaviorKey: 'NgVault::Test::Persist',
+          type: 'stage:end:loadpersist',
+          timestamp: 'timestamp-removed',
+          state: Object({ isLoading: false, value: undefined, error: null, hasValue: false })
+        }),
+        Object({
+          id: 'id-removed',
+          cell: 'reset-test',
+          behaviorKey: 'core',
+          type: 'lifecycle:end:initialized',
+          timestamp: 'timestamp-removed',
+          state: Object({ isLoading: false, value: undefined, error: null, hasValue: false })
+        }),
+        Object({
+          id: 'id-removed',
+          cell: 'reset-test',
+          behaviorKey: 'vault-orchestrator',
+          type: 'lifecycle:start:replace',
+          timestamp: 'timestamp-removed',
+          state: Object({ isLoading: true, value: undefined, error: Object({ message: 'fail' }), hasValue: false })
+        }),
+        Object({
+          id: 'id-removed',
+          cell: 'reset-test',
+          behaviorKey: 'NgVault::Core::State',
+          type: 'stage:start:state',
+          timestamp: 'timestamp-removed',
+          state: Object({ isLoading: true, value: undefined, error: Object({ message: 'fail' }), hasValue: false })
+        }),
+        Object({
+          id: 'id-removed',
+          cell: 'reset-test',
+          behaviorKey: 'NgVault::Core::State',
+          type: 'stage:end:state',
+          timestamp: 'timestamp-removed',
+          state: Object({ isLoading: true, value: undefined, error: Object({ message: 'fail' }), hasValue: false })
+        }),
+        Object({
+          id: 'id-removed',
+          cell: 'reset-test',
+          behaviorKey: 'NgVault::CoreHttpResource::State',
+          type: 'stage:start:state',
+          timestamp: 'timestamp-removed',
+          state: Object({ isLoading: true, value: undefined, error: Object({ message: 'fail' }), hasValue: false })
+        }),
+        Object({
+          id: 'id-removed',
+          cell: 'reset-test',
+          behaviorKey: 'NgVault::CoreHttpResource::State',
+          type: 'stage:end:state',
+          timestamp: 'timestamp-removed',
+          state: Object({ isLoading: true, value: undefined, error: Object({ message: 'fail' }), hasValue: false })
+        }),
+        Object({
+          id: 'id-removed',
+          cell: 'reset-test',
+          behaviorKey: 'NgVault::Test::Persist',
+          type: 'stage:start:persist',
+          timestamp: 'timestamp-removed',
+          state: Object({ isLoading: true, value: undefined, error: Object({ message: 'fail' }), hasValue: false })
+        }),
+        Object({
+          id: 'id-removed',
+          cell: 'reset-test',
+          behaviorKey: 'NgVault::Test::Persist',
+          type: 'stage:end:persist',
+          timestamp: 'timestamp-removed',
+          state: Object({ isLoading: true, value: undefined, error: Object({ message: 'fail' }), hasValue: false })
+        }),
+        Object({
+          id: 'id-removed',
+          cell: 'reset-test',
+          behaviorKey: 'vault-orchestrator',
+          type: 'lifecycle:end:replace',
+          timestamp: 'timestamp-removed',
+          state: Object({ isLoading: true, value: undefined, error: Object({ message: 'fail' }), hasValue: false })
+        }),
+        Object({
+          id: 'id-removed',
+          cell: 'reset-test',
+          behaviorKey: 'core',
+          type: 'lifecycle:start:reset',
+          timestamp: 'timestamp-removed',
+          state: Object({ isLoading: true, value: [1, 2, 3], error: Object({ message: 'fail' }), hasValue: true })
+        }),
+        Object({
+          id: 'id-removed',
+          cell: 'reset-test',
+          behaviorKey: 'NgVault::Test::Persist',
+          type: 'stage:start:clearpersist',
+          timestamp: 'timestamp-removed',
+          state: Object({ isLoading: false, value: undefined, error: null, hasValue: false })
+        }),
+        Object({
+          id: 'id-removed',
+          cell: 'reset-test',
+          behaviorKey: 'NgVault::Test::Persist',
+          type: 'stage:end:clearpersist',
+          timestamp: 'timestamp-removed',
+          state: Object({ isLoading: false, value: undefined, error: null, hasValue: false })
+        }),
+        Object({
+          id: 'id-removed',
+          cell: 'reset-test',
+          behaviorKey: 'core',
+          type: 'lifecycle:end:reset',
+          timestamp: 'timestamp-removed',
+          state: Object({ isLoading: false, value: undefined, error: null, hasValue: false })
+        })
+      ]);
+    });
+  });
 
-    vault.reset();
-    await flushMicrotasksZoneless();
+  describe('mergeState', () => {
+    it('should reset state with undefined', async () => {
+      const persistBehavior = createTestBehavior(NgVaultBehaviorTypes.Persist, called);
+      runInInjectionContext(injector, () => {
+        providers = provideFeatureCell(
+          class DummyService {},
+          { key: 'reset-test', initial: null, insights: { wantsState: true } as any },
+          [persistBehavior]
+        );
+      });
+      const provider = providers.find((p: any) => typeof p.useFactory === 'function');
+      let vault!: NgVaultFeatureCell<any>;
 
-    expect(called).toEqual(['load', 'persist', 'persist', 'persist', 'clear']);
-    expect(emitted).toEqual([
-      Object({
-        id: 'id-removed',
-        cell: 'reset-test',
-        behaviorKey: 'core',
-        type: 'lifecycle:start:initialized',
-        timestamp: 'timestamp-removed',
-        state: Object({ isLoading: false, value: undefined, error: null, hasValue: false })
-      }),
-      Object({
-        id: 'id-removed',
-        cell: 'reset-test',
-        behaviorKey: 'NgVault::Test::Persist',
-        type: 'stage:start:loadpersist',
-        timestamp: 'timestamp-removed',
-        state: Object({ isLoading: false, value: undefined, error: null, hasValue: false })
-      }),
-      Object({
-        id: 'id-removed',
-        cell: 'reset-test',
-        behaviorKey: 'NgVault::Test::Persist',
-        type: 'stage:end:loadpersist',
-        timestamp: 'timestamp-removed',
-        state: Object({ isLoading: false, value: undefined, error: null, hasValue: false })
-      }),
-      Object({
-        id: 'id-removed',
-        cell: 'reset-test',
-        behaviorKey: 'core',
-        type: 'lifecycle:end:initialized',
-        timestamp: 'timestamp-removed',
-        state: Object({ isLoading: false, value: undefined, error: null, hasValue: false })
-      }),
-      Object({
-        id: 'id-removed',
-        cell: 'reset-test',
-        behaviorKey: 'vault-orchestrator',
-        type: 'lifecycle:start:replace',
-        timestamp: 'timestamp-removed',
-        state: Object({ isLoading: true, value: undefined, error: Object({ message: 'fail' }), hasValue: false })
-      }),
-      Object({
-        id: 'id-removed',
-        cell: 'reset-test',
-        behaviorKey: 'NgVault::Core::State',
-        type: 'stage:start:state',
-        timestamp: 'timestamp-removed',
-        state: Object({ isLoading: true, value: undefined, error: Object({ message: 'fail' }), hasValue: false })
-      }),
-      Object({
-        id: 'id-removed',
-        cell: 'reset-test',
-        behaviorKey: 'NgVault::Core::State',
-        type: 'stage:end:state',
-        timestamp: 'timestamp-removed',
-        state: Object({ isLoading: true, value: undefined, error: Object({ message: 'fail' }), hasValue: false })
-      }),
-      Object({
-        id: 'id-removed',
-        cell: 'reset-test',
-        behaviorKey: 'NgVault::CoreHttpResource::State',
-        type: 'stage:start:state',
-        timestamp: 'timestamp-removed',
-        state: Object({ isLoading: true, value: undefined, error: Object({ message: 'fail' }), hasValue: false })
-      }),
-      Object({
-        id: 'id-removed',
-        cell: 'reset-test',
-        behaviorKey: 'NgVault::CoreHttpResource::State',
-        type: 'stage:end:state',
-        timestamp: 'timestamp-removed',
-        state: Object({ isLoading: true, value: undefined, error: Object({ message: 'fail' }), hasValue: false })
-      }),
-      Object({
-        id: 'id-removed',
-        cell: 'reset-test',
-        behaviorKey: 'NgVault::Test::Persist',
-        type: 'stage:start:persist',
-        timestamp: 'timestamp-removed',
-        state: Object({ isLoading: true, value: undefined, error: Object({ message: 'fail' }), hasValue: false })
-      }),
-      Object({
-        id: 'id-removed',
-        cell: 'reset-test',
-        behaviorKey: 'NgVault::Test::Persist',
-        type: 'stage:end:persist',
-        timestamp: 'timestamp-removed',
-        state: Object({ isLoading: true, value: undefined, error: Object({ message: 'fail' }), hasValue: false })
-      }),
-      Object({
-        id: 'id-removed',
-        cell: 'reset-test',
-        behaviorKey: 'vault-orchestrator',
-        type: 'lifecycle:end:replace',
-        timestamp: 'timestamp-removed',
-        state: Object({ isLoading: true, value: undefined, error: Object({ message: 'fail' }), hasValue: false })
-      }),
-      Object({
-        id: 'id-removed',
-        cell: 'reset-test',
-        behaviorKey: 'vault-orchestrator',
-        type: 'lifecycle:start:replace',
-        timestamp: 'timestamp-removed',
-        state: Object({ isLoading: true, value: undefined, error: Object({ message: 'fail' }), hasValue: false })
-      }),
-      Object({
-        id: 'id-removed',
-        cell: 'reset-test',
-        behaviorKey: 'NgVault::Core::State',
-        type: 'stage:start:state',
-        timestamp: 'timestamp-removed',
-        state: Object({ isLoading: true, value: undefined, error: Object({ message: 'fail' }), hasValue: false })
-      }),
-      Object({
-        id: 'id-removed',
-        cell: 'reset-test',
-        behaviorKey: 'NgVault::Core::State',
-        type: 'stage:end:state',
-        timestamp: 'timestamp-removed',
-        state: Object({ isLoading: true, value: undefined, error: Object({ message: 'fail' }), hasValue: false })
-      }),
-      Object({
-        id: 'id-removed',
-        cell: 'reset-test',
-        behaviorKey: 'NgVault::CoreHttpResource::State',
-        type: 'stage:start:state',
-        timestamp: 'timestamp-removed',
-        state: Object({ isLoading: true, value: undefined, error: Object({ message: 'fail' }), hasValue: false })
-      }),
-      Object({
-        id: 'id-removed',
-        cell: 'reset-test',
-        behaviorKey: 'NgVault::CoreHttpResource::State',
-        type: 'stage:end:state',
-        timestamp: 'timestamp-removed',
-        state: Object({ isLoading: true, value: undefined, error: Object({ message: 'fail' }), hasValue: false })
-      }),
-      Object({
-        id: 'id-removed',
-        cell: 'reset-test',
-        behaviorKey: 'NgVault::Test::Persist',
-        type: 'stage:start:persist',
-        timestamp: 'timestamp-removed',
-        state: Object({ isLoading: true, value: undefined, error: Object({ message: 'fail' }), hasValue: false })
-      }),
-      Object({
-        id: 'id-removed',
-        cell: 'reset-test',
-        behaviorKey: 'NgVault::Test::Persist',
-        type: 'stage:end:persist',
-        timestamp: 'timestamp-removed',
-        state: Object({ isLoading: true, value: undefined, error: Object({ message: 'fail' }), hasValue: false })
-      }),
-      Object({
-        id: 'id-removed',
-        cell: 'reset-test',
-        behaviorKey: 'vault-orchestrator',
-        type: 'lifecycle:end:replace',
-        timestamp: 'timestamp-removed',
-        state: Object({ isLoading: true, value: undefined, error: Object({ message: 'fail' }), hasValue: false })
-      }),
-      Object({
-        id: 'id-removed',
-        cell: 'reset-test',
-        behaviorKey: 'vault-orchestrator',
-        type: 'lifecycle:start:merge',
-        timestamp: 'timestamp-removed',
-        state: Object({ isLoading: false, value: undefined, error: null, hasValue: false })
-      }),
-      Object({
-        id: 'id-removed',
-        cell: 'reset-test',
-        behaviorKey: 'NgVault::Core::State',
-        type: 'stage:start:state',
-        timestamp: 'timestamp-removed',
-        state: Object({ isLoading: true, value: undefined, error: Object({ message: 'fail' }), hasValue: false })
-      }),
-      Object({
-        id: 'id-removed',
-        cell: 'reset-test',
-        behaviorKey: 'NgVault::Core::State',
-        type: 'stage:end:state',
-        timestamp: 'timestamp-removed',
-        state: Object({ isLoading: true, value: undefined, error: Object({ message: 'fail' }), hasValue: false })
-      }),
-      Object({
-        id: 'id-removed',
-        cell: 'reset-test',
-        behaviorKey: 'NgVault::CoreHttpResource::State',
-        type: 'stage:start:state',
-        timestamp: 'timestamp-removed',
-        state: Object({ isLoading: true, value: undefined, error: Object({ message: 'fail' }), hasValue: false })
-      }),
-      Object({
-        id: 'id-removed',
-        cell: 'reset-test',
-        behaviorKey: 'NgVault::CoreHttpResource::State',
-        type: 'stage:end:state',
-        timestamp: 'timestamp-removed',
-        state: Object({ isLoading: true, value: undefined, error: Object({ message: 'fail' }), hasValue: false })
-      }),
-      Object({
-        id: 'id-removed',
-        cell: 'reset-test',
-        behaviorKey: 'NgVault::Test::Persist',
-        type: 'stage:start:persist',
-        timestamp: 'timestamp-removed',
-        state: Object({ isLoading: true, value: undefined, error: Object({ message: 'fail' }), hasValue: false })
-      }),
-      Object({
-        id: 'id-removed',
-        cell: 'reset-test',
-        behaviorKey: 'NgVault::Test::Persist',
-        type: 'stage:end:persist',
-        timestamp: 'timestamp-removed',
-        state: Object({ isLoading: true, value: undefined, error: Object({ message: 'fail' }), hasValue: false })
-      }),
-      Object({
-        id: 'id-removed',
-        cell: 'reset-test',
-        behaviorKey: 'vault-orchestrator',
-        type: 'lifecycle:end:merge',
-        timestamp: 'timestamp-removed',
-        state: Object({ isLoading: true, value: undefined, error: Object({ message: 'fail' }), hasValue: false })
-      }),
-      Object({
-        id: 'id-removed',
-        cell: 'reset-test',
-        behaviorKey: 'core',
-        type: 'lifecycle:start:reset',
-        timestamp: 'timestamp-removed',
-        state: Object({ isLoading: true, value: [2, 3, 1], error: Object({ message: 'fail' }), hasValue: true })
-      }),
-      Object({
-        id: 'id-removed',
-        cell: 'reset-test',
-        behaviorKey: 'NgVault::Test::Persist',
-        type: 'stage:start:clearpersist',
-        timestamp: 'timestamp-removed',
-        state: Object({ isLoading: false, value: undefined, error: null, hasValue: false })
-      }),
-      Object({
-        id: 'id-removed',
-        cell: 'reset-test',
-        behaviorKey: 'NgVault::Test::Persist',
-        type: 'stage:end:clearpersist',
-        timestamp: 'timestamp-removed',
-        state: Object({ isLoading: false, value: undefined, error: null, hasValue: false })
-      }),
-      Object({
-        id: 'id-removed',
-        cell: 'reset-test',
-        behaviorKey: 'core',
-        type: 'lifecycle:end:reset',
-        timestamp: 'timestamp-removed',
-        state: Object({ isLoading: false, value: undefined, error: null, hasValue: false })
-      })
-    ]);
+      runInInjectionContext(injector, () => {
+        vault = (provider as any).useFactory();
+        vault.initialize();
+      });
+
+      vault.mergeState({ loading: true, error: { message: 'fail' }, value: [1, 2, 3] });
+      expect(vault.state.isLoading()).toBeTrue();
+      expect(vault.state.error()).toEqual({ message: 'fail' });
+      expect(vault.state.value()).toBeUndefined();
+      expect(vault.state.hasValue()).toBeFalse();
+
+      await flushMicrotasksZoneless();
+      expect(vault.state.isLoading()).toBeTrue();
+      expect(vault.state.error()).toEqual({ message: 'fail' });
+      expect(vault.state.value()).toEqual([1, 2, 3]);
+      expect(vault.state.hasValue()).toBeTrue();
+
+      vault.mergeState(undefined);
+      await flushMicrotasksZoneless();
+
+      expect(vault.state.isLoading()).toBeFalse();
+      expect(vault.state.error()).toBeNull();
+      expect(vault.state.value()).toBeUndefined();
+      expect(vault.state.hasValue()).toBeFalse();
+
+      expect(called).toEqual(['load', 'persist']);
+      expect(emitted).toEqual([
+        Object({
+          id: 'id-removed',
+          cell: 'reset-test',
+          behaviorKey: 'core',
+          type: 'lifecycle:start:initialized',
+          timestamp: 'timestamp-removed',
+          state: Object({ isLoading: false, value: undefined, error: null, hasValue: false })
+        }),
+        Object({
+          id: 'id-removed',
+          cell: 'reset-test',
+          behaviorKey: 'NgVault::Test::Persist',
+          type: 'stage:start:loadpersist',
+          timestamp: 'timestamp-removed',
+          state: Object({ isLoading: false, value: undefined, error: null, hasValue: false })
+        }),
+        Object({
+          id: 'id-removed',
+          cell: 'reset-test',
+          behaviorKey: 'NgVault::Test::Persist',
+          type: 'stage:end:loadpersist',
+          timestamp: 'timestamp-removed',
+          state: Object({ isLoading: false, value: undefined, error: null, hasValue: false })
+        }),
+        Object({
+          id: 'id-removed',
+          cell: 'reset-test',
+          behaviorKey: 'core',
+          type: 'lifecycle:end:initialized',
+          timestamp: 'timestamp-removed',
+          state: Object({ isLoading: false, value: undefined, error: null, hasValue: false })
+        }),
+        Object({
+          id: 'id-removed',
+          cell: 'reset-test',
+          behaviorKey: 'vault-orchestrator',
+          type: 'lifecycle:start:merge',
+          timestamp: 'timestamp-removed',
+          state: Object({ isLoading: false, value: undefined, error: null, hasValue: false })
+        }),
+        Object({
+          id: 'id-removed',
+          cell: 'reset-test',
+          behaviorKey: 'NgVault::Core::State',
+          type: 'stage:start:state',
+          timestamp: 'timestamp-removed',
+          state: Object({ isLoading: true, value: undefined, error: Object({ message: 'fail' }), hasValue: false })
+        }),
+        Object({
+          id: 'id-removed',
+          cell: 'reset-test',
+          behaviorKey: 'NgVault::Core::State',
+          type: 'stage:end:state',
+          timestamp: 'timestamp-removed',
+          state: Object({ isLoading: true, value: undefined, error: Object({ message: 'fail' }), hasValue: false })
+        }),
+        Object({
+          id: 'id-removed',
+          cell: 'reset-test',
+          behaviorKey: 'NgVault::CoreHttpResource::State',
+          type: 'stage:start:state',
+          timestamp: 'timestamp-removed',
+          state: Object({ isLoading: true, value: undefined, error: Object({ message: 'fail' }), hasValue: false })
+        }),
+        Object({
+          id: 'id-removed',
+          cell: 'reset-test',
+          behaviorKey: 'NgVault::CoreHttpResource::State',
+          type: 'stage:end:state',
+          timestamp: 'timestamp-removed',
+          state: Object({ isLoading: true, value: undefined, error: Object({ message: 'fail' }), hasValue: false })
+        }),
+        Object({
+          id: 'id-removed',
+          cell: 'reset-test',
+          behaviorKey: 'NgVault::Test::Persist',
+          type: 'stage:start:persist',
+          timestamp: 'timestamp-removed',
+          state: Object({ isLoading: true, value: undefined, error: Object({ message: 'fail' }), hasValue: false })
+        }),
+        Object({
+          id: 'id-removed',
+          cell: 'reset-test',
+          behaviorKey: 'NgVault::Test::Persist',
+          type: 'stage:end:persist',
+          timestamp: 'timestamp-removed',
+          state: Object({ isLoading: true, value: undefined, error: Object({ message: 'fail' }), hasValue: false })
+        }),
+        Object({
+          id: 'id-removed',
+          cell: 'reset-test',
+          behaviorKey: 'vault-orchestrator',
+          type: 'lifecycle:end:merge',
+          timestamp: 'timestamp-removed',
+          state: Object({ isLoading: true, value: undefined, error: Object({ message: 'fail' }), hasValue: false })
+        }),
+        Object({
+          id: 'id-removed',
+          cell: 'reset-test',
+          behaviorKey: 'vault-orchestrator',
+          type: 'lifecycle:start:merge',
+          timestamp: 'timestamp-removed',
+          state: Object({ isLoading: true, value: [1, 2, 3], error: Object({ message: 'fail' }), hasValue: true })
+        }),
+        Object({
+          id: 'id-removed',
+          cell: 'reset-test',
+          behaviorKey: 'vault-orchestrator',
+          type: 'lifecycle:end:merge',
+          timestamp: 'timestamp-removed',
+          state: Object({ isLoading: false, value: undefined, error: null, hasValue: false })
+        })
+      ]);
+    });
+
+    it('should reset state with null', async () => {
+      const persistBehavior = createTestBehavior(NgVaultBehaviorTypes.Persist, called);
+      runInInjectionContext(injector, () => {
+        providers = provideFeatureCell(
+          class DummyService {},
+          { key: 'reset-test', initial: null, insights: { wantsState: true } as any },
+          [persistBehavior]
+        );
+      });
+      const provider = providers.find((p: any) => typeof p.useFactory === 'function');
+      let vault!: NgVaultFeatureCell<any>;
+
+      runInInjectionContext(injector, () => {
+        vault = (provider as any).useFactory();
+        vault.initialize();
+      });
+
+      vault.mergeState({ loading: true, error: { message: 'fail' }, value: [1, 2, 3] });
+      expect(vault.state.isLoading()).toBeTrue();
+      expect(vault.state.error()).toEqual({ message: 'fail' });
+      expect(vault.state.value()).toBeUndefined();
+      expect(vault.state.hasValue()).toBeFalse();
+
+      await flushMicrotasksZoneless();
+      expect(vault.state.isLoading()).toBeTrue();
+      expect(vault.state.error()).toEqual({ message: 'fail' });
+      expect(vault.state.value()).toEqual([1, 2, 3]);
+      expect(vault.state.hasValue()).toBeTrue();
+
+      vault.mergeState(null);
+      await flushMicrotasksZoneless();
+      expect(vault.state.isLoading()).toBeFalse();
+      expect(vault.state.error()).toBeNull();
+      expect(vault.state.value()).toBeUndefined();
+      expect(vault.state.hasValue()).toBeFalse();
+
+      expect(called).toEqual(['load', 'persist']);
+      expect(emitted).toEqual([
+        Object({
+          id: 'id-removed',
+          cell: 'reset-test',
+          behaviorKey: 'core',
+          type: 'lifecycle:start:initialized',
+          timestamp: 'timestamp-removed',
+          state: Object({ isLoading: false, value: undefined, error: null, hasValue: false })
+        }),
+        Object({
+          id: 'id-removed',
+          cell: 'reset-test',
+          behaviorKey: 'NgVault::Test::Persist',
+          type: 'stage:start:loadpersist',
+          timestamp: 'timestamp-removed',
+          state: Object({ isLoading: false, value: undefined, error: null, hasValue: false })
+        }),
+        Object({
+          id: 'id-removed',
+          cell: 'reset-test',
+          behaviorKey: 'NgVault::Test::Persist',
+          type: 'stage:end:loadpersist',
+          timestamp: 'timestamp-removed',
+          state: Object({ isLoading: false, value: undefined, error: null, hasValue: false })
+        }),
+        Object({
+          id: 'id-removed',
+          cell: 'reset-test',
+          behaviorKey: 'core',
+          type: 'lifecycle:end:initialized',
+          timestamp: 'timestamp-removed',
+          state: Object({ isLoading: false, value: undefined, error: null, hasValue: false })
+        }),
+        Object({
+          id: 'id-removed',
+          cell: 'reset-test',
+          behaviorKey: 'vault-orchestrator',
+          type: 'lifecycle:start:merge',
+          timestamp: 'timestamp-removed',
+          state: Object({ isLoading: false, value: undefined, error: null, hasValue: false })
+        }),
+        Object({
+          id: 'id-removed',
+          cell: 'reset-test',
+          behaviorKey: 'NgVault::Core::State',
+          type: 'stage:start:state',
+          timestamp: 'timestamp-removed',
+          state: Object({ isLoading: true, value: undefined, error: Object({ message: 'fail' }), hasValue: false })
+        }),
+        Object({
+          id: 'id-removed',
+          cell: 'reset-test',
+          behaviorKey: 'NgVault::Core::State',
+          type: 'stage:end:state',
+          timestamp: 'timestamp-removed',
+          state: Object({ isLoading: true, value: undefined, error: Object({ message: 'fail' }), hasValue: false })
+        }),
+        Object({
+          id: 'id-removed',
+          cell: 'reset-test',
+          behaviorKey: 'NgVault::CoreHttpResource::State',
+          type: 'stage:start:state',
+          timestamp: 'timestamp-removed',
+          state: Object({ isLoading: true, value: undefined, error: Object({ message: 'fail' }), hasValue: false })
+        }),
+        Object({
+          id: 'id-removed',
+          cell: 'reset-test',
+          behaviorKey: 'NgVault::CoreHttpResource::State',
+          type: 'stage:end:state',
+          timestamp: 'timestamp-removed',
+          state: Object({ isLoading: true, value: undefined, error: Object({ message: 'fail' }), hasValue: false })
+        }),
+        Object({
+          id: 'id-removed',
+          cell: 'reset-test',
+          behaviorKey: 'NgVault::Test::Persist',
+          type: 'stage:start:persist',
+          timestamp: 'timestamp-removed',
+          state: Object({ isLoading: true, value: undefined, error: Object({ message: 'fail' }), hasValue: false })
+        }),
+        Object({
+          id: 'id-removed',
+          cell: 'reset-test',
+          behaviorKey: 'NgVault::Test::Persist',
+          type: 'stage:end:persist',
+          timestamp: 'timestamp-removed',
+          state: Object({ isLoading: true, value: undefined, error: Object({ message: 'fail' }), hasValue: false })
+        }),
+        Object({
+          id: 'id-removed',
+          cell: 'reset-test',
+          behaviorKey: 'vault-orchestrator',
+          type: 'lifecycle:end:merge',
+          timestamp: 'timestamp-removed',
+          state: Object({ isLoading: true, value: undefined, error: Object({ message: 'fail' }), hasValue: false })
+        }),
+        Object({
+          id: 'id-removed',
+          cell: 'reset-test',
+          behaviorKey: 'vault-orchestrator',
+          type: 'lifecycle:start:merge',
+          timestamp: 'timestamp-removed',
+          state: Object({ isLoading: true, value: [1, 2, 3], error: Object({ message: 'fail' }), hasValue: true })
+        }),
+        Object({
+          id: 'id-removed',
+          cell: 'reset-test',
+          behaviorKey: 'vault-orchestrator',
+          type: 'lifecycle:end:merge',
+          timestamp: 'timestamp-removed',
+          state: Object({ isLoading: false, value: undefined, error: null, hasValue: false })
+        })
+      ]);
+    });
+
+    it('should reset state with reset', async () => {
+      const persistBehavior = createTestBehavior(NgVaultBehaviorTypes.Persist, called);
+      runInInjectionContext(injector, () => {
+        providers = provideFeatureCell(
+          class DummyService {},
+          { key: 'reset-test', initial: null, insights: { wantsState: true } as any },
+          [persistBehavior]
+        );
+      });
+      const provider = providers.find((p: any) => typeof p.useFactory === 'function');
+      let vault!: NgVaultFeatureCell<any>;
+
+      runInInjectionContext(injector, () => {
+        vault = (provider as any).useFactory();
+        vault.initialize();
+      });
+
+      vault.mergeState({ loading: true, error: { message: 'fail' }, value: [1, 2, 3] });
+      expect(vault.state.isLoading()).toBeTrue();
+      expect(vault.state.error()).toEqual({ message: 'fail' });
+      expect(vault.state.value()).toBeUndefined();
+      expect(vault.state.hasValue()).toBeFalse();
+
+      await flushMicrotasksZoneless();
+      expect(vault.state.isLoading()).toBeTrue();
+      expect(vault.state.error()).toEqual({ message: 'fail' });
+      expect(vault.state.value()).toEqual([1, 2, 3]);
+      expect(vault.state.hasValue()).toBeTrue();
+
+      vault.reset();
+      await flushMicrotasksZoneless();
+
+      expect(vault.state.isLoading()).toBeFalse();
+      expect(vault.state.error()).toBeNull();
+      expect(vault.state.value()).toBeUndefined([]);
+      expect(vault.state.hasValue()).toBeFalse();
+
+      expect(called).toEqual(['load', 'persist', 'clear']);
+      expect(emitted).toEqual([
+        Object({
+          id: 'id-removed',
+          cell: 'reset-test',
+          behaviorKey: 'core',
+          type: 'lifecycle:start:initialized',
+          timestamp: 'timestamp-removed',
+          state: Object({ isLoading: false, value: undefined, error: null, hasValue: false })
+        }),
+        Object({
+          id: 'id-removed',
+          cell: 'reset-test',
+          behaviorKey: 'NgVault::Test::Persist',
+          type: 'stage:start:loadpersist',
+          timestamp: 'timestamp-removed',
+          state: Object({ isLoading: false, value: undefined, error: null, hasValue: false })
+        }),
+        Object({
+          id: 'id-removed',
+          cell: 'reset-test',
+          behaviorKey: 'NgVault::Test::Persist',
+          type: 'stage:end:loadpersist',
+          timestamp: 'timestamp-removed',
+          state: Object({ isLoading: false, value: undefined, error: null, hasValue: false })
+        }),
+        Object({
+          id: 'id-removed',
+          cell: 'reset-test',
+          behaviorKey: 'core',
+          type: 'lifecycle:end:initialized',
+          timestamp: 'timestamp-removed',
+          state: Object({ isLoading: false, value: undefined, error: null, hasValue: false })
+        }),
+        Object({
+          id: 'id-removed',
+          cell: 'reset-test',
+          behaviorKey: 'vault-orchestrator',
+          type: 'lifecycle:start:merge',
+          timestamp: 'timestamp-removed',
+          state: Object({ isLoading: false, value: undefined, error: null, hasValue: false })
+        }),
+        Object({
+          id: 'id-removed',
+          cell: 'reset-test',
+          behaviorKey: 'NgVault::Core::State',
+          type: 'stage:start:state',
+          timestamp: 'timestamp-removed',
+          state: Object({ isLoading: true, value: undefined, error: Object({ message: 'fail' }), hasValue: false })
+        }),
+        Object({
+          id: 'id-removed',
+          cell: 'reset-test',
+          behaviorKey: 'NgVault::Core::State',
+          type: 'stage:end:state',
+          timestamp: 'timestamp-removed',
+          state: Object({ isLoading: true, value: undefined, error: Object({ message: 'fail' }), hasValue: false })
+        }),
+        Object({
+          id: 'id-removed',
+          cell: 'reset-test',
+          behaviorKey: 'NgVault::CoreHttpResource::State',
+          type: 'stage:start:state',
+          timestamp: 'timestamp-removed',
+          state: Object({ isLoading: true, value: undefined, error: Object({ message: 'fail' }), hasValue: false })
+        }),
+        Object({
+          id: 'id-removed',
+          cell: 'reset-test',
+          behaviorKey: 'NgVault::CoreHttpResource::State',
+          type: 'stage:end:state',
+          timestamp: 'timestamp-removed',
+          state: Object({ isLoading: true, value: undefined, error: Object({ message: 'fail' }), hasValue: false })
+        }),
+        Object({
+          id: 'id-removed',
+          cell: 'reset-test',
+          behaviorKey: 'NgVault::Test::Persist',
+          type: 'stage:start:persist',
+          timestamp: 'timestamp-removed',
+          state: Object({ isLoading: true, value: undefined, error: Object({ message: 'fail' }), hasValue: false })
+        }),
+        Object({
+          id: 'id-removed',
+          cell: 'reset-test',
+          behaviorKey: 'NgVault::Test::Persist',
+          type: 'stage:end:persist',
+          timestamp: 'timestamp-removed',
+          state: Object({ isLoading: true, value: undefined, error: Object({ message: 'fail' }), hasValue: false })
+        }),
+        Object({
+          id: 'id-removed',
+          cell: 'reset-test',
+          behaviorKey: 'vault-orchestrator',
+          type: 'lifecycle:end:merge',
+          timestamp: 'timestamp-removed',
+          state: Object({ isLoading: true, value: undefined, error: Object({ message: 'fail' }), hasValue: false })
+        }),
+        Object({
+          id: 'id-removed',
+          cell: 'reset-test',
+          behaviorKey: 'core',
+          type: 'lifecycle:start:reset',
+          timestamp: 'timestamp-removed',
+          state: Object({ isLoading: true, value: [1, 2, 3], error: Object({ message: 'fail' }), hasValue: true })
+        }),
+        Object({
+          id: 'id-removed',
+          cell: 'reset-test',
+          behaviorKey: 'NgVault::Test::Persist',
+          type: 'stage:start:clearpersist',
+          timestamp: 'timestamp-removed',
+          state: Object({ isLoading: false, value: undefined, error: null, hasValue: false })
+        }),
+        Object({
+          id: 'id-removed',
+          cell: 'reset-test',
+          behaviorKey: 'NgVault::Test::Persist',
+          type: 'stage:end:clearpersist',
+          timestamp: 'timestamp-removed',
+          state: Object({ isLoading: false, value: undefined, error: null, hasValue: false })
+        }),
+        Object({
+          id: 'id-removed',
+          cell: 'reset-test',
+          behaviorKey: 'core',
+          type: 'lifecycle:end:reset',
+          timestamp: 'timestamp-removed',
+          state: Object({ isLoading: false, value: undefined, error: null, hasValue: false })
+        })
+      ]);
+    });
   });
 });
