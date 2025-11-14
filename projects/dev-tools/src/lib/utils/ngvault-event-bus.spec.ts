@@ -41,7 +41,7 @@ describe('Utils: NgVaultEventBus)', () => {
         Object({
           cell: 'vault-1',
           type: 'init',
-          timestamp: 'timestamp-removed',
+          timestamp: jasmine.any(Number),
           state: Object({ isLoading: false, value: [], error: null, hasValue: true })
         })
       );
@@ -71,19 +71,19 @@ describe('Utils: NgVaultEventBus)', () => {
         Object({
           cell: 'vault-0',
           type: 'patch',
-          timestamp: 'timestamp-removed',
+          timestamp: jasmine.any(Number),
           state: Object({ isLoading: false, value: 0, error: null, hasValue: true })
         }),
         Object({
           cell: 'vault-1',
           type: 'patch',
-          timestamp: 'timestamp-removed',
+          timestamp: jasmine.any(Number),
           state: Object({ isLoading: false, value: 1, error: null, hasValue: true })
         }),
         Object({
           cell: 'vault-2',
           type: 'patch',
-          timestamp: 'timestamp-removed',
+          timestamp: jasmine.any(Number),
           state: Object({ isLoading: false, value: 2, error: null, hasValue: true })
         })
       ]);

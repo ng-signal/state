@@ -41,17 +41,15 @@ describe('useDevtoolsEventEmitter', () => {
 
       emitter('users', 'init');
 
-      expect(emitted).toEqual(
-        jasmine.objectContaining([
-          Object({
-            id: 'id-removed',
-            behaviorKey: 'dev-tools',
-            cell: 'users',
-            type: 'init',
-            timestamp: 'timestamp-removed'
-          })
-        ])
-      );
+      expect(emitted).toEqual([
+        Object({
+          id: jasmine.any(String),
+          behaviorKey: 'dev-tools',
+          cell: 'users',
+          type: 'init',
+          timestamp: jasmine.any(Number)
+        })
+      ]);
     });
   });
 
