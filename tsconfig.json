@@ -19,7 +19,10 @@
       "@ngvault/shared/*": ["projects/shared/src/lib/*"],
       "@ngvault/testing": ["projects/testing/src/public-api"],
       "@ngvault/testing/*": ["projects/testing/src/lib/*"],
-      "persist": ["./dist/persist"]
+      "@ngvault/encrypt": ["projects/encrypt/src/public-api"],
+      "@ngvault/encrypt/*": ["projects/encrypt/src/lib/*"],
+      "@ngvault/persist": ["projects/persist/src/public-api"],
+      "@ngvault/persist/*": ["projects/persist/src/lib/*"]
     },
     "noFallthroughCasesInSwitch": true,
     "skipLibCheck": true,
@@ -79,6 +82,12 @@
     },
     {
       "path": "./projects/persist/tsconfig.spec.json"
+    },
+    {
+      "path": "./projects/encrypt/tsconfig.lib.json"
+    },
+    {
+      "path": "./projects/encrypt/tsconfig.spec.json"
     }
   ]
 }

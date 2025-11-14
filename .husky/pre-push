@@ -12,8 +12,13 @@ npm run test:coverage:dev-tools || {
   exit 1
 }
 
+npm run test:coverage:encypt || {
+  printf "\n\nERROR: Test Coverage issues were found in the 'encrypt' committed files. Please address them before proceeding.\n\n\n\n"
+  exit 1
+}
+
 npm run test:coverage:persist || {
-  printf "\n\nERROR: Test Coverage issues were found in the 'shared' committed files. Please address them before proceeding.\n\n\n\n"
+  printf "\n\nERROR: Test Coverage issues were found in the 'persist' committed files. Please address them before proceeding.\n\n\n\n"
   exit 1
 }
 

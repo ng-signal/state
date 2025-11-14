@@ -279,6 +279,39 @@
           }
         }
       }
+    },
+    "encrypt": {
+      "projectType": "library",
+      "root": "projects/encrypt",
+      "sourceRoot": "projects/encrypt/src",
+      "prefix": "ngvault",
+      "architect": {
+        "build": {
+          "builder": "@angular/build:ng-packagr",
+          "configurations": {
+            "production": {
+              "tsConfig": "projects/encrypt/tsconfig.lib.prod.json"
+            },
+            "development": {
+              "tsConfig": "projects/encrypt/tsconfig.lib.json"
+            }
+          },
+          "defaultConfiguration": "production"
+        },
+        "test": {
+          "builder": "@angular/build:karma",
+          "options": {
+            "tsConfig": "projects/encrypt/tsconfig.spec.json",
+            "karmaConfig": "projects/encrypt/karma.conf.js",
+            "inlineStyleLanguage": "scss",
+            "stylePreprocessorOptions": {
+              "includePaths": ["projects/styles/src/lib"]
+            },
+            "codeCoverageExclude": [],
+            "scripts": []
+          }
+        }
+      }
     }
   }
 }

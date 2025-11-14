@@ -1,0 +1,144 @@
+import {
+  defineNgVaultBehaviorKey,
+  NgVaultBehaviorContext,
+  NgVaultBehaviorFactory,
+  NgVaultBehaviorFactoryContext,
+  NgVaultBehaviorTypes,
+  NgVaultEncryptBehavior,
+  ngVaultLog
+} from '@ngvault/shared';
+
+//
+// ───────────────────────────────────────────────────────────
+// AES-256-GCM Encryption Utilities
+// ───────────────────────────────────────────────────────────
+//
+
+interface VaultEncryptedEnvelope {
+  v: number; // version
+  iv: string; // base64 IV
+  data: string; // base64 ciphertext
+  alg: 'AES-256-GCM';
+}
+
+const VAULT_CRYPTO_VERSION = 1;
+
+//
+// Convert ArrayBuffer <-> Base64
+//
+function abToBase64(buf: ArrayBuffer | ArrayBufferView): string {
+  const bytes =
+    buf instanceof ArrayBuffer ? new Uint8Array(buf) : new Uint8Array(buf.buffer, buf.byteOffset, buf.byteLength);
+
+  return btoa(String.fromCharCode(...bytes));
+}
+
+function base64ToAb(b64: string): ArrayBuffer {
+  const bin = atob(b64);
+  const bytes = new Uint8Array(bin.length);
+  for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
+  return bytes.buffer;
+}
+
+//
+// Generate a 256-bit CryptoKey from a raw key string
+//
+async function importKey(secret: string): Promise<CryptoKey> {
+  const enc = new TextEncoder();
+  return crypto.subtle.importKey(
+    'raw',
+    enc.encode(secret.padEnd(32).slice(0, 32)), // exactly 32 bytes for AES-256
+    { name: 'AES-GCM' },
+    false,
+    ['encrypt', 'decrypt']
+  );
+}
+
+//
+// ───────────────────────────────────────────────────────────
+// Behavior Implementation
+// ───────────────────────────────────────────────────────────
+//
+
+export class Aes256EncryptBehavior<T> implements NgVaultEncryptBehavior<T> {
+  readonly type = NgVaultBehaviorTypes.Encrypt;
+  readonly key = defineNgVaultBehaviorKey('Core', 'Aes256Encrypt');
+  readonly critical = false;
+
+  #cryptoKeyPromise: Promise<CryptoKey>;
+
+  constructor(
+    private readonly injector: NgVaultBehaviorFactoryContext['injector'],
+    secret: string
+  ) {
+    this.#cryptoKeyPromise = importKey(secret);
+  }
+
+  async encryptState(ctx: NgVaultBehaviorContext<T>, current: T): Promise<T | undefined> {
+    try {
+      if (current === undefined || current === null) return current;
+
+      const cryptoKey = await this.#cryptoKeyPromise;
+      const iv = crypto.getRandomValues(new Uint8Array(12)); // GCM recommended IV size
+
+      const encoded = new TextEncoder().encode(JSON.stringify(current));
+      const encrypted = await crypto.subtle.encrypt({ name: 'AES-GCM', iv }, cryptoKey, encoded);
+
+      const envelope: VaultEncryptedEnvelope = {
+        v: VAULT_CRYPTO_VERSION,
+        alg: 'AES-256-GCM',
+        iv: abToBase64(iv),
+        data: abToBase64(encrypted)
+      };
+
+      return envelope as unknown as T;
+    } catch (err) {
+      ngVaultLog('[NgVault] AES encrypt failed:', err);
+      return current;
+    }
+  }
+
+  async decryptState(ctx: NgVaultBehaviorContext<T>, encrypted: T): Promise<T | undefined> {
+    try {
+      if (encrypted === undefined || encrypted === null) return encrypted;
+
+      const envelope = encrypted as unknown as VaultEncryptedEnvelope;
+
+      // Must be a valid envelope or skip decryption
+      if (typeof envelope !== 'object' || envelope.alg !== 'AES-256-GCM' || !envelope.iv || !envelope.data) {
+        return encrypted; // Not encrypted → return raw value
+      }
+
+      const cryptoKey = await this.#cryptoKeyPromise;
+
+      // Convert Base64 → bytes
+      const iv = base64ToAb(envelope.iv);
+      const ciphertext = base64ToAb(envelope.data);
+
+      const decryptedBuffer = await crypto.subtle.decrypt(
+        { name: 'AES-GCM', iv: new Uint8Array(iv) },
+        cryptoKey,
+        ciphertext
+      );
+
+      const decoded = new TextDecoder().decode(decryptedBuffer);
+      const parsed = JSON.parse(decoded);
+
+      return parsed as T;
+    } catch (err) {
+      ngVaultLog('[NgVault] AES decrypt failed:', err);
+      return encrypted; // fail-safe: don't destroy user data
+    }
+  }
+}
+
+export function withAes256EncryptBehavior(secret: string) {
+  const factory: NgVaultBehaviorFactory = (context: NgVaultBehaviorFactoryContext) => {
+    return new Aes256EncryptBehavior(context.injector, secret);
+  };
+
+  factory.type = NgVaultBehaviorTypes.Encrypt;
+  factory.critical = false;
+
+  return factory as NgVaultBehaviorFactory;
+}
