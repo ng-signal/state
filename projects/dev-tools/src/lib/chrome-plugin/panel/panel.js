@@ -5,6 +5,7 @@ console.log('[ngVault DevTools] Panel loaded.');
 const port = chrome.runtime.connect({ name: 'ngvault-devtools' });
 
 port.onMessage.addListener((event) => {
+  console.log('[ngVault DevTools] Panel received event', event);
   appendEvent(event);
 });
 

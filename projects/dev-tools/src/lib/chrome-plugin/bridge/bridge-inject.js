@@ -10,8 +10,10 @@
     const bus = window.ngVaultEventBus;
 
     if (!monitor || !bus) {
+      console.error('monitor', monitor);
+      console.error('bus', bus);
       // Keep polling until app boots fully
-      return setTimeout(waitForNgVault, 200);
+      return setTimeout(waitForNgVault, 500);
     }
 
     console.log('[ngVault DevTools] Found monitor + event bus', { monitor, bus });
@@ -32,14 +34,16 @@
       console.error('[ngVault DevTools] Failed to enable insights:', e);
     }
 
-    if (!bus || typeof bus.subscribe !== 'function') {
-      console.warn('[ngVault DevTools] NgVaultEventBus missing or not subscribable');
+    const observable = bus.asObservable();
+
+    if (!observable || typeof observable.subscribe !== 'function') {
+      console.warn('[ngVault DevTools] NgVaultEventBus.asObservable() missing or broken');
       return;
     }
 
     console.log('[ngVault DevTools] Subscribing to NgVaultEventBus…');
 
-    bus.subscribe((event) => {
+    observable.subscribe((event) => {
       window.postMessage(
         {
           source: 'ngvault-devtools',

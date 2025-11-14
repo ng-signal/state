@@ -18,6 +18,10 @@ describe('Utils: NgVaultEventBus)', () => {
       bus = TestBed.inject(NgVaultEventBus);
     });
 
+    it('should validate the chrome plug-in hook', () => {
+      expect((window as any).ngVaultEventBus).toBeTruthy();
+    });
+
     it('should emit an event with a generated ID', () => {
       const inputEvent: NgVaultEventModel = {
         cell: 'vault-1',

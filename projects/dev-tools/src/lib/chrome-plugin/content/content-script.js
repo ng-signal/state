@@ -1,4 +1,7 @@
-// content/content-script.js
+//content/content-script.js
+
+console.log('[ngVault DevTools] CONTENT SCRIPT running on', location.href);
+
 (function injectBridge() {
   try {
     const script = document.createElement('script');
@@ -14,6 +17,7 @@
 
 // Listen for messages from the injected page script
 window.addEventListener('message', (event) => {
+  console.log('content-script message');
   if (event.source !== window) return;
   if (!event.data || event.data.source !== 'ngvault-devtools') return;
 

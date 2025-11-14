@@ -23,6 +23,12 @@ export class NgVaultMonitor {
   >();
   public readonly key = defineNgVaultBehaviorKey('DevTools', 'Telemetry');
 
+  constructor() {
+    // This is for the chrome plugin
+    // eslint-disable-next-line
+    (window as any).ngVaultMonitorInstance = this;
+  }
+
   #serializeName(name: string): string {
     const lower = name.toLowerCase();
 

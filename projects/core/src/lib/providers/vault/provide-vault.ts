@@ -4,18 +4,12 @@ import { isTestEnv } from '../../../../../shared/src/lib/helpers/testing-environ
 import { NGVAULT_DEV_MODE } from '../../constants/ngvault-dev-mode.constant';
 import { VAULT_ROOT as NGVAULT_ROOT } from '../../constants/ngvault-root.constant';
 import { NgVaultConfigModel } from '../../models/ng-vault-config.model';
-import { NgVaultMonitor } from '../../monitor/ngvault-monitor.service';
 import { FEATURE_CELL_REGISTRY } from '../../tokens/feature-cell-registry.token';
 import { NGVAULT_CONFIG } from '../../tokens/ngvault-config.token';
 import { NGVAULT_QUEUE } from '../../tokens/ngvault-queue.token';
 
 let _config: Readonly<NgVaultConfigModel> | undefined;
 let _initialized = false;
-
-function exposeNgVaultDevtoolsHooks() {
-  // eslint-disable-next-line
-  (window as any).ngVault = { NgVaultMonitor };
-}
 
 function setNgVaultConfig(config: NgVaultConfigModel): void {
   const testMode = isTestEnv();
@@ -33,10 +27,6 @@ function setNgVaultConfig(config: NgVaultConfigModel): void {
   });
 
   _initialized = true;
-
-  if (ngDevMode) {
-    exposeNgVaultDevtoolsHooks();
-  }
 }
 
 export function getNgVaultConfig(): Readonly<NgVaultConfigModel> {

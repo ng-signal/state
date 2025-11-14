@@ -9,6 +9,12 @@ export class NgVaultEventBus {
   #bus = new Subject<NgVaultEventModel>();
   #devModeService = inject(NgVaultDevModeService);
 
+  constructor() {
+    // Expose globally for DevTools bridge
+    // eslint-disable-next-line
+    (window as any).ngVaultEventBus = this;
+  }
+
   next(event: NgVaultEventModel): void {
     if (!this.#devModeService.isDevMode || !event) return;
     this.#bus.next(event);

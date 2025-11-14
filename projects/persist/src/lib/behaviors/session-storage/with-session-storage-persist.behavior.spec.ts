@@ -33,7 +33,7 @@ describe('Behavior: Session Storage Persist Behavior', () => {
 
   describe('peristState', () => {
     it('should have default properties', () => {
-      expect(behavior.critical).toBeTrue();
+      expect(behavior.critical).toBeUndefined();
       expect(behavior.type).toBe('persist');
       expect(behavior.key).toBe('NgVault::Core::SessionStoragePersist');
     });

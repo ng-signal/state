@@ -11,7 +11,6 @@ import { defineNgVaultPersistKey } from '../../utils/define-ngvault-persist-key.
 class LocalStoragePersistBehavior<T> implements NgVaultPersistBehavior<T> {
   readonly type = NgVaultBehaviorTypes.Persist;
   readonly key = defineNgVaultBehaviorKey('Core', 'LocalStoragePersist');
-  readonly critical = true;
   readonly #storageKey: string;
 
   constructor(

@@ -54,6 +54,10 @@ describe('Service: Vault Monitor', () => {
       stopListening();
     });
 
+    it('should validate the chrome plug-in hook', () => {
+      expect((window as any).ngVaultMonitorInstance).toBeTruthy();
+    });
+
     it('should register, emit init and prevent double registration', () => {
       vaultMonitor.registerCell('vault1', insightsOptions);
       vaultMonitor.startReplace('vault1', 'state key', ctx);
