@@ -31,6 +31,10 @@ export class CarService implements ExampleCarServiceInterface<CarModel[]> {
     });
   });
 
+  constructor() {
+    this.vault.initialize();
+  }
+
   cars(): VaultSignalRef<CarModel[]> {
     if (!this.isLoaded()) {
       this.isLoaded.set(true);

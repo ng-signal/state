@@ -8,7 +8,9 @@ export abstract class UserService<T> {
   private readonly isLoaded = signal(false);
   protected readonly http = inject(HttpClient);
 
-  constructor(protected readonly vault: NgVaultFeatureCell<T>) {}
+  constructor(protected readonly vault: NgVaultFeatureCell<T>) {
+    vault.initialize();
+  }
 
   users(): VaultSignalRef<T> {
     if (!this.isLoaded()) {
