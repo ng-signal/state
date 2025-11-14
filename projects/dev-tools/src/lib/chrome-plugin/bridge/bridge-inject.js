@@ -1,40 +1,56 @@
-console.log('bridge called');
-
+// bridge/bridge-inject.js
 (function () {
-  console.log('[ngVault bridge] injected');
+  if (window.__ngVaultDevtoolsBridgeInjected) return;
+  window.__ngVaultDevtoolsBridgeInjected = true;
 
-  function wait() {
+  console.log('[ngVault DevTools] bridge-inject.js executing in page context');
+
+  function waitForNgVault() {
     const monitor = window.ngVaultMonitorInstance;
+    const bus = window.ngVaultEventBus;
 
-    if (monitor) {
-      hook(monitor);
-    } else {
-      setTimeout(wait, 100);
+    if (!monitor || !bus) {
+      // Keep polling until app boots fully
+      return setTimeout(waitForNgVault, 200);
     }
-  }
 
-  function hook(monitor) {
-    console.log('[ngVault bridge] Hooking monitor');
+    console.log('[ngVault DevTools] Found monitor + event bus', { monitor, bus });
 
     try {
-      monitor.activateGlobalInsights({
-        wantsState: true,
-        wantsPayload: true,
-        wantsErrors: true
-      });
+      // Enable global insights so we get state/payload/error
+      if (typeof monitor.activateGlobalInsights === 'function') {
+        monitor.activateGlobalInsights({
+          wantsState: true,
+          wantsPayload: true,
+          wantsErrors: true
+        });
+        console.log('[ngVault DevTools] Global insights enabled');
+      } else {
+        console.warn('[ngVault DevTools] monitor.activateGlobalInsights not found');
+      }
     } catch (e) {
-      console.error('[ngVault] Failed to enable insights', e);
+      console.error('[ngVault DevTools] Failed to enable insights:', e);
     }
 
-    const bus = monitor.eventBus;
-    if (!bus?.subscribe) return;
+    if (!bus || typeof bus.subscribe !== 'function') {
+      console.warn('[ngVault DevTools] NgVaultEventBus missing or not subscribable');
+      return;
+    }
+
+    console.log('[ngVault DevTools] Subscribing to NgVaultEventBus…');
 
     bus.subscribe((event) => {
-      window.dispatchEvent(new CustomEvent('__ngvault_event__', { detail: event }));
+      window.postMessage(
+        {
+          source: 'ngvault-devtools',
+          event
+        },
+        '*'
+      );
     });
 
-    console.log('[ngVault bridge] Ready');
+    console.log('[ngVault DevTools] Event bus subscription active');
   }
 
-  wait();
+  waitForNgVault();
 })();

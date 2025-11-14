@@ -1,24 +1,24 @@
-console.log('[ngVault] content-script loaded');
-
-// Inject the bridging script into the page
-const script = document.createElement('script');
-script.src = chrome.runtime.getURL('bridge/bridge-inject.js');
-(document.head || document.documentElement).appendChild(script);
-
-// Receive events from bridge-inject.js
-window.addEventListener('__ngvault_event__', (event) => {
-  chrome.runtime.sendMessage({
-    type: 'ngvault-event',
-    event: event.detail
-  });
-});
-
-// Bridge: Page → ContentScript → DevTools panel
-window.addEventListener('message', (event) => {
-  if (event.data?.source === 'ngvault-devtools') {
-    chrome.runtime.sendMessage({
-      type: 'NGVAULT_EVENT',
-      event: event.data.event
-    });
+// content/content-script.js
+(function injectBridge() {
+  try {
+    const script = document.createElement('script');
+    script.src = chrome.runtime.getURL('bridge/bridge-inject.js');
+    script.async = true;
+    (document.documentElement || document.head || document.body).appendChild(script);
+    script.remove();
+    // console.log('[ngVault DevTools] bridge-inject.js tag inserted');
+  } catch (e) {
+    console.warn('[ngVault DevTools] Failed to inject bridge script:', e);
   }
+})();
+
+// Listen for messages from the injected page script
+window.addEventListener('message', (event) => {
+  if (event.source !== window) return;
+  if (!event.data || event.data.source !== 'ngvault-devtools') return;
+
+  chrome.runtime.sendMessage({
+    type: 'NGVAULT_EVENT',
+    event: event.data.event
+  });
 });

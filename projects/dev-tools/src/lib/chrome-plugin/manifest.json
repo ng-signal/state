@@ -3,7 +3,8 @@
   "name": "ngVault DevTools",
   "version": "0.0.1",
   "description": "Developer tools panel for inspecting ngVault state and events.",
-  "permissions": ["scripting", "tabs"],
+
+  "permissions": ["tabs"],
   "host_permissions": ["<all_urls>"],
 
   "devtools_page": "devtools/devtools.html",
