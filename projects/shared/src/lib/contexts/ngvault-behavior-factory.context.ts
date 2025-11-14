@@ -5,5 +5,5 @@ import { NgVaultBehaviorTypes } from '../types/ngvault-behavior.type';
 export interface NgVaultBehaviorFactoryContext {
   injector: Injector;
   readonly type: NgVaultBehaviorTypes;
-  featureCellKey?: string;
+  featureCellKey: string;
 }

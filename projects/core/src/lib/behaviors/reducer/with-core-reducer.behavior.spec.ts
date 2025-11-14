@@ -23,7 +23,8 @@ describe('Behavior: CoreReducerBehavior', () => {
     runInInjectionContext(injector, () => {
       behavior = withCoreReducerBehavior({
         type: NgVaultBehaviorTypes.Reduce,
-        injector
+        injector,
+        featureCellKey: 'cell key'
       });
     });
   });

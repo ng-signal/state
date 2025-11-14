@@ -44,8 +44,8 @@ export class SessionStoragePersistBehavior<T> implements NgVaultPersistBehavior<
 /**
  * Factory wrapper — matches the exact shape of other behaviors
  */
-export const withSessionStoragePersistBehavior = ((context: NgVaultBehaviorFactoryContext, featureCellKey: string) => {
-  return new SessionStoragePersistBehavior(context.injector, featureCellKey);
+export const withSessionStoragePersistBehavior = ((context: NgVaultBehaviorFactoryContext) => {
+  return new SessionStoragePersistBehavior(context.injector, context.featureCellKey);
 }) as unknown as NgVaultBehaviorFactory;
 
 // Metadata matching pattern of all NgVault behaviors

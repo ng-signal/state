@@ -38,12 +38,12 @@ export function provideFeatureCell<Service, T>(
     useFactory: (): NgVaultFeatureCell<T> => {
       const _isLoading = signal(false);
       const _error = signal<NgVaultResourceStateError | null>(null);
-      const _behaviorRunner = NgVaultBehaviorLifecycleService();
+      const _cellKey = featureCellDescriptor.key;
+      const _behaviorRunner = NgVaultBehaviorLifecycleService(_cellKey);
       const _injector = inject(Injector);
       const _destroyRef = inject(DestroyRef);
       const _destroyed$ = new Subject<void>();
       const _reset$ = new Subject<void>();
-      const _cellKey = featureCellDescriptor.key;
       const _ngVaultMonitor = inject(NgVaultMonitor);
 
       let _initialized = false;

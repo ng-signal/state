@@ -224,7 +224,7 @@ export class VaultOrchestrator<T> {
 
           case 'persist':
             if (typeof (behavior as NgVaultPersistBehavior<T>).persistState === 'function') {
-              await (behavior as NgVaultPersistBehavior<T>).persistState(ctx, current!);
+              await (behavior as NgVaultPersistBehavior<T>).persistState(current!);
             }
             break;
         }

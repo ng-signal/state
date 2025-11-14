@@ -26,7 +26,8 @@ describe('Behavior: CoreStateBehavior', () => {
     runInInjectionContext(injector, () => {
       behavior = withCoreStateBehavior({
         type: NgVaultBehaviorTypes.State,
-        injector
+        injector,
+        featureCellKey: 'cell key'
       });
     });
   });

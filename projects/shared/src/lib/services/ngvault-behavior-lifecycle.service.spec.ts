@@ -42,11 +42,11 @@ describe('Service: VaultBehaviorLifecycle', () => {
     spyOn(crypto, 'randomUUID').and.callFake(() => ids.shift() as any);
 
     TestBed.configureTestingModule({
-      providers: [provideVaultTesting(), NgVaultBehaviorLifecycleService, provideZonelessChangeDetection()]
+      providers: [provideVaultTesting(), provideZonelessChangeDetection()]
     });
 
     injector = TestBed.inject(Injector);
-    const vaultService = TestBed.inject(NgVaultBehaviorLifecycleService);
+    const vaultService = NgVaultBehaviorLifecycleService('cell key');
     vaultRunner = vaultService;
 
     eventBus = TestBed.inject(NgVaultEventBus);
@@ -111,7 +111,7 @@ describe('Service: VaultBehaviorLifecycle', () => {
       }, 'encryption');
 
       runInInjectionContext(injector, () => {
-        vaultRunner = NgVaultBehaviorLifecycleService();
+        vaultRunner = NgVaultBehaviorLifecycleService('cell key');
       });
 
       const behaviors = vaultRunner.initializeBehaviors(injector, [
@@ -314,7 +314,7 @@ describe('Service: VaultBehaviorLifecycle', () => {
       };
 
       runInInjectionContext(injector, () => {
-        vaultRunner = NgVaultBehaviorLifecycleService();
+        vaultRunner = NgVaultBehaviorLifecycleService('cell key');
       });
     });
 

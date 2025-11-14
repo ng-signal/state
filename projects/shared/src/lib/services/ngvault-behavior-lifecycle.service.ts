@@ -13,6 +13,11 @@ class VaultBehaviorRunnerClass implements NgVaultBehaviorRunner {
   // eslint-disable-next-line
   #behaviors: NgVaultBehavior<any>[] = [];
   #initialized = false;
+  #cellKey: string;
+
+  constructor(cellKey: string) {
+    this.#cellKey = cellKey;
+  }
 
   initializeBehaviors<T>(injector: Injector, behaviors: Array<NgVaultBehaviorFactory<T>>): NgVaultBehavior<T>[] {
     if (this.#initialized)
@@ -38,7 +43,8 @@ class VaultBehaviorRunnerClass implements NgVaultBehaviorRunner {
 
           const instance = factory({
             injector,
-            type: behaviorType
+            type: behaviorType,
+            featureCellKey: this.#cellKey
           } as NgVaultBehaviorFactoryContext);
 
           if (!instance || typeof instance !== 'object') {
@@ -138,6 +144,6 @@ class VaultBehaviorRunnerClass implements NgVaultBehaviorRunner {
   }
 }
 
-export function NgVaultBehaviorLifecycleService(): NgVaultBehaviorRunner {
-  return new VaultBehaviorRunnerClass();
+export function NgVaultBehaviorLifecycleService(cellKey: string): NgVaultBehaviorRunner {
+  return new VaultBehaviorRunnerClass(cellKey);
 }

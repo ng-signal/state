@@ -46,7 +46,8 @@ describe('Behavior: CoreHttpResourceStateBehavior', () => {
     runInInjectionContext(injector, () => {
       behavior = withCoreHttpResourceStateBehavior({
         type: 'state',
-        injector
+        injector,
+        featureCellKey: 'cell key'
       });
     });
   });
