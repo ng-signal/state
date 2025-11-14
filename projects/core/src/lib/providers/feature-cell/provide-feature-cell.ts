@@ -19,7 +19,7 @@ import { NgVaultDataType } from '@ngvault/shared/types/ngvault-data.type';
 import { NgVaultStateInputType } from '@ngvault/shared/types/ngvault-state-input.type';
 import { NrVaultStateType as NgVaultStateType } from '@ngvault/shared/types/ngvault-state.type';
 import { Subject } from 'rxjs';
-import { ngVaultWarn } from '../../../../../shared/src/lib/utils/ngvault-logger.util';
+import { ngVaultLog, ngVaultWarn } from '../../../../../shared/src/lib/utils/ngvault-logger.util';
 import { withCoreObservableBehavior } from '../../behaviors/core-observable/with-core-observable.behavior';
 import { FeatureCellDescriptorModel } from '../../models/feature-cell-descriptor.model';
 import { NgVaultMonitor } from '../../monitor/ngvault-monitor.service';
@@ -75,11 +75,7 @@ export function provideFeatureCell<Service, T>(
 
       const _allBehaviors: NgVaultBehaviorFactory<T>[] = [..._defaultBehaviors, ..._userBehaviorsWithoutReducers];
 
-      const _value = signal<NgVaultDataType<T>>(
-        featureCellDescriptor.initial === null || featureCellDescriptor.initial === undefined
-          ? undefined
-          : (featureCellDescriptor.initial as T)
-      );
+      const _value = signal<NgVaultDataType<T>>(undefined);
 
       const _hasValue = computed(() => {
         const val = _value();
@@ -116,6 +112,9 @@ export function provideFeatureCell<Service, T>(
         _ensureInitialized();
         _reset$.next();
         _hardReset();
+
+        _orchestrator.clearPersistedState(ctx);
+
         _ngVaultMonitor.endReset(_cellKey, 'core', ctx);
       };
 
@@ -196,6 +195,21 @@ export function provideFeatureCell<Service, T>(
         );
 
         _behaviorRunner.applyBehaviorExtensions(cell);
+
+        const persisted = _orchestrator.loadPersistedState(ctx);
+
+        if (persisted !== undefined) {
+          _value.set(persisted as T);
+          _isLoading.set(false);
+          _error.set(null);
+          ngVaultLog('Persisted data loaded from storage');
+        } else if (featureCellDescriptor.initial !== null && featureCellDescriptor.initial !== undefined) {
+          ngVaultLog('Initialized data loaded from storage');
+          _value.set(featureCellDescriptor.initial as T);
+          _isLoading.set(false);
+          _error.set(null);
+        }
+
         _ngVaultMonitor.endInitialized(_cellKey, 'core', ctx);
       };
 

@@ -2,6 +2,7 @@
  * Public API Surface of testing
  */
 
+export * from './lib/factory/create-custom-test-behavior.factory';
 export * from './lib/factory/create-test-behavior.factory';
 export * from './lib/factory/create-test-event-listener.mock';
 export * from './lib/provider/provide-vault-testing';

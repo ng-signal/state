@@ -3,8 +3,13 @@ import { HttpTestingController, provideHttpClientTesting } from '@angular/common
 import { Injector, provideZonelessChangeDetection, runInInjectionContext, signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { NgVaultEventBus } from '@ngvault/dev-tools';
-import { NgVaultBehaviorContext, NgVaultBehaviorTypes } from '@ngvault/shared';
-import { createTestEventListener, flushMicrotasksZoneless, provideVaultTesting } from '@ngvault/testing';
+import { NgVaultBehaviorContext } from '@ngvault/shared';
+import {
+  createInitializedTestBehavior,
+  createTestEventListener,
+  flushMicrotasksZoneless,
+  provideVaultTesting
+} from '@ngvault/testing';
 import { NgVaultMonitor } from '../monitor/ngvault-monitor.service';
 import { VaultOrchestrator } from './ngvault.orchestrator';
 
@@ -54,29 +59,6 @@ describe('Orcestrator: Vault', () => {
     stopListening();
   });
 
-  function makeBehavior(type: string, returnValue?: any): any {
-    return {
-      type: type as NgVaultBehaviorTypes,
-      key: `${type}-id`,
-      computeState: async () => {
-        calls.push(type);
-        return returnValue ?? { [`${type}`]: true };
-      },
-      applyReducer: async () => {
-        calls.push(type);
-        return returnValue ?? { [`${type}`]: true };
-      },
-      encryptState: async () => {
-        calls.push(type);
-        return returnValue ?? { [`${type}`]: true };
-      },
-      persistState: async () => {
-        calls.push(type);
-        return returnValue ?? { [`${type}`]: true };
-      }
-    };
-  }
-
   it('should execute state → reduce (2 reducers) → encrypt → persist in order', async () => {
     // Two reducer functions
     reducer1 = () => calls.push('reducer 1');
@@ -84,14 +66,10 @@ describe('Orcestrator: Vault', () => {
 
     // Make behaviors using the helper + real reducer behavior
     const behaviors = [
-      makeBehavior('state'),
-      {
-        ...makeBehavior('reduce'),
-        applyReducer: (current: any, reducerFn: any) => reducerFn(current)
-      },
-      makeBehavior('encrypt'),
-      makeBehavior('persist'),
-      makeBehavior(NgVaultBehaviorTypes.Insights)
+      createInitializedTestBehavior('state', calls, Object({ state: true })),
+      createInitializedTestBehavior('reduce', calls, Object({ reduce: true })),
+      createInitializedTestBehavior('encrypt', calls),
+      createInitializedTestBehavior('persist', calls)
     ];
 
     // Create orchestrator
@@ -104,12 +82,12 @@ describe('Orcestrator: Vault', () => {
     await flushMicrotasksZoneless();
 
     // Reducer pipeline order + other behaviors
-    expect(calls).toEqual(['state', 'reducer 1', 'reducer 2', 'encrypt', 'persist']);
+    expect(calls).toEqual(['state', 'reduce', 'reducer 1', 'reduce', 'reducer 2', 'encrypt', 'persist']);
 
     // Verify final state after reducer pipeline
     expect(mockCtx.isLoading?.()).toBeFalse();
     expect(mockCtx.error?.()).toBeNull();
-    expect(mockCtx.value?.()).toEqual(3);
+    expect(mockCtx.value?.()).toEqual(5);
 
     // Verify event pipeline
     expect(emitted).toEqual([
@@ -120,56 +98,62 @@ describe('Orcestrator: Vault', () => {
         type: 'lifecycle:start:replace',
         timestamp: 'timestamp-removed'
       }),
-
-      // STATE behavior (start + end)
       Object({
         id: 'id-removed',
         cell: 'cell key',
-        behaviorKey: 'state-id',
+        behaviorKey: 'NgVault::Test::State',
         type: 'stage:start:state',
         timestamp: 'timestamp-removed'
       }),
       Object({
         id: 'id-removed',
         cell: 'cell key',
-        behaviorKey: 'state-id',
+        behaviorKey: 'NgVault::Test::State',
         type: 'stage:end:state',
         timestamp: 'timestamp-removed'
       }),
-
-      // REDUCER #1 (start + end)
       Object({
         id: 'id-removed',
         cell: 'cell key',
-        behaviorKey: 'reduce-id',
+        behaviorKey: 'NgVault::Test::Reduce',
         type: 'stage:start:reducer',
         timestamp: 'timestamp-removed'
       }),
       Object({
         id: 'id-removed',
         cell: 'cell key',
-        behaviorKey: 'reduce-id',
+        behaviorKey: 'NgVault::Test::Reduce',
         type: 'stage:end:reducer',
         timestamp: 'timestamp-removed'
       }),
-
-      // REDUCER #2 (start + end)
       Object({
         id: 'id-removed',
         cell: 'cell key',
-        behaviorKey: 'reduce-id',
+        behaviorKey: 'NgVault::Test::Reduce',
         type: 'stage:start:reducer',
         timestamp: 'timestamp-removed'
       }),
       Object({
         id: 'id-removed',
         cell: 'cell key',
-        behaviorKey: 'reduce-id',
+        behaviorKey: 'NgVault::Test::Reduce',
         type: 'stage:end:reducer',
         timestamp: 'timestamp-removed'
       }),
-
-      // END REPLACE
+      Object({
+        id: 'id-removed',
+        cell: 'cell key',
+        behaviorKey: 'NgVault::Test::Persist',
+        type: 'stage:start:persist',
+        timestamp: 'timestamp-removed'
+      }),
+      Object({
+        id: 'id-removed',
+        cell: 'cell key',
+        behaviorKey: 'NgVault::Test::Persist',
+        type: 'stage:end:persist',
+        timestamp: 'timestamp-removed'
+      }),
       Object({
         id: 'id-removed',
         cell: 'cell key',
@@ -181,7 +165,7 @@ describe('Orcestrator: Vault', () => {
   });
 
   it('should throw an error with undefined state', async () => {
-    const stateBehavior = makeBehavior('state');
+    const stateBehavior = createInitializedTestBehavior('state', calls);
 
     (stateBehavior as any).computeState = async () => {
       return undefined;
@@ -191,13 +175,7 @@ describe('Orcestrator: Vault', () => {
     const reducer2 = () => calls.push('reducer 2');
 
     // Make behaviors usng the helper + real reducer behavior
-    const behaviors = [
-      stateBehavior,
-      {
-        ...makeBehavior('reduce'),
-        applyReducer: (current: any, reducerFn: any) => reducerFn(current)
-      }
-    ];
+    const behaviors = [stateBehavior, createInitializedTestBehavior('reduce', calls)];
 
     // Create orchestrator
     runInInjectionContext(injector, () => {
@@ -228,21 +206,21 @@ describe('Orcestrator: Vault', () => {
       Object({
         id: 'id-removed',
         cell: 'cell key',
-        behaviorKey: 'state-id',
+        behaviorKey: 'NgVault::Test::State',
         type: 'stage:start:state',
         timestamp: 'timestamp-removed'
       }),
       Object({
         id: 'id-removed',
         cell: 'cell key',
-        behaviorKey: 'state-id',
+        behaviorKey: 'NgVault::Test::State',
         type: 'stage:end:state',
         timestamp: 'timestamp-removed'
       }),
       Object({
         id: 'id-removed',
         cell: 'cell key',
-        behaviorKey: 'reduce-id',
+        behaviorKey: 'NgVault::Test::Reduce',
         type: 'error',
         timestamp: 'timestamp-removed'
       })
@@ -250,7 +228,7 @@ describe('Orcestrator: Vault', () => {
   });
 
   it('should handle errors and set resourceError', async () => {
-    const errorBehavior = makeBehavior('state');
+    const errorBehavior = createInitializedTestBehavior('state', calls);
     errorBehavior.computeState = async () => {
       throw new Error('Test error');
     };
@@ -281,7 +259,7 @@ describe('Orcestrator: Vault', () => {
     const mockBackend = TestBed.inject(HttpTestingController);
     const injector = TestBed.inject(Injector);
 
-    const behaviors = [makeBehavior('state')];
+    const behaviors = [createInitializedTestBehavior('state', calls)];
 
     runInInjectionContext(injector, () => {
       dispatcher = new VaultOrchestrator<any>('cell key', behaviors, [reducer1], injector, ngVaultMonitor);
@@ -322,9 +300,9 @@ describe('Orcestrator: Vault', () => {
 
   it('should skip undefined stage results and maintain working state', async () => {
     const behaviors = [
-      makeBehavior('state', { id: 1 }),
-      { ...makeBehavior('reduce'), applyReducer: () => undefined },
-      makeBehavior('encrypt')
+      createInitializedTestBehavior('state', calls, Object({ state: true })),
+      { ...createInitializedTestBehavior('reduce', calls), applyReducer: () => undefined },
+      createInitializedTestBehavior('encrypt', calls)
     ];
 
     runInInjectionContext(injector, () => {
@@ -337,11 +315,11 @@ describe('Orcestrator: Vault', () => {
     expect(calls).toEqual(['state', 'encrypt']);
     expect(mockCtx.isLoading?.()).toBeFalse();
     expect(mockCtx.error?.()).toBeNull();
-    expect(mockCtx.value?.()).toEqual({ id: 1 });
+    expect(mockCtx.value?.()).toEqual({ state: true });
   });
 
   it('should not throw if optional ctx signals are undefined', async () => {
-    const behaviors = [makeBehavior('state')];
+    const behaviors = [createInitializedTestBehavior('state', calls)];
 
     runInInjectionContext(injector, () => {
       dispatcher = new VaultOrchestrator<any>('cell key', behaviors, [reducer1], injector, ngVaultMonitor);
@@ -353,9 +331,9 @@ describe('Orcestrator: Vault', () => {
   });
 
   it('should set signals correctly after microtask flush', async () => {
-    const behaviors = [makeBehavior('state', { ok: true })];
+    const behaviors = createInitializedTestBehavior('state', calls, Object({ ok: true }));
     runInInjectionContext(injector, () => {
-      dispatcher = new VaultOrchestrator<any>('cell key', behaviors, [reducer1], injector, ngVaultMonitor);
+      dispatcher = new VaultOrchestrator<any>('cell key', [behaviors], [reducer1], injector, ngVaultMonitor);
     });
 
     dispatcher.dispatchSet(mockCtx);
@@ -371,11 +349,16 @@ describe('Orcestrator: Vault', () => {
 
   describe('runStage failures - one of each', () => {
     it('should stop execution on a state event', async () => {
-      const errorBehavior = makeBehavior('state');
+      const errorBehavior = createInitializedTestBehavior('state', calls);
       errorBehavior.computeState = async () => {
         throw new Error('Test error');
       };
-      const behaviors = [errorBehavior, makeBehavior('reducee'), makeBehavior('encrypt'), makeBehavior('persist')];
+      const behaviors = [
+        errorBehavior,
+        createInitializedTestBehavior('reduce', calls),
+        createInitializedTestBehavior('encrypt', calls),
+        createInitializedTestBehavior('persist', calls)
+      ];
 
       runInInjectionContext(injector, () => {
         dispatcher = new VaultOrchestrator<any>('cell key', behaviors, [reducer1], injector, ngVaultMonitor);
@@ -400,11 +383,16 @@ describe('Orcestrator: Vault', () => {
         throw new Error('error');
       };
 
-      const errorBehavior = makeBehavior('reduce');
+      const errorBehavior = createInitializedTestBehavior('reduce', calls);
       errorBehavior.applyReducer = async () => {
         throw new Error('Test error');
       };
-      const behaviors = [makeBehavior('state'), errorBehavior, makeBehavior('encrypt'), makeBehavior('persist')];
+      const behaviors = [
+        createInitializedTestBehavior('state', calls, Object({ state: true })),
+        errorBehavior,
+        createInitializedTestBehavior('encrypt', calls),
+        createInitializedTestBehavior('persist', calls)
+      ];
 
       runInInjectionContext(injector, () => {
         dispatcher = new VaultOrchestrator<any>('cell key', behaviors, [reducer1], injector, ngVaultMonitor);
@@ -425,11 +413,16 @@ describe('Orcestrator: Vault', () => {
     });
 
     it('should stop execution on an encrypt event', async () => {
-      const errorBehavior = makeBehavior('encrypt');
+      const errorBehavior = createInitializedTestBehavior('encrypt', calls);
       errorBehavior.encryptState = async () => {
         throw new Error('Test error');
       };
-      const behaviors = [makeBehavior('state'), makeBehavior('reduce'), errorBehavior, makeBehavior('persist')];
+      const behaviors = [
+        createInitializedTestBehavior('state', calls, Object({ state: true })),
+        createInitializedTestBehavior('reduce', calls, Object({ reduce: true })),
+        errorBehavior,
+        createInitializedTestBehavior('persist', calls)
+      ];
 
       runInInjectionContext(injector, () => {
         dispatcher = new VaultOrchestrator<any>('cell key', behaviors, [reducer1], injector, ngVaultMonitor);
@@ -438,7 +431,7 @@ describe('Orcestrator: Vault', () => {
       dispatcher.dispatchSet(mockCtx);
       await flushMicrotasksZoneless();
 
-      expect(calls).toEqual(['state', 'reduce']);
+      expect(calls).toEqual(['state', 'reduce', 'reducer 1']);
       expect(mockCtx.isLoading?.()).toBeFalse();
       expect(mockCtx.error?.()).toEqual(
         Object({
@@ -450,11 +443,16 @@ describe('Orcestrator: Vault', () => {
     });
 
     it('should stop execution on a persist event', async () => {
-      const errorBehavior = makeBehavior('persist');
+      const errorBehavior = createInitializedTestBehavior('persist', calls);
       errorBehavior.persistState = async () => {
         throw new Error('Test error');
       };
-      const behaviors = [makeBehavior('state'), makeBehavior('reduce'), makeBehavior('encrypt'), errorBehavior];
+      const behaviors = [
+        createInitializedTestBehavior('state', calls, Object({ state: true })),
+        createInitializedTestBehavior('reduce', calls, Object({ reduce: true })),
+        createInitializedTestBehavior('encrypt', calls),
+        errorBehavior
+      ];
 
       runInInjectionContext(injector, () => {
         dispatcher = new VaultOrchestrator<any>('cell key', behaviors, [reducer1], injector, ngVaultMonitor);
@@ -463,7 +461,7 @@ describe('Orcestrator: Vault', () => {
       dispatcher.dispatchSet(mockCtx);
       await flushMicrotasksZoneless();
 
-      expect(calls).toEqual(['state', 'reduce', 'encrypt']);
+      expect(calls).toEqual(['state', 'reduce', 'reducer 1', 'encrypt']);
       expect(mockCtx.isLoading?.()).toBeFalse();
       expect(mockCtx.error?.()).toEqual(
         Object({
@@ -477,16 +475,16 @@ describe('Orcestrator: Vault', () => {
 
   describe('runStage failures - two of each', () => {
     it('should stop execution on a state event', async () => {
-      const errorBehavior = makeBehavior('state');
+      const errorBehavior = createInitializedTestBehavior('state', calls);
       errorBehavior.computeState = async () => {
         throw new Error('Test error');
       };
       const behaviors = [
-        makeBehavior('state'),
+        createInitializedTestBehavior('state', calls),
         errorBehavior,
-        makeBehavior('reduce'),
-        makeBehavior('encrypt'),
-        makeBehavior('persist')
+        createInitializedTestBehavior('reduce', calls),
+        createInitializedTestBehavior('encrypt', calls),
+        createInitializedTestBehavior('persist', calls)
       ];
 
       runInInjectionContext(injector, () => {
@@ -508,16 +506,16 @@ describe('Orcestrator: Vault', () => {
     });
 
     it('should stop execution on a reduce event', async () => {
-      const errorBehavior = makeBehavior('reduce');
+      const errorBehavior = createInitializedTestBehavior('reduce', calls);
       errorBehavior.applyReducer = async () => {
         throw new Error('Test error');
       };
       const behaviors = [
-        makeBehavior('state'),
-        makeBehavior('reduce'),
+        createInitializedTestBehavior('state', calls, Object({ state: true })),
+        createInitializedTestBehavior('reduce', calls, Object({ reduce: true })),
         errorBehavior,
-        makeBehavior('encrypt'),
-        makeBehavior('persist')
+        createInitializedTestBehavior('encrypt', calls),
+        createInitializedTestBehavior('persist', calls)
       ];
 
       runInInjectionContext(injector, () => {
@@ -527,7 +525,7 @@ describe('Orcestrator: Vault', () => {
       dispatcher.dispatchSet(mockCtx);
       await flushMicrotasksZoneless();
 
-      expect(calls).toEqual(['state', 'reduce']);
+      expect(calls).toEqual(['state', 'reduce', 'reducer 1']);
       expect(mockCtx.isLoading?.()).toBeFalse();
       expect(mockCtx.error?.()).toEqual(
         Object({
@@ -539,16 +537,16 @@ describe('Orcestrator: Vault', () => {
     });
 
     it('should stop execution on an encrypt event', async () => {
-      const errorBehavior = makeBehavior('encrypt');
+      const errorBehavior = createInitializedTestBehavior('encrypt', calls);
       errorBehavior.encryptState = async () => {
         throw new Error('Test error');
       };
       const behaviors = [
-        makeBehavior('state'),
-        makeBehavior('reduce'),
-        makeBehavior('encrypt'),
+        createInitializedTestBehavior('state', calls, Object({ state: true })),
+        createInitializedTestBehavior('reduce', calls, Object({ reduce: true })),
+        createInitializedTestBehavior('encrypt', calls),
         errorBehavior,
-        makeBehavior('persist')
+        createInitializedTestBehavior('persist', calls)
       ];
 
       runInInjectionContext(injector, () => {
@@ -558,7 +556,7 @@ describe('Orcestrator: Vault', () => {
       dispatcher.dispatchSet(mockCtx);
       await flushMicrotasksZoneless();
 
-      expect(calls).toEqual(['state', 'reduce', 'encrypt']);
+      expect(calls).toEqual(['state', 'reduce', 'reducer 1', 'encrypt']);
       expect(mockCtx.isLoading?.()).toBeFalse();
       expect(mockCtx.error?.()).toEqual(
         Object({
@@ -570,15 +568,15 @@ describe('Orcestrator: Vault', () => {
     });
 
     it('should stop execution on a persist event', async () => {
-      const errorBehavior = makeBehavior('persist');
+      const errorBehavior = createInitializedTestBehavior('persist', calls);
       errorBehavior.persistState = async () => {
         throw new Error('Test error');
       };
       const behaviors = [
-        makeBehavior('state'),
-        makeBehavior('reduce'),
-        makeBehavior('encrypt'),
-        makeBehavior('persist'),
+        createInitializedTestBehavior('state', calls, Object({ state: true })),
+        createInitializedTestBehavior('reduce', calls, Object({ reduce: true })),
+        createInitializedTestBehavior('encrypt', calls),
+        createInitializedTestBehavior('persist', calls),
         errorBehavior
       ];
 
@@ -589,7 +587,7 @@ describe('Orcestrator: Vault', () => {
       dispatcher.dispatchSet(mockCtx);
       await flushMicrotasksZoneless();
 
-      expect(calls).toEqual(['state', 'reduce', 'encrypt', 'persist']);
+      expect(calls).toEqual(['state', 'reduce', 'reducer 1', 'encrypt', 'persist']);
       expect(mockCtx.isLoading?.()).toBeFalse();
       expect(mockCtx.error?.()).toEqual(
         Object({
@@ -603,7 +601,10 @@ describe('Orcestrator: Vault', () => {
 
   describe('runStage failures nothing before', () => {
     it('should stop execution on a reduce event', async () => {
-      const behaviors = [makeBehavior('state'), makeBehavior('reduce')];
+      const behaviors = [
+        createInitializedTestBehavior('state', calls, Object({ state: true })),
+        createInitializedTestBehavior('reduce', calls, Object({ reduce: true }))
+      ];
 
       runInInjectionContext(injector, () => {
         dispatcher = new VaultOrchestrator<any>('cell key', behaviors, [reducer1], injector, ngVaultMonitor);
@@ -612,14 +613,17 @@ describe('Orcestrator: Vault', () => {
       dispatcher.dispatchSet(mockCtx);
       await flushMicrotasksZoneless();
 
-      expect(calls).toEqual(['state', 'reduce']);
+      expect(calls).toEqual(['state', 'reduce', 'reducer 1']);
       expect(mockCtx.isLoading?.()).toBeFalse();
       expect(mockCtx.error?.()).toBeNull();
-      expect(mockCtx.value?.()).toEqual(Object({ reduce: true }));
+      expect(mockCtx.value?.()).toEqual(3);
     });
 
     it('should stop execution on an encrypt event', async () => {
-      const behaviors = [makeBehavior('state'), makeBehavior('encrypt')];
+      const behaviors = [
+        createInitializedTestBehavior('state', calls, Object({ state: true })),
+        createInitializedTestBehavior('encrypt', calls)
+      ];
 
       runInInjectionContext(injector, () => {
         dispatcher = new VaultOrchestrator<any>('cell key', behaviors, [], injector, ngVaultMonitor);
@@ -635,7 +639,10 @@ describe('Orcestrator: Vault', () => {
     });
 
     it('should stop execution on a persist event', async () => {
-      const behaviors = [makeBehavior('state'), makeBehavior('persist')];
+      const behaviors = [
+        createInitializedTestBehavior('state', calls, Object({ state: true })),
+        createInitializedTestBehavior('persist', calls)
+      ];
 
       runInInjectionContext(injector, () => {
         dispatcher = new VaultOrchestrator<any>('cell key', behaviors, [], injector, ngVaultMonitor);

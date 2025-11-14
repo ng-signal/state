@@ -71,9 +71,9 @@ describe('Provider: Feature Cell Resource', () => {
       TestBed.tick();
 
       expect(vault.state.value()).toEqual([]);
+      expect(vault.state.hasValue()).toBeTrue();
       expect(vault.state.isLoading()).toBeTrue();
       expect(vault.state.error()).toEqual(jasmine.any(Function));
-      expect(vault.state.hasValue()).toBeTrue();
 
       mockBackend.expectOne('/data').flush([{ id: 1, name: 'Ada' }]);
       TestBed.tick();

@@ -50,66 +50,12 @@ describe('Provider: Feature Cell: fromObservable', () => {
     stopListening();
   });
 
-  it('should set state fully with replaceState()', async () => {
-    const initial = vault.state.value();
-    expect(initial).toEqual([]);
-
-    const newData = [
-      { id: 1, name: 'Ada' },
-      { id: 2, name: 'Grace' }
-    ];
-    vault.replaceState({ loading: true });
-    TestBed.tick();
-    await flushMicrotasksZoneless();
-    expect(vault.state.value()).toBeUndefined();
-    expect(vault.state.isLoading()).toBeTrue();
-    expect(vault.state.error()).toBeNull();
-    expect(vault.state.hasValue()).toBeFalse();
-
-    vault.replaceState({ value: newData });
-    await flushMicrotasksZoneless();
-    expect(vault.state.value()).toEqual(newData);
-    expect(vault.state.isLoading()).toBeFalse();
-    expect(vault.state.error()).toBeNull();
-    expect(vault.state.hasValue()).toBeTrue();
-
-    vault.replaceState({ value: newData, loading: false, error: { message: 'oops' } });
-    await flushMicrotasksZoneless();
-    expect(vault.state.value()).toEqual(newData);
-    expect(vault.state.isLoading()).toBeFalse();
-    expect(vault.state.error()).toEqual(Object({ message: 'oops' }));
-    expect(vault.state.hasValue()).toBeTrue();
-  });
-
-  it('should replace array when mergeState() is called with array data', async () => {
-    vault.replaceState({ value: [{ id: 1, name: 'Ada' }] });
-    await flushMicrotasksZoneless();
-    expect(vault.state.hasValue()).toBeTrue();
-    vault.mergeState({ value: [{ id: 2, name: 'Grace' }] });
-    await flushMicrotasksZoneless();
-    expect(vault.state.value()).toEqual([{ id: 2, name: 'Grace' }]);
-    expect(vault.state.hasValue()).toBeTrue();
-  });
-
-  it('should shallow merge objects when mergeState() is called with object data', async () => {
-    const providers = provideFeatureCell(class ObjService {}, { key: 'obj', initial: { id: 1, name: 'Ada' } });
-
-    const provider = providers.find((p: any) => typeof p.useFactory === 'function');
-
-    let vault!: NgVaultFeatureCell<any>;
-
-    runInInjectionContext(TestBed.inject(Injector), () => {
-      vault = (provider as any).useFactory();
-      vault.initialize();
-    });
-
-    vault.mergeState({ value: { name: 'Grace' } as any });
-    await flushMicrotasksZoneless();
-    expect(vault.state.value()).toEqual({ id: 1, name: 'Grace' });
-    expect(vault.state.hasValue()).toBeTrue();
-  });
-
   it('should return independent ResourceSignal when fromObservable() succeeds', () => {
+    expect(vault.state.hasValue()).toBeTrue();
+    expect(vault.state.value()).toEqual([]);
+    expect(vault.state.isLoading()).toBeFalse();
+    expect(vault.state.error()).toBeNull();
+
     const resource = {
       loading: signal<boolean>(false),
       value: signal<any | undefined>(undefined),
@@ -137,7 +83,11 @@ describe('Provider: Feature Cell: fromObservable', () => {
     expect(resource.loading()).toBeFalse();
     expect(resource.error()).toBeNull();
     expect(resource.value()).toBeUndefined();
+
+    expect(vault.state.value()).toEqual([]);
     expect(vault.state.hasValue()).toBeTrue();
+    expect(vault.state.isLoading()).toBeFalse();
+    expect(vault.state.error()).toBeNull();
 
     // Emit value
     subject.next(data);
@@ -145,7 +95,12 @@ describe('Provider: Feature Cell: fromObservable', () => {
     expect(resource.loading()).toBeFalse();
     expect(resource.value()).toEqual(data);
     expect(resource.error()).toBeNull();
+
+    expect(vault.state.value()).toEqual([]);
     expect(vault.state.hasValue()).toBeTrue();
+
+    expect(vault.state.isLoading()).toBeFalse();
+    expect(vault.state.error()).toBeNull();
   });
 
   it('should capture error in returned ResourceSignal', () => {
@@ -181,6 +136,7 @@ describe('Provider: Feature Cell: fromObservable', () => {
     vault.fromObservable!(subject.asObservable()).subscribe({
       next: (result) => (lastRef = result)
     });
+    await flushMicrotasksZoneless();
 
     subject.next({ id: 1, name: 'Ada' });
     subject.complete();

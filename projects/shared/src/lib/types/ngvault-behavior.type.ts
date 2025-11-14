@@ -8,7 +8,7 @@ export const NgVaultBehaviorTypes = {
   Insights: 'insights',
   State: 'state',
   Persist: 'persist',
-  Encrypt: 'encryption',
+  Encrypt: 'encrypt',
   Reduce: 'reduce',
   Events: 'events'
 } as const;

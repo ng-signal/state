@@ -4,6 +4,6 @@ import { NgVaultBehavior } from './ngvault-behavior.interface';
 export interface NgVaultPersistBehavior<T> extends NgVaultBehavior<T> {
   type: 'persist';
   persistState(current: T): Promise<void> | void;
-  removeState(): void;
+  clearState(): void;
   loadState(): T | undefined;
 }

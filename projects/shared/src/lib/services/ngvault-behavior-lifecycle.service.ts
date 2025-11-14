@@ -1,5 +1,6 @@
 // projects/core/src/lib/services/vault-behavior-lifecycle.service.ts
 import { Injector } from '@angular/core';
+import { validateNgVaultBehaviorKey } from '@ngvault/shared';
 import { PROTECTED_FEATURE_CELL_KEYS } from '../constants/protected-feature-cell-keys.constant';
 import { NgVaultBehaviorFactoryContext } from '../contexts/ngvault-behavior-factory.context';
 import { NgVaultBehaviorContext } from '../contexts/ngvault-behavior.context';
@@ -7,7 +8,6 @@ import { NgVaultBehaviorRunner } from '../interfaces/ngvault-behavior-runner.int
 import { NgVaultBehavior } from '../interfaces/ngvault-behavior.interface';
 import { NgVaultFeatureCell } from '../models/feature-cell.model';
 import { NgVaultBehaviorFactory } from '../types/ngvault-behavior-factory.type';
-import { validateNgVaultBehaviorKey } from '../utils/define-ngvault-behavior-key.util';
 
 class VaultBehaviorRunnerClass implements NgVaultBehaviorRunner {
   // eslint-disable-next-line
@@ -60,10 +60,17 @@ class VaultBehaviorRunnerClass implements NgVaultBehaviorRunner {
             return null;
           }
 
-          if (!(instance.key && validateNgVaultBehaviorKey(instance.key))) {
+          if (!instance.key) {
             isCritical = true;
             throw new Error(
               `[NgVault] Behavior missing key for type "${behaviorType}". Every behavior must define a unique "key".`
+            );
+          }
+
+          if (!validateNgVaultBehaviorKey(instance.key)) {
+            isCritical = true;
+            throw new Error(
+              `[NgVault] Behavior key "${instance.key}" not valid format for "${behaviorType}" behavior.`
             );
           }
 

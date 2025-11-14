@@ -3,7 +3,7 @@ import { Injector, provideZonelessChangeDetection, runInInjectionContext } from 
 import { TestBed } from '@angular/core/testing';
 import { NgVaultEventBus } from '@ngvault/dev-tools';
 import {
-  createTestBehaviorFactory,
+  createCustomTestBehavior,
   createTestEventListener,
   provideVaultTesting,
   resetTestBehaviorFactoryId
@@ -14,7 +14,7 @@ import { NgVaultBehaviorLifecycleService } from './ngvault-behavior-lifecycle.se
 
 describe('Service: VaultBehaviorLifecycle', () => {
   function createParenttBehaviorFactory(): any {
-    const coreBehavior = createTestBehaviorFactory(() => {
+    const coreBehavior = createCustomTestBehavior(() => {
       return {};
     }, 'core');
 
@@ -91,24 +91,24 @@ describe('Service: VaultBehaviorLifecycle', () => {
       crypto.randomUUID = undefined as any;
 
       const parentBehavior = createParenttBehaviorFactory();
-      const devTools = createTestBehaviorFactory(() => {
+      const devTools = createCustomTestBehavior(() => {
         return {};
       }, 'dev-tools');
-      const events = createTestBehaviorFactory(() => {
+      const events = createCustomTestBehavior(() => {
         return {};
       }, 'events');
-      const state = createTestBehaviorFactory(() => {
+      const state = createCustomTestBehavior(() => {
         return {};
       }, 'state');
-      const state2 = createTestBehaviorFactory(() => {
+      const state2 = createCustomTestBehavior(() => {
         return {};
       }, 'state');
-      const persistence = createTestBehaviorFactory(() => {
+      const persistence = createCustomTestBehavior(() => {
         return {};
       }, NgVaultBehaviorTypes.Persist);
-      const encryption = createTestBehaviorFactory(() => {
+      const encryption = createCustomTestBehavior(() => {
         return {};
-      }, 'encryption');
+      }, 'encrypt');
 
       runInInjectionContext(injector, () => {
         vaultRunner = NgVaultBehaviorLifecycleService('cell key');
@@ -133,7 +133,7 @@ describe('Service: VaultBehaviorLifecycle', () => {
         Object({ type: 'state' }),
         Object({ type: 'state' }),
         Object({ type: NgVaultBehaviorTypes.Persist }),
-        Object({ type: 'encryption' })
+        Object({ type: 'encrypt' })
       ]);
       expect(emitted).toEqual([]);
     });
@@ -151,7 +151,7 @@ describe('Service: VaultBehaviorLifecycle', () => {
     });
 
     it('handles factory returning non-object gracefully', () => {
-      const badBehaviorFactory = createTestBehaviorFactory(() => undefined, 'state');
+      const badBehaviorFactory = createCustomTestBehavior(() => undefined, 'state');
 
       vaultRunner.initializeBehaviors(injector, [badBehaviorFactory]);
 
@@ -161,7 +161,7 @@ describe('Service: VaultBehaviorLifecycle', () => {
     });
 
     it('throws an error if a factory does not have a type', () => {
-      const badBehaviorFactory = createTestBehaviorFactory(() => undefined, undefined as any);
+      const badBehaviorFactory = createCustomTestBehavior(() => undefined, undefined as any);
 
       expect(() => vaultRunner.initializeBehaviors(injector, [badBehaviorFactory])).toThrowError(
         '[NgVault] Behavior factory missing type metadata.'
@@ -171,7 +171,7 @@ describe('Service: VaultBehaviorLifecycle', () => {
     });
 
     it('throws an error if a critical factory returns a non-object', () => {
-      const badBehaviorFactory = createTestBehaviorFactory(() => undefined, 'state', 'key', true);
+      const badBehaviorFactory = createCustomTestBehavior(() => undefined, 'state', 'key', true);
 
       expect(() => vaultRunner.initializeBehaviors(injector, [badBehaviorFactory])).toThrowError(
         '[NgVault] Behavior did not return an object'
@@ -179,10 +179,10 @@ describe('Service: VaultBehaviorLifecycle', () => {
     });
 
     it('continues execution when a factory throws', () => {
-      const throwingFactory = createTestBehaviorFactory(() => {
+      const throwingFactory = createCustomTestBehavior(() => {
         throw new Error('boom');
       }, 'state');
-      const workingFactory = createTestBehaviorFactory(
+      const workingFactory = createCustomTestBehavior(
         () => ({
           onInit() {},
           onDestroy() {}
@@ -206,9 +206,9 @@ describe('Service: VaultBehaviorLifecycle', () => {
     });
 
     it('filters null and undefined factories but retains valid ones', () => {
-      const nullFactory = createTestBehaviorFactory(() => null as any, 'state');
-      const undefinedFactory = createTestBehaviorFactory(() => undefined as any, 'state');
-      const validFactory = createTestBehaviorFactory(
+      const nullFactory = createCustomTestBehavior(() => null as any, 'state');
+      const undefinedFactory = createCustomTestBehavior(() => undefined as any, 'state');
+      const validFactory = createCustomTestBehavior(
         () => ({
           onInit() {},
           onDestroy() {}
@@ -227,9 +227,9 @@ describe('Service: VaultBehaviorLifecycle', () => {
     });
 
     it('throws an error if a critical factory returns a non-object', () => {
-      const nullFactory = createTestBehaviorFactory(() => null as any, 'state');
-      const undefinedFactory = createTestBehaviorFactory(() => undefined as any, 'state', 'key', true);
-      const validFactory = createTestBehaviorFactory(
+      const nullFactory = createCustomTestBehavior(() => null as any, 'state');
+      const undefinedFactory = createCustomTestBehavior(() => undefined as any, 'state', 'key', true);
+      const validFactory = createCustomTestBehavior(
         () => ({
           onInit() {},
           onDestroy() {}
@@ -243,7 +243,7 @@ describe('Service: VaultBehaviorLifecycle', () => {
     });
 
     it('throws an error if a behavior has no key', () => {
-      const childBehavior = createTestBehaviorFactory(() => ({}), 'state', 'no-gen');
+      const childBehavior = createCustomTestBehavior(() => ({}), 'state', 'no-gen');
 
       expect(() => vaultRunner.initializeBehaviors(injector, [childBehavior])).toThrowError(
         '[NgVault] Behavior missing key for type "state". Every behavior must define a unique "key".'
@@ -253,18 +253,18 @@ describe('Service: VaultBehaviorLifecycle', () => {
     });
 
     it('throws an error if a behavior has a bad key', () => {
-      const childBehavior = createTestBehaviorFactory(() => ({}), 'state', 'bad-gen');
+      const childBehavior = createCustomTestBehavior(() => ({}), 'state', 'bad-gen');
 
       expect(() => vaultRunner.initializeBehaviors(injector, [childBehavior])).toThrowError(
-        '[NgVault] Behavior missing key for type "state". Every behavior must define a unique "key".'
+        '[NgVault] Behavior key "bad-gen" not valid format for "state" behavior.'
       );
 
       expect(warnSpy).not.toHaveBeenCalled();
     });
 
     it('throws an error if a behavior has a duplicate key', () => {
-      const childBehavior = createTestBehaviorFactory(() => ({}), 'state', 'duplicate');
-      const childBehaviorDup = createTestBehaviorFactory(() => ({}), 'state', 'duplicate');
+      const childBehavior = createCustomTestBehavior(() => ({}), 'state', 'duplicate');
+      const childBehaviorDup = createCustomTestBehavior(() => ({}), 'state', 'duplicate');
 
       vaultRunner.initializeBehaviors(injector, [childBehavior, childBehaviorDup]);
 
@@ -319,7 +319,7 @@ describe('Service: VaultBehaviorLifecycle', () => {
     });
 
     it('should attach new methods from extendCellAPI to the FeatureCell', () => {
-      const extendBehavior = createTestBehaviorFactory(
+      const extendBehavior = createCustomTestBehavior(
         () => ({
           extendCellAPI: () => ({
             customMethod: (key: string, ctx: any, ...args: any) => `${key}:${ctx}:${args.toString()}`
@@ -338,7 +338,7 @@ describe('Service: VaultBehaviorLifecycle', () => {
     });
 
     it('should throw if a behavior tries to overwrite a protected key', () => {
-      const dangerousBehavior = createTestBehaviorFactory(
+      const dangerousBehavior = createCustomTestBehavior(
         () => ({
           key: 'NgVault::Testing::Overwrite',
           extendCellAPI: () => ({
@@ -356,7 +356,7 @@ describe('Service: VaultBehaviorLifecycle', () => {
     });
 
     it('should warn and skip redefining an existing method', () => {
-      const redefineBehavior = createTestBehaviorFactory(
+      const redefineBehavior = createCustomTestBehavior(
         () => ({
           key: 'NgVault::Testing::Redefine',
           extendCellAPI: () => ({
@@ -374,7 +374,7 @@ describe('Service: VaultBehaviorLifecycle', () => {
     });
 
     it('should skip if extendCellAPI returns null or non-object', () => {
-      const noOpBehavior = createTestBehaviorFactory(
+      const noOpBehavior = createCustomTestBehavior(
         () => ({
           key: 'NgVault::Testing::NoOp',
           extendCellAPI: () => null
@@ -390,7 +390,7 @@ describe('Service: VaultBehaviorLifecycle', () => {
     });
 
     it('should define new methods as non-enumerable and read-only', () => {
-      const defineBehavior = createTestBehaviorFactory(
+      const defineBehavior = createCustomTestBehavior(
         () => ({
           extendCellAPI: () => ({
             extra: () => 'immutable'
@@ -413,7 +413,7 @@ describe('Service: VaultBehaviorLifecycle', () => {
         existingCustom: jasmine.createSpy('existingCustom').and.returnValue('original')
       } as any;
 
-      const redefineBehavior = createTestBehaviorFactory(
+      const redefineBehavior = createCustomTestBehavior(
         () => ({
           key: 'NgVault::Testing::Redefine',
           extendCellAPI: () => ({
@@ -438,7 +438,7 @@ describe('Service: VaultBehaviorLifecycle', () => {
       const consoleSpy = spyOn(console, 'error');
 
       // Mock behavior that throws when called
-      const throwingBehavior = createTestBehaviorFactory(
+      const throwingBehavior = createCustomTestBehavior(
         () => ({
           extendCellAPI: () => ({
             boomMethod: () => {
@@ -472,7 +472,7 @@ describe('Service: VaultBehaviorLifecycle', () => {
 
     it('should throw when multiple behaviors define the same method name without allowOverride', () => {
       // Behavior A adds two custom methods
-      const behaviorA = createTestBehaviorFactory(
+      const behaviorA = createCustomTestBehavior(
         () => ({
           extendCellAPI: () => ({
             methodA: (key: string) => `A:${key}`,
@@ -483,7 +483,7 @@ describe('Service: VaultBehaviorLifecycle', () => {
       );
 
       // Behavior B tries to redefine `shared` without allowOverride
-      const behaviorB = createTestBehaviorFactory(
+      const behaviorB = createCustomTestBehavior(
         () => ({
           extendCellAPI: () => ({
             methodB: (key: string) => `B:${key}`,
@@ -504,7 +504,7 @@ describe('Service: VaultBehaviorLifecycle', () => {
 
     it('should throw if a behavior tries to overwrite a protected FeatureCell method', () => {
       // Behavior attempts to overwrite a protected method ("reset")
-      const protectedBehavior = createTestBehaviorFactory(
+      const protectedBehavior = createCustomTestBehavior(
         () => ({
           extendCellAPI: () => ({
             reset: () => 'hacked'
@@ -531,14 +531,14 @@ describe('Service: VaultBehaviorLifecycle', () => {
     });
 
     it('should handle behaviors with no or empty extensions gracefully', () => {
-      const noExtensionBehavior = createTestBehaviorFactory(
+      const noExtensionBehavior = createCustomTestBehavior(
         () => ({
           extendCellAPI: () => undefined
         }),
         'state'
       );
 
-      const emptyExtensionBehavior = createTestBehaviorFactory(
+      const emptyExtensionBehavior = createCustomTestBehavior(
         () => ({
           extendCellAPI: () => ({})
         }),
@@ -559,7 +559,7 @@ describe('Service: VaultBehaviorLifecycle', () => {
     });
 
     it('should compose multiple behavior extensions that access ctx and key', () => {
-      const behaviorA = createTestBehaviorFactory(
+      const behaviorA = createCustomTestBehavior(
         () => ({
           extendCellAPI: () => ({
             logKey: (key: string, ctx: any) => `A:${key}:${ctx.id}`
@@ -568,7 +568,7 @@ describe('Service: VaultBehaviorLifecycle', () => {
         'state'
       );
 
-      const behaviorB = createTestBehaviorFactory(
+      const behaviorB = createCustomTestBehavior(
         () => ({
           extendCellAPI: () => ({
             logValue: (key: string, ctx: any, val: string) => `B:${key}:${ctx.id}:${val}`
@@ -602,7 +602,7 @@ describe('Service: VaultBehaviorLifecycle', () => {
     });
 
     it('should throw if two behaviors define the same method name without allowOverride', () => {
-      const behaviorA = createTestBehaviorFactory(
+      const behaviorA = createCustomTestBehavior(
         () => ({
           extendCellAPI: () => ({
             shared: () => 'A'
@@ -611,7 +611,7 @@ describe('Service: VaultBehaviorLifecycle', () => {
         'state'
       );
 
-      const behaviorB = createTestBehaviorFactory(
+      const behaviorB = createCustomTestBehavior(
         () => ({
           extendCellAPI: () => ({
             shared: () => 'B'
@@ -630,7 +630,7 @@ describe('Service: VaultBehaviorLifecycle', () => {
     });
 
     it('should allow overriding when allowOverride explicitly includes the method name', () => {
-      const behaviorA = createTestBehaviorFactory(
+      const behaviorA = createCustomTestBehavior(
         () => ({
           extendCellAPI: () => ({
             shared: () => 'A'
@@ -639,7 +639,7 @@ describe('Service: VaultBehaviorLifecycle', () => {
         'state'
       );
 
-      const behaviorB = createTestBehaviorFactory(
+      const behaviorB = createCustomTestBehavior(
         () => ({
           extendCellAPI: () => ({
             shared: () => 'B'

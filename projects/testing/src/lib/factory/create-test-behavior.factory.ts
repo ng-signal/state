@@ -1,74 +1,80 @@
-import { defineNgVaultBehaviorKey } from '@ngvault/shared';
+import { defineNgVaultBehaviorKey, NgVaultBehaviorTypes } from '@ngvault/shared';
 
-let counter = 0;
+/**
+ * Creates a valid test behavior for a specific NgVault behavior type.
+ * Each type gets only the methods the behavior pipeline expects.
+ */
+export function createTestBehavior(type: NgVaultBehaviorTypes, emitted: any[], returnValue: any = undefined) {
+  const factory = (): any => {
+    const key = defineNgVaultBehaviorKey('Test', type);
 
-export function createTestBehaviorFactory(
-  factory: (...args: any[]) => any,
-  type?: string,
-  key?: string,
-  critical: boolean = false,
-  autoFix = true
-): any {
-  const wrappedFactory = (context: any) => {
-    const behavior = factory(context);
+    switch (type) {
+      case NgVaultBehaviorTypes.State:
+        return {
+          type,
+          key,
+          computeState: async () => {
+            emitted.push('state');
+            return returnValue;
+          }
+        };
 
-    if (!behavior || typeof behavior !== 'object') {
-      return behavior; // Let the runner handle the error path
-    }
-    const behaviorId = context.behaviorId;
+      case NgVaultBehaviorTypes.Reduce:
+        return {
+          type,
+          key,
+          applyReducer: (current: any, fn: any) => {
+            emitted.push('reduce');
+            if (typeof fn === 'function') {
+              return fn(current);
+            }
 
-    Object.defineProperty(behavior, 'behaviorId', {
-      value: behaviorId,
-      enumerable: false,
+            return 'noop';
+          }
+        };
 
-      writable: true
-    });
+      case NgVaultBehaviorTypes.Encrypt:
+        return {
+          type,
+          key,
+          encryptState: async () => {
+            emitted.push('encrypt');
+            return returnValue;
+          }
+        };
 
-    if (key !== 'no-gen') {
-      let value = defineNgVaultBehaviorKey('testing', `id-${counter++}`);
-
-      if (key === 'bad-gen') {
-        value = key;
-      } else if (key === 'duplicate') {
-        value = defineNgVaultBehaviorKey('testing', key);
-      }
-
-      Object.defineProperty(behavior, 'key', {
-        value,
-        enumerable: false,
-        writable: true
-      });
-    }
-
-    if (type) {
-      Object.defineProperty(behavior, 'type', {
-        value: type,
-        enumerable: true,
-        writable: true
-      });
-    }
-
-    if (typeof behavior.onInit !== 'function') {
-      if (autoFix) {
-        Object.defineProperty(behavior, 'onInit', {
-          value: (key: string, service: string, ctx: any) => {
-            // No-op for tests — ensures lifecycle consistency
-            // console.debug(`[NgVault::Testing] Auto-added onInit() for ${behavior.key ?? '(no-key)'}`);
+      case NgVaultBehaviorTypes.Persist:
+        return {
+          type,
+          key,
+          persistState: () => {
+            emitted.push('persist');
           },
-          enumerable: false,
-          writable: false
-        });
-      }
+          clearState: () => {
+            emitted.push('clear');
+          },
+          loadState: () => {
+            emitted.push('load');
+            return returnValue;
+          }
+        };
+
+      default:
+        throw new Error(`Unsupported test behavior type: ${type}`);
     }
-    return behavior;
   };
 
-  (wrappedFactory as any).type = type;
-  (wrappedFactory as any).critical = critical;
+  factory.type = type;
+  factory.critical = false;
 
-  return wrappedFactory as any;
+  return factory as any;
 }
 
-export const resetTestBehaviorFactoryId = () => {
-  counter = 0;
-};
+export function createInitializedTestBehavior(
+  type: NgVaultBehaviorTypes,
+  emitted: any[],
+  returnValue: any = undefined
+): any {
+  const behavior = createTestBehavior(type, emitted, returnValue);
+  return behavior() as any;
+}

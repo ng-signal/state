@@ -6,6 +6,7 @@ import { effect, inject, Injector, runInInjectionContext } from '@angular/core';
 import {
   NgVaultBehavior,
   NgVaultBehaviorContext,
+  NgVaultBehaviorTypes,
   NgVaultDataType,
   NgVaultEncryptBehavior,
   NgVaultPersistBehavior,
@@ -13,6 +14,7 @@ import {
   NgVaultReducerFunction,
   NgVaultStateBehavior,
   NgVaultStateInputType,
+  ngVaultWarn,
   NrVaultStateType
 } from '@ngvault/shared';
 import { NgVaultMonitor } from '../monitor/ngvault-monitor.service';
@@ -65,9 +67,6 @@ export class VaultOrchestrator<T> {
     return stateData;
   }
 
-  // ──────────────────────────────
-  // dispatchSet with proper narrowing
-  // ──────────────────────────────
   dispatchSet(ctx: NgVaultBehaviorContext<T>): void {
     this.#queue.enqueue(async () => {
       ctx.operation = 'replace';
@@ -82,6 +81,7 @@ export class VaultOrchestrator<T> {
         const finalState = await this.#finishPipeline(ctx, stateResult);
 
         this.#ngVaultMonitor.endReplace(this.cellKey, 'vault-orchestrator', ctx);
+
         return finalState;
       }, ctx);
     });
@@ -216,7 +216,7 @@ export class VaultOrchestrator<T> {
             }
             break;
 
-          case 'encrypt':
+          case NgVaultBehaviorTypes.Encrypt:
             if (typeof (behavior as NgVaultEncryptBehavior<T>).encryptState === 'function') {
               next = await (behavior as NgVaultEncryptBehavior<T>).encryptState(ctx, current!);
             }
@@ -224,7 +224,9 @@ export class VaultOrchestrator<T> {
 
           case 'persist':
             if (typeof (behavior as NgVaultPersistBehavior<T>).persistState === 'function') {
+              this.#ngVaultMonitor.startPersist(this.cellKey, behavior.key, ctx);
               await (behavior as NgVaultPersistBehavior<T>).persistState(current!);
+              this.#ngVaultMonitor.endPersist(this.cellKey, behavior.key, ctx);
             }
             break;
         }
@@ -239,5 +241,42 @@ export class VaultOrchestrator<T> {
     }
 
     return current;
+  }
+
+  public clearPersistedState(ctx: NgVaultBehaviorContext<T>): void {
+    const persistBehaviors = this.behaviors.filter((b) => b.type === NgVaultBehaviorTypes.Persist);
+
+    for (const behavior of persistBehaviors) {
+      try {
+        this.#ngVaultMonitor.startClearPersist(this.cellKey, behavior.key, ctx);
+        (behavior as NgVaultPersistBehavior<T>).clearState();
+        this.#ngVaultMonitor.endClearPersist(this.cellKey, behavior.key, ctx);
+        // eslint-disable-next-line
+      } catch (err: any) {
+        this.#ngVaultMonitor.error(this.cellKey, behavior.key, ctx, err);
+        ngVaultWarn(`"[NgVault] persist.clearState()" for ${behavior.key} failed with ${err.message}`);
+      }
+    }
+  }
+
+  public loadPersistedState(ctx: NgVaultBehaviorContext<T>): T | undefined {
+    const persistBehaviors = this.behaviors.filter(
+      (b) => b.type === NgVaultBehaviorTypes.Persist
+    ) as NgVaultPersistBehavior<T>[];
+
+    for (const behavior of persistBehaviors) {
+      try {
+        this.#ngVaultMonitor.startLoadPersist(this.cellKey, behavior.key, ctx);
+        const loaded = behavior.loadState?.();
+        this.#ngVaultMonitor.endLoadPersist(this.cellKey, behavior.key, ctx);
+        if (loaded !== undefined) return loaded;
+        // eslint-disable-next-line
+      } catch (err: any) {
+        this.#ngVaultMonitor.error(this.cellKey, behavior.key, ctx, err);
+        ngVaultWarn(`"[NgVault] persist.loadState()" for ${behavior.key} failed with ${err.message}`);
+      }
+    }
+
+    return undefined;
   }
 }

@@ -89,23 +89,23 @@ describe('SessionStoragePersistBehavior', () => {
     });
   });
 
-  describe('removeState', () => {
-    it('should remove storage key on removeState()', () => {
-      behavior.removeState();
+  describe('clearState', () => {
+    it('should clear storage key on clearState()', () => {
+      behavior.clearState();
 
       const expectedKey = defineNgVaultPersistKey('sessionStorage', 'userCell');
       expect(sessionStorage.removeItem).toHaveBeenCalledTimes(1);
       expect(sessionStorage.removeItem).toHaveBeenCalledWith(expectedKey);
     });
 
-    it('should catch and swallow errors during removeState()', () => {
+    it('should catch and swallow errors during clearState()', () => {
       // force an exception
       sessionStorage.removeItem = () => {
         throw new Error('storage permission denied');
       };
       spyOn(sessionStorage, 'removeItem').and.callThrough();
 
-      expect(() => behavior.removeState()).not.toThrow();
+      expect(() => behavior.clearState()).not.toThrow();
     });
   });
 

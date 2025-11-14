@@ -85,6 +85,12 @@ describe('Service: Vault Monitor', () => {
       vaultMonitor.endDestroy?.('vault1', 'end destroy', ctx);
       vaultMonitor.startInitialized?.('vault1', 'start initialized', ctx);
       vaultMonitor.endInitialized?.('vault1', 'end initialized', ctx);
+      vaultMonitor.startPersist?.('vault1', 'start persist', ctx);
+      vaultMonitor.endPersist?.('vault1', 'end persist', ctx);
+      vaultMonitor.startClearPersist?.('vault1', 'start clear persist', ctx);
+      vaultMonitor.endClearPersist?.('vault1', 'end clear persist', ctx);
+      vaultMonitor.startLoadPersist?.('vault1', 'start load persist', ctx);
+      vaultMonitor.endLoadPersist?.('vault1', 'end load persist', ctx);
 
       expect(emitted).toEqual([
         Object({
@@ -225,6 +231,54 @@ describe('Service: Vault Monitor', () => {
           cell: 'vault1',
           behaviorKey: 'end initialized',
           type: 'lifecycle:end:initialized',
+          timestamp: 'timestamp-removed',
+          state: Object({ isLoading: true, value: 'hello', error: null, hasValue: false })
+        }),
+        Object({
+          id: 'id-removed',
+          cell: 'vault1',
+          behaviorKey: 'start persist',
+          type: 'stage:start:persist',
+          timestamp: 'timestamp-removed',
+          state: Object({ isLoading: true, value: 'hello', error: null, hasValue: false })
+        }),
+        Object({
+          id: 'id-removed',
+          cell: 'vault1',
+          behaviorKey: 'end persist',
+          type: 'stage:end:persist',
+          timestamp: 'timestamp-removed',
+          state: Object({ isLoading: true, value: 'hello', error: null, hasValue: false })
+        }),
+        Object({
+          id: 'id-removed',
+          cell: 'vault1',
+          behaviorKey: 'start clear persist',
+          type: 'stage:start:clearpersist',
+          timestamp: 'timestamp-removed',
+          state: Object({ isLoading: true, value: 'hello', error: null, hasValue: false })
+        }),
+        Object({
+          id: 'id-removed',
+          cell: 'vault1',
+          behaviorKey: 'end clear persist',
+          type: 'stage:end:clearpersist',
+          timestamp: 'timestamp-removed',
+          state: Object({ isLoading: true, value: 'hello', error: null, hasValue: false })
+        }),
+        Object({
+          id: 'id-removed',
+          cell: 'vault1',
+          behaviorKey: 'start load persist',
+          type: 'stage:start:loadpersist',
+          timestamp: 'timestamp-removed',
+          state: Object({ isLoading: true, value: 'hello', error: null, hasValue: false })
+        }),
+        Object({
+          id: 'id-removed',
+          cell: 'vault1',
+          behaviorKey: 'end load persist',
+          type: 'stage:end:loadpersist',
           timestamp: 'timestamp-removed',
           state: Object({ isLoading: true, value: 'hello', error: null, hasValue: false })
         })

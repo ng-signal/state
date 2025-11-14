@@ -44,7 +44,7 @@ describe('Injector: Vault', () => {
 
     // Should be a valid vault
     expect(service.vault).toBeTruthy();
-    expect(service.vault.state.value()?.count).toBe(1);
+    expect(service.vault.state.value()).toBeUndefined();
   });
 
   it('should throw an error when called without a @FeatureCell-decorated class', () => {

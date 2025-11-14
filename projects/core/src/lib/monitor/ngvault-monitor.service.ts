@@ -104,6 +104,30 @@ export class NgVaultMonitor {
     this.#emitEvent(cell, behaviorKey, 'endInitialized', ctx.state);
   }
 
+  startPersist<T>(cell: string, behaviorKey: string, ctx: Readonly<NgVaultBehaviorContext<T>>) {
+    this.#emitEvent(cell, behaviorKey, 'startPersist', ctx.state);
+  }
+
+  endPersist<T>(cell: string, behaviorKey: string, ctx: Readonly<NgVaultBehaviorContext<T>>) {
+    this.#emitEvent(cell, behaviorKey, 'endPersist', ctx.state);
+  }
+
+  startClearPersist<T>(cell: string, behaviorKey: string, ctx: Readonly<NgVaultBehaviorContext<T>>) {
+    this.#emitEvent(cell, behaviorKey, 'startClearPersist', ctx.state);
+  }
+
+  endClearPersist<T>(cell: string, behaviorKey: string, ctx: Readonly<NgVaultBehaviorContext<T>>) {
+    this.#emitEvent(cell, behaviorKey, 'endClearPersist', ctx.state);
+  }
+
+  startLoadPersist<T>(cell: string, behaviorKey: string, ctx: Readonly<NgVaultBehaviorContext<T>>) {
+    this.#emitEvent(cell, behaviorKey, 'startLoadPersist', ctx.state);
+  }
+
+  endLoadPersist<T>(cell: string, behaviorKey: string, ctx: Readonly<NgVaultBehaviorContext<T>>) {
+    this.#emitEvent(cell, behaviorKey, 'endLoadPersist', ctx.state);
+  }
+
   registerCell(cellKey: string, insight?: NgVaultInsightDefinition): void {
     const hasInsight = !!insight;
 

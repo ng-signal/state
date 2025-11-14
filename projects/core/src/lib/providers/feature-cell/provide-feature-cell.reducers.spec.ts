@@ -13,7 +13,7 @@ interface TestModel {
   active: boolean;
 }
 
-describe('Provider: Feature Cell: fromObservable', () => {
+describe('Provider: Feature Cell: reducers', () => {
   let vault: NgVaultFeatureCell<TestModel[] | TestModel>;
   const calls: any = [];
   const emitted: any[] = [];

@@ -36,7 +36,7 @@ class SessionStoragePersistBehavior<T> implements NgVaultPersistBehavior<T> {
     }
   }
 
-  removeState(): void {
+  clearState(): void {
     try {
       sessionStorage.removeItem(this.#storageKey);
     } catch (err) {
