@@ -12,7 +12,9 @@ import { UserService } from '../../services/user-base.service';
 })
 export class UserCellManualService extends UserService<UserModel[]> {
   constructor() {
-    super(injectVault<UserModel[]>(UserCellManualService));
+    const vault = injectVault<UserModel[]>(UserCellManualService);
+    vault.initialize();
+    super(vault);
   }
 
   override loadUsers(): void {

@@ -14,6 +14,7 @@ export class UserCellNoCacheService extends UserService<UserModel[]> {
 
   constructor() {
     const vault = injectVault<UserModel[]>(UserCellNoCacheService);
+    vault.initialize();
     super(vault);
   }
 

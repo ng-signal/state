@@ -11,7 +11,9 @@ import { flushMicrotasksZoneless, provideVaultTesting } from '@ngvault/testing';
 @FeatureCell<UserModel[]>('userManual')
 class TestUserService extends UserService<UserModel[]> {
   constructor() {
-    super(injectVault<UserModel[]>(TestUserService));
+    const vault = injectVault<UserModel[]>(TestUserService);
+    vault.initialize();
+    super(vault);
   }
 
   override loadUsers(): void {
