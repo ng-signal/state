@@ -4,11 +4,11 @@
  * Runtime-safe enum-like object.
  * No JS enum bloat and works with tree-shaking.
  */
-export const NgVaultBehaviorType = {
+export const NgVaultBehaviorTypes = {
   Insights: 'insights',
   State: 'state',
-  Persistence: 'persistence',
-  Encryption: 'encryption',
+  Persist: 'persist',
+  Encrypt: 'encryption',
   Reduce: 'reduce',
   Events: 'events'
 } as const;
@@ -16,17 +16,17 @@ export const NgVaultBehaviorType = {
 /**
  * Literal union type inferred from the const object.
  */
-export type NgVaultBehaviorType = (typeof NgVaultBehaviorType)[keyof typeof NgVaultBehaviorType];
+export type NgVaultBehaviorTypes = (typeof NgVaultBehaviorTypes)[keyof typeof NgVaultBehaviorTypes];
 
 /**
  * Optional ordering for orchestration
  * (this uses the *values* of the enum-like object)
  */
-export const NgVaultBehaviorTypeOrder: readonly NgVaultBehaviorType[] = [
-  NgVaultBehaviorType.Insights,
-  NgVaultBehaviorType.State,
-  NgVaultBehaviorType.Persistence,
-  NgVaultBehaviorType.Encryption,
-  NgVaultBehaviorType.Reduce,
-  NgVaultBehaviorType.Events
+export const NgVaultBehaviorTypeOrder: readonly NgVaultBehaviorTypes[] = [
+  NgVaultBehaviorTypes.Insights,
+  NgVaultBehaviorTypes.State,
+  NgVaultBehaviorTypes.Persist,
+  NgVaultBehaviorTypes.Encrypt,
+  NgVaultBehaviorTypes.Reduce,
+  NgVaultBehaviorTypes.Events
 ] as const;

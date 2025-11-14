@@ -5,14 +5,14 @@ import {
   NgVaultBehaviorContext,
   NgVaultBehaviorFactory,
   NgVaultBehaviorFactoryContext,
-  NgVaultBehaviorType,
+  NgVaultBehaviorTypes,
   NgVaultDataType,
   NgVaultStateBehavior
 } from '@ngvault/shared';
 import { isHttpResourceRef } from '../../utils/is-http-resource.util';
 
 class CoreStateBehavior<T> implements NgVaultStateBehavior<T> {
-  readonly type = NgVaultBehaviorType.State;
+  readonly type = NgVaultBehaviorTypes.State;
   readonly critical = true;
   readonly key = defineNgVaultBehaviorKey('Core', 'State');
 
@@ -42,5 +42,5 @@ export const withCoreStateBehavior = ((context: NgVaultBehaviorFactoryContext): 
   return new CoreStateBehavior(context.injector);
 }) as NgVaultBehaviorFactory;
 
-withCoreStateBehavior.type = NgVaultBehaviorType.State;
+withCoreStateBehavior.type = NgVaultBehaviorTypes.State;
 withCoreStateBehavior.critical = true;

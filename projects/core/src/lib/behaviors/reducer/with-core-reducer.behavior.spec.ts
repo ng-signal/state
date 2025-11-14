@@ -3,7 +3,7 @@ import { TestBed } from '@angular/core/testing';
 import {
   defineNgVaultBehaviorKey,
   NgVaultBehaviorFactoryContext,
-  NgVaultBehaviorType,
+  NgVaultBehaviorTypes,
   NgVaultReducerFunction
 } from '@ngvault/shared';
 import { provideVaultTesting } from '@ngvault/testing';
@@ -22,7 +22,7 @@ describe('Behavior: CoreReducerBehavior', () => {
 
     runInInjectionContext(injector, () => {
       behavior = withCoreReducerBehavior({
-        type: NgVaultBehaviorType.Reduce,
+        type: NgVaultBehaviorTypes.Reduce,
         injector
       });
     });
@@ -40,7 +40,7 @@ describe('Behavior: CoreReducerBehavior', () => {
     const behavior = withCoreReducerBehavior(fakeContext);
 
     expect(behavior).toBeTruthy();
-    expect(behavior.type).toBe(NgVaultBehaviorType.Reduce);
+    expect(behavior.type).toBe(NgVaultBehaviorTypes.Reduce);
     expect(behavior.key).toBe(defineNgVaultBehaviorKey('Core', 'Reducer'));
   });
 

@@ -2,14 +2,14 @@ import {
   defineNgVaultBehaviorKey,
   NgVaultBehaviorFactory,
   NgVaultBehaviorFactoryContext,
-  NgVaultBehaviorType,
+  NgVaultBehaviorTypes,
   NgVaultReduceBehavior,
   NgVaultReducerFunction
 } from '@ngvault/shared';
 
 class CoreReducerBehavior<T> implements NgVaultReduceBehavior<T> {
   readonly critical = true;
-  readonly type = NgVaultBehaviorType.Reduce;
+  readonly type = NgVaultBehaviorTypes.Reduce;
   readonly key = defineNgVaultBehaviorKey('Core', 'Reducer');
 
   constructor(private readonly injector: NgVaultBehaviorFactoryContext['injector']) {}
@@ -24,5 +24,5 @@ export const withCoreReducerBehavior = ((context: NgVaultBehaviorFactoryContext)
   return new CoreReducerBehavior(context.injector);
 }) as unknown as NgVaultBehaviorFactory;
 
-withCoreReducerBehavior.type = NgVaultBehaviorType.Reduce;
+withCoreReducerBehavior.type = NgVaultBehaviorTypes.Reduce;
 withCoreReducerBehavior.critical = true;

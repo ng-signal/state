@@ -3,7 +3,7 @@ import { HttpTestingController, provideHttpClientTesting } from '@angular/common
 import { Injector, provideZonelessChangeDetection, runInInjectionContext, signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { NgVaultEventBus } from '@ngvault/dev-tools';
-import { NgVaultBehaviorContext, NgVaultBehaviorType } from '@ngvault/shared';
+import { NgVaultBehaviorContext, NgVaultBehaviorTypes } from '@ngvault/shared';
 import { createTestEventListener, flushMicrotasksZoneless, provideVaultTesting } from '@ngvault/testing';
 import { NgVaultMonitor } from '../monitor/ngvault-monitor.service';
 import { VaultOrchestrator } from './ngvault.orchestrator';
@@ -56,7 +56,7 @@ describe('Orcestrator: Vault', () => {
 
   function makeBehavior(type: string, returnValue?: any): any {
     return {
-      type: type as NgVaultBehaviorType,
+      type: type as NgVaultBehaviorTypes,
       key: `${type}-id`,
       computeState: async () => {
         calls.push(type);
@@ -91,7 +91,7 @@ describe('Orcestrator: Vault', () => {
       },
       makeBehavior('encrypt'),
       makeBehavior('persist'),
-      makeBehavior(NgVaultBehaviorType.Insights)
+      makeBehavior(NgVaultBehaviorTypes.Insights)
     ];
 
     // Create orchestrator

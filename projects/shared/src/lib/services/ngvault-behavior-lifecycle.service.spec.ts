@@ -9,6 +9,7 @@ import {
   resetTestBehaviorFactoryId
 } from '@ngvault/testing';
 import { NgVaultBehaviorRunner } from '../interfaces/ngvault-behavior-runner.interface';
+import { NgVaultBehaviorTypes } from '../types/ngvault-behavior.type';
 import { NgVaultBehaviorLifecycleService } from './ngvault-behavior-lifecycle.service';
 
 describe('Service: VaultBehaviorLifecycle', () => {
@@ -104,7 +105,7 @@ describe('Service: VaultBehaviorLifecycle', () => {
       }, 'state');
       const persistence = createTestBehaviorFactory(() => {
         return {};
-      }, 'persistence');
+      }, NgVaultBehaviorTypes.Persist);
       const encryption = createTestBehaviorFactory(() => {
         return {};
       }, 'encryption');
@@ -131,7 +132,7 @@ describe('Service: VaultBehaviorLifecycle', () => {
         Object({ type: 'events' }),
         Object({ type: 'state' }),
         Object({ type: 'state' }),
-        Object({ type: 'persistence' }),
+        Object({ type: NgVaultBehaviorTypes.Persist }),
         Object({ type: 'encryption' })
       ]);
       expect(emitted).toEqual([]);

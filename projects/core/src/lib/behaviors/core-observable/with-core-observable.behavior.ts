@@ -4,7 +4,7 @@ import {
   NgVaultBehavior,
   NgVaultBehaviorFactory,
   NgVaultBehaviorFactoryContext,
-  NgVaultBehaviorType,
+  NgVaultBehaviorTypes,
   NgVaultDataType,
   NgVaultResourceStateError,
   VaultSignalRef
@@ -19,7 +19,7 @@ class CoreObservableBehavior<T> implements NgVaultBehavior<T, ObservableBehavior
   public readonly critical = false;
 
   constructor(
-    readonly type: NgVaultBehaviorType,
+    readonly type: NgVaultBehaviorTypes,
     private readonly injector: NgVaultBehaviorFactoryContext['injector']
   ) {}
 

@@ -7,8 +7,8 @@ describe('defineVaultBehaviorKey', () => {
   });
 
   it('should work with other domains and names', () => {
-    const key = defineNgVaultBehaviorKey('Persistence', 'LocalStorage');
-    expect(key).toBe('NgVault::Persistence::LocalStorage');
+    const key = defineNgVaultBehaviorKey('Persist', 'LocalStorage');
+    expect(key).toBe('NgVault::Persist::LocalStorage');
   });
 
   it('should be deterministic for the same input', () => {

@@ -9,7 +9,7 @@ import {
   NgVaultBehaviorContext,
   NgVaultBehaviorFactory,
   NgVaultBehaviorLifecycleService,
-  NgVaultBehaviorType,
+  NgVaultBehaviorTypes,
   NgVaultFeatureCell,
   NgVaultReducerFunction,
   NgVaultResourceStateError,
@@ -71,7 +71,7 @@ export function provideFeatureCell<Service, T>(
       ];
 
       // eslint-disable-next-line
-      const _userBehaviorsWithoutReducers = behaviors.filter((b) => (b as any).type !== NgVaultBehaviorType.Reduce);
+      const _userBehaviorsWithoutReducers = behaviors.filter((b) => (b as any).type !== NgVaultBehaviorTypes.Reduce);
 
       const _allBehaviors: NgVaultBehaviorFactory<T>[] = [..._defaultBehaviors, ..._userBehaviorsWithoutReducers];
 
