@@ -1,0 +1,12 @@
+{
+  "manifest_version": 3,
+  "name": "ngVault DevTools",
+  "version": "0.0.1",
+  "description": "Developer tools panel for inspecting ngVault state and events.",
+  "devtools_page": "ngvault-devtools.html",
+  "icons": {
+    "128": "icons/ngvault-128.png"
+  },
+  "permissions": [],
+  "host_permissions": ["<all_urls>"]
+}
