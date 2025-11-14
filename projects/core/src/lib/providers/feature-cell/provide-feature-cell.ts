@@ -6,13 +6,13 @@ import { withCoreStateBehavior } from '@ngvault/core/behaviors/core-state/with-c
 import { withCoreReducerBehavior } from '@ngvault/core/behaviors/reducer/with-core-reducer.behavior';
 import { VaultOrchestrator } from '@ngvault/core/orchestrator/ngvault.orchestrator';
 import {
+  NgVaultBehaviorContext,
+  NgVaultBehaviorFactory,
   NgVaultBehaviorLifecycleService,
   NgVaultBehaviorType,
   NgVaultFeatureCell,
   NgVaultReducerFunction,
   NgVaultResourceStateError,
-  VaultBehaviorContext,
-  VaultBehaviorFactory,
   VaultStateSnapshot
 } from '@ngvault/shared';
 import { NgVaultDataType } from '@ngvault/shared/types/ngvault-data.type';
@@ -29,7 +29,7 @@ import { ngVaultWarn } from '../../utils/ngvault-logger.util';
 export function provideFeatureCell<Service, T>(
   service: Type<Service>,
   featureCellDescriptor: FeatureCellDescriptorModel<T>,
-  behaviors: VaultBehaviorFactory<T>[] = []
+  behaviors: NgVaultBehaviorFactory<T>[] = []
 ): Provider[] {
   const token = getOrCreateFeatureCellToken<T>(featureCellDescriptor.key, false);
 
@@ -63,7 +63,7 @@ export function provideFeatureCell<Service, T>(
         );
       }
 
-      const _defaultBehaviors: VaultBehaviorFactory<T>[] = [
+      const _defaultBehaviors: NgVaultBehaviorFactory<T>[] = [
         withCoreStateBehavior,
         withCoreHttpResourceStateBehavior,
         withCoreObservableBehavior,
@@ -73,7 +73,7 @@ export function provideFeatureCell<Service, T>(
       // eslint-disable-next-line
       const _userBehaviorsWithoutReducers = behaviors.filter((b) => (b as any).type !== NgVaultBehaviorType.Reduce);
 
-      const _allBehaviors: VaultBehaviorFactory<T>[] = [..._defaultBehaviors, ..._userBehaviorsWithoutReducers];
+      const _allBehaviors: NgVaultBehaviorFactory<T>[] = [..._defaultBehaviors, ..._userBehaviorsWithoutReducers];
 
       const _value = signal<NgVaultDataType<T>>(
         featureCellDescriptor.initial === null || featureCellDescriptor.initial === undefined
@@ -102,7 +102,7 @@ export function provideFeatureCell<Service, T>(
             hasValue: _hasValue()
           };
         }
-      } as VaultBehaviorContext<T>;
+      } as NgVaultBehaviorContext<T>;
 
       const _hardReset = () => {
         _isLoading.set(false);

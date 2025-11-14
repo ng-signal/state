@@ -1,13 +1,13 @@
 import { Injector, provideZonelessChangeDetection, runInInjectionContext, signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
-import { VaultBehaviorContext } from '@ngvault/shared';
+import { NgVaultBehaviorContext, NgVaultBehaviorType } from '@ngvault/shared';
 import { provideVaultTesting } from '@ngvault/testing';
 import { withCoreStateBehavior } from './with-core-state.behavior';
 
 describe('Behavior: CoreStateBehavior', () => {
   let behavior: any;
   let injector: Injector;
-  let ctx: VaultBehaviorContext<any>;
+  let ctx: NgVaultBehaviorContext<any>;
 
   beforeEach(() => {
     TestBed.configureTestingModule({
@@ -21,11 +21,11 @@ describe('Behavior: CoreStateBehavior', () => {
       error: signal(null),
       value: signal(undefined),
       incoming: null
-    } as unknown as VaultBehaviorContext<any>;
+    } as unknown as NgVaultBehaviorContext<any>;
 
     runInInjectionContext(injector, () => {
       behavior = withCoreStateBehavior({
-        type: 'state',
+        type: NgVaultBehaviorType.State,
         injector
       });
     });

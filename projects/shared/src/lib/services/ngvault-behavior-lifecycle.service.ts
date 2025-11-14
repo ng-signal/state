@@ -1,20 +1,20 @@
 // projects/core/src/lib/services/vault-behavior-lifecycle.service.ts
 import { Injector } from '@angular/core';
 import { PROTECTED_FEATURE_CELL_KEYS } from '../constants/protected-feature-cell-keys.constant';
-import { VaultBehaviorFactoryContext } from '../contexts/vault-behavior-factory.context';
-import { VaultBehaviorContext } from '../contexts/vault-behavior.context';
-import { VaultBehaviorRunner } from '../interfaces/vault-behavior-runner.interface';
-import { VaultBehavior } from '../interfaces/vault-behavior.interface';
+import { NgVaultBehaviorFactoryContext } from '../contexts/ngvault-behavior-factory.context';
+import { NgVaultBehaviorContext } from '../contexts/ngvault-behavior.context';
+import { NgVaultBehaviorRunner } from '../interfaces/ngvault-behavior-runner.interface';
+import { NgVaultBehavior } from '../interfaces/ngvault-behavior.interface';
 import { NgVaultFeatureCell } from '../models/feature-cell.model';
 import { NgVaultBehaviorFactory } from '../types/ngvault-behavior-factory.type';
 import { validateNgVaultBehaviorKey } from '../utils/define-ngvault-behavior-key.util';
 
-class VaultBehaviorRunnerClass implements VaultBehaviorRunner {
+class VaultBehaviorRunnerClass implements NgVaultBehaviorRunner {
   // eslint-disable-next-line
-  #behaviors: VaultBehavior<any>[] = [];
+  #behaviors: NgVaultBehavior<any>[] = [];
   #initialized = false;
 
-  initializeBehaviors<T>(injector: Injector, behaviors: Array<NgVaultBehaviorFactory<T>>): VaultBehavior<T>[] {
+  initializeBehaviors<T>(injector: Injector, behaviors: Array<NgVaultBehaviorFactory<T>>): NgVaultBehavior<T>[] {
     if (this.#initialized)
       throw new Error('[NgVault] VaultBehaviorRunner already initialized — cannot reissue core behavior ID.');
 
@@ -30,7 +30,7 @@ class VaultBehaviorRunnerClass implements VaultBehaviorRunner {
         try {
           // Determine declared behavior type
           // eslint-disable-next-line
-          const behaviorType = (factory as any)?.type as VaultBehavior['type'] | undefined;
+          const behaviorType = (factory as any)?.type as NgVaultBehavior['type'] | undefined;
           if (!behaviorType) {
             isCritical = true;
             throw new Error(`[NgVault] Behavior factory missing type metadata.`);
@@ -39,7 +39,7 @@ class VaultBehaviorRunnerClass implements VaultBehaviorRunner {
           const instance = factory({
             injector,
             type: behaviorType
-          } as VaultBehaviorFactoryContext);
+          } as NgVaultBehaviorFactoryContext);
 
           if (!instance || typeof instance !== 'object') {
             const message = `[NgVault] Behavior did not return an object`;
@@ -81,7 +81,7 @@ class VaultBehaviorRunnerClass implements VaultBehaviorRunner {
           return null;
         }
       })
-      .filter((b): b is VaultBehavior<T> => !!b);
+      .filter((b): b is NgVaultBehavior<T> => !!b);
 
     return this.#behaviors;
   }
@@ -122,7 +122,7 @@ class VaultBehaviorRunnerClass implements VaultBehaviorRunner {
           //eslint-disable-next-line
           value: (...args: any[]) => {
             try {
-              return fn?.(cell.key as string, cell.ctx as VaultBehaviorContext<T>, ...args);
+              return fn?.(cell.key as string, cell.ctx as NgVaultBehaviorContext<T>, ...args);
             } catch (err) {
               //eslint-disable-next-line
               console.error(`[NgVault] Behavior extension "${key}" threw an error:`, err);
@@ -138,6 +138,6 @@ class VaultBehaviorRunnerClass implements VaultBehaviorRunner {
   }
 }
 
-export function NgVaultBehaviorLifecycleService(): VaultBehaviorRunner {
+export function NgVaultBehaviorLifecycleService(): NgVaultBehaviorRunner {
   return new VaultBehaviorRunnerClass();
 }

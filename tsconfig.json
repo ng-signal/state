@@ -18,7 +18,8 @@
       "@ngvault/shared": ["projects/shared/src/public-api"],
       "@ngvault/shared/*": ["projects/shared/src/lib/*"],
       "@ngvault/testing": ["projects/testing/src/public-api"],
-      "@ngvault/testing/*": ["projects/testing/src/lib/*"]
+      "@ngvault/testing/*": ["projects/testing/src/lib/*"],
+      "persist": ["./dist/persist"]
     },
     "noFallthroughCasesInSwitch": true,
     "skipLibCheck": true,
@@ -72,6 +73,12 @@
     },
     {
       "path": "./projects/testing/tsconfig.spec.json"
+    },
+    {
+      "path": "./projects/persist/tsconfig.lib.json"
+    },
+    {
+      "path": "./projects/persist/tsconfig.spec.json"
     }
   ]
 }

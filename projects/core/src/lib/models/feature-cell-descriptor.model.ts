@@ -1,7 +1,7 @@
-import { VaultInsightDefinition } from '@ngvault/shared';
+import { NgVaultInsightDefinition } from '@ngvault/shared';
 
 export interface FeatureCellDescriptorModel<T> {
   key: string;
   initial: T;
-  insights?: VaultInsightDefinition;
+  insights?: NgVaultInsightDefinition;
 }

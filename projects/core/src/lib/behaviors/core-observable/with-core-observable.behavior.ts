@@ -1,12 +1,12 @@
 import { signal } from '@angular/core';
 import {
   defineNgVaultBehaviorKey,
+  NgVaultBehavior,
+  NgVaultBehaviorFactory,
+  NgVaultBehaviorFactoryContext,
   NgVaultBehaviorType,
   NgVaultDataType,
   NgVaultResourceStateError,
-  VaultBehavior,
-  VaultBehaviorFactory,
-  VaultBehaviorFactoryContext,
   VaultSignalRef
 } from '@ngvault/shared';
 import { EMPTY, Observable, take, takeUntil } from 'rxjs';
@@ -14,13 +14,13 @@ import { ngVaultDebug, ngVaultError, ngVaultLog, ngVaultWarn } from '../../utils
 import { resourceError } from '../../utils/resource-error.util';
 import { ObservableBehaviorExtension } from './interface/observable-behavior.interface';
 
-class CoreObservableBehavior<T> implements VaultBehavior<T, ObservableBehaviorExtension<T>> {
+class CoreObservableBehavior<T> implements NgVaultBehavior<T, ObservableBehaviorExtension<T>> {
   public readonly key = defineNgVaultBehaviorKey('Core', 'FromObservable');
   public readonly critical = false;
 
   constructor(
     readonly type: NgVaultBehaviorType,
-    private readonly injector: VaultBehaviorFactoryContext['injector']
+    private readonly injector: NgVaultBehaviorFactoryContext['injector']
   ) {}
 
   extendCellAPI(): ObservableBehaviorExtension<T> {
@@ -94,8 +94,8 @@ class CoreObservableBehavior<T> implements VaultBehavior<T, ObservableBehaviorEx
   }
 }
 
-export const withCoreObservableBehavior: VaultBehaviorFactory<unknown, ObservableBehaviorExtension<unknown>> = (
-  context: VaultBehaviorFactoryContext
+export const withCoreObservableBehavior: NgVaultBehaviorFactory<unknown, ObservableBehaviorExtension<unknown>> = (
+  context: NgVaultBehaviorFactoryContext
 ) => {
   return new CoreObservableBehavior(context.type, context.injector);
 };

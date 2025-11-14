@@ -1,6 +1,6 @@
 import { NgVaultReducerFunction } from '@ngvault/shared';
 import { Observable } from 'rxjs';
-import { VaultBehaviorContext } from '../contexts/vault-behavior.context';
+import { NgVaultBehaviorContext } from '../contexts/ngvault-behavior.context';
 import { VaultSignalRef } from '../references/vault-signal.reference';
 import { NgVaultStateInputType } from '../types/ngvault-state-input.type';
 import { SignalVaultModel } from './signal-vault.model';
@@ -21,7 +21,7 @@ export interface NgVaultFeatureCell<T> extends SignalVaultModel<T> {
   reset$?: Observable<void>;
 
   /** @internal – used by NgVault for behavior extension context */
-  readonly ctx?: VaultBehaviorContext<T>;
+  readonly ctx?: NgVaultBehaviorContext<T>;
   /** @internal – the unique feature key for this cell */
   readonly key?: string;
 

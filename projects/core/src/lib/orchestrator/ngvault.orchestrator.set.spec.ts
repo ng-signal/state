@@ -3,14 +3,14 @@ import { HttpTestingController, provideHttpClientTesting } from '@angular/common
 import { Injector, provideZonelessChangeDetection, runInInjectionContext, signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { NgVaultEventBus } from '@ngvault/dev-tools';
-import { NgVaultBehaviorType, VaultBehaviorContext } from '@ngvault/shared';
+import { NgVaultBehaviorContext, NgVaultBehaviorType } from '@ngvault/shared';
 import { createTestEventListener, flushMicrotasksZoneless, provideVaultTesting } from '@ngvault/testing';
 import { NgVaultMonitor } from '../monitor/ngvault-monitor.service';
 import { VaultOrchestrator } from './ngvault.orchestrator';
 
 describe('Orcestrator: Vault', () => {
   let dispatcher: VaultOrchestrator<any>;
-  let mockCtx: VaultBehaviorContext<any>;
+  let mockCtx: NgVaultBehaviorContext<any>;
   let calls: string[];
   let injector: any;
   let ngVaultMonitor: any;
@@ -29,7 +29,7 @@ describe('Orcestrator: Vault', () => {
       error: signal<any>(null),
       value: signal<any>(null),
       state: 22
-    } as unknown as VaultBehaviorContext<any>;
+    } as unknown as NgVaultBehaviorContext<any>;
 
     TestBed.configureTestingModule({
       providers: [
@@ -347,7 +347,7 @@ describe('Orcestrator: Vault', () => {
       dispatcher = new VaultOrchestrator<any>('cell key', behaviors, [reducer1], injector, ngVaultMonitor);
     });
 
-    const minimalCtx = {} as VaultBehaviorContext<any>; // no signals
+    const minimalCtx = {} as NgVaultBehaviorContext<any>; // no signals
     expect(() => dispatcher.dispatchSet(minimalCtx)).not.toThrow();
     expect(calls).toEqual([]);
   });

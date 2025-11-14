@@ -2,11 +2,11 @@ import { HttpResourceRef } from '@angular/common/http';
 import { DestroyRef, effect, runInInjectionContext } from '@angular/core';
 import {
   defineNgVaultBehaviorKey,
-  VaultBehavior,
-  VaultBehaviorContext,
-  VaultBehaviorFactory,
-  VaultBehaviorFactoryContext,
-  VaultStateBehavior
+  NgVaultBehavior,
+  NgVaultBehaviorContext,
+  NgVaultBehaviorFactory,
+  NgVaultBehaviorFactoryContext,
+  NgVaultStateBehavior
 } from '@ngvault/shared';
 import { NGVAULT_EXPERIMENTAL_HTTP_RESOURCE } from '../../constants/experimental-flag.constant';
 import { devWarnExperimentalHttpResource } from '../../utils/dev-warning.util';
@@ -14,17 +14,17 @@ import { isHttpResourceRef } from '../../utils/is-http-resource.util';
 import { ngVaultDebug } from '../../utils/ngvault-logger.util';
 import { resourceError } from '../../utils/resource-error.util';
 
-class CoreHttpResourceStateBehavior<T> implements VaultStateBehavior<T> {
+class CoreHttpResourceStateBehavior<T> implements NgVaultStateBehavior<T> {
   readonly type = 'state';
   public readonly critical = true;
   public readonly key = defineNgVaultBehaviorKey('CoreHttpResource', 'State');
 
   constructor(
-    private readonly injector: VaultBehaviorFactoryContext['injector'],
+    private readonly injector: NgVaultBehaviorFactoryContext['injector'],
     private readonly destroyRef: DestroyRef
   ) {}
 
-  async computeState(ctx: VaultBehaviorContext<T>): Promise<T | undefined> {
+  async computeState(ctx: NgVaultBehaviorContext<T>): Promise<T | undefined> {
     ngVaultDebug('http resource state');
 
     if (NGVAULT_EXPERIMENTAL_HTTP_RESOURCE && ctx.incoming && isHttpResourceRef<T>(ctx.incoming)) {
@@ -64,11 +64,11 @@ class CoreHttpResourceStateBehavior<T> implements VaultStateBehavior<T> {
   }
 }
 
-export const withCoreHttpResourceStateBehavior = ((context: VaultBehaviorFactoryContext): VaultBehavior => {
+export const withCoreHttpResourceStateBehavior = ((context: NgVaultBehaviorFactoryContext): NgVaultBehavior => {
   const destroyRef = context.injector.get(DestroyRef);
 
   return new CoreHttpResourceStateBehavior(context.injector, destroyRef);
-}) as VaultBehaviorFactory;
+}) as NgVaultBehaviorFactory;
 
 // Required metadata for discovery
 withCoreHttpResourceStateBehavior.type = 'state';

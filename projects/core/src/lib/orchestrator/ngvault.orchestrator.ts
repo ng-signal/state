@@ -4,16 +4,16 @@
 import { HttpResourceRef } from '@angular/common/http';
 import { effect, inject, Injector, runInInjectionContext } from '@angular/core';
 import {
+  NgVaultBehavior,
+  NgVaultBehaviorContext,
   NgVaultDataType,
+  NgVaultEncryptBehavior,
+  NgVaultPersistBehavior,
+  NgVaultReduceBehavior,
   NgVaultReducerFunction,
+  NgVaultStateBehavior,
   NgVaultStateInputType,
-  NrVaultStateType,
-  VaultBehavior,
-  VaultBehaviorContext,
-  VaultEncryptionBehavior,
-  VaultPersistenceBehavior,
-  VaultReducerBehavior,
-  VaultStateBehavior
+  NrVaultStateType
 } from '@ngvault/shared';
 import { NgVaultMonitor } from '../monitor/ngvault-monitor.service';
 import { NGVAULT_QUEUE } from '../tokens/ngvault-queue.token';
@@ -27,7 +27,7 @@ export class VaultOrchestrator<T> {
 
   constructor(
     private cellKey: string,
-    private readonly behaviors: VaultBehavior<T>[],
+    private readonly behaviors: NgVaultBehavior<T>[],
     private readonly reducers: NgVaultReducerFunction<T>[],
     private readonly injector: Injector,
     readonly ngVaultMonitor: NgVaultMonitor
@@ -35,7 +35,7 @@ export class VaultOrchestrator<T> {
     this.#ngVaultMonitor = ngVaultMonitor;
   }
 
-  #ensureIncoming(ctx: VaultBehaviorContext<T>): NgVaultStateInputType<T> | null {
+  #ensureIncoming(ctx: NgVaultBehaviorContext<T>): NgVaultStateInputType<T> | null {
     const incoming = ctx.incoming;
 
     if (incoming == null) {
@@ -48,7 +48,7 @@ export class VaultOrchestrator<T> {
     return incoming;
   }
 
-  async #finishPipeline(ctx: VaultBehaviorContext<T>, working?: T): Promise<T | undefined> {
+  async #finishPipeline(ctx: NgVaultBehaviorContext<T>, working?: T): Promise<T | undefined> {
     // Stage 1: reduce
     let pipelineDataFlow = await this.#runStage('reduce', ctx, working);
 
@@ -68,7 +68,7 @@ export class VaultOrchestrator<T> {
   // ──────────────────────────────
   // dispatchSet with proper narrowing
   // ──────────────────────────────
-  dispatchSet(ctx: VaultBehaviorContext<T>): void {
+  dispatchSet(ctx: NgVaultBehaviorContext<T>): void {
     this.#queue.enqueue(async () => {
       ctx.operation = 'replace';
       this.#ngVaultMonitor.startReplace(this.cellKey, 'vault-orchestrator', ctx);
@@ -87,7 +87,7 @@ export class VaultOrchestrator<T> {
     });
   }
 
-  dispatchPatch(ctx: VaultBehaviorContext<T>): void {
+  dispatchPatch(ctx: NgVaultBehaviorContext<T>): void {
     this.#queue.enqueue(async () => {
       ctx.operation = 'merge';
       this.#ngVaultMonitor.startMerge(this.cellKey, 'vault-orchestrator', ctx);
@@ -114,7 +114,7 @@ export class VaultOrchestrator<T> {
 
   async #safeAsync(
     fn: () => Promise<NgVaultDataType<T> | void | Partial<NrVaultStateType<T>> | null>,
-    ctx: VaultBehaviorContext<T>
+    ctx: NgVaultBehaviorContext<T>
   ): Promise<void> {
     try {
       const incoming = ctx.incoming;
@@ -177,7 +177,7 @@ export class VaultOrchestrator<T> {
 
   async #runStage(
     stage: 'state' | 'reduce' | 'encrypt' | 'persist',
-    ctx: VaultBehaviorContext<T>,
+    ctx: NgVaultBehaviorContext<T>,
     working?: T
   ): Promise<T | undefined> {
     const stageBehaviors = this.behaviors.filter((b) => b.type === stage);
@@ -190,23 +190,23 @@ export class VaultOrchestrator<T> {
       try {
         switch (stage) {
           case 'state':
-            if (typeof (behavior as VaultStateBehavior<T>).computeState === 'function') {
+            if (typeof (behavior as NgVaultStateBehavior<T>).computeState === 'function') {
               // TODO - make this better for state management
               this.#ngVaultMonitor.startState(this.cellKey, behavior.key, ctx);
-              next = await (behavior as VaultStateBehavior<T>).computeState(ctx);
+              next = await (behavior as NgVaultStateBehavior<T>).computeState(ctx);
               this.#ngVaultMonitor.endState(this.cellKey, behavior.key, ctx);
             }
             break;
 
           case 'reduce':
-            if (typeof (behavior as VaultReducerBehavior<T>).applyReducer === 'function') {
+            if (typeof (behavior as NgVaultReduceBehavior<T>).applyReducer === 'function') {
               if (current === undefined) {
                 throw new Error(`[NgVault] Reducer stage received undefined state in cell "${this.cellKey}".`);
               }
 
               for (const reducer of this.reducers) {
                 this.#ngVaultMonitor.startReducer(this.cellKey, behavior.key, ctx);
-                const nextValue = (behavior as VaultReducerBehavior<T>).applyReducer(current, reducer);
+                const nextValue = (behavior as NgVaultReduceBehavior<T>).applyReducer(current, reducer);
 
                 this.#ngVaultMonitor.endReducer(this.cellKey, behavior.key, ctx);
                 if (nextValue !== undefined) {
@@ -217,14 +217,14 @@ export class VaultOrchestrator<T> {
             break;
 
           case 'encrypt':
-            if (typeof (behavior as VaultEncryptionBehavior<T>).encryptState === 'function') {
-              next = await (behavior as VaultEncryptionBehavior<T>).encryptState(ctx, current!);
+            if (typeof (behavior as NgVaultEncryptBehavior<T>).encryptState === 'function') {
+              next = await (behavior as NgVaultEncryptBehavior<T>).encryptState(ctx, current!);
             }
             break;
 
           case 'persist':
-            if (typeof (behavior as VaultPersistenceBehavior<T>).persistState === 'function') {
-              await (behavior as VaultPersistenceBehavior<T>).persistState(ctx, current!);
+            if (typeof (behavior as NgVaultPersistBehavior<T>).persistState === 'function') {
+              await (behavior as NgVaultPersistBehavior<T>).persistState(ctx, current!);
             }
             break;
         }

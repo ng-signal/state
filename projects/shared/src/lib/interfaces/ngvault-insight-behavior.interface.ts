@@ -1,4 +1,4 @@
-export interface VaultInsightDefinition {
+export interface NgVaultInsightDefinition {
   /**
    * Unique identifier for the insight definition.
    * Example: "manual-insights"

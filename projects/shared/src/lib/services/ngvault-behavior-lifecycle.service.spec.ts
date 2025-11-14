@@ -8,7 +8,7 @@ import {
   provideVaultTesting,
   resetTestBehaviorFactoryId
 } from '@ngvault/testing';
-import { VaultBehaviorRunner } from '../interfaces/vault-behavior-runner.interface';
+import { NgVaultBehaviorRunner } from '../interfaces/ngvault-behavior-runner.interface';
 import { NgVaultBehaviorLifecycleService } from './ngvault-behavior-lifecycle.service';
 
 describe('Service: VaultBehaviorLifecycle', () => {
@@ -22,7 +22,7 @@ describe('Service: VaultBehaviorLifecycle', () => {
     return coreBehavior;
   }
 
-  let vaultRunner: VaultBehaviorRunner;
+  let vaultRunner: NgVaultBehaviorRunner;
   let randonUuid: any;
   let injector: any;
   let ids: any = [];

@@ -2,23 +2,23 @@ import { inject, Injectable } from '@angular/core';
 import { NgVaultEventBus, NgVaultEventModel } from '@ngvault/dev-tools';
 import {
   defineNgVaultBehaviorKey,
+  NgVaultBehaviorContext,
   NgVaultDevModeService,
-  VaultBehaviorContext,
-  VaultInsightDefinition,
+  NgVaultInsightDefinition,
   VaultStateSnapshot
 } from '@ngvault/shared';
 
 @Injectable({ providedIn: 'root' })
 export class NgVaultMonitor {
   #devModeService = inject(NgVaultDevModeService);
-  #globalInsightOverride: VaultInsightDefinition | null = null;
+  #globalInsightOverride: NgVaultInsightDefinition | null = null;
 
   #eventBus = inject(NgVaultEventBus);
   #cellRegistry = new Map<
     string,
     {
       hasInsight: boolean;
-      insights: VaultInsightDefinition[];
+      insights: NgVaultInsightDefinition[];
     }
   >();
   public readonly key = defineNgVaultBehaviorKey('DevTools', 'Telemetry');
@@ -44,67 +44,67 @@ export class NgVaultMonitor {
     return `${domain}:${phase}:${operation}`;
   }
 
-  startReplace<T>(cell: string, behaviorKey: string, ctx: Readonly<VaultBehaviorContext<T>>): void {
+  startReplace<T>(cell: string, behaviorKey: string, ctx: Readonly<NgVaultBehaviorContext<T>>): void {
     this.#emitEvent(cell, behaviorKey, 'startReplace', ctx.state);
   }
 
-  endReplace<T>(cell: string, behaviorKey: string, ctx: Readonly<VaultBehaviorContext<T>>): void {
+  endReplace<T>(cell: string, behaviorKey: string, ctx: Readonly<NgVaultBehaviorContext<T>>): void {
     this.#emitEvent(cell, behaviorKey, 'endReplace', ctx.state);
   }
 
-  startMerge<T>(cell: string, behaviorKey: string, ctx: Readonly<VaultBehaviorContext<T>>): void {
+  startMerge<T>(cell: string, behaviorKey: string, ctx: Readonly<NgVaultBehaviorContext<T>>): void {
     this.#emitEvent(cell, behaviorKey, 'startMerge', ctx.state);
   }
 
-  endMerge<T>(cell: string, behaviorKey: string, ctx: Readonly<VaultBehaviorContext<T>>, payload?: unknown): void {
+  endMerge<T>(cell: string, behaviorKey: string, ctx: Readonly<NgVaultBehaviorContext<T>>, payload?: unknown): void {
     this.#emitEvent(cell, behaviorKey, 'endMerge', ctx.state, payload);
   }
 
-  startState<T>(cell: string, behaviorKey: string, ctx: Readonly<VaultBehaviorContext<T>>): void {
+  startState<T>(cell: string, behaviorKey: string, ctx: Readonly<NgVaultBehaviorContext<T>>): void {
     this.#emitEvent(cell, behaviorKey, 'startState', ctx.state);
   }
 
-  endState<T>(cell: string, behaviorKey: string, ctx: Readonly<VaultBehaviorContext<T>>): void {
+  endState<T>(cell: string, behaviorKey: string, ctx: Readonly<NgVaultBehaviorContext<T>>): void {
     this.#emitEvent(cell, behaviorKey, 'endState', ctx.state);
   }
 
-  startReducer<T>(cell: string, behaviorKey: string, ctx: Readonly<VaultBehaviorContext<T>>): void {
+  startReducer<T>(cell: string, behaviorKey: string, ctx: Readonly<NgVaultBehaviorContext<T>>): void {
     this.#emitEvent(cell, behaviorKey, 'startReducer', ctx.state);
   }
 
-  endReducer<T>(cell: string, behaviorKey: string, ctx: Readonly<VaultBehaviorContext<T>>): void {
+  endReducer<T>(cell: string, behaviorKey: string, ctx: Readonly<NgVaultBehaviorContext<T>>): void {
     this.#emitEvent(cell, behaviorKey, 'endReducer', ctx.state);
   }
 
-  error<T>(cell: string, behaviorKey: string, ctx: Readonly<VaultBehaviorContext<T>>, err: unknown): void {
+  error<T>(cell: string, behaviorKey: string, ctx: Readonly<NgVaultBehaviorContext<T>>, err: unknown): void {
     this.#emitEvent(cell, behaviorKey, 'error', ctx.state, 'error', err instanceof Error ? err.message : String(err));
   }
 
-  startReset<T>(cell: string, behaviorKey: string, ctx: Readonly<VaultBehaviorContext<T>>): void {
+  startReset<T>(cell: string, behaviorKey: string, ctx: Readonly<NgVaultBehaviorContext<T>>): void {
     this.#emitEvent(cell, behaviorKey, 'startReset', ctx.state);
   }
 
-  endReset<T>(cell: string, behaviorKey: string, ctx: Readonly<VaultBehaviorContext<T>>): void {
+  endReset<T>(cell: string, behaviorKey: string, ctx: Readonly<NgVaultBehaviorContext<T>>): void {
     this.#emitEvent(cell, behaviorKey, 'endReset', ctx.state);
   }
 
-  startDestroy<T>(cell: string, behaviorKey: string, ctx: Readonly<VaultBehaviorContext<T>>): void {
+  startDestroy<T>(cell: string, behaviorKey: string, ctx: Readonly<NgVaultBehaviorContext<T>>): void {
     this.#emitEvent(cell, behaviorKey, 'startDestroy', ctx.state);
   }
 
-  endDestroy<T>(cell: string, behaviorKey: string, ctx: Readonly<VaultBehaviorContext<T>>): void {
+  endDestroy<T>(cell: string, behaviorKey: string, ctx: Readonly<NgVaultBehaviorContext<T>>): void {
     this.#emitEvent(cell, behaviorKey, 'endDestroy', ctx.state);
   }
 
-  startInitialized<T>(cell: string, behaviorKey: string, ctx: Readonly<VaultBehaviorContext<T>>): void {
+  startInitialized<T>(cell: string, behaviorKey: string, ctx: Readonly<NgVaultBehaviorContext<T>>): void {
     this.#emitEvent(cell, behaviorKey, 'startInitialized', ctx.state);
   }
 
-  endInitialized<T>(cell: string, behaviorKey: string, ctx: Readonly<VaultBehaviorContext<T>>): void {
+  endInitialized<T>(cell: string, behaviorKey: string, ctx: Readonly<NgVaultBehaviorContext<T>>): void {
     this.#emitEvent(cell, behaviorKey, 'endInitialized', ctx.state);
   }
 
-  registerCell(cellKey: string, insight?: VaultInsightDefinition): void {
+  registerCell(cellKey: string, insight?: NgVaultInsightDefinition): void {
     const hasInsight = !!insight;
 
     this.#cellRegistry.set(cellKey, {
@@ -123,7 +123,7 @@ export class NgVaultMonitor {
   ): void {
     if (!this.#devModeService.isDevMode) return;
 
-    let insight: VaultInsightDefinition;
+    let insight: NgVaultInsightDefinition;
 
     if (this.#globalInsightOverride) {
       insight = this.#globalInsightOverride;
@@ -160,7 +160,7 @@ export class NgVaultMonitor {
     this.#eventBus.next(event);
   }
 
-  activateGlobalInsights(def: VaultInsightDefinition): void {
+  activateGlobalInsights(def: NgVaultInsightDefinition): void {
     this.#globalInsightOverride = def;
   }
 }

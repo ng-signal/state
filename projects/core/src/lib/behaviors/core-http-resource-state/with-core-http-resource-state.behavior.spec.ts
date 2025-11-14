@@ -3,7 +3,7 @@ import { HttpTestingController, provideHttpClientTesting } from '@angular/common
 import { DestroyRef, Injector, provideZonelessChangeDetection, runInInjectionContext, signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { resetWarnExperimentalHttpResourceTestingOnly } from '@ngvault/core/utils/dev-warning.util';
-import { VaultBehaviorContext } from '@ngvault/shared';
+import { NgVaultBehaviorContext } from '@ngvault/shared';
 import { flushMicrotasksZoneless, provideVaultTesting } from '@ngvault/testing';
 import { withCoreHttpResourceStateBehavior } from './with-core-http-resource-state.behavior';
 
@@ -115,7 +115,7 @@ describe('Behavior: CoreHttpResourceStateBehavior', () => {
   });
 
   it('should skip when ctx.incoming is not an HttpResourceRef', async () => {
-    const ctx = { incoming: { fake: true } } as unknown as VaultBehaviorContext<TestModel[]>;
+    const ctx = { incoming: { fake: true } } as unknown as NgVaultBehaviorContext<TestModel[]>;
     const result = await behavior.computeState(ctx);
     expect(result).toBeUndefined();
     expect(warnSpy).toHaveBeenCalledTimes(0);
@@ -126,13 +126,13 @@ describe('Behavior: CoreHttpResourceStateBehavior', () => {
       incoming: httpResource<TestModel[]>(() => `/api/u1`, { injector }),
       isLoading: signal(false),
       error: signal(null)
-    } as unknown as VaultBehaviorContext<TestModel[]>;
+    } as unknown as NgVaultBehaviorContext<TestModel[]>;
 
     const ctx2 = {
       incoming: httpResource<TestModel[]>(() => `/api/u2`, { injector }),
       isLoading: signal(false),
       error: signal(null)
-    } as unknown as VaultBehaviorContext<TestModel[]>;
+    } as unknown as NgVaultBehaviorContext<TestModel[]>;
 
     const p1 = behavior.computeState(ctx1);
     const p2 = behavior.computeState(ctx2);

@@ -2,18 +2,18 @@
  * Public API Surface of shared
  */
 
-export * from './lib/contexts/vault-behavior-factory.context';
-export * from './lib/contexts/vault-behavior.context';
+export * from './lib/contexts/ngvault-behavior-factory.context';
+export * from './lib/contexts/ngvault-behavior.context';
 export * from './lib/helpers/testing-environment.helper';
+export * from './lib/interfaces/ngvault-behavior-runner.interface';
+export * from './lib/interfaces/ngvault-behavior.interface';
+export * from './lib/interfaces/ngvault-encrypt-behavior.interface';
+export * from './lib/interfaces/ngvault-insight-behavior.interface';
 export * from './lib/interfaces/ngvault-inspectable-queue.interface';
+export * from './lib/interfaces/ngvault-persist-behavior.interface';
 export * from './lib/interfaces/ngvault-queue.interface';
-export * from './lib/interfaces/vault-behavior-runner.interface';
-export * from './lib/interfaces/vault-behavior.interface';
-export * from './lib/interfaces/vault-encryption-behavior.interface';
-export * from './lib/interfaces/vault-insights-behavior.interface';
-export * from './lib/interfaces/vault-persistence-behavior.interface';
-export * from './lib/interfaces/vault-reducer-behavior.interface';
-export * from './lib/interfaces/vault-state-behavior.interface';
+export * from './lib/interfaces/ngvault-reduce-behavior.interface';
+export * from './lib/interfaces/ngvault-state-behavior.interface';
 export * from './lib/models/feature-cell.model';
 export * from './lib/models/ngvault-queue-event.model';
 export * from './lib/models/ngvault-queue-stats.model';

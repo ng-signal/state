@@ -5,7 +5,7 @@ import { NgVaultResourceStateError } from '../models/ngvault-resource-state-erro
 import { VaultStateSnapshot } from '../models/vault-state-snapshot.model';
 import { NgVaultDataType } from '../types/ngvault-data.type';
 
-export interface VaultBehaviorContext<T> {
+export interface NgVaultBehaviorContext<T> {
   isLoading?: Signal<boolean> & { set(value: boolean): void };
   error?: Signal<NgVaultResourceStateError | null> & { set(value: NgVaultResourceStateError | null): void };
   value?: Signal<NgVaultDataType<T>> & { set(value: NgVaultDataType<T>): void };

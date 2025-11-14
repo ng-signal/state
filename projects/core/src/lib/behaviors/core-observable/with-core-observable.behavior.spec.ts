@@ -2,7 +2,7 @@ import { HttpClient, provideHttpClient } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { Injector, provideZonelessChangeDetection, runInInjectionContext, signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
-import { NgVaultResourceStateError, VaultBehaviorContext } from '@ngvault/shared';
+import { NgVaultBehaviorContext, NgVaultResourceStateError } from '@ngvault/shared';
 import { flushMicrotasksZoneless, provideVaultTesting } from '@ngvault/testing';
 import { of, throwError } from 'rxjs';
 import { withCoreObservableBehavior } from './with-core-observable.behavior';
@@ -15,7 +15,7 @@ interface TestModel {
 describe('Behavior: withCoreObservableBehavior', () => {
   let injector: Injector;
   let mockBackend: HttpTestingController;
-  let ctx: VaultBehaviorContext<TestModel[]>;
+  let ctx: NgVaultBehaviorContext<TestModel[]>;
   let behavior: ReturnType<typeof withCoreObservableBehavior>;
   let key = 'NgVault::Core::FromObservable';
   let httpClient: any;

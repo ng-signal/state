@@ -2,7 +2,7 @@
 import { Injector } from '@angular/core';
 import { NgVaultBehaviorType } from '../types/ngvault-behavior.type';
 
-export interface VaultBehaviorFactoryContext {
+export interface NgVaultBehaviorFactoryContext {
   injector: Injector;
   readonly type: NgVaultBehaviorType;
 }

@@ -9,7 +9,7 @@ import {
 } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { NgVaultEventBus } from '@ngvault/dev-tools';
-import { NgVaultFeatureCell, VaultBehaviorFactory } from '@ngvault/shared';
+import { NgVaultBehaviorFactory, NgVaultFeatureCell } from '@ngvault/shared';
 import { createTestEventListener, flushMicrotasksZoneless, provideVaultTesting } from '@ngvault/testing';
 import { FEATURE_CELL_REGISTRY } from '../../tokens/feature-cell-registry.token';
 import { provideFeatureCell } from './provide-feature-cell';
@@ -470,7 +470,7 @@ describe('Provider: Feature Cell (core vault functionality)', () => {
         async computeState() {
           throw new Error('Simulated failure inside behavior');
         }
-      } as unknown as VaultBehaviorFactory;
+      } as unknown as NgVaultBehaviorFactory;
     };
 
     withErrorBehavior.type = 'state';
@@ -865,7 +865,7 @@ describe('Provider: Feature Cell (core vault functionality)', () => {
   describe('Behavior Factory Instantiation)', () => {
     it('filters null and undefined factories but retains valid ones', () => {
       spyOn(console, 'warn');
-      const nullFactory = (() => null as any) as unknown as VaultBehaviorFactory<any>;
+      const nullFactory = (() => null as any) as unknown as NgVaultBehaviorFactory<any>;
       nullFactory.type = 'state';
 
       runInInjectionContext(injector, () => {
