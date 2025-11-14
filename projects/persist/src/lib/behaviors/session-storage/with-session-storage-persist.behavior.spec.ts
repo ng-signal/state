@@ -81,8 +81,9 @@ describe('SessionStoragePersistBehavior', () => {
     });
 
     it('should catch sessionStorage.setItem errors and NOT throw', () => {
-      sessionStorage.setItem = () => undefined;
-      spyOn(sessionStorage, 'setItem').and.throwError('Storage full');
+      (sessionStorage.setItem as jasmine.Spy).and.callFake(() => {
+        throw new Error('Storage full');
+      });
 
       expect(() => behavior.persistState({ ok: true })).not.toThrow();
     });
@@ -90,9 +91,7 @@ describe('SessionStoragePersistBehavior', () => {
 
   describe('removeState', () => {
     it('should remove storage key on removeState()', () => {
-      runInInjectionContext(injector, () => {
-        behavior.removeState();
-      });
+      behavior.removeState();
 
       const expectedKey = defineNgVaultPersistKey('sessionStorage', 'userCell');
       expect(sessionStorage.removeItem).toHaveBeenCalledTimes(1);
@@ -107,6 +106,59 @@ describe('SessionStoragePersistBehavior', () => {
       spyOn(sessionStorage, 'removeItem').and.callThrough();
 
       expect(() => behavior.removeState()).not.toThrow();
+    });
+  });
+
+  describe('loadState', () => {
+    it('should return undefined when no state exists', () => {
+      sessionStorage.getItem = jasmine.createSpy().and.returnValue(null);
+
+      const result = behavior.loadState();
+
+      expect(sessionStorage.getItem).toHaveBeenCalledTimes(1);
+      expect(result).toBeUndefined();
+    });
+
+    it('should load and parse stored JSON into an object', () => {
+      const stored = { id: 1, name: 'Ada' };
+      sessionStorage.getItem = jasmine.createSpy().and.returnValue(JSON.stringify(stored));
+
+      const result = behavior.loadState();
+
+      expect(sessionStorage.getItem).toHaveBeenCalledTimes(1);
+      expect(result).toEqual(stored);
+    });
+
+    it('should load primitives correctly', () => {
+      sessionStorage.getItem = jasmine.createSpy().and.returnValue('123');
+
+      const result = behavior.loadState();
+
+      expect(result).toBe(123);
+    });
+
+    it('should load null explicitly', () => {
+      sessionStorage.getItem = jasmine.createSpy().and.returnValue('null');
+
+      const result = behavior.loadState();
+
+      expect(result).toBeNull();
+    });
+
+    it('should catch JSON.parse errors and return undefined', () => {
+      sessionStorage.getItem = jasmine.createSpy().and.returnValue('{ bad json');
+
+      const result = behavior.loadState();
+
+      expect(result).toBeUndefined();
+    });
+
+    it('should catch sessionStorage.getItem errors and NOT throw', () => {
+      sessionStorage.getItem = jasmine.createSpy().and.throwError('access denied');
+
+      expect(() => behavior.loadState()).not.toThrow();
+      const result = behavior.loadState();
+      expect(result).toBeUndefined();
     });
   });
 });

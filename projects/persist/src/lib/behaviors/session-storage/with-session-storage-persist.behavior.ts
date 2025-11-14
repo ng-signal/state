@@ -43,6 +43,18 @@ class SessionStoragePersistBehavior<T> implements NgVaultPersistBehavior<T> {
       ngVaultLog(`[NgVault] SessionStorage removeState() failed for key "${this.#storageKey}":`, err);
     }
   }
+
+  loadState(): T | undefined {
+    try {
+      const raw = sessionStorage.getItem(this.#storageKey);
+      if (raw === null) return undefined; // nothing stored
+
+      return JSON.parse(raw) as T;
+    } catch (err) {
+      ngVaultLog(`[NgVault] SessionStorage load failed for key "${this.#storageKey}":`, err);
+      return undefined; // fail safe
+    }
+  }
 }
 
 export const withSessionStoragePersistBehavior = ((context: NgVaultBehaviorFactoryContext) => {
