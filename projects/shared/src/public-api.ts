@@ -29,3 +29,4 @@ export * from './lib/types/ngvault-reducer-function.type';
 export * from './lib/types/ngvault-state-input.type';
 export * from './lib/types/ngvault-state.type';
 export * from './lib/utils/define-ngvault-behavior-key.util';
+export * from './lib/utils/ngvault-logger.util';

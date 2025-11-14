@@ -10,7 +10,12 @@ import {
   VaultSignalRef
 } from '@ngvault/shared';
 import { EMPTY, Observable, take, takeUntil } from 'rxjs';
-import { ngVaultDebug, ngVaultError, ngVaultLog, ngVaultWarn } from '../../utils/ngvault-logger.util';
+import {
+  ngVaultDebug,
+  ngVaultError,
+  ngVaultLog,
+  ngVaultWarn
+} from '../../../../../shared/src/lib/utils/ngvault-logger.util';
 import { resourceError } from '../../utils/resource-error.util';
 import { ObservableBehaviorExtension } from './interface/observable-behavior.interface';
 

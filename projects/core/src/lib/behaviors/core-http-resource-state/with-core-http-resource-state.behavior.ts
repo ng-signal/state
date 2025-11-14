@@ -8,10 +8,10 @@ import {
   NgVaultBehaviorFactoryContext,
   NgVaultStateBehavior
 } from '@ngvault/shared';
+import { ngVaultDebug } from '../../../../../shared/src/lib/utils/ngvault-logger.util';
 import { NGVAULT_EXPERIMENTAL_HTTP_RESOURCE } from '../../constants/experimental-flag.constant';
 import { devWarnExperimentalHttpResource } from '../../utils/dev-warning.util';
 import { isHttpResourceRef } from '../../utils/is-http-resource.util';
-import { ngVaultDebug } from '../../utils/ngvault-logger.util';
 import { resourceError } from '../../utils/resource-error.util';
 
 class CoreHttpResourceStateBehavior<T> implements NgVaultStateBehavior<T> {

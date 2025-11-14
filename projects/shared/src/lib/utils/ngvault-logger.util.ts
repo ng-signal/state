@@ -1,5 +1,5 @@
-import { getNgVaultConfig } from '../providers/vault/provide-vault';
-import { NgVaultLogLevel } from '../types/ngvault-log-level.type';
+import { getNgVaultConfig } from '../../../../core/src/lib/providers/vault/provide-vault';
+import { NgVaultLogLevel } from '../../../../core/src/lib/types/ngvault-log-level.type';
 
 const LOG_LIMIT = 200;
 const LOG_PREFIX = '[NgVault]';

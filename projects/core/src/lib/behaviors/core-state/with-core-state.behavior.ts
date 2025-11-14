@@ -1,4 +1,3 @@
-import { ngVaultDebug } from '@ngvault/core/utils/ngvault-logger.util';
 import {
   defineNgVaultBehaviorKey,
   NgVaultBehavior,
@@ -9,6 +8,7 @@ import {
   NgVaultDataType,
   NgVaultStateBehavior
 } from '@ngvault/shared';
+import { ngVaultDebug } from '@ngvault/shared/utils/ngvault-logger.util';
 import { isHttpResourceRef } from '../../utils/is-http-resource.util';
 
 class CoreStateBehavior<T> implements NgVaultStateBehavior<T> {

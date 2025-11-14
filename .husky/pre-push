@@ -2,11 +2,6 @@ echo "Running library coverage before push..."
 
 npm run test:coverage:clean
 
-npm run test:coverage:ngvault || {
-  printf "\n\nERROR: Test Coverage issues were found in the 'ngvault app' committed files. Please address them before proceeding.\n\n\n\n"
-  exit 1
-}
-
 npm run test:coverage:core || {
   printf "\n\nERROR: Test Coverage issues were found in the 'core' committed files. Please address them before proceeding.\n\n\n\n"
   exit 1
@@ -17,8 +12,18 @@ npm run test:coverage:dev-tools || {
   exit 1
 }
 
+npm run test:coverage:persist || {
+  printf "\n\nERROR: Test Coverage issues were found in the 'shared' committed files. Please address them before proceeding.\n\n\n\n"
+  exit 1
+}
+
 npm run test:coverage:shared || {
   printf "\n\nERROR: Test Coverage issues were found in the 'shared' committed files. Please address them before proceeding.\n\n\n\n"
+  exit 1
+}
+
+npm run test:coverage:ngvault || {
+  printf "\n\nERROR: Test Coverage issues were found in the 'ngvault app' committed files. Please address them before proceeding.\n\n\n\n"
   exit 1
 }
 

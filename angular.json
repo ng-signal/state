@@ -268,7 +268,14 @@
         "test": {
           "builder": "@angular/build:karma",
           "options": {
-            "tsConfig": "projects/persist/tsconfig.spec.json"
+            "tsConfig": "projects/persist/tsconfig.spec.json",
+            "karmaConfig": "projects/persist/karma.conf.js",
+            "inlineStyleLanguage": "scss",
+            "stylePreprocessorOptions": {
+              "includePaths": ["projects/styles/src/lib"]
+            },
+            "codeCoverageExclude": [],
+            "scripts": []
           }
         }
       }

@@ -10,6 +10,10 @@
     "inlineSources": true,
     "types": []
   },
-  "include": ["src/**/*.ts"],
+  "include": [
+    "src/**/*.ts",
+    "../shared/src/lib/utils/ngvault-logger.util.spec.ts",
+    "../shared/src/lib/utils/ngvault-logger.util.ts"
+  ],
   "exclude": ["**/*.spec.ts"]
 }

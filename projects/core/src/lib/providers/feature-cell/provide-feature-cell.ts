@@ -19,12 +19,12 @@ import { NgVaultDataType } from '@ngvault/shared/types/ngvault-data.type';
 import { NgVaultStateInputType } from '@ngvault/shared/types/ngvault-state-input.type';
 import { NrVaultStateType as NgVaultStateType } from '@ngvault/shared/types/ngvault-state.type';
 import { Subject } from 'rxjs';
+import { ngVaultWarn } from '../../../../../shared/src/lib/utils/ngvault-logger.util';
 import { withCoreObservableBehavior } from '../../behaviors/core-observable/with-core-observable.behavior';
 import { FeatureCellDescriptorModel } from '../../models/feature-cell-descriptor.model';
 import { NgVaultMonitor } from '../../monitor/ngvault-monitor.service';
 import { FEATURE_CELL_REGISTRY } from '../../tokens/feature-cell-registry.token';
 import { isHttpResourceRef } from '../../utils/is-http-resource.util';
-import { ngVaultWarn } from '../../utils/ngvault-logger.util';
 
 export function provideFeatureCell<Service, T>(
   service: Type<Service>,
