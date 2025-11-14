@@ -12,7 +12,7 @@ npm run test:coverage:dev-tools || {
   exit 1
 }
 
-npm run test:coverage:encypt || {
+npm run test:coverage:encrypt || {
   printf "\n\nERROR: Test Coverage issues were found in the 'encrypt' committed files. Please address them before proceeding.\n\n\n\n"
   exit 1
 }
