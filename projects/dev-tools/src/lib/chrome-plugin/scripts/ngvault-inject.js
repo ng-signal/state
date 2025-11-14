@@ -1,4 +1,6 @@
+console.log('ngvault-inject.js loaded');
 (function () {
+  console.log('ngvault-inject.js called');
   if (window.__ngVaultDevtoolsInjected) return;
   window.__ngVaultDevtoolsInjected = true;
 

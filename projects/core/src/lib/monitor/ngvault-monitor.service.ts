@@ -11,7 +11,7 @@ import {
 @Injectable({ providedIn: 'root' })
 export class NgVaultMonitor {
   #devModeService = inject(NgVaultDevModeService);
-  #globalInsightOverride: NgVaultInsightDefinition | null = null;
+  globalInsightOverride: NgVaultInsightDefinition | null = null;
 
   #eventBus = inject(NgVaultEventBus);
   #cellRegistry = new Map<
@@ -157,8 +157,8 @@ export class NgVaultMonitor {
 
     let insight: NgVaultInsightDefinition;
 
-    if (this.#globalInsightOverride) {
-      insight = this.#globalInsightOverride;
+    if (this.globalInsightOverride) {
+      insight = this.globalInsightOverride;
     } else {
       const config = this.#cellRegistry.get(cell);
 
@@ -193,6 +193,6 @@ export class NgVaultMonitor {
   }
 
   activateGlobalInsights(def: NgVaultInsightDefinition): void {
-    this.#globalInsightOverride = def;
+    this.globalInsightOverride = def;
   }
 }
