@@ -1,3 +1,5 @@
+console.log('bridge called');
+
 (function () {
   console.log('[ngVault bridge] injected');
 

@@ -11,3 +11,9 @@ chrome.runtime.onMessage.addListener((msg, sender) => {
     panelPort.postMessage(msg.event);
   }
 });
+
+chrome.runtime.onMessage.addListener((msg, sender) => {
+  if (msg.type === 'NGVAULT_EVENT') {
+    chrome.runtime.sendMessage(msg); // broadcast to panel
+  }
+});

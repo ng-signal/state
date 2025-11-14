@@ -48,3 +48,9 @@ function injectNgVaultHook() {
 
   wait();
 }
+
+chrome.runtime.onMessage.addListener((msg) => {
+  if (msg.type === 'NGVAULT_EVENT') {
+    addEvent(msg.event);
+  }
+});

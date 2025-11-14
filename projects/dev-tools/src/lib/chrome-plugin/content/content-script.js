@@ -12,3 +12,13 @@ window.addEventListener('__ngvault_event__', (event) => {
     event: event.detail
   });
 });
+
+// Bridge: Page → ContentScript → DevTools panel
+window.addEventListener('message', (event) => {
+  if (event.data?.source === 'ngvault-devtools') {
+    chrome.runtime.sendMessage({
+      type: 'NGVAULT_EVENT',
+      event: event.data.event
+    });
+  }
+});
