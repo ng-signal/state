@@ -1,1 +1,130 @@
-/* You can add global styles to this file, and also import other style files */
+/* ngVault DevTools Panel – minimal required global styles */
+
+@use 'global' as global;
+@use 'index' as ngvault;
+
+/* ----------------------------------------------
+   Root Theme Variables
+   ---------------------------------------------- */
+
+body {
+  // Default: Light Mode
+  color-scheme: light;
+
+  background-color: var(--ngvault-surface-light);
+  color: var(--ngvault-text-inverse);
+  font-family: global.$ngvault-font-family;
+  font-weight: global.$ngvault-font-weight;
+  font-size: global.$font-size-md;
+  line-height: global.$line-height;
+
+  // Smooth text rendering
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+
+  // Material–Vault variable mapping
+  --mat-sys-surface: var(--ngvault-surface-light);
+  --mat-sys-on-surface: var(--ngvault-text-inverse);
+  --mat-sys-primary: var(--ngvault-primary);
+  --mat-sys-on-primary: #{global.$ngvault-text-white};
+  --mat-sys-error: var(--ngvault-warn);
+  --mat-sys-success: var(--ngvault-success);
+  --mat-sys-outline: #{global.$ngvault-surface-outline};
+}
+
+html {
+  height: 100%;
+  overflow: hidden;
+  margin: 0;
+}
+
+body {
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  margin: 0;
+  overflow-x: hidden;
+  background-color: var(--surface-bg);
+  color: var(--text-color);
+}
+
+:root {
+  color-scheme: light;
+
+  --ngvault-primary: #{global.$ngvault-primary-base};
+  --ngvault-accent: #{global.$ngvault-accent-base};
+  --ngvault-warn: #{global.$ngvault-warn-base};
+  --ngvault-success: #{global.$ngvault-success-base};
+
+  // Surface / Background Defaults
+  --ngvault-bg: #{global.$ngvault-surface-light}; // default = light theme
+  --ngvault-bg-dark: #{global.$ngvault-surface-dark};
+  --ngvault-bg-light: #{global.$ngvault-surface-light};
+
+  --ngvault-border-radius: #{global.$border-radius-lg};
+
+  //  Text Colors
+  --ngvault-text-primary: #{global.$ngvault-text-primary};
+  --ngvault-text-secondary: #{global.$ngvault-text-secondary};
+  --ngvault-text-inverse: #{global.$ngvault-text-inverse};
+  --ngvault-text-default: var(--ngvault-text-inverse); // safe default
+
+  // Borders, Shadows, Layout
+  --ngvault-border-color: #{global.$ngvault-surface-outline};
+  --ngvault-shadow: #{global.$ngvault-shadow-base};
+  --app-toolbar-height: #{global.$toolbar-height};
+  --app-footer-height: #{global.$footer-height};
+
+  // Body & surfaces
+  --surface-bg: #{global.$ngvault-surface-light};
+  --surface-text: #{global.$ngvault-text-inverse};
+  --surface-outline: #{global.$ngvault-surface-outline};
+
+  // Toolbar
+  --toolbar-bg: #{global.$ngvault-primary-base};
+  --toolbar-text: #{global.$ngvault-text-white};
+  --toolbar-border: #{global.$ngvault-surface-outline};
+
+  // Sidenav & Navigation
+  --sidenav-bg: #{global.$ngvault-primary-base};
+  --sidenav-text: #{global.$ngvault-text-white};
+
+  // Footer & floating box
+  --footer-border: #{global.$ngvault-primary-base};
+
+  // Link colors
+  --link-color: #{global.$ngvault-primary-base};
+  --link-hover: #{global.$ngvault-accent-base};
+  --link-visited: #{global.$ngvault-primary-dark};
+
+  // Angular Material bridge
+  --mat-sys-surface: #{global.$ngvault-surface-light};
+  --mat-sys-on-surface: #{global.$ngvault-text-inverse};
+  --mat-sys-primary: #{global.$ngvault-primary-base};
+  --mat-sys-on-primary: #{global.$ngvault-text-white};
+
+  --mat-active-text: #{global.$ngvault-primary-base};
+}
+
+/* ----------------------------------------------
+   Scrollbars (DevTools panel only)
+   ---------------------------------------------- */
+
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--surface-outline) var(--surface-bg);
+}
+
+*::-webkit-scrollbar {
+  width: 8px;
+}
+
+*::-webkit-scrollbar-thumb {
+  background: var(--surface-outline);
+  border-radius: var(--ngvault-border-radius);
+}
+
+*::-webkit-scrollbar-track {
+  background: var(--surface-bg);
+}

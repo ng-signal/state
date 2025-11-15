@@ -33,7 +33,7 @@
             ],
             "styles": ["src/styles.scss"],
             "stylePreprocessorOptions": {
-              "includePaths": ["projects/styles/src/lib"]
+              "includePaths": ["projects/styles/scss"]
             }
           },
           "configurations": {
@@ -89,7 +89,7 @@
             ],
             "styles": ["src/styles.scss"],
             "stylePreprocessorOptions": {
-              "includePaths": ["projects/styles/src/lib"]
+              "includePaths": ["projects/styles/scss"]
             },
             "codeCoverageExclude": ["**/testing/data/**", "**/src/testing/data/**", "**/examples/**"]
           }
@@ -121,7 +121,7 @@
             "karmaConfig": "projects/core/karma.conf.js",
             "inlineStyleLanguage": "scss",
             "stylePreprocessorOptions": {
-              "includePaths": ["projects/styles/src/lib"]
+              "includePaths": ["projects/styles/scss"]
             },
             "codeCoverageExclude": [],
             "scripts": []
@@ -154,7 +154,7 @@
             "karmaConfig": "projects/dev-tools/karma.conf.js",
             "inlineStyleLanguage": "scss",
             "stylePreprocessorOptions": {
-              "includePaths": ["projects/styles/src/lib"]
+              "includePaths": ["projects/styles/scss"]
             },
             "codeCoverageExclude": [],
             "scripts": []
@@ -187,7 +187,7 @@
             ],
             "styles": ["projects/dev-tools-ui/src/styles.scss"],
             "stylePreprocessorOptions": {
-              "includePaths": ["projects/styles/src/lib"]
+              "includePaths": ["projects/styles/scss"]
             }
           },
           "configurations": {
@@ -244,7 +244,7 @@
             ],
             "styles": ["projects/dev-tools-ui/src/styles.scss"],
             "stylePreprocessorOptions": {
-              "includePaths": ["projects/styles/src/lib"]
+              "includePaths": ["projects/styles/scss"]
             }
           }
         }
@@ -275,7 +275,7 @@
             "karmaConfig": "projects/encrypt/karma.conf.js",
             "inlineStyleLanguage": "scss",
             "stylePreprocessorOptions": {
-              "includePaths": ["projects/styles/src/lib"]
+              "includePaths": ["projects/styles/scss"]
             },
             "codeCoverageExclude": [],
             "scripts": []
@@ -308,7 +308,7 @@
             "karmaConfig": "projects/persist/karma.conf.js",
             "inlineStyleLanguage": "scss",
             "stylePreprocessorOptions": {
-              "includePaths": ["projects/styles/src/lib"]
+              "includePaths": ["projects/styles/sccs"]
             },
             "codeCoverageExclude": [],
             "scripts": []
@@ -341,36 +341,10 @@
             "karmaConfig": "projects/shared/karma.conf.js",
             "inlineStyleLanguage": "scss",
             "stylePreprocessorOptions": {
-              "includePaths": ["projects/styles/src/lib"]
+              "includePaths": ["projects/styles/scss"]
             },
             "codeCoverageExclude": ["**/helpers/testing-environment.helper.ts"],
             "scripts": []
-          }
-        }
-      }
-    },
-    "styles": {
-      "projectType": "library",
-      "root": "projects/styles",
-      "sourceRoot": "projects/styles/src",
-      "prefix": "lib",
-      "architect": {
-        "build": {
-          "builder": "@angular/build:ng-packagr",
-          "configurations": {
-            "production": {
-              "tsConfig": "projects/styles/tsconfig.lib.prod.json"
-            },
-            "development": {
-              "tsConfig": "projects/styles/tsconfig.lib.json"
-            }
-          },
-          "defaultConfiguration": "production"
-        },
-        "test": {
-          "builder": "@angular/build:karma",
-          "options": {
-            "tsConfig": "projects/styles/tsconfig.spec.json"
           }
         }
       }
