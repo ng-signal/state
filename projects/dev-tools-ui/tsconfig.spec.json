@@ -3,13 +3,8 @@
 {
   "extends": "../../tsconfig.json",
   "compilerOptions": {
-    "outDir": "../../out-tsc/lib",
-    "declaration": true,
-    "declarationMap": true,
-    "inlineSourceMap": true,
-    "inlineSources": true,
-    "types": ["chrome"]
+    "outDir": "../../out-tsc/spec",
+    "types": ["jasmine"]
   },
-  "include": ["src/**/*.ts"],
-  "exclude": ["**/*.spec.ts"]
+  "include": ["src/**/*.ts"]
 }

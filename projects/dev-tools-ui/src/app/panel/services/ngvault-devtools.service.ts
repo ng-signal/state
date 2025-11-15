@@ -1,8 +1,8 @@
 import { computed, DestroyRef, inject, Injectable, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { filter } from 'rxjs/operators';
-import { NgVaultEventModel } from '../../models/ngvault-event.model';
-import { NgVaultInsightService } from '../../services/ngvault-insight.service';
+import { NgVaultEventModel } from '../../../../../dev-tools/src/lib/models/ngvault-event.model';
+import { NgVaultInsightService } from '../../../../../dev-tools/src/lib/services/ngvault-insight.service';
 
 @Injectable({ providedIn: 'root' })
 export class NgVaultDevtoolsService {
@@ -16,7 +16,7 @@ export class NgVaultDevtoolsService {
 
   constructor() {
     this.bus
-      .listen$()
+      .listenEventBus$()
       .pipe(
         filter((e): e is NgVaultEventModel => !!e),
         takeUntilDestroyed(this.destroyRef)

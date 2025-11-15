@@ -13,6 +13,8 @@
       "@ngvault/core/*": ["projects/core/src/lib/*"],
       "@ngvault/dev-tools": ["projects/dev-tools/src/public-api"],
       "@ngvault/dev-tools/*": ["projects/dev-tools/src/lib/*"],
+      "@ngvault/dev-tools-ui": ["projects/dev-tools-ui/src/public-api"],
+      "@ngvault/dev-tools-ui/*": ["projects/dev-tools-ui/src/app/*"],
       "@ngvault/styles": ["projects/styles/src/lib"],
       "@ngvault/styles/*": ["projects/styles/src/lib/*"],
       "@ngvault/shared": ["projects/shared/src/public-api"],
@@ -88,6 +90,12 @@
     },
     {
       "path": "./projects/encrypt/tsconfig.spec.json"
+    },
+    {
+      "path": "./projects/dev-tools-ui/tsconfig.app.json"
+    },
+    {
+      "path": "./projects/dev-tools-ui/tsconfig.spec.json"
     }
   ]
 }

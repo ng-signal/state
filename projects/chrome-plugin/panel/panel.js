@@ -22,3 +22,17 @@ function appendEvent(event) {
   row.textContent = `[${event.type}] cell=${event.cell} | behavior=${event.behaviorKey}`;
   container.appendChild(row);
 }
+
+// Relay events from background → Angular app
+chrome.runtime.onMessage.addListener((msg) => {
+  console.log('[ngVault DevTools] new listener.');
+  if (msg?.type === 'NGVAULT_EVENT') {
+    window.postMessage(
+      {
+        source: 'ngvault-angular-devtools',
+        event: msg.event
+      },
+      '*'
+    );
+  }
+});
