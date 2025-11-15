@@ -27,7 +27,6 @@ describe('Behavior: AES-256 Encrypt', () => {
       ]);
       ngVaultBehaviorLifecycleService.applyBehaviorExtensions(cell);
       behavior = cell.behaviors[0];
-      cell.setSecret(SECRET);
     });
   });
 
@@ -40,24 +39,29 @@ describe('Behavior: AES-256 Encrypt', () => {
   describe('invalid secrets', () => {
     it('should reject if secret is invalid', async () => {
       await expectAsync(cell.setSecret(undefined as any)).toBeRejectedWithError(
-        '[NgVault] Secret must be a non-empty string'
+        '[NgVault] Secret must be a non-empty string.'
       );
     });
 
     it('should reject if secret is invalid', async () => {
       await expectAsync(cell.setSecret('  \t\n\r   ')).toBeRejectedWithError(
-        '[NgVault] Secret must be a non-empty string'
+        '[NgVault] Secret must be a non-empty string.'
       );
     });
   });
 
   describe('encrypt', () => {
+    beforeEach(() => {
+      cell.setSecret(SECRET);
+    });
+
     it('should encrypt a plain object into an envelope', async () => {
-      // deterministic IV for testing
       spyOn(crypto, 'getRandomValues').and.returnValue(new Uint8Array(12).fill(7));
 
       const data = { name: 'Ada' };
-      const encrypted = await behavior.encryptState({} as any, data);
+      const encrypted = await behavior.encryptState({} as any, data).catch((error: any) => {
+        expect(error.message).toBe('this is an error');
+      });
 
       expect(typeof encrypted).toBe('object');
       const env = encrypted as any;
@@ -80,20 +84,35 @@ describe('Behavior: AES-256 Encrypt', () => {
       spyOn(crypto.subtle, 'encrypt').and.throwError('boom');
 
       const input = { x: 1 };
-      const out = await behavior.encryptState({} as any, input);
 
-      expect(out).toBe(input); // failsafe: return original
+      await expectAsync(behavior.encryptState({} as any, input)).toBeRejectedWithError('boom');
+    });
+  });
+
+  describe('encrypt - no setSecret', () => {
+    it('should throw if encryptState is called before setSecret', async () => {
+      const data = { name: 'Ada' };
+
+      await expectAsync(behavior.encryptState({} as any, data)).toBeRejectedWithError(
+        '[NgVault] Cannot encrypt: AES secret not set. Call vault.setSecret("your secret") before state operations.'
+      );
     });
   });
 
   describe('Decrypt', () => {
-    it('should decrypt an encrypted envelope back to original object', async () => {
-      spyOn(crypto, 'getRandomValues').and.returnValue(new Uint8Array(12).fill(7));
+    beforeEach(() => {
+      cell.setSecret(SECRET);
+    });
 
+    it('should decrypt an encrypted envelope back to original object', async () => {
       const source = { id: 3, name: 'Grace' };
 
-      const encrypted = await behavior.encryptState({} as any, source);
-      const decrypted = await behavior.decryptState({} as any, encrypted!);
+      const encrypted = await behavior.encryptState({} as any, source).catch((error: any) => {
+        expect(error.message).toBe('this is an error');
+      });
+      const decrypted = await behavior.decryptState({} as any, encrypted!).catch((error: any) => {
+        expect(error.message).toBe('this is an error');
+      });
 
       expect(decrypted).toEqual(source);
     });
@@ -105,9 +124,9 @@ describe('Behavior: AES-256 Encrypt', () => {
 
     it('should skip decryption if payload is not an AES envelope', async () => {
       const raw = { not: 'encrypted' };
-      const out = await behavior.decryptState({} as any, raw);
-
-      expect(out).toBe(raw);
+      await expectAsync(behavior.decryptState({} as any, raw)).toBeRejectedWithError(
+        '[NgVault] Invalid encrypted envelope. Expected shape { v, alg: "AES-256-GCM", iv, data }.'
+      );
     });
 
     it('should fail-safe and return encrypted value when decryption fails', async () => {
@@ -121,8 +140,7 @@ describe('Behavior: AES-256 Encrypt', () => {
         data: 'BB=='
       };
 
-      const result = await behavior.decryptState({} as any, fakeEnvelope as any);
-      expect(result).toBe(fakeEnvelope); // failsafe: return raw encrypted
+      await expectAsync(behavior.decryptState({} as any, fakeEnvelope as any)).toBeRejectedWithError('bad decrypt');
     });
 
     it('should not throw on malformed Base64', async () => {
@@ -133,8 +151,19 @@ describe('Behavior: AES-256 Encrypt', () => {
         data: '???'
       };
 
-      const out = await behavior.decryptState({} as any, malformed as any);
-      expect(out).toBe(malformed);
+      await expectAsync(behavior.decryptState({} as any, malformed as any)).toBeRejectedWithError(
+        `Failed to execute 'atob' on 'Window': The string to be decoded is not correctly encoded.`
+      );
+    });
+  });
+
+  describe('decrypt - no setSecret', () => {
+    it('should throw if decryptState is called before setSecret', async () => {
+      const data = { name: 'Ada' };
+
+      await expectAsync(behavior.decryptState({} as any, data)).toBeRejectedWithError(
+        '[NgVault] Cannot decrypt: AES secret not set. Call vault.setSecret("your secret") before state operations.'
+      );
     });
   });
 
@@ -152,8 +181,12 @@ describe('Behavior: AES-256 Encrypt', () => {
       const testValues = [{ a: 1 }, [1, 2, 3], 'hello world', 12345, { deep: { nested: { value: true } } }];
 
       for (const val of testValues) {
-        const enc = await behavior.encryptState({} as any, val as any);
-        const dec = await behavior.decryptState({} as any, enc as any);
+        const enc = await behavior.encryptState({} as any, val as any).catch((error: any) => {
+          expect(error.message).toBe('this is an error');
+        });
+        const dec = await behavior.decryptState({} as any, enc as any).catch((error: any) => {
+          expect(error.message).toBe('this is an error');
+        });
 
         expect(dec).toEqual(val);
       }
