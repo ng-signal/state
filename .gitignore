@@ -7,6 +7,10 @@
 /bazel-out
 /documentation
 
+projects/chrome-plugin/panel/index.html
+projects/chrome-plugin/panel/main.js
+projects/chrome-plugin/panel/styles.css
+
 # Node
 /node_modules
 npm-debug.log
