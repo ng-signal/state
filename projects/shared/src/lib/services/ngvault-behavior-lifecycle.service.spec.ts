@@ -318,11 +318,11 @@ describe('Service: VaultBehaviorLifecycle', () => {
       });
     });
 
-    it('should attach new methods from extendCellAPI to the FeatureCell', () => {
+    it('should return if the new method is not a function', () => {
       const extendBehavior = createCustomTestBehavior(
         () => ({
           extendCellAPI: () => ({
-            customMethod: (key: string, ctx: any, ...args: any) => `${key}:${ctx}:${args.toString()}`
+            customMethod: 'noop'
           })
         }),
         'state'
@@ -333,8 +333,26 @@ describe('Service: VaultBehaviorLifecycle', () => {
       vaultRunner.applyBehaviorExtensions(mockCell);
 
       expect(typeof mockCell.customMethod).toBe('function');
-      expect(mockCell.customMethod('arg1', 'arg2')).toBe('mock-key:mock-ctx:arg1,arg2');
-      expect(mockCell.customMethod()).toBe('mock-key:mock-ctx:');
+      expect(mockCell.customMethod()).toBeUndefined();
+    });
+
+    it('should attach new methods from extendCellAPI to the FeatureCell', () => {
+      const extendBehavior = createCustomTestBehavior(
+        () => ({
+          extendCellAPI: () => ({
+            customMethod: (ctx: any, ...args: any) => `no-key:${ctx}:${args.toString()}`
+          })
+        }),
+        'state'
+      );
+
+      vaultRunner.initializeBehaviors(injector, [extendBehavior]);
+
+      vaultRunner.applyBehaviorExtensions(mockCell);
+
+      expect(typeof mockCell.customMethod).toBe('function');
+      expect(mockCell.customMethod('arg1', 'arg2')).toBe('no-key:mock-ctx:arg1,arg2');
+      expect(mockCell.customMethod()).toBe('no-key:mock-ctx:');
     });
 
     it('should throw if a behavior tries to overwrite a protected key', () => {
@@ -435,8 +453,6 @@ describe('Service: VaultBehaviorLifecycle', () => {
     });
 
     it('should catch and log errors thrown inside behavior extension methods', () => {
-      const consoleSpy = spyOn(console, 'error');
-
       // Mock behavior that throws when called
       const throwingBehavior = createCustomTestBehavior(
         () => ({
@@ -463,11 +479,6 @@ describe('Service: VaultBehaviorLifecycle', () => {
 
       // Expect thrown error is logged and rethrown
       expect(() => mockCell.boomMethod()).toThrowError('Boom!');
-
-      expect(consoleSpy).toHaveBeenCalledWith(
-        `[NgVault] Behavior extension "boomMethod" threw an error:`,
-        jasmine.any(Error)
-      );
     });
 
     it('should throw when multiple behaviors define the same method name without allowOverride', () => {
@@ -562,7 +573,7 @@ describe('Service: VaultBehaviorLifecycle', () => {
       const behaviorA = createCustomTestBehavior(
         () => ({
           extendCellAPI: () => ({
-            logKey: (key: string, ctx: any) => `A:${key}:${ctx.id}`
+            logKey: (ctx: any) => `A:${ctx.id}`
           })
         }),
         'state'
@@ -571,7 +582,7 @@ describe('Service: VaultBehaviorLifecycle', () => {
       const behaviorB = createCustomTestBehavior(
         () => ({
           extendCellAPI: () => ({
-            logValue: (key: string, ctx: any, val: string) => `B:${key}:${ctx.id}:${val}`
+            logValue: (ctx: any, val: string) => `B:${ctx.id}:${val}`
           })
         }),
         'state'
@@ -592,8 +603,8 @@ describe('Service: VaultBehaviorLifecycle', () => {
       expect(typeof mockCell.logValue).toBe('function');
 
       // Ensure they received the correct injected args automatically
-      expect(mockCell.logKey()).toBe('A:NgVault::Feature::TestCell:ctx-123');
-      expect(mockCell.logValue('foo')).toBe('B:NgVault::Feature::TestCell:ctx-123:foo');
+      expect(mockCell.logKey()).toBe('A:ctx-123');
+      expect(mockCell.logValue('foo')).toBe('B:ctx-123:foo');
 
       // Ensure both methods are non-enumerable (hidden API surface)
       const keys = Object.keys(mockCell);

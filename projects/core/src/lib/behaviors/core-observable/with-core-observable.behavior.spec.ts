@@ -17,7 +17,6 @@ describe('Behavior: withCoreObservableBehavior', () => {
   let mockBackend: HttpTestingController;
   let ctx: NgVaultBehaviorContext<TestModel[]>;
   let behavior: ReturnType<typeof withCoreObservableBehavior>;
-  let key = 'NgVault::Core::FromObservable';
   let httpClient: any;
 
   beforeEach(() => {
@@ -60,7 +59,7 @@ describe('Behavior: withCoreObservableBehavior', () => {
 
     const result: any[] = [];
 
-    api?.fromObservable(key, ctx, source$).subscribe(
+    api?.fromObservable(ctx, source$).subscribe(
       (res) => result.push(res),
       fail,
       async () => {
@@ -87,7 +86,7 @@ describe('Behavior: withCoreObservableBehavior', () => {
     const result: any[] = [];
     let errValue: any;
 
-    api?.fromObservable(key, ctx, source$).subscribe({
+    api?.fromObservable(ctx, source$).subscribe({
       next: (res) => result.push(res),
       error: (err) => (errValue = err)
     });
@@ -110,7 +109,7 @@ describe('Behavior: withCoreObservableBehavior', () => {
     const source$ = httpClient.get('/api/data');
 
     const result: any[] = [];
-    api?.fromObservable(key, ctx, source$).subscribe(
+    api?.fromObservable(ctx, source$).subscribe(
       (res) => result.push(res),
       fail,
       async () => {
@@ -135,7 +134,7 @@ describe('Behavior: withCoreObservableBehavior', () => {
     const result: any[] = [];
     let errValue: any;
 
-    api?.fromObservable(key, ctx, source$).subscribe({
+    api?.fromObservable(ctx, source$).subscribe({
       next: (res) => result.push(res),
       error: (err) => (errValue = err)
     });

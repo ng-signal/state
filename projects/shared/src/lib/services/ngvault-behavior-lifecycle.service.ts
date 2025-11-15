@@ -18,26 +18,6 @@ class VaultBehaviorRunnerClass implements NgVaultBehaviorRunner {
     this.#cellKey = cellKey;
   }
 
-  //eslint-disable-next-line
-  getBehaviorExtensions<T>(): Record<string, any> {
-    //eslint-disable-next-line
-    const out: Record<string, any> = {};
-
-    for (const behavior of this.#behaviors) {
-      const ext = behavior.extendCellAPI?.();
-      if (!ext || typeof ext !== 'object') continue;
-
-      // Merge extension functions by key
-      for (const [name, fn] of Object.entries(ext)) {
-        if (typeof fn === 'function') {
-          out[name] = fn;
-        }
-      }
-    }
-
-    return out;
-  }
-
   initializeBehaviors<T>(injector: Injector, behaviors: Array<NgVaultBehaviorFactory<T>>): NgVaultBehavior<T>[] {
     if (this.#initialized)
       throw new Error('[NgVault] VaultBehaviorRunner already initialized — cannot reissue core behavior ID.');
@@ -152,7 +132,7 @@ class VaultBehaviorRunnerClass implements NgVaultBehaviorRunner {
           //eslint-disable-next-line
           value: (...args: any[]) => {
             try {
-              if (!fn) return;
+              if (typeof fn !== 'function') return;
               return fn(cell.ctx!, ...args);
             } catch (err) {
               ngVaultError(`[NgVault] Behavior extension "${key}" threw an error:`, err);

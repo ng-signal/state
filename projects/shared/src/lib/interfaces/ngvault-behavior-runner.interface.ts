@@ -7,7 +7,4 @@ import { NgVaultBehavior } from './ngvault-behavior.interface';
 export interface NgVaultBehaviorRunner<T = any> {
   initializeBehaviors<T>(injector: Injector, factories: Array<NgVaultBehaviorFactory<T>>): NgVaultBehavior<T>[];
   applyBehaviorExtensions<T>(cell: NgVaultFeatureCell<T>): void;
-
-  // eslint-disable-next-line
-  getBehaviorExtensions<T>(): Record<string, any>;
 }

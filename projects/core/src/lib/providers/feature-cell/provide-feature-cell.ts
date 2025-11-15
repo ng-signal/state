@@ -131,6 +131,9 @@ export function provideFeatureCell<Service, T>(
         _ngVaultMonitor.endDestroy(_cellKey, 'core', ctx);
       };
 
+      // Angular DI teardown
+      _destroyRef.onDestroy(() => _destroy());
+
       const _normalizeIncoming = <T>(
         incoming: NgVaultStateInputType<T>
       ): NgVaultStateType<T> | HttpResourceRef<T> | null => {
@@ -199,11 +202,6 @@ export function provideFeatureCell<Service, T>(
         );
 
         _behaviorRunner.applyBehaviorExtensions(cell);
-        const behaviorExts = _behaviorRunner.getBehaviorExtensions?.();
-        if (behaviorExts) {
-          // eslint-disable-next-line
-          Object.assign(cell as any, behaviorExts);
-        }
 
         const persisted = _orchestrator.loadPersistedState(ctx);
 
@@ -221,9 +219,6 @@ export function provideFeatureCell<Service, T>(
 
         _ngVaultMonitor.endInitialized(_cellKey, 'core', ctx);
       };
-
-      // Angular DI teardown
-      _destroyRef.onDestroy(() => _destroy());
 
       // Create the base FeatureCell instance
       const cell: NgVaultFeatureCell<T> = {
