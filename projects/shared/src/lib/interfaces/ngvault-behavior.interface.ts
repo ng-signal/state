@@ -4,8 +4,7 @@ import { NgVaultBehaviorTypes } from '../types/ngvault-behavior.type';
 
 // Reusable function type each extension provides
 // eslint-disable-next-line
-type BehaviorExtFn<T = unknown> = (key: string, ctx: NgVaultBehaviorContext<T>, ...args: any[]) => unknown;
-
+export type BehaviorExtFn<T = unknown> = (ctx: NgVaultBehaviorContext<T>, ...args: any[]) => unknown;
 // The extension object a behavior may return
 export type NgVaultBehaviorExtension<T = unknown> = Partial<Record<string, BehaviorExtFn<T>>>;
 
@@ -30,3 +29,13 @@ export interface NgVaultBehaviorFactory<
   critical: boolean;
   type: NgVaultBehaviorTypes;
 }
+
+export type BehaviorExtensionOf<B> =
+  // eslint-disable-next-line
+  B extends NgVaultBehaviorFactory<any, infer E> ? E : B extends NgVaultBehavior<any, infer E> ? E : {};
+
+// eslint-disable-next-line
+export type MergeBehaviorExtensions<B extends readonly any[]> = B extends readonly [infer H, ...infer R]
+  ? BehaviorExtensionOf<H> & MergeBehaviorExtensions<R>
+  : // eslint-disable-next-line
+    {};

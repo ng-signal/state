@@ -1,13 +1,13 @@
 import { Injector, provideZonelessChangeDetection, runInInjectionContext } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
-import { defineNgVaultBehaviorKey, NgVaultBehaviorFactoryContext, NgVaultBehaviorTypes } from '@ngvault/shared';
+import { defineNgVaultBehaviorKey, NgVaultBehaviorLifecycleService, NgVaultBehaviorTypes } from '@ngvault/shared';
 import { provideVaultTesting } from '@ngvault/testing';
 import { Aes256EncryptBehavior, withAes256EncryptBehavior } from './with-aes256-encrypt.behavior';
 
 describe('Behavior: AES-256 Encrypt', () => {
   let behavior: Aes256EncryptBehavior<any>;
-  let context: NgVaultBehaviorFactoryContext;
   let injector: Injector;
+  let cell: any;
 
   const SECRET = 'my-test-secret';
 
@@ -18,13 +18,16 @@ describe('Behavior: AES-256 Encrypt', () => {
 
     injector = TestBed.inject(Injector);
 
-    context = {
-      injector: {} as any,
-      type: NgVaultBehaviorTypes.Encrypt
-    } as any;
+    const ngVaultBehaviorLifecycleService = NgVaultBehaviorLifecycleService('cell key');
+    cell = {};
 
     runInInjectionContext(injector, () => {
-      behavior = withAes256EncryptBehavior(SECRET)(context) as Aes256EncryptBehavior<any>;
+      cell.behaviors = ngVaultBehaviorLifecycleService.initializeBehaviors(injector, [
+        withAes256EncryptBehavior as any
+      ]);
+      ngVaultBehaviorLifecycleService.applyBehaviorExtensions(cell);
+      behavior = cell.behaviors[0];
+      cell.setSecret(SECRET);
     });
   });
 
@@ -32,6 +35,20 @@ describe('Behavior: AES-256 Encrypt', () => {
     expect(behavior.type).toBe(NgVaultBehaviorTypes.Encrypt);
     expect(behavior.key).toBe(defineNgVaultBehaviorKey('Core', 'Aes256Encrypt'));
     expect(behavior.critical).toBeFalse();
+  });
+
+  describe('invalid secrets', () => {
+    it('should reject if secret is invalid', async () => {
+      await expectAsync(cell.setSecret(undefined as any)).toBeRejectedWithError(
+        '[NgVault] Secret must be a non-empty string'
+      );
+    });
+
+    it('should reject if secret is invalid', async () => {
+      await expectAsync(cell.setSecret('  \t\n\r   ')).toBeRejectedWithError(
+        '[NgVault] Secret must be a non-empty string'
+      );
+    });
   });
 
   describe('encrypt', () => {
@@ -122,19 +139,16 @@ describe('Behavior: AES-256 Encrypt', () => {
   });
 
   describe('encrypt and decrypt', () => {
-    let behavior: Aes256EncryptBehavior<any>;
-
     beforeEach(() => {
       spyOn(crypto, 'getRandomValues').and.callFake(<T extends ArrayBufferView>(array: T): T => {
         const u8 = new Uint8Array(array.buffer, array.byteOffset, array.byteLength);
         u8.fill(9); // deterministic bytes
         return array;
       });
-
-      behavior = new Aes256EncryptBehavior({} as any, 'mysecret');
     });
 
     it('should round-trip encrypt → decrypt for a variety of values', async () => {
+      cell.setSecret('mysecret');
       const testValues = [{ a: 1 }, [1, 2, 3], 'hello world', 12345, { deep: { nested: { value: true } } }];
 
       for (const val of testValues) {

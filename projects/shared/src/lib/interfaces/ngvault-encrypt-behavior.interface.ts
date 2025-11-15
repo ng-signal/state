@@ -5,4 +5,5 @@ import { NgVaultBehavior } from './ngvault-behavior.interface';
 export interface NgVaultEncryptBehavior<T> extends NgVaultBehavior<T> {
   type: 'encrypt';
   encryptState(ctx: NgVaultBehaviorContext<T>, current: T): Promise<T | undefined> | T | undefined;
+  decryptState(ctx: NgVaultBehaviorContext<T>, encrypted: T): Promise<T | undefined> | T | undefined;
 }

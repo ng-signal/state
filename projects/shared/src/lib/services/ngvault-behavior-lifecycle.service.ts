@@ -1,9 +1,8 @@
 // projects/core/src/lib/services/vault-behavior-lifecycle.service.ts
 import { Injector } from '@angular/core';
-import { validateNgVaultBehaviorKey } from '@ngvault/shared';
+import { ngVaultError, ngVaultWarn, validateNgVaultBehaviorKey } from '@ngvault/shared';
 import { PROTECTED_FEATURE_CELL_KEYS } from '../constants/protected-feature-cell-keys.constant';
 import { NgVaultBehaviorFactoryContext } from '../contexts/ngvault-behavior-factory.context';
-import { NgVaultBehaviorContext } from '../contexts/ngvault-behavior.context';
 import { NgVaultBehaviorRunner } from '../interfaces/ngvault-behavior-runner.interface';
 import { NgVaultBehavior } from '../interfaces/ngvault-behavior.interface';
 import { NgVaultFeatureCell } from '../models/feature-cell.model';
@@ -17,6 +16,26 @@ class VaultBehaviorRunnerClass implements NgVaultBehaviorRunner {
 
   constructor(cellKey: string) {
     this.#cellKey = cellKey;
+  }
+
+  //eslint-disable-next-line
+  getBehaviorExtensions<T>(): Record<string, any> {
+    //eslint-disable-next-line
+    const out: Record<string, any> = {};
+
+    for (const behavior of this.#behaviors) {
+      const ext = behavior.extendCellAPI?.();
+      if (!ext || typeof ext !== 'object') continue;
+
+      // Merge extension functions by key
+      for (const [name, fn] of Object.entries(ext)) {
+        if (typeof fn === 'function') {
+          out[name] = fn;
+        }
+      }
+    }
+
+    return out;
   }
 
   initializeBehaviors<T>(injector: Injector, behaviors: Array<NgVaultBehaviorFactory<T>>): NgVaultBehavior<T>[] {
@@ -124,21 +143,19 @@ class VaultBehaviorRunnerClass implements NgVaultBehaviorRunner {
         }
 
         if (alreadyDefined && canOverride) {
-          //eslint-disable-next-line
-          console.warn(`[NgVault] Behavior "${behavior.key}" is overriding method "${key}" (explicitly allowed).`);
+          ngVaultWarn(`[NgVault] Behavior "${behavior.key}" is overriding method "${key}" (explicitly allowed).`);
           //eslint-disable-next-line
           delete (cell as any)[key]; // always safe now
         }
 
-        // Always configurable for future safe overrides
         Object.defineProperty(cell, key, {
           //eslint-disable-next-line
           value: (...args: any[]) => {
             try {
-              return fn?.(cell.key as string, cell.ctx as NgVaultBehaviorContext<T>, ...args);
+              if (!fn) return;
+              return fn(cell.ctx!, ...args);
             } catch (err) {
-              //eslint-disable-next-line
-              console.error(`[NgVault] Behavior extension "${key}" threw an error:`, err);
+              ngVaultError(`[NgVault] Behavior extension "${key}" threw an error:`, err);
               throw err;
             }
           },

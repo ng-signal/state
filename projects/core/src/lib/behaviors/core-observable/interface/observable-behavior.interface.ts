@@ -5,9 +5,5 @@ export interface ObservableBehaviorExtension<T> {
   // eslint-disable-next-line
   [key: string]: (...args: any[]) => unknown;
 
-  fromObservable: (
-    key: string,
-    ctx: NgVaultBehaviorContext<T>,
-    source$: Observable<T>
-  ) => Observable<VaultSignalRef<T>>;
+  fromObservable: (ctx: NgVaultBehaviorContext<T>, source$: Observable<T>) => Observable<VaultSignalRef<T>>;
 }

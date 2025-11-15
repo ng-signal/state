@@ -33,6 +33,8 @@ export function provideFeatureCell<Service, T>(
 ): Provider[] {
   const token = getOrCreateFeatureCellToken<T>(featureCellDescriptor.key, false);
 
+  // eslint-disable-next-line
+  (token as any).__ngvault_behaviors = behaviors;
   const featureCellProvider: Provider = {
     provide: token,
     useFactory: (): NgVaultFeatureCell<T> => {
@@ -197,6 +199,11 @@ export function provideFeatureCell<Service, T>(
         );
 
         _behaviorRunner.applyBehaviorExtensions(cell);
+        const behaviorExts = _behaviorRunner.getBehaviorExtensions?.();
+        if (behaviorExts) {
+          // eslint-disable-next-line
+          Object.assign(cell as any, behaviorExts);
+        }
 
         const persisted = _orchestrator.loadPersistedState(ctx);
 

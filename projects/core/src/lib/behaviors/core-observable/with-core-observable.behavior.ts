@@ -2,6 +2,7 @@ import { signal } from '@angular/core';
 import {
   defineNgVaultBehaviorKey,
   NgVaultBehavior,
+  NgVaultBehaviorContext,
   NgVaultBehaviorFactory,
   NgVaultBehaviorFactoryContext,
   NgVaultBehaviorTypes,
@@ -45,7 +46,7 @@ class CoreObservableBehavior<T> implements NgVaultBehavior<T, ObservableBehavior
   */
 
     return {
-      fromObservable: (key, ctx, source$) =>
+      fromObservable: (ctx: NgVaultBehaviorContext<T>, source$: Observable<T>) =>
         new Observable<VaultSignalRef<T>>((observer) => {
           ngVaultDebug('fromObservable → start');
 
