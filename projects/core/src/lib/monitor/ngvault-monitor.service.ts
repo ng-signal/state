@@ -142,6 +142,22 @@ export class NgVaultMonitor {
     this.#emitEvent(cell, behaviorKey, 'endClearValue', ctx.state);
   }
 
+  startEncrypt<T>(cell: string, behaviorKey: string, ctx: Readonly<NgVaultBehaviorContext<T>>) {
+    this.#emitEvent(cell, behaviorKey, 'startEncrypt', ctx.state);
+  }
+
+  endEncrypt<T>(cell: string, behaviorKey: string, ctx: Readonly<NgVaultBehaviorContext<T>>) {
+    this.#emitEvent(cell, behaviorKey, 'endEncrypt', ctx.state);
+  }
+
+  startDecrypt<T>(cell: string, behaviorKey: string, ctx: Readonly<NgVaultBehaviorContext<T>>) {
+    this.#emitEvent(cell, behaviorKey, 'startDecrypt', ctx.state);
+  }
+
+  endDecrypt<T>(cell: string, behaviorKey: string, ctx: Readonly<NgVaultBehaviorContext<T>>, payload?: unknown) {
+    this.#emitEvent(cell, behaviorKey, 'endDecrypt', ctx.state, payload);
+  }
+
   registerCell(cellKey: string, insight?: NgVaultInsightDefinition): void {
     const hasInsight = !!insight;
 

@@ -97,6 +97,11 @@ describe('Service: Vault Monitor', () => {
       vaultMonitor.endLoadPersist?.('vault1', 'end load persist', ctx);
       vaultMonitor.startClearValue?.('vault1', 'start clear value', ctx);
       vaultMonitor.endClearValue?.('vault1', 'end clear value', ctx);
+      vaultMonitor.startEncrypt?.('vault1', 'start encrpyt', ctx);
+      vaultMonitor.endEncrypt?.('vault1', 'end encrpyt', ctx);
+      vaultMonitor.startDecrypt?.('vault1', 'start decrypt', ctx);
+      vaultMonitor.endDecrypt?.('vault1', 'start decrypt', ctx);
+      vaultMonitor.endDecrypt?.('vault1', 'start decrypt', ctx, Object({ noop: true }));
 
       expect(emitted).toEqual([
         Object({
@@ -303,6 +308,47 @@ describe('Service: Vault Monitor', () => {
           type: 'lifecycle:end:clearvalue',
           timestamp: 'timestamp-removed',
           state: Object({ isLoading: true, value: 'hello', error: null, hasValue: false })
+        }),
+        Object({
+          id: 'id-removed',
+          cell: 'vault1',
+          behaviorKey: 'start encrpyt',
+          type: 'stage:start:encrypt',
+          timestamp: 'timestamp-removed',
+          state: Object({ isLoading: true, value: 'hello', error: null, hasValue: false })
+        }),
+        Object({
+          id: 'id-removed',
+          cell: 'vault1',
+          behaviorKey: 'end encrpyt',
+          type: 'stage:end:encrypt',
+          timestamp: 'timestamp-removed',
+          state: Object({ isLoading: true, value: 'hello', error: null, hasValue: false })
+        }),
+        Object({
+          id: 'id-removed',
+          cell: 'vault1',
+          behaviorKey: 'start decrypt',
+          type: 'lifecycle:start:decrypt',
+          timestamp: 'timestamp-removed',
+          state: Object({ isLoading: true, value: 'hello', error: null, hasValue: false })
+        }),
+        Object({
+          id: 'id-removed',
+          cell: 'vault1',
+          behaviorKey: 'start decrypt',
+          type: 'lifecycle:end:decrypt',
+          timestamp: 'timestamp-removed',
+          state: Object({ isLoading: true, value: 'hello', error: null, hasValue: false })
+        }),
+        Object({
+          id: 'id-removed',
+          cell: 'vault1',
+          behaviorKey: 'start decrypt',
+          type: 'lifecycle:end:decrypt',
+          timestamp: 'timestamp-removed',
+          state: Object({ isLoading: true, value: 'hello', error: null, hasValue: false }),
+          payload: Object({ noop: true })
         })
       ]);
     });

@@ -59,6 +59,8 @@ describe('Provider: Feature Cell - destroy', () => {
       vault.initialize();
     });
 
+    await flushMicrotasksZoneless();
+
     vault.replaceState({ loading: true, value: [1, 2, 3], error: { message: 'oops' } as any });
 
     expect(vault.state.isLoading()).toBeTrue();

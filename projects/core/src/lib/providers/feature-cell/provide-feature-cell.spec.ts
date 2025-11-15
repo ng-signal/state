@@ -3,9 +3,9 @@ import {
   ExistingProvider,
   FactoryProvider,
   Injector,
-  ValueProvider,
   provideZonelessChangeDetection,
-  runInInjectionContext
+  runInInjectionContext,
+  ValueProvider
 } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { NgVaultEventBus } from '@ngvault/dev-tools';
@@ -424,8 +424,13 @@ describe('Provider: Feature Cell (core vault functionality)', () => {
       vault = (provider as any).useFactory();
       vault.initialize();
     });
-    expect(vault.state.isLoading()).toBeFalse();
+
+    await flushMicrotasksZoneless();
+
+    expect(vault.state.value()).toEqual([1, 2, 3]);
     expect(vault.state.hasValue()).toBeTrue();
+    expect(vault.state.isLoading()).toBeFalse();
+    expect(vault.state.error()).toBeNull();
     vault.mergeState({ loading: true });
 
     expect(vault.state.isLoading()).toBeTrue();
@@ -446,8 +451,13 @@ describe('Provider: Feature Cell (core vault functionality)', () => {
       vault.initialize();
     });
 
+    await flushMicrotasksZoneless();
+
     expect(vault.state.error()).toBeNull();
+    expect(vault.state.value()).toEqual([1, 2, 3]);
     expect(vault.state.hasValue()).toBeTrue();
+    expect(vault.state.isLoading()).toBeFalse();
+
     const testError = { message: 'Something went wrong' } as any;
     vault.mergeState({ error: testError });
     expect(vault.state.isLoading()).toBeFalse();

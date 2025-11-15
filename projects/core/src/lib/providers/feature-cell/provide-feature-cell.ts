@@ -180,7 +180,7 @@ export function provideFeatureCell<Service, T>(
         }
       };
 
-      const _initialize = (reducers: NgVaultReducerFunction<T>[] = []) => {
+      const _initialize = async (reducers: NgVaultReducerFunction<T>[] = []): Promise<void> => {
         _ngVaultMonitor.registerCell(_cellKey, featureCellDescriptor.insights);
 
         _ngVaultMonitor.startInitialized(_cellKey, 'core', ctx);
@@ -203,7 +203,7 @@ export function provideFeatureCell<Service, T>(
 
         _behaviorRunner.applyBehaviorExtensions(cell);
 
-        const persisted = _orchestrator.loadPersistedState(ctx);
+        const persisted = await _orchestrator.loadPersistedState(ctx);
 
         if (persisted !== undefined) {
           _value.set(persisted as T);

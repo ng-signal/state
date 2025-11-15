@@ -259,17 +259,19 @@ export class VaultOrchestrator<T> {
     }
   }
 
-  public loadPersistedState(ctx: NgVaultBehaviorContext<T>): T | undefined {
+  public async loadPersistedState(ctx: NgVaultBehaviorContext<T>): Promise<T | undefined> {
     const persistBehaviors = this.behaviors.filter(
       (b) => b.type === NgVaultBehaviorTypes.Persist
     ) as NgVaultPersistBehavior<T>[];
 
+    let loaded: T | undefined = undefined;
+
     for (const behavior of persistBehaviors) {
       try {
         this.#ngVaultMonitor.startLoadPersist(this.cellKey, behavior.key, ctx);
-        const loaded = behavior.loadState?.();
+        loaded = behavior.loadState?.();
         this.#ngVaultMonitor.endLoadPersist(this.cellKey, behavior.key, ctx);
-        if (loaded !== undefined) return loaded;
+        if (loaded !== undefined) break;
         // eslint-disable-next-line
       } catch (err: any) {
         this.#ngVaultMonitor.error(this.cellKey, behavior.key, ctx, err);
@@ -277,6 +279,34 @@ export class VaultOrchestrator<T> {
       }
     }
 
-    return undefined;
+    // ─────────────────────────────────────
+    // NEW: Decrypt if encryption behaviors exist
+    // ─────────────────────────────────────
+    const decryptBehaviors = this.behaviors.filter(
+      (behavior) => behavior.type === NgVaultBehaviorTypes.Encrypt
+    ) as unknown as NgVaultEncryptBehavior<T>[];
+
+    if (loaded !== undefined && decryptBehaviors.length > 0) {
+      for (const behavior of decryptBehaviors) {
+        try {
+          this.#ngVaultMonitor.startDecrypt(this.cellKey, behavior.key, ctx);
+          const decrypted = await behavior.decryptState?.(ctx, loaded);
+
+          if (decrypted !== undefined) {
+            this.#ngVaultMonitor.endDecrypt(this.cellKey, behavior.key, ctx);
+            loaded = decrypted;
+          } else {
+            this.#ngVaultMonitor.endDecrypt(this.cellKey, behavior.key, ctx, { noop: true });
+          }
+          // eslint-disable-next-line
+        } catch (err: any) {
+          this.#ngVaultMonitor.error(this.cellKey, behavior.key, ctx, err);
+          ngVaultWarn(`"[NgVault] encrypt.decryptState()" for ${behavior.key} failed with ${err.message}`);
+          return undefined;
+        }
+      }
+    }
+
+    return loaded;
   }
 }

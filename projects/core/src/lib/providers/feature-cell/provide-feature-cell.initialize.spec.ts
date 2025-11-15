@@ -46,14 +46,16 @@ describe('Provider: Feature Cell - initialize', () => {
     runInInjectionContext(injector, () => {
       providers = provideFeatureCell(class DummyService {}, { key: 'double-init', initial: [], insights: {} as any });
     });
+    await flushMicrotasksZoneless();
     const provider = providers.find((p: any) => typeof p.useFactory === 'function');
-    let vault!: NgVaultFeatureCell<any>;
 
-    runInInjectionContext(injector, () => {
-      vault = (provider as any).useFactory();
-      vault.initialize();
-      expect(() => vault.initialize()).toThrowError('[NgVault] FeatureCell "double-init" already initialized.');
-    });
+    await expectAsync(
+      runInInjectionContext(injector, async () => {
+        const vault = (provider as any).useFactory();
+        await vault.initialize(); // error thrown inside here
+        await vault.initialize(); // error thrown inside here
+      })
+    ).toBeRejectedWithError('[NgVault] FeatureCell "double-init" already initialized.');
 
     await flushMicrotasksZoneless();
 

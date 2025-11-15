@@ -51,8 +51,8 @@ describe('Provider: Feature Cell: fromObservable', () => {
   });
 
   it('should return independent ResourceSignal when fromObservable() succeeds', () => {
-    expect(vault.state.hasValue()).toBeTrue();
-    expect(vault.state.value()).toEqual([]);
+    expect(vault.state.hasValue()).toBeFalse();
+    expect(vault.state.value()).toBeUndefined();
     expect(vault.state.isLoading()).toBeFalse();
     expect(vault.state.error()).toBeNull();
 
@@ -84,8 +84,8 @@ describe('Provider: Feature Cell: fromObservable', () => {
     expect(resource.error()).toBeNull();
     expect(resource.value()).toBeUndefined();
 
-    expect(vault.state.value()).toEqual([]);
-    expect(vault.state.hasValue()).toBeTrue();
+    expect(vault.state.value()).toBeUndefined();
+    expect(vault.state.hasValue()).toBeFalse();
     expect(vault.state.isLoading()).toBeFalse();
     expect(vault.state.error()).toBeNull();
 
@@ -96,8 +96,8 @@ describe('Provider: Feature Cell: fromObservable', () => {
     expect(resource.value()).toEqual(data);
     expect(resource.error()).toBeNull();
 
-    expect(vault.state.value()).toEqual([]);
-    expect(vault.state.hasValue()).toBeTrue();
+    expect(vault.state.value()).toBeUndefined();
+    expect(vault.state.hasValue()).toBeFalse();
 
     expect(vault.state.isLoading()).toBeFalse();
     expect(vault.state.error()).toBeNull();
@@ -146,6 +146,14 @@ describe('Provider: Feature Cell: fromObservable', () => {
     expect(lastRef.error()).toBeNull();
     await flushMicrotasksZoneless();
 
-    expect(emitted).toEqual([]);
+    expect(emitted).toEqual([
+      Object({
+        id: 'id-removed',
+        cell: 'http',
+        behaviorKey: 'core',
+        type: 'lifecycle:end:initialized',
+        timestamp: 'timestamp-removed'
+      })
+    ]);
   });
 });

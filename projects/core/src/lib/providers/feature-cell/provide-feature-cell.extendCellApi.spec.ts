@@ -67,6 +67,8 @@ describe('Provider: Feature Cell - extendVCellApi', () => {
       ]);
     });
 
+    await flushMicrotasksZoneless();
+
     const provider = providers.find((p: any) => typeof p.useFactory === 'function');
     let vault!: NgVaultFeatureCell<any>;
 
@@ -75,6 +77,8 @@ describe('Provider: Feature Cell - extendVCellApi', () => {
       vault = (provider as any).useFactory();
       vault.initialize();
     });
+
+    await flushMicrotasksZoneless();
 
     // Step 4: Verify that the extension method was added
     expect(typeof (vault as any).sayHello).toBe('function');
@@ -92,7 +96,7 @@ describe('Provider: Feature Cell - extendVCellApi', () => {
     expect(emitted).toEqual([]);
   });
 
-  it('should throw when two behaviors define the same method name without allowOverride', () => {
+  it('should throw when two behaviors define the same method name without allowOverride', async () => {
     const behaviorA = () => ({
       type: 'state',
       key: 'NgVault::Testing::BehaviorA',
@@ -124,16 +128,19 @@ describe('Provider: Feature Cell - extendVCellApi', () => {
       ]);
     });
 
+    await flushMicrotasksZoneless();
+
     const provider = providers.find((p: any) => typeof p.useFactory === 'function');
 
-    expect(() => {
-      runInInjectionContext(injector, () => {
+    await expectAsync(
+      runInInjectionContext(injector, async () => {
         const vault = (provider as any).useFactory();
-        vault.initialize();
-      });
-    }).toThrowError(
+        await vault.initialize(); // error thrown inside here
+      })
+    ).toBeRejectedWithError(
       `[NgVault] Behavior "NgVault::Testing::BehaviorB" attempted to redefine method "shared" already provided by another behavior.`
     );
+
     expect(emitted).toEqual([]);
   });
 
@@ -183,6 +190,8 @@ describe('Provider: Feature Cell - extendVCellApi', () => {
       vault = (provider as any).useFactory();
       vault.initialize();
     });
+
+    await flushMicrotasksZoneless();
 
     // Step 5: Verify the overridden method exists
     expect(typeof (vault as any).shared).toBe('function');

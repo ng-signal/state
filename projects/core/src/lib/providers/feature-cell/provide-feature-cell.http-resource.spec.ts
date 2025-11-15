@@ -70,13 +70,12 @@ describe('Provider: Feature Cell Resource', () => {
       vault.replaceState(response);
       TestBed.tick();
 
-      expect(vault.state.value()).toEqual([]);
-      expect(vault.state.hasValue()).toBeTrue();
+      expect(vault.state.value()).toBeUndefined([]);
+      expect(vault.state.hasValue()).toBeFalse();
       expect(vault.state.isLoading()).toBeTrue();
       expect(vault.state.error()).toEqual(jasmine.any(Function));
 
       mockBackend.expectOne('/data').flush([{ id: 1, name: 'Ada' }]);
-      TestBed.tick();
       await flushMicrotasksZoneless();
 
       expect(vault.state.value()).toEqual([{ id: 1, name: 'Ada' }]);
@@ -85,6 +84,7 @@ describe('Provider: Feature Cell Resource', () => {
       expect(vault.state.hasValue()).toBeTrue();
 
       vault.replaceState(undefined);
+      await flushMicrotasksZoneless();
       TestBed.tick();
 
       expect(vault.state.value()).toBeUndefined();
@@ -125,13 +125,14 @@ describe('Provider: Feature Cell Resource', () => {
       TestBed.tick();
 
       // Before response arrives, value() throws → _data should remain undefined
-      expect(vault.state.value()).toEqual([]);
+      expect(vault.state.value()).toBeUndefined();
+      expect(vault.state.hasValue()).toBeFalse();
       expect(vault.state.isLoading()).toBeTrue();
-      expect(vault.state.hasValue()).toBeTrue();
+      expect(vault.state.error()).toBeNull();
 
       // Simulate backend returning a primitive (final else case)
       mockBackend.expectOne('/primitive').flush(42);
-      await TestBed.inject(ApplicationRef).whenStable();
+      await flushMicrotasksZoneless();
 
       // After flush, final else executes (`_data.set(next as VaultDataType<T>)`)
       expect(vault.state.value()).toBe(42);

@@ -40,6 +40,13 @@ export function createTestBehavior(type: NgVaultBehaviorTypes, emitted: any[], r
           encryptState: async () => {
             emitted.push('encrypt');
             return returnValue;
+          },
+          decryptState: async () => {
+            emitted.push('decrypt');
+            if (returnValue === 'throw-error') {
+              throw new Error(returnValue);
+            }
+            return returnValue;
           }
         };
 

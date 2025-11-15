@@ -64,6 +64,7 @@ describe('Provider: Feature Cell: reducers', () => {
     runInInjectionContext(injector, () => {
       vault.initialize([addActiveFlag, renameUser as any]);
     });
+    await flushMicrotasksZoneless();
 
     // Act — run reductions
     vault.replaceState({ value: { id: 1, name: 'Brian', active: true } });

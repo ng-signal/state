@@ -61,6 +61,7 @@ describe('Provider: Feature Cell (core vault functionality)', () => {
         vault = (provider as any).useFactory();
         vault.initialize();
       });
+      await flushMicrotasksZoneless();
 
       vault.replaceState({ loading: true, error: { message: 'fail' }, value: [1, 2, 3] });
       expect(vault.state.isLoading()).toBeTrue();
@@ -215,6 +216,7 @@ describe('Provider: Feature Cell (core vault functionality)', () => {
         vault = (provider as any).useFactory();
         vault.initialize();
       });
+      await flushMicrotasksZoneless();
 
       vault.replaceState({ loading: true, error: { message: 'fail' }, value: [1, 2, 3] });
       expect(vault.state.isLoading()).toBeTrue();
@@ -368,6 +370,7 @@ describe('Provider: Feature Cell (core vault functionality)', () => {
         vault = (provider as any).useFactory();
         vault.initialize();
       });
+      await flushMicrotasksZoneless();
 
       vault.replaceState({ loading: true, error: { message: 'fail' }, value: [1, 2, 3] });
       expect(vault.state.isLoading()).toBeTrue();
@@ -540,6 +543,7 @@ describe('Provider: Feature Cell (core vault functionality)', () => {
         vault = (provider as any).useFactory();
         vault.initialize();
       });
+      await flushMicrotasksZoneless();
 
       vault.mergeState({ loading: true, error: { message: 'fail' }, value: [1, 2, 3] });
       expect(vault.state.isLoading()).toBeTrue();
@@ -694,6 +698,7 @@ describe('Provider: Feature Cell (core vault functionality)', () => {
         vault = (provider as any).useFactory();
         vault.initialize();
       });
+      await flushMicrotasksZoneless();
 
       vault.mergeState({ loading: true, error: { message: 'fail' }, value: [1, 2, 3] });
       expect(vault.state.isLoading()).toBeTrue();
@@ -847,6 +852,8 @@ describe('Provider: Feature Cell (core vault functionality)', () => {
         vault = (provider as any).useFactory();
         vault.initialize();
       });
+
+      await flushMicrotasksZoneless();
 
       vault.mergeState({ loading: true, error: { message: 'fail' }, value: [1, 2, 3] });
       expect(vault.state.isLoading()).toBeTrue();
