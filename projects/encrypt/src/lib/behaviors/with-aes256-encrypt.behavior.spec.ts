@@ -1,11 +1,11 @@
 import { Injector, provideZonelessChangeDetection, runInInjectionContext } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
-import { defineNgVaultBehaviorKey, NgVaultBehaviorLifecycleService, NgVaultBehaviorTypes } from '@ngvault/shared';
+import { defineNgVaultBehaviorKey, NgVaultBehaviorTypes } from '@ngvault/shared';
 import { provideVaultTesting } from '@ngvault/testing';
-import { Aes256EncryptBehavior, withAes256EncryptBehavior } from './with-aes256-encrypt.behavior';
+import { withAes256EncryptBehavior } from './with-aes256-encrypt.behavior';
 
 describe('Behavior: AES-256 Encrypt', () => {
-  let behavior: Aes256EncryptBehavior<any>;
+  let behavior: any;
   let injector: Injector;
   let cell: any;
 
@@ -18,15 +18,17 @@ describe('Behavior: AES-256 Encrypt', () => {
 
     injector = TestBed.inject(Injector);
 
-    const ngVaultBehaviorLifecycleService = NgVaultBehaviorLifecycleService('cell key');
     cell = {};
 
     runInInjectionContext(injector, () => {
-      cell.behaviors = ngVaultBehaviorLifecycleService.initializeBehaviors(injector, [
-        withAes256EncryptBehavior as any
-      ]);
-      ngVaultBehaviorLifecycleService.applyBehaviorExtensions(cell);
-      behavior = cell.behaviors[0];
+      behavior = withAes256EncryptBehavior({
+        type: NgVaultBehaviorTypes.State,
+        injector,
+        featureCellKey: 'cell key'
+      });
+
+      const ext = behavior.extendCellAPI();
+      Object.assign(cell, ext);
     });
   });
 
@@ -52,7 +54,7 @@ describe('Behavior: AES-256 Encrypt', () => {
 
   describe('encrypt', () => {
     beforeEach(() => {
-      cell.setSecret(SECRET);
+      cell.setSecret({}, SECRET);
     });
 
     it('should encrypt a plain object into an envelope', async () => {
@@ -101,7 +103,7 @@ describe('Behavior: AES-256 Encrypt', () => {
 
   describe('Decrypt', () => {
     beforeEach(() => {
-      cell.setSecret(SECRET);
+      cell.setSecret({}, SECRET);
     });
 
     it('should decrypt an encrypted envelope back to original object', async () => {
@@ -177,7 +179,7 @@ describe('Behavior: AES-256 Encrypt', () => {
     });
 
     it('should round-trip encrypt → decrypt for a variety of values', async () => {
-      cell.setSecret('mysecret');
+      cell.setSecret({}, 'mysecret');
       const testValues = [{ a: 1 }, [1, 2, 3], 'hello world', 12345, { deep: { nested: { value: true } } }];
 
       for (const val of testValues) {
