@@ -10,6 +10,12 @@
     "inlineSources": true,
     "types": []
   },
-  "include": ["src/**/*.ts"],
+  "include": [
+    "src/**/*.ts",
+    "../core/src/lib/orchestrator/utils/ngvault-initialize-behavior.util.ts",
+    "../core/src/lib/orchestrator/utils/ngvault-initialize-behavior.util.spec.ts",
+    "../core/src/lib/interfaces/ngvault-behavior-initialization.interface.ts",
+    "../core/src/lib/constants/protected-feature-cell-keys.constant.ts"
+  ],
   "exclude": ["**/*.spec.ts"]
 }

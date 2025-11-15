@@ -3,7 +3,7 @@
   if (window.__ngVaultDevtoolsBridgeInjected) return;
   window.__ngVaultDevtoolsBridgeInjected = true;
 
-  console.log('[ngVault DevTools] bridge-inject.js executing in page context');
+  console.warn('[ngVault DevTools] bridge-inject.js executing in page context');
 
   function waitForNgVault() {
     const monitor = window.ngVaultMonitorInstance;
@@ -16,7 +16,7 @@
       return setTimeout(waitForNgVault, 500);
     }
 
-    console.log('[ngVault DevTools] Found monitor + event bus', { monitor, bus });
+    console.warn('[ngVault DevTools] Found monitor + event bus', { monitor, bus });
 
     try {
       // Enable global insights so we get state/payload/error
@@ -26,7 +26,7 @@
           wantsPayload: true,
           wantsErrors: true
         });
-        console.log('[ngVault DevTools] Global insights enabled');
+        console.warn('[ngVault DevTools] Global insights enabled');
       } else {
         console.warn('[ngVault DevTools] monitor.activateGlobalInsights not found');
       }
@@ -41,7 +41,7 @@
       return;
     }
 
-    console.log('[ngVault DevTools] Subscribing to NgVaultEventBus…');
+    console.warn('[ngVault DevTools] Subscribing to NgVaultEventBus…');
 
     observable.subscribe((event) => {
       window.postMessage(
@@ -53,7 +53,7 @@
       );
     });
 
-    console.log('[ngVault DevTools] Event bus subscription active');
+    console.warn('[ngVault DevTools] Event bus subscription active');
   }
 
   waitForNgVault();

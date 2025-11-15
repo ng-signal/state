@@ -23,7 +23,7 @@ export interface NgVaultFeatureCell<T> extends SignalVaultModel<T> {
   /** @internal – used by NgVault for behavior extension context */
   readonly ctx?: NgVaultBehaviorContext<T>;
   /** @internal – the unique feature key for this cell */
-  readonly key?: string;
+  readonly key: string;
 
   initialize(reducers?: NgVaultReducerFunction<T>[]): void;
 }

@@ -5,10 +5,13 @@ import { TestBed } from '@angular/core/testing';
 import { NgVaultEventBus } from '@ngvault/dev-tools';
 import { NgVaultBehaviorContext, NgVaultBehaviorTypes } from '@ngvault/shared';
 import {
-  createInitializedTestBehavior,
+  createTestBehavior,
   createTestEventListener,
   flushMicrotasksZoneless,
-  provideVaultTesting
+  provideVaultTesting,
+  resetTestBehaviorKeys,
+  resetTestBehaviorUniqueKeys,
+  setTestBehaviorUniqueKeys
 } from '@ngvault/testing';
 import { NgVaultMonitor } from '../monitor/ngvault-monitor.service';
 import { VaultOrchestrator } from './ngvault.orchestrator';
@@ -19,10 +22,15 @@ describe('Orcestrator: Vault - Load Persist', () => {
   let calls: string[];
   let injector: any;
   let ngVaultMonitor: any;
+  let cell: any;
 
   const emitted: any[] = [];
   let stopListening: any;
   let eventBus: any;
+
+  beforeAll(() => {
+    setTestBehaviorUniqueKeys();
+  });
 
   beforeEach(() => {
     calls = [];
@@ -44,29 +52,36 @@ describe('Orcestrator: Vault - Load Persist', () => {
       ]
     });
 
+    cell = { key: 'cell key' };
+
     injector = TestBed.inject(Injector);
     ngVaultMonitor = TestBed.inject(NgVaultMonitor);
-    ngVaultMonitor.registerCell('cell key', { wantsPayload: true });
+    ngVaultMonitor.registerCell(cell.key, { wantsPayload: true });
 
     eventBus = TestBed.inject(NgVaultEventBus);
     stopListening = createTestEventListener(eventBus, emitted);
   });
 
   afterEach(() => {
+    resetTestBehaviorKeys();
     stopListening();
+  });
+
+  afterAll(() => {
+    resetTestBehaviorUniqueKeys();
   });
 
   it('should load state without decrypt', async () => {
     // Make behaviors using the helper + real reducer behavior
     const behaviors = [
-      createInitializedTestBehavior(NgVaultBehaviorTypes.State, calls),
-      createInitializedTestBehavior(NgVaultBehaviorTypes.Reduce, calls),
-      createInitializedTestBehavior(NgVaultBehaviorTypes.Persist, calls, Object({ data: true }))
+      createTestBehavior(NgVaultBehaviorTypes.State, calls),
+      createTestBehavior(NgVaultBehaviorTypes.Reduce, calls),
+      createTestBehavior(NgVaultBehaviorTypes.Persist, calls, Object({ data: true }))
     ] as any;
 
     // Create orchestrator
     runInInjectionContext(injector, () => {
-      dispatcher = new VaultOrchestrator<any>('cell key', behaviors, [], injector, ngVaultMonitor);
+      dispatcher = new VaultOrchestrator<any>(cell, behaviors, [], injector, ngVaultMonitor);
     });
 
     // Act — trigger reducer pipeline
@@ -87,14 +102,14 @@ describe('Orcestrator: Vault - Load Persist', () => {
       Object({
         id: 'id-removed',
         cell: 'cell key',
-        behaviorKey: 'NgVault::Test::Persist',
+        behaviorKey: 'NgVault::Test::Persist3',
         type: 'stage:start:loadpersist',
         timestamp: 'timestamp-removed'
       }),
       Object({
         id: 'id-removed',
         cell: 'cell key',
-        behaviorKey: 'NgVault::Test::Persist',
+        behaviorKey: 'NgVault::Test::Persist3',
         type: 'stage:end:loadpersist',
         timestamp: 'timestamp-removed'
       })
@@ -105,15 +120,15 @@ describe('Orcestrator: Vault - Load Persist', () => {
     it('should load state with a decrypt value', async () => {
       // Make behaviors using the helper + real reducer behavior
       const behaviors = [
-        createInitializedTestBehavior(NgVaultBehaviorTypes.State, calls),
-        createInitializedTestBehavior(NgVaultBehaviorTypes.Reduce, calls),
-        createInitializedTestBehavior(NgVaultBehaviorTypes.Encrypt, calls, Object({ decrypt: true })),
-        createInitializedTestBehavior(NgVaultBehaviorTypes.Persist, calls, Object({ persist: true }))
+        createTestBehavior(NgVaultBehaviorTypes.State, calls),
+        createTestBehavior(NgVaultBehaviorTypes.Reduce, calls),
+        createTestBehavior(NgVaultBehaviorTypes.Encrypt, calls, Object({ decrypt: true })),
+        createTestBehavior(NgVaultBehaviorTypes.Persist, calls, Object({ persist: true }))
       ] as any;
 
       // Create orchestrator
       runInInjectionContext(injector, () => {
-        dispatcher = new VaultOrchestrator<any>('cell key', behaviors, [], injector, ngVaultMonitor);
+        dispatcher = new VaultOrchestrator<any>(cell, behaviors, [], injector, ngVaultMonitor);
       });
 
       // Act — trigger reducer pipeline
@@ -135,28 +150,28 @@ describe('Orcestrator: Vault - Load Persist', () => {
         Object({
           id: 'id-removed',
           cell: 'cell key',
-          behaviorKey: 'NgVault::Test::Persist',
+          behaviorKey: 'NgVault::Test::Persist4',
           type: 'stage:start:loadpersist',
           timestamp: 'timestamp-removed'
         }),
         Object({
           id: 'id-removed',
           cell: 'cell key',
-          behaviorKey: 'NgVault::Test::Persist',
+          behaviorKey: 'NgVault::Test::Persist4',
           type: 'stage:end:loadpersist',
           timestamp: 'timestamp-removed'
         }),
         Object({
           id: 'id-removed',
           cell: 'cell key',
-          behaviorKey: 'NgVault::Test::Encrypt',
+          behaviorKey: 'NgVault::Test::Encrypt3',
           type: 'lifecycle:start:decrypt',
           timestamp: 'timestamp-removed'
         }),
         Object({
           id: 'id-removed',
           cell: 'cell key',
-          behaviorKey: 'NgVault::Test::Encrypt',
+          behaviorKey: 'NgVault::Test::Encrypt3',
           type: 'lifecycle:end:decrypt',
           timestamp: 'timestamp-removed'
         })
@@ -166,15 +181,15 @@ describe('Orcestrator: Vault - Load Persist', () => {
     it('should load state without a decrypt value', async () => {
       // Make behaviors using the helper + real reducer behavior
       const behaviors = [
-        createInitializedTestBehavior(NgVaultBehaviorTypes.State, calls),
-        createInitializedTestBehavior(NgVaultBehaviorTypes.Reduce, calls),
-        createInitializedTestBehavior(NgVaultBehaviorTypes.Persist, calls, Object({ persist: true })),
-        createInitializedTestBehavior(NgVaultBehaviorTypes.Encrypt, calls)
+        createTestBehavior(NgVaultBehaviorTypes.State, calls),
+        createTestBehavior(NgVaultBehaviorTypes.Reduce, calls),
+        createTestBehavior(NgVaultBehaviorTypes.Persist, calls, Object({ persist: true })),
+        createTestBehavior(NgVaultBehaviorTypes.Encrypt, calls)
       ] as any;
 
       // Create orchestrator
       runInInjectionContext(injector, () => {
-        dispatcher = new VaultOrchestrator<any>('cell key', behaviors, [], injector, ngVaultMonitor);
+        dispatcher = new VaultOrchestrator<any>(cell, behaviors, [], injector, ngVaultMonitor);
       });
 
       // Act — trigger reducer pipeline
@@ -196,28 +211,28 @@ describe('Orcestrator: Vault - Load Persist', () => {
         Object({
           id: 'id-removed',
           cell: 'cell key',
-          behaviorKey: 'NgVault::Test::Persist',
+          behaviorKey: 'NgVault::Test::Persist3',
           type: 'stage:start:loadpersist',
           timestamp: 'timestamp-removed'
         }),
         Object({
           id: 'id-removed',
           cell: 'cell key',
-          behaviorKey: 'NgVault::Test::Persist',
+          behaviorKey: 'NgVault::Test::Persist3',
           type: 'stage:end:loadpersist',
           timestamp: 'timestamp-removed'
         }),
         Object({
           id: 'id-removed',
           cell: 'cell key',
-          behaviorKey: 'NgVault::Test::Encrypt',
+          behaviorKey: 'NgVault::Test::Encrypt4',
           type: 'lifecycle:start:decrypt',
           timestamp: 'timestamp-removed'
         }),
         Object({
           id: 'id-removed',
           cell: 'cell key',
-          behaviorKey: 'NgVault::Test::Encrypt',
+          behaviorKey: 'NgVault::Test::Encrypt4',
           type: 'lifecycle:end:decrypt',
           timestamp: 'timestamp-removed',
           payload: Object({ noop: true })
@@ -228,15 +243,15 @@ describe('Orcestrator: Vault - Load Persist', () => {
     it('should load state with a decrypt error value', async () => {
       // Make behaviors using the helper + real reducer behavior
       const behaviors = [
-        createInitializedTestBehavior(NgVaultBehaviorTypes.State, calls),
-        createInitializedTestBehavior(NgVaultBehaviorTypes.Reduce, calls),
-        createInitializedTestBehavior(NgVaultBehaviorTypes.Persist, calls, Object({ persist: true })),
-        createInitializedTestBehavior(NgVaultBehaviorTypes.Encrypt, calls, 'throw-error')
+        createTestBehavior(NgVaultBehaviorTypes.State, calls),
+        createTestBehavior(NgVaultBehaviorTypes.Reduce, calls),
+        createTestBehavior(NgVaultBehaviorTypes.Persist, calls, Object({ persist: true })),
+        createTestBehavior(NgVaultBehaviorTypes.Encrypt, calls, 'throw-error', true)
       ] as any;
 
       // Create orchestrator
       runInInjectionContext(injector, () => {
-        dispatcher = new VaultOrchestrator<any>('cell key', behaviors, [], injector, ngVaultMonitor);
+        dispatcher = new VaultOrchestrator<any>(cell, behaviors, [], injector, ngVaultMonitor);
       });
 
       // Act — trigger reducer pipeline
@@ -246,7 +261,7 @@ describe('Orcestrator: Vault - Load Persist', () => {
       expect(value).toBeUndefined();
 
       // Reducer pipeline order + other behaviors
-      expect(calls).toEqual(['load', 'decrypt']);
+      expect(calls).toEqual(['load']);
 
       // Verify final state after reducer pipeline
       expect(mockCtx.isLoading?.()).toBeFalse();
@@ -258,28 +273,28 @@ describe('Orcestrator: Vault - Load Persist', () => {
         Object({
           id: 'id-removed',
           cell: 'cell key',
-          behaviorKey: 'NgVault::Test::Persist',
+          behaviorKey: 'NgVault::Test::Persist3',
           type: 'stage:start:loadpersist',
           timestamp: 'timestamp-removed'
         }),
         Object({
           id: 'id-removed',
           cell: 'cell key',
-          behaviorKey: 'NgVault::Test::Persist',
+          behaviorKey: 'NgVault::Test::Persist3',
           type: 'stage:end:loadpersist',
           timestamp: 'timestamp-removed'
         }),
         Object({
           id: 'id-removed',
           cell: 'cell key',
-          behaviorKey: 'NgVault::Test::Encrypt',
+          behaviorKey: 'NgVault::Test::Encrypt4',
           type: 'lifecycle:start:decrypt',
           timestamp: 'timestamp-removed'
         }),
         Object({
           id: 'id-removed',
           cell: 'cell key',
-          behaviorKey: 'NgVault::Test::Encrypt',
+          behaviorKey: 'NgVault::Test::Encrypt4',
           type: 'error',
           timestamp: 'timestamp-removed',
           payload: 'error'
@@ -291,14 +306,14 @@ describe('Orcestrator: Vault - Load Persist', () => {
   it('should not load state', async () => {
     // Make behaviors using the helper + real reducer behavior
     const behaviors = [
-      createInitializedTestBehavior(NgVaultBehaviorTypes.State, calls),
-      createInitializedTestBehavior(NgVaultBehaviorTypes.Reduce, calls),
-      createInitializedTestBehavior(NgVaultBehaviorTypes.Encrypt, calls)
+      createTestBehavior(NgVaultBehaviorTypes.State, calls),
+      createTestBehavior(NgVaultBehaviorTypes.Reduce, calls),
+      createTestBehavior(NgVaultBehaviorTypes.Encrypt, calls)
     ] as any;
 
     // Create orchestrator
     runInInjectionContext(injector, () => {
-      dispatcher = new VaultOrchestrator<any>('cell key', behaviors, [], injector, ngVaultMonitor);
+      dispatcher = new VaultOrchestrator<any>(cell, behaviors, [], injector, ngVaultMonitor);
     });
 
     // Act — trigger reducer pipeline
@@ -320,22 +335,15 @@ describe('Orcestrator: Vault - Load Persist', () => {
   it('should handle an error', async () => {
     // Make behaviors using the helper + real reducer behavior
     const behaviors = [
-      createInitializedTestBehavior(NgVaultBehaviorTypes.State, calls),
-
-      {
-        type: NgVaultBehaviorTypes.Persist,
-        key: `perist-id`,
-        loadState: () => {
-          throw new Error('this is the error');
-        }
-      },
-      createInitializedTestBehavior(NgVaultBehaviorTypes.Reduce, calls),
-      createInitializedTestBehavior(NgVaultBehaviorTypes.Encrypt, calls)
+      createTestBehavior(NgVaultBehaviorTypes.State, calls),
+      createTestBehavior(NgVaultBehaviorTypes.Persist, calls, 'this is the error', true),
+      createTestBehavior(NgVaultBehaviorTypes.Reduce, calls),
+      createTestBehavior(NgVaultBehaviorTypes.Encrypt, calls)
     ] as any;
 
     // Create orchestrator
     runInInjectionContext(injector, () => {
-      dispatcher = new VaultOrchestrator<any>('cell key', behaviors, [], injector, ngVaultMonitor);
+      dispatcher = new VaultOrchestrator<any>(cell, behaviors, [], injector, ngVaultMonitor);
     });
 
     // Act — trigger reducer pipeline
@@ -355,14 +363,14 @@ describe('Orcestrator: Vault - Load Persist', () => {
       Object({
         id: 'id-removed',
         cell: 'cell key',
-        behaviorKey: 'perist-id',
+        behaviorKey: 'NgVault::Test::Persist2',
         type: 'stage:start:loadpersist',
         timestamp: 'timestamp-removed'
       }),
       Object({
         id: 'id-removed',
         cell: 'cell key',
-        behaviorKey: 'perist-id',
+        behaviorKey: 'NgVault::Test::Persist2',
         type: 'error',
         timestamp: 'timestamp-removed',
         payload: 'error'

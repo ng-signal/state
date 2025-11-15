@@ -6,7 +6,8 @@ import {
   createTestBehavior,
   createTestEventListener,
   flushMicrotasksZoneless,
-  provideVaultTesting
+  provideVaultTesting,
+  resetTestBehaviorKeys
 } from '@ngvault/testing';
 import { provideFeatureCell } from './provide-feature-cell';
 
@@ -41,6 +42,7 @@ describe('Provider: Feature Cell (core vault functionality)', () => {
   });
 
   afterEach(() => {
+    resetTestBehaviorKeys();
     stopListening();
   });
 

@@ -8,7 +8,6 @@ import { VaultOrchestrator } from '@ngvault/core/orchestrator/ngvault.orchestrat
 import {
   NgVaultBehaviorContext,
   NgVaultBehaviorFactory,
-  NgVaultBehaviorLifecycleService,
   NgVaultBehaviorTypes,
   NgVaultFeatureCell,
   NgVaultReducerFunction,
@@ -42,7 +41,6 @@ export function provideFeatureCell<Service, T>(
       const _isLoading = signal(false);
       const _error = signal<NgVaultResourceStateError | null>(null);
       const _cellKey = featureCellDescriptor.key;
-      const _behaviorRunner = NgVaultBehaviorLifecycleService(_cellKey);
       const _injector = inject(Injector);
       const _destroyRef = inject(DestroyRef);
       const _destroyed$ = new Subject<void>();
@@ -51,25 +49,6 @@ export function provideFeatureCell<Service, T>(
 
       let _initialized = false;
       let _orchestrator: VaultOrchestrator<T>;
-
-      const _defaultBehaviors: NgVaultBehaviorFactory<T>[] = [
-        withCoreStateBehavior,
-        withCoreHttpResourceStateBehavior,
-        withCoreObservableBehavior,
-        withCoreReducerBehavior
-      ];
-
-      // eslint-disable-next-line
-      const encryptBehaviors = behaviors.filter((b) => (b as any).type === NgVaultBehaviorTypes.Encrypt);
-
-      if (encryptBehaviors.length > 1) {
-        throw new Error(`[NgVault] FeatureCell cannot register multiple encryption behaviors.`);
-      }
-
-      // eslint-disable-next-line
-      const _userBehaviorsWithoutReducers = behaviors.filter((b) => (b as any).type !== NgVaultBehaviorTypes.Reduce);
-
-      const _allBehaviors: NgVaultBehaviorFactory<T>[] = [..._defaultBehaviors, ..._userBehaviorsWithoutReducers];
 
       const _value = signal<NgVaultDataType<T>>(undefined);
 
@@ -82,7 +61,6 @@ export function provideFeatureCell<Service, T>(
         isLoading: _isLoading,
         error: _error,
         value: _value,
-        behaviorRunner: _behaviorRunner,
         destroyed$: _destroyed$.asObservable(),
         reset$: _reset$.asObservable(),
 
@@ -175,7 +153,19 @@ export function provideFeatureCell<Service, T>(
       };
 
       const _initialize = async (reducers: NgVaultReducerFunction<T>[] = []): Promise<void> => {
-        featureCellValidation(featureCellDescriptor);
+        featureCellValidation(featureCellDescriptor, behaviors);
+
+        const _defaultBehaviors: NgVaultBehaviorFactory<T>[] = [
+          withCoreStateBehavior,
+          withCoreHttpResourceStateBehavior,
+          withCoreObservableBehavior,
+          withCoreReducerBehavior
+        ];
+
+        // eslint-disable-next-line
+        const _userBehaviorsWithoutReducers = behaviors.filter((b) => (b as any).type !== NgVaultBehaviorTypes.Reduce);
+
+        const _allBehaviors: NgVaultBehaviorFactory<T>[] = [..._defaultBehaviors, ..._userBehaviorsWithoutReducers];
 
         _ngVaultMonitor.registerCell(_cellKey, featureCellDescriptor.insights);
 
@@ -189,15 +179,7 @@ export function provideFeatureCell<Service, T>(
 
         _initialized = true;
 
-        _orchestrator = new VaultOrchestrator(
-          _cellKey,
-          _behaviorRunner.initializeBehaviors(_injector, _allBehaviors)!,
-          reducers,
-          _injector,
-          _ngVaultMonitor
-        );
-
-        _behaviorRunner.applyBehaviorExtensions(cell);
+        _orchestrator = new VaultOrchestrator(cell, _allBehaviors, reducers, _injector, _ngVaultMonitor);
 
         const persisted = await _orchestrator.loadPersistedState(ctx);
 
@@ -224,6 +206,7 @@ export function provideFeatureCell<Service, T>(
           error: _error.asReadonly(),
           hasValue: _hasValue
         },
+        key: _cellKey,
         initialize: _initialize,
         replaceState: _replaceState,
         mergeState: _mergeState,

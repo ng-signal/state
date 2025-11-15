@@ -1,6 +1,6 @@
 //content/content-script.js
 
-console.log('[ngVault DevTools] CONTENT SCRIPT running on', location.href);
+console.warn('[ngVault DevTools] CONTENT SCRIPT running on', location.href);
 
 (function injectBridge() {
   try {
@@ -9,7 +9,7 @@ console.log('[ngVault DevTools] CONTENT SCRIPT running on', location.href);
     script.async = true;
     (document.documentElement || document.head || document.body).appendChild(script);
     script.remove();
-    // console.log('[ngVault DevTools] bridge-inject.js tag inserted');
+    // console.warn('[ngVault DevTools] bridge-inject.js tag inserted');
   } catch (e) {
     console.warn('[ngVault DevTools] Failed to inject bridge script:', e);
   }
@@ -17,7 +17,7 @@ console.log('[ngVault DevTools] CONTENT SCRIPT running on', location.href);
 
 // Listen for messages from the injected page script
 window.addEventListener('message', (event) => {
-  console.log('content-script message');
+  console.warn('content-script message');
   if (event.source !== window) return;
   if (!event.data || event.data.source !== 'ngvault-devtools') return;
 

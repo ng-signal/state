@@ -546,10 +546,6 @@ describe('Provider: Feature Cell (core vault functionality)', () => {
       });
 
       expect(vault).toBeDefined();
-      // eslint-disable-next-line
-      expect(console.warn).toHaveBeenCalledWith(
-        '[NgVault] Behavior initialization failed: [NgVault] Behavior did not return an object'
-      );
     });
   });
 });

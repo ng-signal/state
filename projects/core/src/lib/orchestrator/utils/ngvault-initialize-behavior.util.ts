@@ -1,14 +1,18 @@
 // projects/core/src/lib/services/vault-behavior-lifecycle.service.ts
 import { Injector } from '@angular/core';
-import { ngVaultError, ngVaultWarn, validateNgVaultBehaviorKey } from '@ngvault/shared';
-import { PROTECTED_FEATURE_CELL_KEYS } from '../constants/protected-feature-cell-keys.constant';
-import { NgVaultBehaviorFactoryContext } from '../contexts/ngvault-behavior-factory.context';
-import { NgVaultBehaviorRunner } from '../interfaces/ngvault-behavior-runner.interface';
-import { NgVaultBehavior } from '../interfaces/ngvault-behavior.interface';
-import { NgVaultFeatureCell } from '../models/feature-cell.model';
-import { NgVaultBehaviorFactory } from '../types/ngvault-behavior-factory.type';
+import {
+  NgVaultBehavior,
+  NgVaultBehaviorFactory,
+  NgVaultBehaviorFactoryContext,
+  ngVaultError,
+  NgVaultFeatureCell,
+  ngVaultWarn,
+  validateNgVaultBehaviorKey
+} from '@ngvault/shared';
+import { PROTECTED_FEATURE_CELL_KEYS } from '../../constants/protected-feature-cell-keys.constant';
+import { NgVaultBehaviorInit } from '../../interfaces/ngvault-behavior-initialization.interface';
 
-class VaultBehaviorRunnerClass implements NgVaultBehaviorRunner {
+class VaultBehaviorInitializationClass implements NgVaultBehaviorInit {
   // eslint-disable-next-line
   #behaviors: NgVaultBehavior<any>[] = [];
   #initialized = false;
@@ -20,7 +24,9 @@ class VaultBehaviorRunnerClass implements NgVaultBehaviorRunner {
 
   initializeBehaviors<T>(injector: Injector, behaviors: Array<NgVaultBehaviorFactory<T>>): NgVaultBehavior<T>[] {
     if (this.#initialized)
-      throw new Error('[NgVault] VaultBehaviorRunner already initialized — cannot reissue core behavior ID.');
+      throw new Error(
+        `[NgVault] VaultBehaviorRunner already initialized — cannot reissue core behavior ID for feature cell "${this.#cellKey}".`
+      );
 
     this.#initialized = true;
 
@@ -54,8 +60,7 @@ class VaultBehaviorRunnerClass implements NgVaultBehaviorRunner {
               throw new Error(message);
             }
 
-            // eslint-disable-next-line
-            console.warn(`[NgVault] Behavior initialization failed: ${message}`);
+            ngVaultWarn(`[NgVault] Behavior initialization failed: ${message}`);
             return null;
           }
 
@@ -74,8 +79,7 @@ class VaultBehaviorRunnerClass implements NgVaultBehaviorRunner {
           }
 
           if (instance.key && seenKeys.has(instance.key)) {
-            // eslint-disable-next-line
-            console.warn(`[NgVault] Skipping duplicate behavior with key "${instance.key}"`);
+            ngVaultWarn(`[NgVault] Skipping duplicate behavior with key "${instance.key}"`);
             return null;
           }
 
@@ -89,7 +93,7 @@ class VaultBehaviorRunnerClass implements NgVaultBehaviorRunner {
           }
 
           // eslint-disable-next-line
-          console.warn(`[NgVault] Non-critical behavior initialization failed: ${(err as any)?.message}`);
+          ngVaultWarn(`[NgVault] Non-critical behavior initialization failed: ${(err as any)?.message}`);
           return null;
         }
       })
@@ -148,6 +152,6 @@ class VaultBehaviorRunnerClass implements NgVaultBehaviorRunner {
   }
 }
 
-export function NgVaultBehaviorLifecycleService(cellKey: string): NgVaultBehaviorRunner {
-  return new VaultBehaviorRunnerClass(cellKey);
+export function ngVaultInitializeBehaviors(cellKey: string): NgVaultBehaviorInit {
+  return new VaultBehaviorInitializationClass(cellKey);
 }

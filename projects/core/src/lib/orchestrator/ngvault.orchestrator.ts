@@ -6,9 +6,12 @@ import { effect, inject, Injector, runInInjectionContext } from '@angular/core';
 import {
   NgVaultBehavior,
   NgVaultBehaviorContext,
+  NgVaultBehaviorFactory,
   NgVaultBehaviorTypes,
   NgVaultDataType,
   NgVaultEncryptBehavior,
+  NgVaultFeatureCell,
+  ngVaultInitializeBehaviors,
   NgVaultPersistBehavior,
   NgVaultReduceBehavior,
   NgVaultReducerFunction,
@@ -26,15 +29,21 @@ import { resourceError } from '../utils/resource-error.util';
 export class VaultOrchestrator<T> {
   #queue = inject(NGVAULT_QUEUE);
   #ngVaultMonitor!: NgVaultMonitor;
+  #cellKey: string;
+  #behaviors: NgVaultBehavior<T>[];
 
   constructor(
-    private cellKey: string,
-    private readonly behaviors: NgVaultBehavior<T>[],
+    cell: NgVaultFeatureCell<T>,
+    behaviors: Array<NgVaultBehaviorFactory<T>>,
     private readonly reducers: NgVaultReducerFunction<T>[],
     private readonly injector: Injector,
     readonly ngVaultMonitor: NgVaultMonitor
   ) {
     this.#ngVaultMonitor = ngVaultMonitor;
+    this.#cellKey = cell.key!;
+    const behaviorInit = ngVaultInitializeBehaviors(cell.key);
+    this.#behaviors = behaviorInit.initializeBehaviors(injector, behaviors);
+    behaviorInit.applyBehaviorExtensions(cell);
   }
 
   #ensureIncoming(ctx: NgVaultBehaviorContext<T>): NgVaultStateInputType<T> | null {
@@ -70,7 +79,7 @@ export class VaultOrchestrator<T> {
   dispatchSet(ctx: NgVaultBehaviorContext<T>): void {
     this.#queue.enqueue(async () => {
       ctx.operation = 'replace';
-      this.#ngVaultMonitor.startReplace(this.cellKey, 'vault-orchestrator', ctx);
+      this.#ngVaultMonitor.startReplace(this.#cellKey, 'vault-orchestrator', ctx);
 
       const incoming = this.#ensureIncoming(ctx);
       if (!incoming) return;
@@ -80,7 +89,7 @@ export class VaultOrchestrator<T> {
 
         const finalState = await this.#finishPipeline(ctx, stateResult);
 
-        this.#ngVaultMonitor.endReplace(this.cellKey, 'vault-orchestrator', ctx);
+        this.#ngVaultMonitor.endReplace(this.#cellKey, 'vault-orchestrator', ctx);
 
         return finalState;
       }, ctx);
@@ -90,11 +99,11 @@ export class VaultOrchestrator<T> {
   dispatchPatch(ctx: NgVaultBehaviorContext<T>): void {
     this.#queue.enqueue(async () => {
       ctx.operation = 'merge';
-      this.#ngVaultMonitor.startMerge(this.cellKey, 'vault-orchestrator', ctx);
+      this.#ngVaultMonitor.startMerge(this.#cellKey, 'vault-orchestrator', ctx);
 
       const incoming = this.#ensureIncoming(ctx);
       if (!incoming) {
-        this.#ngVaultMonitor.endMerge(this.cellKey, 'vault-orchestrator', ctx, { noop: true });
+        this.#ngVaultMonitor.endMerge(this.#cellKey, 'vault-orchestrator', ctx, { noop: true });
         return;
       }
 
@@ -106,7 +115,7 @@ export class VaultOrchestrator<T> {
         const stateResult = structuredClone(applyNgVaultValueMerge<T>(current, partial));
 
         const finalState = await this.#finishPipeline(ctx, stateResult);
-        this.#ngVaultMonitor.endMerge(this.cellKey, 'vault-orchestrator', ctx);
+        this.#ngVaultMonitor.endMerge(this.#cellKey, 'vault-orchestrator', ctx);
         return finalState;
       }, ctx);
     });
@@ -180,7 +189,7 @@ export class VaultOrchestrator<T> {
     ctx: NgVaultBehaviorContext<T>,
     working?: T
   ): Promise<T | undefined> {
-    const stageBehaviors = this.behaviors.filter((b) => b.type === stage);
+    const stageBehaviors = this.#behaviors.filter((b) => b.type === stage);
 
     let current = working;
 
@@ -192,23 +201,23 @@ export class VaultOrchestrator<T> {
           case 'state':
             if (typeof (behavior as NgVaultStateBehavior<T>).computeState === 'function') {
               // TODO - make this better for state management
-              this.#ngVaultMonitor.startState(this.cellKey, behavior.key, ctx);
+              this.#ngVaultMonitor.startState(this.#cellKey, behavior.key, ctx);
               next = await (behavior as NgVaultStateBehavior<T>).computeState(ctx);
-              this.#ngVaultMonitor.endState(this.cellKey, behavior.key, ctx);
+              this.#ngVaultMonitor.endState(this.#cellKey, behavior.key, ctx);
             }
             break;
 
           case 'reduce':
             if (typeof (behavior as NgVaultReduceBehavior<T>).applyReducer === 'function') {
               if (current === undefined) {
-                throw new Error(`[NgVault] Reducer stage received undefined state in cell "${this.cellKey}".`);
+                throw new Error(`[NgVault] Reducer stage received undefined state in cell "${this.#cellKey}".`);
               }
 
               for (const reducer of this.reducers) {
-                this.#ngVaultMonitor.startReducer(this.cellKey, behavior.key, ctx);
+                this.#ngVaultMonitor.startReducer(this.#cellKey, behavior.key, ctx);
                 const nextValue = (behavior as NgVaultReduceBehavior<T>).applyReducer(current, reducer);
 
-                this.#ngVaultMonitor.endReducer(this.cellKey, behavior.key, ctx);
+                this.#ngVaultMonitor.endReducer(this.#cellKey, behavior.key, ctx);
                 if (nextValue !== undefined) {
                   current = nextValue;
                 }
@@ -224,16 +233,16 @@ export class VaultOrchestrator<T> {
 
           case 'persist':
             if (typeof (behavior as NgVaultPersistBehavior<T>).persistState === 'function') {
-              this.#ngVaultMonitor.startPersist(this.cellKey, behavior.key, ctx);
+              this.#ngVaultMonitor.startPersist(this.#cellKey, behavior.key, ctx);
               await (behavior as NgVaultPersistBehavior<T>).persistState(current!);
-              this.#ngVaultMonitor.endPersist(this.cellKey, behavior.key, ctx);
+              this.#ngVaultMonitor.endPersist(this.#cellKey, behavior.key, ctx);
             }
             break;
         }
       } catch (err) {
         ctx.error?.set(resourceError(err));
         ctx.isLoading?.set(false);
-        this.#ngVaultMonitor.error(this.cellKey, behavior.key, ctx, err);
+        this.#ngVaultMonitor.error(this.#cellKey, behavior.key, ctx, err);
         throw err;
       }
 
@@ -244,37 +253,41 @@ export class VaultOrchestrator<T> {
   }
 
   public clearPersistedState(ctx: NgVaultBehaviorContext<T>): void {
-    const persistBehaviors = this.behaviors.filter((b) => b.type === NgVaultBehaviorTypes.Persist);
+    const persistBehaviors = this.#behaviors.filter((b) => b.type === NgVaultBehaviorTypes.Persist);
 
     for (const behavior of persistBehaviors) {
       try {
-        this.#ngVaultMonitor.startClearPersist(this.cellKey, behavior.key, ctx);
+        this.#ngVaultMonitor.startClearPersist(this.#cellKey, behavior.key, ctx);
         (behavior as NgVaultPersistBehavior<T>).clearState();
-        this.#ngVaultMonitor.endClearPersist(this.cellKey, behavior.key, ctx);
+        this.#ngVaultMonitor.endClearPersist(this.#cellKey, behavior.key, ctx);
         // eslint-disable-next-line
       } catch (err: any) {
-        this.#ngVaultMonitor.error(this.cellKey, behavior.key, ctx, err);
+        this.#ngVaultMonitor.error(this.#cellKey, behavior.key, ctx, err);
         ngVaultWarn(`"[NgVault] persist.clearState()" for ${behavior.key} failed with ${err.message}`);
       }
     }
   }
 
   public async loadPersistedState(ctx: NgVaultBehaviorContext<T>): Promise<T | undefined> {
-    const persistBehaviors = this.behaviors.filter(
-      (b) => b.type === NgVaultBehaviorTypes.Persist
+    const persistBehaviors = this.#behaviors.filter(
+      (behavior) => behavior.type === NgVaultBehaviorTypes.Persist
     ) as NgVaultPersistBehavior<T>[];
 
     let loaded: T | undefined = undefined;
 
     for (const behavior of persistBehaviors) {
       try {
-        this.#ngVaultMonitor.startLoadPersist(this.cellKey, behavior.key, ctx);
+        this.#ngVaultMonitor.startLoadPersist(this.#cellKey, behavior.key, ctx);
         loaded = behavior.loadState?.();
-        this.#ngVaultMonitor.endLoadPersist(this.cellKey, behavior.key, ctx);
-        if (loaded !== undefined) break;
+        if (loaded !== undefined) {
+          this.#ngVaultMonitor.endLoadPersist(this.#cellKey, behavior.key, ctx);
+          break;
+        } else {
+          this.#ngVaultMonitor.endLoadPersist(this.#cellKey, behavior.key, ctx, { noop: true });
+        }
         // eslint-disable-next-line
       } catch (err: any) {
-        this.#ngVaultMonitor.error(this.cellKey, behavior.key, ctx, err);
+        this.#ngVaultMonitor.error(this.#cellKey, behavior.key, ctx, err);
         ngVaultWarn(`"[NgVault] persist.loadState()" for ${behavior.key} failed with ${err.message}`);
       }
     }
@@ -282,25 +295,25 @@ export class VaultOrchestrator<T> {
     // ─────────────────────────────────────
     // NEW: Decrypt if encryption behaviors exist
     // ─────────────────────────────────────
-    const decryptBehaviors = this.behaviors.filter(
+    const decryptBehaviors = this.#behaviors.filter(
       (behavior) => behavior.type === NgVaultBehaviorTypes.Encrypt
     ) as unknown as NgVaultEncryptBehavior<T>[];
 
     if (loaded !== undefined && decryptBehaviors.length > 0) {
       for (const behavior of decryptBehaviors) {
         try {
-          this.#ngVaultMonitor.startDecrypt(this.cellKey, behavior.key, ctx);
+          this.#ngVaultMonitor.startDecrypt(this.#cellKey, behavior.key, ctx);
           const decrypted = await behavior.decryptState?.(ctx, loaded);
 
           if (decrypted !== undefined) {
-            this.#ngVaultMonitor.endDecrypt(this.cellKey, behavior.key, ctx);
+            this.#ngVaultMonitor.endDecrypt(this.#cellKey, behavior.key, ctx);
             loaded = decrypted;
           } else {
-            this.#ngVaultMonitor.endDecrypt(this.cellKey, behavior.key, ctx, { noop: true });
+            this.#ngVaultMonitor.endDecrypt(this.#cellKey, behavior.key, ctx, { noop: true });
           }
           // eslint-disable-next-line
         } catch (err: any) {
-          this.#ngVaultMonitor.error(this.cellKey, behavior.key, ctx, err);
+          this.#ngVaultMonitor.error(this.#cellKey, behavior.key, ctx, err);
           ngVaultWarn(`"[NgVault] encrypt.decryptState()" for ${behavior.key} failed with ${err.message}`);
           return undefined;
         }

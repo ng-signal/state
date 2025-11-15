@@ -1,11 +1,11 @@
 // panel/panel.js
-console.log('[ngVault DevTools] Panel loaded.');
+console.warn('[ngVault DevTools] Panel loaded.');
 
 // Connect to background to receive events
 const port = chrome.runtime.connect({ name: 'ngvault-devtools' });
 
 port.onMessage.addListener((event) => {
-  console.log('[ngVault DevTools] Panel received event', event);
+  console.warn('[ngVault DevTools] Panel received event', event);
   appendEvent(event);
 });
 

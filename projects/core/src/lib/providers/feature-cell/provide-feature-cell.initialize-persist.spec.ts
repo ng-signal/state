@@ -32,7 +32,7 @@ describe('Provider: Feature Cell - initialize perist', () => {
         class TestService {
           behaviorKey = 'behavior-id';
         },
-        { key: 'http', initial: [] }
+        { key: 'http', initial: [], insights: { wantsPayload: true } as any }
       );
     });
 

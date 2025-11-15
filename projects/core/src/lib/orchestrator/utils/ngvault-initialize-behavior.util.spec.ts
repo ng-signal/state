@@ -6,13 +6,15 @@ import {
   createCustomTestBehavior,
   createTestEventListener,
   provideVaultTesting,
-  resetTestBehaviorFactoryId
+  resetTestBehaviorFactoryId,
+  resetTestBehaviorUniqueKeys,
+  setTestBehaviorUniqueKeys
 } from '@ngvault/testing';
-import { NgVaultBehaviorRunner } from '../interfaces/ngvault-behavior-runner.interface';
-import { NgVaultBehaviorTypes } from '../types/ngvault-behavior.type';
-import { NgVaultBehaviorLifecycleService } from './ngvault-behavior-lifecycle.service';
+import { NgVaultBehaviorTypes } from '../../../../../shared/src/lib/types/ngvault-behavior.type';
+import { NgVaultBehaviorInit } from '../../interfaces/ngvault-behavior-initialization.interface';
+import { ngVaultInitializeBehaviors } from './ngvault-initialize-behavior.util';
 
-describe('Service: VaultBehaviorLifecycle', () => {
+describe('Util: ngVaultInitializeBehaviors', () => {
   function createParenttBehaviorFactory(): any {
     const coreBehavior = createCustomTestBehavior(() => {
       return {};
@@ -23,7 +25,7 @@ describe('Service: VaultBehaviorLifecycle', () => {
     return coreBehavior;
   }
 
-  let vaultRunner: NgVaultBehaviorRunner;
+  let vaultRunner: NgVaultBehaviorInit;
   let randonUuid: any;
   let injector: any;
   let ids: any = [];
@@ -31,12 +33,16 @@ describe('Service: VaultBehaviorLifecycle', () => {
   const emitted: any[] = [];
   let stopListening: any;
   let eventBus: any;
+  const cellKey = 'the cell key';
+
+  beforeAll(() => {
+    randonUuid = crypto.randomUUID;
+    setTestBehaviorUniqueKeys();
+  });
 
   beforeEach(() => {
-    warnSpy = spyOn(console, 'warn');
-    randonUuid = crypto.randomUUID;
-
     resetTestBehaviorFactoryId();
+    warnSpy = spyOn(console, 'warn');
 
     ids = ['dev-tools-id', 'events-id', 'core-id', 'state-id', 'persistence-id', 'encryption-id'];
     spyOn(crypto, 'randomUUID').and.callFake(() => ids.shift() as any);
@@ -46,7 +52,7 @@ describe('Service: VaultBehaviorLifecycle', () => {
     });
 
     injector = TestBed.inject(Injector);
-    const vaultService = NgVaultBehaviorLifecycleService('cell key');
+    const vaultService = ngVaultInitializeBehaviors(cellKey);
     vaultRunner = vaultService;
 
     eventBus = TestBed.inject(NgVaultEventBus);
@@ -56,6 +62,10 @@ describe('Service: VaultBehaviorLifecycle', () => {
   afterEach(() => {
     stopListening();
     crypto.randomUUID = randonUuid;
+  });
+
+  afterAll(() => {
+    resetTestBehaviorUniqueKeys();
   });
 
   describe('initializeBehaviors', () => {
@@ -111,7 +121,7 @@ describe('Service: VaultBehaviorLifecycle', () => {
       }, 'encrypt');
 
       runInInjectionContext(injector, () => {
-        vaultRunner = NgVaultBehaviorLifecycleService('cell key');
+        vaultRunner = ngVaultInitializeBehaviors(cellKey);
       });
 
       const behaviors = vaultRunner.initializeBehaviors(injector, [
@@ -139,25 +149,13 @@ describe('Service: VaultBehaviorLifecycle', () => {
     });
 
     it('handles empty behaviors', () => {
-      vaultRunner.initializeBehaviors(injector, []);
-
-      expect(warnSpy).not.toHaveBeenCalled();
-    });
-
-    it('handles undefined behaviors', () => {
-      vaultRunner.initializeBehaviors(injector, undefined as any);
-
-      expect(warnSpy).not.toHaveBeenCalled();
+      expect(vaultRunner.initializeBehaviors(injector, [])).toEqual([]);
     });
 
     it('handles factory returning non-object gracefully', () => {
       const badBehaviorFactory = createCustomTestBehavior(() => undefined, 'state');
 
-      vaultRunner.initializeBehaviors(injector, [badBehaviorFactory]);
-
-      expect(warnSpy).toHaveBeenCalledWith(
-        '[NgVault] Behavior initialization failed: [NgVault] Behavior did not return an object'
-      );
+      expect(vaultRunner.initializeBehaviors(injector, [badBehaviorFactory])).toEqual([]);
     });
 
     it('throws an error if a factory does not have a type', () => {
@@ -166,8 +164,6 @@ describe('Service: VaultBehaviorLifecycle', () => {
       expect(() => vaultRunner.initializeBehaviors(injector, [badBehaviorFactory])).toThrowError(
         '[NgVault] Behavior factory missing type metadata.'
       );
-
-      expect(warnSpy).not.toHaveBeenCalled();
     });
 
     it('throws an error if a critical factory returns a non-object', () => {
@@ -181,18 +177,17 @@ describe('Service: VaultBehaviorLifecycle', () => {
     it('continues execution when a factory throws', () => {
       const throwingFactory = createCustomTestBehavior(() => {
         throw new Error('boom');
-      }, 'state');
+      }, 'state - 1');
       const workingFactory = createCustomTestBehavior(
         () => ({
-          onInit() {},
           onDestroy() {}
         }),
-        'state'
+        'state - 2'
       );
 
-      vaultRunner.initializeBehaviors(injector, [throwingFactory, workingFactory]);
-
-      expect(warnSpy).toHaveBeenCalledWith('[NgVault] Non-critical behavior initialization failed: boom');
+      expect(vaultRunner.initializeBehaviors(injector, [throwingFactory, workingFactory])).toEqual([
+        Object({ onDestroy: jasmine.any(Function), type: 'state - 2' })
+      ]);
     });
 
     it('ignores invalid non-function behaviors', () => {
@@ -201,29 +196,22 @@ describe('Service: VaultBehaviorLifecycle', () => {
       expect(() => vaultRunner.initializeBehaviors(injector, [invalidBehavior])).toThrowError(
         '[NgVault] Behavior factory missing type metadata.'
       );
-
-      expect(warnSpy).not.toHaveBeenCalled();
     });
 
     it('filters null and undefined factories but retains valid ones', () => {
-      const nullFactory = createCustomTestBehavior(() => null as any, 'state');
-      const undefinedFactory = createCustomTestBehavior(() => undefined as any, 'state');
+      const nullFactory = createCustomTestBehavior(() => null as any, 'state - 1');
+      const undefinedFactory = createCustomTestBehavior(() => undefined as any, 'state - 2');
       const validFactory = createCustomTestBehavior(
         () => ({
           onInit() {},
           onDestroy() {}
         }),
-        'state'
+        'state - 3'
       );
 
-      vaultRunner.initializeBehaviors(injector, [nullFactory, undefinedFactory, validFactory]);
-
-      expect(warnSpy).toHaveBeenCalledTimes(2);
-
-      const call1 = (warnSpy as jasmine.Spy).calls.allArgs()[0];
-      const call2 = (warnSpy as jasmine.Spy).calls.allArgs()[1];
-      expect(call1).toEqual(['[NgVault] Behavior initialization failed: [NgVault] Behavior did not return an object']);
-      expect(call2).toEqual(['[NgVault] Behavior initialization failed: [NgVault] Behavior did not return an object']);
+      expect(vaultRunner.initializeBehaviors(injector, [nullFactory, undefinedFactory, validFactory])).toEqual([
+        Object({ onInit: jasmine.any(Function), onDestroy: jasmine.any(Function), type: 'state - 3' })
+      ]);
     });
 
     it('throws an error if a critical factory returns a non-object', () => {
@@ -248,8 +236,6 @@ describe('Service: VaultBehaviorLifecycle', () => {
       expect(() => vaultRunner.initializeBehaviors(injector, [childBehavior])).toThrowError(
         '[NgVault] Behavior missing key for type "state". Every behavior must define a unique "key".'
       );
-
-      expect(warnSpy).not.toHaveBeenCalled();
     });
 
     it('throws an error if a behavior has a bad key', () => {
@@ -258,19 +244,15 @@ describe('Service: VaultBehaviorLifecycle', () => {
       expect(() => vaultRunner.initializeBehaviors(injector, [childBehavior])).toThrowError(
         '[NgVault] Behavior key "bad-gen" not valid format for "state" behavior.'
       );
-
-      expect(warnSpy).not.toHaveBeenCalled();
     });
 
     it('throws an error if a behavior has a duplicate key', () => {
-      const childBehavior = createCustomTestBehavior(() => ({}), 'state', 'duplicate');
-      const childBehaviorDup = createCustomTestBehavior(() => ({}), 'state', 'duplicate');
+      const childBehavior = createCustomTestBehavior(() => ({}), 'state - 1', 'duplicate');
+      const childBehaviorDup = createCustomTestBehavior(() => ({}), 'state - 2', 'duplicate');
 
-      vaultRunner.initializeBehaviors(injector, [childBehavior, childBehaviorDup]);
-
-      expect(warnSpy).toHaveBeenCalledWith(
-        '[NgVault] Skipping duplicate behavior with key "NgVault::Testing::Duplicate"'
-      );
+      expect(vaultRunner.initializeBehaviors(injector, [childBehavior, childBehaviorDup])).toEqual([
+        Object({ type: 'state - 1' })
+      ]);
     });
   });
 
@@ -293,7 +275,7 @@ describe('Service: VaultBehaviorLifecycle', () => {
       vaultRunner.initializeBehaviors(injector, [parentBehavior]);
 
       expect(() => vaultRunner.initializeBehaviors(injector, [parentBehavior])).toThrowError(
-        '[NgVault] VaultBehaviorRunner already initialized — cannot reissue core behavior ID.'
+        '[NgVault] VaultBehaviorRunner already initialized — cannot reissue core behavior ID for feature cell "the cell key".'
       );
     });
   });
@@ -314,7 +296,7 @@ describe('Service: VaultBehaviorLifecycle', () => {
       };
 
       runInInjectionContext(injector, () => {
-        vaultRunner = NgVaultBehaviorLifecycleService('cell key');
+        vaultRunner = ngVaultInitializeBehaviors(cellKey);
       });
     });
 

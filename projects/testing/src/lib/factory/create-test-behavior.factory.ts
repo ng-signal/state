@@ -1,12 +1,31 @@
 import { defineNgVaultBehaviorKey, NgVaultBehaviorTypes } from '@ngvault/shared';
 
+let keySuffix = 1;
+let hasUniqueKeys = false;
 /**
  * Creates a valid test behavior for a specific NgVault behavior type.
  * Each type gets only the methods the behavior pipeline expects.
  */
-export function createTestBehavior(type: NgVaultBehaviorTypes, emitted: any[], returnValue: any = undefined) {
+export function resetTestBehaviorKeys() {
+  keySuffix = 1;
+}
+
+export function setTestBehaviorUniqueKeys() {
+  hasUniqueKeys = true;
+}
+
+export function resetTestBehaviorUniqueKeys() {
+  hasUniqueKeys = false;
+}
+
+export function createTestBehavior(
+  type: NgVaultBehaviorTypes,
+  emitted: any[],
+  returnValue: any = undefined,
+  isError = false
+) {
   const factory = (): any => {
-    const key = defineNgVaultBehaviorKey('Test', type);
+    const key = defineNgVaultBehaviorKey('Test', hasUniqueKeys ? `${type}-${keySuffix++}` : type);
 
     switch (type) {
       case NgVaultBehaviorTypes.State:
@@ -14,6 +33,9 @@ export function createTestBehavior(type: NgVaultBehaviorTypes, emitted: any[], r
           type,
           key,
           computeState: async () => {
+            if (isError) {
+              throw new Error(returnValue);
+            }
             emitted.push('state');
             return returnValue;
           }
@@ -24,6 +46,9 @@ export function createTestBehavior(type: NgVaultBehaviorTypes, emitted: any[], r
           type,
           key,
           applyReducer: (current: any, fn: any) => {
+            if (isError) {
+              throw new Error(returnValue);
+            }
             emitted.push('reduce');
             if (typeof fn === 'function') {
               return fn(current);
@@ -38,14 +63,17 @@ export function createTestBehavior(type: NgVaultBehaviorTypes, emitted: any[], r
           type,
           key,
           encryptState: async () => {
+            if (isError) {
+              throw new Error(returnValue);
+            }
             emitted.push('encrypt');
             return returnValue;
           },
           decryptState: async () => {
-            emitted.push('decrypt');
-            if (returnValue === 'throw-error') {
+            if (isError) {
               throw new Error(returnValue);
             }
+            emitted.push('decrypt');
             return returnValue;
           }
         };
@@ -55,12 +83,21 @@ export function createTestBehavior(type: NgVaultBehaviorTypes, emitted: any[], r
           type,
           key,
           persistState: () => {
+            if (isError) {
+              throw new Error(returnValue);
+            }
             emitted.push('persist');
           },
           clearState: () => {
+            if (isError) {
+              throw new Error(returnValue);
+            }
             emitted.push('clear');
           },
           loadState: () => {
+            if (isError) {
+              throw new Error(returnValue);
+            }
             emitted.push('load');
             return returnValue;
           }
