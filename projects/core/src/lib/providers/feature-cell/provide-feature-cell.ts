@@ -73,6 +73,13 @@ export function provideFeatureCell<Service, T>(
       ];
 
       // eslint-disable-next-line
+      const encryptBehaviors = behaviors.filter((b) => (b as any).type === NgVaultBehaviorTypes.Encrypt);
+
+      if (encryptBehaviors.length > 1) {
+        throw new Error(`[NgVault] FeatureCell cannot register multiple encryption behaviors.`);
+      }
+
+      // eslint-disable-next-line
       const _userBehaviorsWithoutReducers = behaviors.filter((b) => (b as any).type !== NgVaultBehaviorTypes.Reduce);
 
       const _allBehaviors: NgVaultBehaviorFactory<T>[] = [..._defaultBehaviors, ..._userBehaviorsWithoutReducers];

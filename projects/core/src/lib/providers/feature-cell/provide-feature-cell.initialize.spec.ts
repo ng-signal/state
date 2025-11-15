@@ -1,8 +1,13 @@
 import { Injector, provideZonelessChangeDetection, runInInjectionContext } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { NgVaultEventBus } from '@ngvault/dev-tools';
-import { NgVaultFeatureCell } from '@ngvault/shared';
-import { createTestEventListener, flushMicrotasksZoneless, provideVaultTesting } from '@ngvault/testing';
+import { NgVaultBehaviorTypes, NgVaultFeatureCell } from '@ngvault/shared';
+import {
+  createTestBehavior,
+  createTestEventListener,
+  flushMicrotasksZoneless,
+  provideVaultTesting
+} from '@ngvault/testing';
 import { FEATURE_CELL_REGISTRY } from '../../tokens/feature-cell-registry.token';
 import { provideFeatureCell } from './provide-feature-cell';
 
@@ -40,6 +45,24 @@ describe('Provider: Feature Cell - initialize', () => {
 
   afterEach(() => {
     stopListening();
+  });
+
+  it('should throw an error if there are two encrypt behaviors', async () => {
+    runInInjectionContext(injector, () => {
+      providers = provideFeatureCell(class DummyService {}, { key: 'double-init', initial: [], insights: {} as any }, [
+        createTestBehavior(NgVaultBehaviorTypes.Encrypt, []),
+        createTestBehavior(NgVaultBehaviorTypes.Encrypt, [])
+      ]);
+    });
+    await flushMicrotasksZoneless();
+    const provider = providers.find((p: any) => typeof p.useFactory === 'function');
+
+    await expectAsync(
+      runInInjectionContext(injector, async () => {
+        const vault = (provider as any).useFactory();
+        await vault.initialize(); // error thrown inside here
+      })
+    ).toBeRejectedWithError('[NgVault] FeatureCell cannot register multiple encryption behaviors.');
   });
 
   it('should throw an error if the initialized is called twice', async () => {
