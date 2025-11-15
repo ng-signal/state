@@ -307,9 +307,6 @@
             "tsConfig": "projects/persist/tsconfig.spec.json",
             "karmaConfig": "projects/persist/karma.conf.js",
             "inlineStyleLanguage": "scss",
-            "stylePreprocessorOptions": {
-              "includePaths": ["projects/styles/sccs"]
-            },
             "codeCoverageExclude": [],
             "scripts": []
           }

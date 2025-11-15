@@ -35,60 +35,6 @@ describe('Service: NgVaultInsightService', () => {
         } as any);
       });
     });
-
-    describe('listenEventBus$', () => {
-      it('should emit events through the listen$ observable', (done) => {
-        const expected: NgVaultEventModel = {
-          cell: 'stream-test',
-          type: 'init',
-          timestamp: Date.now(),
-          state: { isLoading: false, value: [], error: null, hasValue: true }
-        } as any;
-
-        const received: NgVaultEventModel[] = [];
-
-        hook.listenEventBus$().subscribe({
-          next: (event) => {
-            received.push(event);
-            expect(event.cell).toBe(expected.cell);
-            expect(event.type).toBe(expected.type);
-            expect(event.state).toEqual(expected.state);
-            expect(received.length).toBe(1);
-            done();
-          }
-        });
-
-        // Push a single event
-        bus.next(expected);
-      });
-
-      it('should support multiple subscribers independently', (done) => {
-        const event: NgVaultEventModel = {
-          cell: 'multi-test',
-          type: 'load',
-          timestamp: Date.now(),
-          state: { isLoading: true, value: [1], error: null, hasValue: true }
-        } as any;
-
-        const resultsA: NgVaultEventModel[] = [];
-        const resultsB: NgVaultEventModel[] = [];
-
-        const subA = hook.listenEventBus$().subscribe((e) => resultsA.push(e));
-        const subB = hook.listenEventBus$().subscribe((e) => resultsB.push(e));
-
-        // Emit one event
-        bus.next(event);
-
-        setTimeout(() => {
-          expect(resultsA).toEqual([jasmine.objectContaining({ cell: 'multi-test', type: 'load' })]);
-          expect(resultsB).toEqual([jasmine.objectContaining({ cell: 'multi-test', type: 'load' })]);
-
-          subA.unsubscribe();
-          subB.unsubscribe();
-          done();
-        }, 0);
-      });
-    });
   });
 
   describe('chrome runtime message handling', () => {

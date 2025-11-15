@@ -1,16 +1,39 @@
 import { provideZonelessChangeDetection } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
+import { NgVaultInsightService } from '@ngvault/dev-tools';
+import { flushMicrotasksZoneless } from '@ngvault/testing';
 import { NgVaultEventModel } from '../../../../../dev-tools/src/lib/models/ngvault-event.model';
 import { NgVaultEventBus } from '../../../../../dev-tools/src/lib/utils/ngvault-event-bus';
 import { NgVaultDevtoolsService } from './ngvault-devtools.service';
 
-describe('Service NgVaultDevtools', () => {
+describe('Service: NgVaultDevtools', () => {
   let service: NgVaultDevtoolsService;
   let bus: NgVaultEventBus;
 
+  class MockInsightService {
+    constructor(private bus: NgVaultEventBus) {}
+
+    listen$() {
+      return this.bus.asObservable(); // chrome stream mocked
+    }
+
+    listenEventBus$() {
+      return this.bus.asObservable(); // local stream mocked
+    }
+  }
+
   beforeEach(() => {
     TestBed.configureTestingModule({
-      providers: [NgVaultDevtoolsService, provideZonelessChangeDetection()]
+      providers: [
+        provideZonelessChangeDetection(),
+        NgVaultEventBus,
+        {
+          provide: NgVaultInsightService,
+          useFactory: (bus: NgVaultEventBus) => new MockInsightService(bus),
+          deps: [NgVaultEventBus]
+        },
+        NgVaultDevtoolsService
+      ]
     });
 
     service = TestBed.inject(NgVaultDevtoolsService);
@@ -19,11 +42,10 @@ describe('Service NgVaultDevtools', () => {
   });
 
   it('should create successfully', () => {
-    expect(service).toBeTruthy();
     expect(service.events()).toEqual([]);
   });
 
-  it('should record incoming events from the event bus', () => {
+  it('should record incoming events from the event bus', async () => {
     const base: NgVaultEventModel = {
       id: '1',
       cell: 'cell',
@@ -34,6 +56,8 @@ describe('Service NgVaultDevtools', () => {
     };
 
     bus.next(base);
+    TestBed.tick();
+    await flushMicrotasksZoneless();
 
     let allEvents = service.events();
     expect(allEvents.length).toBe(1);

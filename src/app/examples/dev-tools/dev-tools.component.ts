@@ -1,5 +1,5 @@
 import { Component } from '@angular/core';
-import { NgVaultDevtoolsPanelComponent } from '@ngvault/dev-tools';
+import { NgVaultDevtoolsPanelComponent } from '@ngvault/dev-tools-ui';
 
 @Component({
   selector: 'ngvault-devtools',

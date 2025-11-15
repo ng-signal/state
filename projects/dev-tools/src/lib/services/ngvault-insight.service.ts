@@ -25,11 +25,6 @@ export class NgVaultInsightService {
     }
   }
 
-  /** Legacy listener for app-side testing */
-  listenEventBus$() {
-    return this.eventBus.asObservable();
-  }
-
   /** Same — for older unit tests */
   listen(hook: (event: NgVaultEventModel) => void): () => void {
     const subscription: Subscription = this.eventBus.asObservable().subscribe(hook);
