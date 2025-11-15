@@ -1,57 +1,21 @@
-import { HttpResourceRef } from '@angular/common/http';
-import { DestroyRef, Injector, Provider, Type, computed, inject, signal } from '@angular/core';
-import { getOrCreateFeatureCellToken } from '@ngvault/core';
-import { withCoreHttpResourceStateBehavior } from '@ngvault/core/behaviors/core-http-resource-state/with-core-http-resource-state.behavior';
-import { withCoreStateBehavior } from '@ngvault/core/behaviors/core-state/with-core-state.behavior';
-import { withCoreReducerBehavior } from '@ngvault/core/behaviors/reducer/with-core-reducer.behavior';
-import { VaultOrchestrator } from '@ngvault/core/orchestrator/ngvault.orchestrator';
-import {
-  NgVaultBehaviorContext,
-  NgVaultBehaviorFactory,
-  NgVaultBehaviorLifecycleService,
-  NgVaultBehaviorTypes,
-  NgVaultFeatureCell,
-  NgVaultReducerFunction,
-  NgVaultResourceStateError,
-  VaultStateSnapshot
-} from '@ngvault/shared';
-import { NgVaultDataType } from '@ngvault/shared/types/ngvault-data.type';
-import { NgVaultStateInputType } from '@ngvault/shared/types/ngvault-state-input.type';
-import { NrVaultStateType as NgVaultStateType } from '@ngvault/shared/types/ngvault-state.type';
-import { Subject } from 'rxjs';
-import { ngVaultLog, ngVaultWarn } from '../../../../../shared/src/lib/utils/ngvault-logger.util';
-import { withCoreObservableBehavior } from '../../behaviors/core-observable/with-core-observable.behavior';
-import { FeatureCellDescriptorModel } from '../../models/feature-cell-descriptor.model';
-import { NgVaultMonitor } from '../../monitor/ngvault-monitor.service';
-import { FEATURE_CELL_REGISTRY } from '../../tokens/feature-cell-registry.token';
-import { isHttpResourceRef } from '../../utils/is-http-resource.util';
-import { featureCellValidation } from './utils/feature-cell-validation.util';
+import { FeatureCellDescriptorModel } from '../../../models/feature-cell-descriptor.model';
 
-export function provideFeatureCell<Service, T>(
-  service: Type<Service>,
-  featureCellDescriptor: FeatureCellDescriptorModel<T>,
-  behaviors: NgVaultBehaviorFactory<T>[] = []
-): Provider[] {
-  const token = getOrCreateFeatureCellToken<T>(featureCellDescriptor.key, false);
+export function featureCellValidation<T>(descriptor: FeatureCellDescriptorModel<T>): void {
+  // Prevent incorrect initialization (e.g., passing a resource object)
+  if (
+    typeof descriptor.initial === 'object' &&
+    descriptor.initial !== null &&
+    // eslint-disable-next-line
+    'data' in (descriptor.initial as any)
+  ) {
+    throw new Error(
+      `[NgVault] Invalid FeatureCellDescriptorModel.initial for feature "${descriptor.key}". ` +
+        `Expected raw data (e.g., [] or {}), but received an object with resource fields { loading, data, error }. ` +
+        `Pass plain data to avoid double-wrapping.`
+    );
+  }
 
-  // eslint-disable-next-line
-  (token as any).__ngvault_behaviors = behaviors;
-  const featureCellProvider: Provider = {
-    provide: token,
-    useFactory: (): NgVaultFeatureCell<T> => {
-      const _isLoading = signal(false);
-      const _error = signal<NgVaultResourceStateError | null>(null);
-      const _cellKey = featureCellDescriptor.key;
-      const _behaviorRunner = NgVaultBehaviorLifecycleService(_cellKey);
-      const _injector = inject(Injector);
-      const _destroyRef = inject(DestroyRef);
-      const _destroyed$ = new Subject<void>();
-      const _reset$ = new Subject<void>();
-      const _ngVaultMonitor = inject(NgVaultMonitor);
-
-      let _initialized = false;
-      let _orchestrator: VaultOrchestrator<T>;
-
+  /*
       const _defaultBehaviors: NgVaultBehaviorFactory<T>[] = [
         withCoreStateBehavior,
         withCoreHttpResourceStateBehavior,
@@ -175,8 +139,6 @@ export function provideFeatureCell<Service, T>(
       };
 
       const _initialize = async (reducers: NgVaultReducerFunction<T>[] = []): Promise<void> => {
-        featureCellValidation(featureCellDescriptor);
-
         _ngVaultMonitor.registerCell(_cellKey, featureCellDescriptor.insights);
 
         _ngVaultMonitor.startInitialized(_cellKey, 'core', ctx);
@@ -257,4 +219,5 @@ export function provideFeatureCell<Service, T>(
   };
 
   return [featureCellProvider, service, registryProvider];
+  */
 }

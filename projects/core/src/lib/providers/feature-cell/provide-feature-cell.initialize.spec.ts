@@ -133,4 +133,32 @@ describe('Provider: Feature Cell - initialize', () => {
 
     expect(emitted).toEqual([]);
   });
+
+  it('should throw an error if desc.initial contains a "data" field (resource-like object)', async () => {
+    const invalidInitial = {
+      loading: false,
+      data: [],
+      error: null
+    };
+
+    await expectAsync(
+      (async () => {
+        return runInInjectionContext(injector, async () => {
+          providers = provideFeatureCell(class DummyService {}, {
+            key: 'invalid-initial',
+            initial: invalidInitial
+          });
+
+          const provider = providers.find((p: any) => typeof p.useFactory === 'function');
+          const vault = (provider as any).useFactory();
+
+          await vault.initialize(); // <-- This should throw
+        });
+      })()
+    ).toBeRejectedWithError(
+      `[NgVault] Invalid FeatureCellDescriptorModel.initial for feature "invalid-initial". ` +
+        `Expected raw data (e.g., [] or {}), but received an object with resource fields { loading, data, error }. ` +
+        `Pass plain data to avoid double-wrapping.`
+    );
+  });
 });

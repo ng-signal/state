@@ -73,32 +73,6 @@ describe('Provider: Feature Cell (core vault functionality)', () => {
     expect(registry[1]).toEqual({ key: 'user', token: {}, insights: {} });
   });
 
-  it('should throw an error if desc.initial contains a "data" field (resource-like object)', () => {
-    const invalidInitial = {
-      loading: false,
-      data: [],
-      error: null
-    };
-
-    runInInjectionContext(injector, () => {
-      providers = provideFeatureCell(class DummyService {}, {
-        key: 'invalid-initial',
-        initial: invalidInitial
-      });
-    });
-
-    const provider = providers.find((p: any) => typeof p.useFactory === 'function');
-
-    expect(() =>
-      // 👇 ensure the factory runs inside an Angular injection context
-      runInInjectionContext(injector, () => (provider as any).useFactory())
-    ).toThrowError(
-      `[NgVault] Invalid FeatureCellDescriptorModel.initial for feature "invalid-initial". ` +
-        `Expected raw data (e.g., [] or {}), but received an object with resource fields { loading, data, error }. ` +
-        `Pass plain data to avoid double-wrapping.`
-    );
-  });
-
   it('should gracefully reset all vault signals when replaceState(null) or mergeState(null) is used', async () => {
     runInInjectionContext(injector, () => {
       providers = provideFeatureCell(class DummyService {}, { key: 'reset-test', initial: null });
