@@ -23,29 +23,18 @@
       <img class="logo" src="assets/brand/ngvault-landscape-dark.svg" alt="ngVault logo" />
     </section>
   } @else {
-    <!-- Custom Tabs -->
-    <nav class="vault-tabs">
-      @for (tab of tabs; track tab; let i = $index) {
-        <div class="tab" [class.active]="selectedIndex() === i" (click)="onTabChange(i)">
-          {{ tab }}
-        </div>
-      }
-    </nav>
+    <mat-tab-group
+      class="vault-tabs"
+      animationDuration="150ms"
+      [selectedIndex]="selectedIndex()"
+      (selectedIndexChange)="onTabChange($event)">
+      <mat-tab label="All">
+        <section class="vault-tab-content">
+          <ngvault-devtools-panel></ngvault-devtools-panel>
+        </section>
+      </mat-tab>
 
-    <!-- Content -->
-    <section class="vault-tab-content">
-      <!-- Only show the active tab -->
-      @if (selectedIndex() === 0) {
-        <ngvault-devtools-panel></ngvault-devtools-panel>
-      }
-      @if (selectedIndex() === 1) {
-        there
-        <!-- <ngvault-devtools-errors></ngvault-devtools-errors> -->
-      }
-      @if (selectedIndex() === 2) {
-        Hello
-        <!-- <ngvault-devtools-state></ngvault-devtools-state> -->
-      }
-    </section>
+      <!-- add more tabs later -->
+    </mat-tab-group>
   }
 </div>

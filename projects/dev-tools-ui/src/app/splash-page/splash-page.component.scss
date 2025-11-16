@@ -10,7 +10,9 @@
   @include global.ngvault-surface(global.$ngvault-surface-dark);
   @include global.ngvault-text(global.$ngvault-text-primary);
 
-  /* HEADER ---------------------------------------------------- */
+  /* ----------------------------------------------
+     HEADER
+  ------------------------------------------------*/
   .header {
     display: flex;
     justify-content: space-between;
@@ -53,7 +55,9 @@
     }
   }
 
-  /* WARNING --------------------------------------------------- */
+  /* ----------------------------------------------
+     WARNING
+  ------------------------------------------------*/
   .warning {
     background-color: global.$ngvault-warn-light;
     border-left: 4px solid global.$ngvault-warn-dark;
@@ -64,43 +68,54 @@
     font-size: global.$font-size-sm;
   }
 
-  /* TABS ------------------------------------------------------ */
+  /* ----------------------------------------------
+     MATERIAL TAB GROUP
+  ------------------------------------------------*/
   .vault-tabs {
+    flex: 1;
+    min-height: 0;
     display: flex;
-    gap: global.$spacing-sm;
-    margin-bottom: global.$spacing-sm;
-    border-bottom: 1px solid global.$ngvault-surface-outline;
+    flex-direction: column;
 
-    .tab {
-      padding: global.$spacing-sm global.$spacing-md;
-      cursor: pointer;
-      border-radius: global.$border-radius-sm global.$border-radius-sm 0 0;
-      background: global.$ngvault-surface-darker;
-      @include global.ngvault-text(global.$ngvault-text-secondary);
+    /* tab header stays fixed */
+    .mat-mdc-tab-header {
+      background-color: global.$ngvault-surface-darker;
+      border-bottom: 1px solid global.$ngvault-surface-outline;
+    }
 
-      &.active {
-        @include global.ngvault-text(global.$ngvault-text-primary, global.$font-weight-semibold);
-        background: global.$ngvault-surface-light;
-        color: global.$ngvault-text-inverse;
-      }
+    /* body wrapper must shrink + allow scroll */
+    .mat-mdc-tab-body-wrapper {
+      flex: 1;
+      min-height: 0;
+      display: flex;
+    }
 
-      &:hover:not(.active) {
-        background: global.$ngvault-hover-background-color;
+    /* each tab body must stretch */
+    .mat-mdc-tab-body {
+      flex: 1;
+      min-height: 0;
+
+      .mat-mdc-tab-body-content {
+        height: 100%;
+        min-height: 0;
+        overflow: hidden; /* leave scrolling to the content wrapper */
       }
     }
   }
 
-  /* TAB CONTENT (scrolling) ----------------------------------- */
+  /* ----------------------------------------------
+     TAB CONTENT → scrolling container
+  ------------------------------------------------*/
   .vault-tab-content {
     flex: 1;
     min-height: 0;
     overflow-y: auto;
     padding-right: global.$spacing-sm;
 
+    /* nice scrollbars */
     &::-webkit-scrollbar {
       width: 8px;
     }
-
     &::-webkit-scrollbar-thumb {
       background-color: global.$ngvault-surface-outline;
       border-radius: global.$border-radius-xs;
@@ -127,4 +142,13 @@
       }
     }
   }
+}
+
+/* ----------------------------------------------
+   MATERIAL OVERRIDE: TAB BAR COLOR
+------------------------------------------------*/
+::ng-deep .mat-mdc-tab-label-container {
+  background-color: global.$ngvault-surface-light;
+  border-top-left-radius: global.$border-radius-md;
+  border-top-right-radius: global.$border-radius-md;
 }
