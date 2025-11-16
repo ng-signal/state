@@ -1,7 +1,7 @@
 @use 'global' as global;
 
 .vault-devtools {
-  height: 100%;
+  height: calc(100% - global.$spacing-md * 2);
   min-height: 0;
   display: flex;
   flex-direction: column;
@@ -9,6 +9,7 @@
 
   @include global.ngvault-surface(global.$ngvault-surface-dark);
   @include global.ngvault-text(global.$ngvault-text-primary);
+  border: none;
 
   /* ----------------------------------------------
      HEADER
@@ -123,7 +124,7 @@
   }
 
   .vault-empty {
-    height: calc(100% - 260px);
+    height: calc(100% - 130px);
     display: flex;
     flex-direction: column;
     align-items: center;

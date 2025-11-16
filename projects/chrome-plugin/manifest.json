@@ -27,7 +27,7 @@
 
   "web_accessible_resources": [
     {
-      "resources": ["bridge/bridge-inject.js"],
+      "resources": ["bridge/bridge-inject.js", "assets/brand/ngvault-landscapte-dark.svg"],
       "matches": ["<all_urls>"]
     }
   ]
