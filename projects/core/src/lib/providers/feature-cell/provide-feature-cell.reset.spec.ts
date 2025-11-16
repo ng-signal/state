@@ -125,7 +125,7 @@ describe('Provider: Feature Cell (core vault functionality)', () => {
           behaviorKey: 'vault-orchestrator',
           type: 'lifecycle:start:replace',
           timestamp: 'timestamp-removed',
-          state: Object({ isLoading: true, value: undefined, error: Object({ message: 'fail' }), hasValue: false })
+          state: Object({ isLoading: true, value: [1, 2, 3], error: Object({ message: 'fail' }), hasValue: true })
         }),
         Object({
           id: 'id-removed',
@@ -133,7 +133,7 @@ describe('Provider: Feature Cell (core vault functionality)', () => {
           behaviorKey: 'NgVault::Core::State',
           type: 'stage:start:state',
           timestamp: 'timestamp-removed',
-          state: Object({ isLoading: true, value: undefined, error: Object({ message: 'fail' }), hasValue: false })
+          state: Object({ isLoading: true, value: [1, 2, 3], error: Object({ message: 'fail' }), hasValue: true })
         }),
         Object({
           id: 'id-removed',
@@ -141,7 +141,7 @@ describe('Provider: Feature Cell (core vault functionality)', () => {
           behaviorKey: 'NgVault::Core::State',
           type: 'stage:end:state',
           timestamp: 'timestamp-removed',
-          state: Object({ isLoading: true, value: undefined, error: Object({ message: 'fail' }), hasValue: false })
+          state: Object({ isLoading: true, value: [1, 2, 3], error: Object({ message: 'fail' }), hasValue: true })
         }),
         Object({
           id: 'id-removed',
@@ -149,7 +149,7 @@ describe('Provider: Feature Cell (core vault functionality)', () => {
           behaviorKey: 'NgVault::CoreHttpResource::State',
           type: 'stage:start:state',
           timestamp: 'timestamp-removed',
-          state: Object({ isLoading: true, value: undefined, error: Object({ message: 'fail' }), hasValue: false })
+          state: Object({ isLoading: true, value: [1, 2, 3], error: Object({ message: 'fail' }), hasValue: true })
         }),
         Object({
           id: 'id-removed',
@@ -157,7 +157,7 @@ describe('Provider: Feature Cell (core vault functionality)', () => {
           behaviorKey: 'NgVault::CoreHttpResource::State',
           type: 'stage:end:state',
           timestamp: 'timestamp-removed',
-          state: Object({ isLoading: true, value: undefined, error: Object({ message: 'fail' }), hasValue: false })
+          state: Object({ isLoading: true, value: [1, 2, 3], error: Object({ message: 'fail' }), hasValue: true })
         }),
         Object({
           id: 'id-removed',
@@ -165,7 +165,7 @@ describe('Provider: Feature Cell (core vault functionality)', () => {
           behaviorKey: 'NgVault::Test::Persist',
           type: 'stage:start:persist',
           timestamp: 'timestamp-removed',
-          state: Object({ isLoading: true, value: undefined, error: Object({ message: 'fail' }), hasValue: false })
+          state: Object({ isLoading: true, value: [1, 2, 3], error: Object({ message: 'fail' }), hasValue: true })
         }),
         Object({
           id: 'id-removed',
@@ -173,7 +173,7 @@ describe('Provider: Feature Cell (core vault functionality)', () => {
           behaviorKey: 'NgVault::Test::Persist',
           type: 'stage:end:persist',
           timestamp: 'timestamp-removed',
-          state: Object({ isLoading: true, value: undefined, error: Object({ message: 'fail' }), hasValue: false })
+          state: Object({ isLoading: true, value: [1, 2, 3], error: Object({ message: 'fail' }), hasValue: true })
         }),
         Object({
           id: 'id-removed',
@@ -181,7 +181,7 @@ describe('Provider: Feature Cell (core vault functionality)', () => {
           behaviorKey: 'vault-orchestrator',
           type: 'lifecycle:end:replace',
           timestamp: 'timestamp-removed',
-          state: Object({ isLoading: true, value: undefined, error: Object({ message: 'fail' }), hasValue: false })
+          state: Object({ isLoading: true, value: [1, 2, 3], error: Object({ message: 'fail' }), hasValue: true })
         }),
         Object({
           id: 'id-removed',
@@ -197,7 +197,7 @@ describe('Provider: Feature Cell (core vault functionality)', () => {
           behaviorKey: 'core',
           type: 'lifecycle:end:clearvalue',
           timestamp: 'timestamp-removed',
-          state: Object({ isLoading: false, value: undefined, error: null, hasValue: false })
+          state: Object({ isLoading: true, value: [1, 2, 3], error: Object({ message: 'fail' }), hasValue: true })
         })
       ]);
     });
@@ -279,7 +279,7 @@ describe('Provider: Feature Cell (core vault functionality)', () => {
           behaviorKey: 'vault-orchestrator',
           type: 'lifecycle:start:replace',
           timestamp: 'timestamp-removed',
-          state: Object({ isLoading: true, value: undefined, error: Object({ message: 'fail' }), hasValue: false })
+          state: Object({ isLoading: true, value: [1, 2, 3], error: Object({ message: 'fail' }), hasValue: true })
         }),
         Object({
           id: 'id-removed',
@@ -287,7 +287,7 @@ describe('Provider: Feature Cell (core vault functionality)', () => {
           behaviorKey: 'NgVault::Core::State',
           type: 'stage:start:state',
           timestamp: 'timestamp-removed',
-          state: Object({ isLoading: true, value: undefined, error: Object({ message: 'fail' }), hasValue: false })
+          state: Object({ isLoading: true, value: [1, 2, 3], error: Object({ message: 'fail' }), hasValue: true })
         }),
         Object({
           id: 'id-removed',
@@ -295,7 +295,7 @@ describe('Provider: Feature Cell (core vault functionality)', () => {
           behaviorKey: 'NgVault::Core::State',
           type: 'stage:end:state',
           timestamp: 'timestamp-removed',
-          state: Object({ isLoading: true, value: undefined, error: Object({ message: 'fail' }), hasValue: false })
+          state: Object({ isLoading: true, value: [1, 2, 3], error: Object({ message: 'fail' }), hasValue: true })
         }),
         Object({
           id: 'id-removed',
@@ -303,7 +303,7 @@ describe('Provider: Feature Cell (core vault functionality)', () => {
           behaviorKey: 'NgVault::CoreHttpResource::State',
           type: 'stage:start:state',
           timestamp: 'timestamp-removed',
-          state: Object({ isLoading: true, value: undefined, error: Object({ message: 'fail' }), hasValue: false })
+          state: Object({ isLoading: true, value: [1, 2, 3], error: Object({ message: 'fail' }), hasValue: true })
         }),
         Object({
           id: 'id-removed',
@@ -311,7 +311,7 @@ describe('Provider: Feature Cell (core vault functionality)', () => {
           behaviorKey: 'NgVault::CoreHttpResource::State',
           type: 'stage:end:state',
           timestamp: 'timestamp-removed',
-          state: Object({ isLoading: true, value: undefined, error: Object({ message: 'fail' }), hasValue: false })
+          state: Object({ isLoading: true, value: [1, 2, 3], error: Object({ message: 'fail' }), hasValue: true })
         }),
         Object({
           id: 'id-removed',
@@ -319,7 +319,7 @@ describe('Provider: Feature Cell (core vault functionality)', () => {
           behaviorKey: 'NgVault::Test::Persist',
           type: 'stage:start:persist',
           timestamp: 'timestamp-removed',
-          state: Object({ isLoading: true, value: undefined, error: Object({ message: 'fail' }), hasValue: false })
+          state: Object({ isLoading: true, value: [1, 2, 3], error: Object({ message: 'fail' }), hasValue: true })
         }),
         Object({
           id: 'id-removed',
@@ -327,7 +327,7 @@ describe('Provider: Feature Cell (core vault functionality)', () => {
           behaviorKey: 'NgVault::Test::Persist',
           type: 'stage:end:persist',
           timestamp: 'timestamp-removed',
-          state: Object({ isLoading: true, value: undefined, error: Object({ message: 'fail' }), hasValue: false })
+          state: Object({ isLoading: true, value: [1, 2, 3], error: Object({ message: 'fail' }), hasValue: true })
         }),
         Object({
           id: 'id-removed',
@@ -335,7 +335,7 @@ describe('Provider: Feature Cell (core vault functionality)', () => {
           behaviorKey: 'vault-orchestrator',
           type: 'lifecycle:end:replace',
           timestamp: 'timestamp-removed',
-          state: Object({ isLoading: true, value: undefined, error: Object({ message: 'fail' }), hasValue: false })
+          state: Object({ isLoading: true, value: [1, 2, 3], error: Object({ message: 'fail' }), hasValue: true })
         }),
         Object({
           id: 'id-removed',
@@ -351,7 +351,7 @@ describe('Provider: Feature Cell (core vault functionality)', () => {
           behaviorKey: 'core',
           type: 'lifecycle:end:clearvalue',
           timestamp: 'timestamp-removed',
-          state: Object({ isLoading: false, value: undefined, error: null, hasValue: false })
+          state: Object({ isLoading: true, value: [1, 2, 3], error: Object({ message: 'fail' }), hasValue: true })
         })
       ]);
     });
@@ -434,7 +434,7 @@ describe('Provider: Feature Cell (core vault functionality)', () => {
           behaviorKey: 'vault-orchestrator',
           type: 'lifecycle:start:replace',
           timestamp: 'timestamp-removed',
-          state: Object({ isLoading: true, value: undefined, error: Object({ message: 'fail' }), hasValue: false })
+          state: Object({ isLoading: true, value: [1, 2, 3], error: Object({ message: 'fail' }), hasValue: true })
         }),
         Object({
           id: 'id-removed',
@@ -442,7 +442,7 @@ describe('Provider: Feature Cell (core vault functionality)', () => {
           behaviorKey: 'NgVault::Core::State',
           type: 'stage:start:state',
           timestamp: 'timestamp-removed',
-          state: Object({ isLoading: true, value: undefined, error: Object({ message: 'fail' }), hasValue: false })
+          state: Object({ isLoading: true, value: [1, 2, 3], error: Object({ message: 'fail' }), hasValue: true })
         }),
         Object({
           id: 'id-removed',
@@ -450,7 +450,7 @@ describe('Provider: Feature Cell (core vault functionality)', () => {
           behaviorKey: 'NgVault::Core::State',
           type: 'stage:end:state',
           timestamp: 'timestamp-removed',
-          state: Object({ isLoading: true, value: undefined, error: Object({ message: 'fail' }), hasValue: false })
+          state: Object({ isLoading: true, value: [1, 2, 3], error: Object({ message: 'fail' }), hasValue: true })
         }),
         Object({
           id: 'id-removed',
@@ -458,7 +458,7 @@ describe('Provider: Feature Cell (core vault functionality)', () => {
           behaviorKey: 'NgVault::CoreHttpResource::State',
           type: 'stage:start:state',
           timestamp: 'timestamp-removed',
-          state: Object({ isLoading: true, value: undefined, error: Object({ message: 'fail' }), hasValue: false })
+          state: Object({ isLoading: true, value: [1, 2, 3], error: Object({ message: 'fail' }), hasValue: true })
         }),
         Object({
           id: 'id-removed',
@@ -466,7 +466,7 @@ describe('Provider: Feature Cell (core vault functionality)', () => {
           behaviorKey: 'NgVault::CoreHttpResource::State',
           type: 'stage:end:state',
           timestamp: 'timestamp-removed',
-          state: Object({ isLoading: true, value: undefined, error: Object({ message: 'fail' }), hasValue: false })
+          state: Object({ isLoading: true, value: [1, 2, 3], error: Object({ message: 'fail' }), hasValue: true })
         }),
         Object({
           id: 'id-removed',
@@ -474,7 +474,7 @@ describe('Provider: Feature Cell (core vault functionality)', () => {
           behaviorKey: 'NgVault::Test::Persist',
           type: 'stage:start:persist',
           timestamp: 'timestamp-removed',
-          state: Object({ isLoading: true, value: undefined, error: Object({ message: 'fail' }), hasValue: false })
+          state: Object({ isLoading: true, value: [1, 2, 3], error: Object({ message: 'fail' }), hasValue: true })
         }),
         Object({
           id: 'id-removed',
@@ -482,7 +482,7 @@ describe('Provider: Feature Cell (core vault functionality)', () => {
           behaviorKey: 'NgVault::Test::Persist',
           type: 'stage:end:persist',
           timestamp: 'timestamp-removed',
-          state: Object({ isLoading: true, value: undefined, error: Object({ message: 'fail' }), hasValue: false })
+          state: Object({ isLoading: true, value: [1, 2, 3], error: Object({ message: 'fail' }), hasValue: true })
         }),
         Object({
           id: 'id-removed',
@@ -490,7 +490,7 @@ describe('Provider: Feature Cell (core vault functionality)', () => {
           behaviorKey: 'vault-orchestrator',
           type: 'lifecycle:end:replace',
           timestamp: 'timestamp-removed',
-          state: Object({ isLoading: true, value: undefined, error: Object({ message: 'fail' }), hasValue: false })
+          state: Object({ isLoading: true, value: [1, 2, 3], error: Object({ message: 'fail' }), hasValue: true })
         }),
         Object({
           id: 'id-removed',
@@ -506,7 +506,7 @@ describe('Provider: Feature Cell (core vault functionality)', () => {
           behaviorKey: 'NgVault::Test::Persist',
           type: 'stage:start:clearpersist',
           timestamp: 'timestamp-removed',
-          state: Object({ isLoading: false, value: undefined, error: null, hasValue: false })
+          state: Object({ isLoading: true, value: [1, 2, 3], error: Object({ message: 'fail' }), hasValue: true })
         }),
         Object({
           id: 'id-removed',
@@ -514,7 +514,7 @@ describe('Provider: Feature Cell (core vault functionality)', () => {
           behaviorKey: 'NgVault::Test::Persist',
           type: 'stage:end:clearpersist',
           timestamp: 'timestamp-removed',
-          state: Object({ isLoading: false, value: undefined, error: null, hasValue: false })
+          state: Object({ isLoading: true, value: [1, 2, 3], error: Object({ message: 'fail' }), hasValue: true })
         }),
         Object({
           id: 'id-removed',
@@ -522,7 +522,7 @@ describe('Provider: Feature Cell (core vault functionality)', () => {
           behaviorKey: 'core',
           type: 'lifecycle:end:reset',
           timestamp: 'timestamp-removed',
-          state: Object({ isLoading: false, value: undefined, error: null, hasValue: false })
+          state: Object({ isLoading: true, value: [1, 2, 3], error: Object({ message: 'fail' }), hasValue: true })
         })
       ]);
     });
@@ -607,7 +607,7 @@ describe('Provider: Feature Cell (core vault functionality)', () => {
           behaviorKey: 'vault-orchestrator',
           type: 'lifecycle:start:merge',
           timestamp: 'timestamp-removed',
-          state: Object({ isLoading: false, value: undefined, error: null, hasValue: false })
+          state: Object({ isLoading: true, value: [1, 2, 3], error: Object({ message: 'fail' }), hasValue: true })
         }),
         Object({
           id: 'id-removed',
@@ -615,7 +615,7 @@ describe('Provider: Feature Cell (core vault functionality)', () => {
           behaviorKey: 'NgVault::Core::State',
           type: 'stage:start:state',
           timestamp: 'timestamp-removed',
-          state: Object({ isLoading: true, value: undefined, error: Object({ message: 'fail' }), hasValue: false })
+          state: Object({ isLoading: true, value: [1, 2, 3], error: Object({ message: 'fail' }), hasValue: true })
         }),
         Object({
           id: 'id-removed',
@@ -623,7 +623,7 @@ describe('Provider: Feature Cell (core vault functionality)', () => {
           behaviorKey: 'NgVault::Core::State',
           type: 'stage:end:state',
           timestamp: 'timestamp-removed',
-          state: Object({ isLoading: true, value: undefined, error: Object({ message: 'fail' }), hasValue: false })
+          state: Object({ isLoading: true, value: [1, 2, 3], error: Object({ message: 'fail' }), hasValue: true })
         }),
         Object({
           id: 'id-removed',
@@ -631,7 +631,7 @@ describe('Provider: Feature Cell (core vault functionality)', () => {
           behaviorKey: 'NgVault::CoreHttpResource::State',
           type: 'stage:start:state',
           timestamp: 'timestamp-removed',
-          state: Object({ isLoading: true, value: undefined, error: Object({ message: 'fail' }), hasValue: false })
+          state: Object({ isLoading: true, value: [1, 2, 3], error: Object({ message: 'fail' }), hasValue: true })
         }),
         Object({
           id: 'id-removed',
@@ -639,7 +639,7 @@ describe('Provider: Feature Cell (core vault functionality)', () => {
           behaviorKey: 'NgVault::CoreHttpResource::State',
           type: 'stage:end:state',
           timestamp: 'timestamp-removed',
-          state: Object({ isLoading: true, value: undefined, error: Object({ message: 'fail' }), hasValue: false })
+          state: Object({ isLoading: true, value: [1, 2, 3], error: Object({ message: 'fail' }), hasValue: true })
         }),
         Object({
           id: 'id-removed',
@@ -647,7 +647,7 @@ describe('Provider: Feature Cell (core vault functionality)', () => {
           behaviorKey: 'NgVault::Test::Persist',
           type: 'stage:start:persist',
           timestamp: 'timestamp-removed',
-          state: Object({ isLoading: true, value: undefined, error: Object({ message: 'fail' }), hasValue: false })
+          state: Object({ isLoading: true, value: [1, 2, 3], error: Object({ message: 'fail' }), hasValue: true })
         }),
         Object({
           id: 'id-removed',
@@ -655,7 +655,7 @@ describe('Provider: Feature Cell (core vault functionality)', () => {
           behaviorKey: 'NgVault::Test::Persist',
           type: 'stage:end:persist',
           timestamp: 'timestamp-removed',
-          state: Object({ isLoading: true, value: undefined, error: Object({ message: 'fail' }), hasValue: false })
+          state: Object({ isLoading: true, value: [1, 2, 3], error: Object({ message: 'fail' }), hasValue: true })
         }),
         Object({
           id: 'id-removed',
@@ -663,7 +663,7 @@ describe('Provider: Feature Cell (core vault functionality)', () => {
           behaviorKey: 'vault-orchestrator',
           type: 'lifecycle:end:merge',
           timestamp: 'timestamp-removed',
-          state: Object({ isLoading: true, value: undefined, error: Object({ message: 'fail' }), hasValue: false })
+          state: Object({ isLoading: true, value: [1, 2, 3], error: Object({ message: 'fail' }), hasValue: true })
         }),
         Object({
           id: 'id-removed',
@@ -761,7 +761,7 @@ describe('Provider: Feature Cell (core vault functionality)', () => {
           behaviorKey: 'vault-orchestrator',
           type: 'lifecycle:start:merge',
           timestamp: 'timestamp-removed',
-          state: Object({ isLoading: false, value: undefined, error: null, hasValue: false })
+          state: Object({ isLoading: true, value: [1, 2, 3], error: Object({ message: 'fail' }), hasValue: true })
         }),
         Object({
           id: 'id-removed',
@@ -769,7 +769,7 @@ describe('Provider: Feature Cell (core vault functionality)', () => {
           behaviorKey: 'NgVault::Core::State',
           type: 'stage:start:state',
           timestamp: 'timestamp-removed',
-          state: Object({ isLoading: true, value: undefined, error: Object({ message: 'fail' }), hasValue: false })
+          state: Object({ isLoading: true, value: [1, 2, 3], error: Object({ message: 'fail' }), hasValue: true })
         }),
         Object({
           id: 'id-removed',
@@ -777,7 +777,7 @@ describe('Provider: Feature Cell (core vault functionality)', () => {
           behaviorKey: 'NgVault::Core::State',
           type: 'stage:end:state',
           timestamp: 'timestamp-removed',
-          state: Object({ isLoading: true, value: undefined, error: Object({ message: 'fail' }), hasValue: false })
+          state: Object({ isLoading: true, value: [1, 2, 3], error: Object({ message: 'fail' }), hasValue: true })
         }),
         Object({
           id: 'id-removed',
@@ -785,7 +785,7 @@ describe('Provider: Feature Cell (core vault functionality)', () => {
           behaviorKey: 'NgVault::CoreHttpResource::State',
           type: 'stage:start:state',
           timestamp: 'timestamp-removed',
-          state: Object({ isLoading: true, value: undefined, error: Object({ message: 'fail' }), hasValue: false })
+          state: Object({ isLoading: true, value: [1, 2, 3], error: Object({ message: 'fail' }), hasValue: true })
         }),
         Object({
           id: 'id-removed',
@@ -793,7 +793,7 @@ describe('Provider: Feature Cell (core vault functionality)', () => {
           behaviorKey: 'NgVault::CoreHttpResource::State',
           type: 'stage:end:state',
           timestamp: 'timestamp-removed',
-          state: Object({ isLoading: true, value: undefined, error: Object({ message: 'fail' }), hasValue: false })
+          state: Object({ isLoading: true, value: [1, 2, 3], error: Object({ message: 'fail' }), hasValue: true })
         }),
         Object({
           id: 'id-removed',
@@ -801,7 +801,7 @@ describe('Provider: Feature Cell (core vault functionality)', () => {
           behaviorKey: 'NgVault::Test::Persist',
           type: 'stage:start:persist',
           timestamp: 'timestamp-removed',
-          state: Object({ isLoading: true, value: undefined, error: Object({ message: 'fail' }), hasValue: false })
+          state: Object({ isLoading: true, value: [1, 2, 3], error: Object({ message: 'fail' }), hasValue: true })
         }),
         Object({
           id: 'id-removed',
@@ -809,7 +809,7 @@ describe('Provider: Feature Cell (core vault functionality)', () => {
           behaviorKey: 'NgVault::Test::Persist',
           type: 'stage:end:persist',
           timestamp: 'timestamp-removed',
-          state: Object({ isLoading: true, value: undefined, error: Object({ message: 'fail' }), hasValue: false })
+          state: Object({ isLoading: true, value: [1, 2, 3], error: Object({ message: 'fail' }), hasValue: true })
         }),
         Object({
           id: 'id-removed',
@@ -817,7 +817,7 @@ describe('Provider: Feature Cell (core vault functionality)', () => {
           behaviorKey: 'vault-orchestrator',
           type: 'lifecycle:end:merge',
           timestamp: 'timestamp-removed',
-          state: Object({ isLoading: true, value: undefined, error: Object({ message: 'fail' }), hasValue: false })
+          state: Object({ isLoading: true, value: [1, 2, 3], error: Object({ message: 'fail' }), hasValue: true })
         }),
         Object({
           id: 'id-removed',
@@ -917,7 +917,7 @@ describe('Provider: Feature Cell (core vault functionality)', () => {
           behaviorKey: 'vault-orchestrator',
           type: 'lifecycle:start:merge',
           timestamp: 'timestamp-removed',
-          state: Object({ isLoading: false, value: undefined, error: null, hasValue: false })
+          state: Object({ isLoading: true, value: [1, 2, 3], error: Object({ message: 'fail' }), hasValue: true })
         }),
         Object({
           id: 'id-removed',
@@ -925,7 +925,7 @@ describe('Provider: Feature Cell (core vault functionality)', () => {
           behaviorKey: 'NgVault::Core::State',
           type: 'stage:start:state',
           timestamp: 'timestamp-removed',
-          state: Object({ isLoading: true, value: undefined, error: Object({ message: 'fail' }), hasValue: false })
+          state: Object({ isLoading: true, value: [1, 2, 3], error: Object({ message: 'fail' }), hasValue: true })
         }),
         Object({
           id: 'id-removed',
@@ -933,7 +933,7 @@ describe('Provider: Feature Cell (core vault functionality)', () => {
           behaviorKey: 'NgVault::Core::State',
           type: 'stage:end:state',
           timestamp: 'timestamp-removed',
-          state: Object({ isLoading: true, value: undefined, error: Object({ message: 'fail' }), hasValue: false })
+          state: Object({ isLoading: true, value: [1, 2, 3], error: Object({ message: 'fail' }), hasValue: true })
         }),
         Object({
           id: 'id-removed',
@@ -941,7 +941,7 @@ describe('Provider: Feature Cell (core vault functionality)', () => {
           behaviorKey: 'NgVault::CoreHttpResource::State',
           type: 'stage:start:state',
           timestamp: 'timestamp-removed',
-          state: Object({ isLoading: true, value: undefined, error: Object({ message: 'fail' }), hasValue: false })
+          state: Object({ isLoading: true, value: [1, 2, 3], error: Object({ message: 'fail' }), hasValue: true })
         }),
         Object({
           id: 'id-removed',
@@ -949,7 +949,7 @@ describe('Provider: Feature Cell (core vault functionality)', () => {
           behaviorKey: 'NgVault::CoreHttpResource::State',
           type: 'stage:end:state',
           timestamp: 'timestamp-removed',
-          state: Object({ isLoading: true, value: undefined, error: Object({ message: 'fail' }), hasValue: false })
+          state: Object({ isLoading: true, value: [1, 2, 3], error: Object({ message: 'fail' }), hasValue: true })
         }),
         Object({
           id: 'id-removed',
@@ -957,7 +957,7 @@ describe('Provider: Feature Cell (core vault functionality)', () => {
           behaviorKey: 'NgVault::Test::Persist',
           type: 'stage:start:persist',
           timestamp: 'timestamp-removed',
-          state: Object({ isLoading: true, value: undefined, error: Object({ message: 'fail' }), hasValue: false })
+          state: Object({ isLoading: true, value: [1, 2, 3], error: Object({ message: 'fail' }), hasValue: true })
         }),
         Object({
           id: 'id-removed',
@@ -965,7 +965,7 @@ describe('Provider: Feature Cell (core vault functionality)', () => {
           behaviorKey: 'NgVault::Test::Persist',
           type: 'stage:end:persist',
           timestamp: 'timestamp-removed',
-          state: Object({ isLoading: true, value: undefined, error: Object({ message: 'fail' }), hasValue: false })
+          state: Object({ isLoading: true, value: [1, 2, 3], error: Object({ message: 'fail' }), hasValue: true })
         }),
         Object({
           id: 'id-removed',
@@ -973,7 +973,7 @@ describe('Provider: Feature Cell (core vault functionality)', () => {
           behaviorKey: 'vault-orchestrator',
           type: 'lifecycle:end:merge',
           timestamp: 'timestamp-removed',
-          state: Object({ isLoading: true, value: undefined, error: Object({ message: 'fail' }), hasValue: false })
+          state: Object({ isLoading: true, value: [1, 2, 3], error: Object({ message: 'fail' }), hasValue: true })
         }),
         Object({
           id: 'id-removed',
@@ -989,7 +989,7 @@ describe('Provider: Feature Cell (core vault functionality)', () => {
           behaviorKey: 'NgVault::Test::Persist',
           type: 'stage:start:clearpersist',
           timestamp: 'timestamp-removed',
-          state: Object({ isLoading: false, value: undefined, error: null, hasValue: false })
+          state: Object({ isLoading: true, value: [1, 2, 3], error: Object({ message: 'fail' }), hasValue: true })
         }),
         Object({
           id: 'id-removed',
@@ -997,7 +997,7 @@ describe('Provider: Feature Cell (core vault functionality)', () => {
           behaviorKey: 'NgVault::Test::Persist',
           type: 'stage:end:clearpersist',
           timestamp: 'timestamp-removed',
-          state: Object({ isLoading: false, value: undefined, error: null, hasValue: false })
+          state: Object({ isLoading: true, value: [1, 2, 3], error: Object({ message: 'fail' }), hasValue: true })
         }),
         Object({
           id: 'id-removed',
@@ -1005,7 +1005,7 @@ describe('Provider: Feature Cell (core vault functionality)', () => {
           behaviorKey: 'core',
           type: 'lifecycle:end:reset',
           timestamp: 'timestamp-removed',
-          state: Object({ isLoading: false, value: undefined, error: null, hasValue: false })
+          state: Object({ isLoading: true, value: [1, 2, 3], error: Object({ message: 'fail' }), hasValue: true })
         })
       ]);
     });

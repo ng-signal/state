@@ -1,5 +1,6 @@
 import { provideZonelessChangeDetection } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
+import { take } from 'rxjs';
 import { NgVaultEventModel } from '../models/ngvault-event.model';
 import { NgVaultEventBus } from '../utils/ngvault-event-bus';
 import { NgVaultInsightService } from './ngvault-insight.service';
@@ -26,6 +27,24 @@ describe('Service: NgVaultInsightService', () => {
           expect(received.length).toBe(1);
           done();
         });
+
+        bus.next({
+          cell: 'debug-test',
+          type: 'init',
+          timestamp: Date.now(),
+          state: { isLoading: false, value: [], error: null, hasValue: true }
+        } as any);
+      });
+
+      it('should subscribe and receive events', (done) => {
+        hook
+          .listen$()
+          .pipe(take(1))
+          .subscribe((event: any) => {
+            received.push(event);
+            expect(received.length).toBe(2);
+            done();
+          });
 
         bus.next({
           cell: 'debug-test',

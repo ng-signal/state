@@ -23,11 +23,7 @@
       <img class="logo" src="assets/brand/ngvault-landscape-dark.svg" alt="ngVault logo" />
     </section>
   } @else {
-    <mat-tab-group
-      class="vault-tabs"
-      animationDuration="150ms"
-      [selectedIndex]="selectedIndex()"
-      (selectedIndexChange)="onTabChange($event)">
+    <mat-tab-group class="vault-tabs" animationDuration="150ms">
       <mat-tab label="All">
         <section class="vault-tab-content">
           <ngvault-devtools-panel></ngvault-devtools-panel>

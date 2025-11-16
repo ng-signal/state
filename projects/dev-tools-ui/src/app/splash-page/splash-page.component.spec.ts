@@ -1,21 +1,21 @@
 import { provideZonelessChangeDetection } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { flushMicrotasksZoneless } from '@ngvault/testing';
-import { NgVaultDevtoolsPanelComponent } from './ngvault-devtools-panel.component';
-import { NgVaultDevtoolsService } from './services/ngvault-devtools.service';
+import { NgVaultDevtoolsService } from '../display-panel/services/ngvault-devtools.service';
+import { SplashPageComponent } from './splash-page.component';
 
-describe('Component: NgVaultDevtoolsPanel', () => {
-  let fixture: ComponentFixture<NgVaultDevtoolsPanelComponent>;
-  let component: NgVaultDevtoolsPanelComponent;
+describe('Component: SplashPageComponent', () => {
+  let fixture: ComponentFixture<SplashPageComponent>;
+  let component: SplashPageComponent;
   let service: NgVaultDevtoolsService;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [NgVaultDevtoolsPanelComponent],
+      imports: [SplashPageComponent],
       providers: [provideZonelessChangeDetection()]
     }).compileComponents();
 
-    fixture = TestBed.createComponent(NgVaultDevtoolsPanelComponent);
+    fixture = TestBed.createComponent(SplashPageComponent);
     component = fixture.componentInstance;
     service = TestBed.inject(NgVaultDevtoolsService);
 

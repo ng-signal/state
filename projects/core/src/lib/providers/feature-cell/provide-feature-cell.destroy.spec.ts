@@ -103,7 +103,7 @@ describe('Provider: Feature Cell - destroy', () => {
         behaviorKey: 'vault-orchestrator',
         type: 'lifecycle:start:replace',
         timestamp: 'timestamp-removed',
-        state: Object({ isLoading: true, value: [], error: Object({ message: 'oops' }), hasValue: true })
+        state: Object({ isLoading: true, value: [1, 2, 3], error: Object({ message: 'oops' }), hasValue: true })
       }),
       Object({
         id: 'id-removed',
@@ -111,7 +111,7 @@ describe('Provider: Feature Cell - destroy', () => {
         behaviorKey: 'NgVault::Core::State',
         type: 'stage:start:state',
         timestamp: 'timestamp-removed',
-        state: Object({ isLoading: true, value: [], error: Object({ message: 'oops' }), hasValue: true })
+        state: Object({ isLoading: true, value: [1, 2, 3], error: Object({ message: 'oops' }), hasValue: true })
       }),
       Object({
         id: 'id-removed',
@@ -119,7 +119,7 @@ describe('Provider: Feature Cell - destroy', () => {
         behaviorKey: 'NgVault::Core::State',
         type: 'stage:end:state',
         timestamp: 'timestamp-removed',
-        state: Object({ isLoading: true, value: [], error: Object({ message: 'oops' }), hasValue: true })
+        state: Object({ isLoading: true, value: [1, 2, 3], error: Object({ message: 'oops' }), hasValue: true })
       }),
       Object({
         id: 'id-removed',
@@ -127,7 +127,7 @@ describe('Provider: Feature Cell - destroy', () => {
         behaviorKey: 'NgVault::CoreHttpResource::State',
         type: 'stage:start:state',
         timestamp: 'timestamp-removed',
-        state: Object({ isLoading: true, value: [], error: Object({ message: 'oops' }), hasValue: true })
+        state: Object({ isLoading: true, value: [1, 2, 3], error: Object({ message: 'oops' }), hasValue: true })
       }),
       Object({
         id: 'id-removed',
@@ -135,7 +135,7 @@ describe('Provider: Feature Cell - destroy', () => {
         behaviorKey: 'NgVault::CoreHttpResource::State',
         type: 'stage:end:state',
         timestamp: 'timestamp-removed',
-        state: Object({ isLoading: true, value: [], error: Object({ message: 'oops' }), hasValue: true })
+        state: Object({ isLoading: true, value: [1, 2, 3], error: Object({ message: 'oops' }), hasValue: true })
       }),
       Object({
         id: 'id-removed',
@@ -143,7 +143,7 @@ describe('Provider: Feature Cell - destroy', () => {
         behaviorKey: 'vault-orchestrator',
         type: 'lifecycle:end:replace',
         timestamp: 'timestamp-removed',
-        state: Object({ isLoading: true, value: [], error: Object({ message: 'oops' }), hasValue: true })
+        state: Object({ isLoading: true, value: [1, 2, 3], error: Object({ message: 'oops' }), hasValue: true })
       }),
       Object({
         id: 'id-removed',
@@ -159,7 +159,7 @@ describe('Provider: Feature Cell - destroy', () => {
         behaviorKey: 'core',
         type: 'lifecycle:end:destroy',
         timestamp: 'timestamp-removed',
-        state: Object({ isLoading: false, value: undefined, error: null, hasValue: false })
+        state: Object({ isLoading: true, value: [1, 2, 3], error: Object({ message: 'oops' }), hasValue: true })
       })
     ]);
   });
