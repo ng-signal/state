@@ -1,0 +1,51 @@
+<div class="vault-devtools">
+  <!-- Header -->
+  <header class="header">
+    <div class="title">
+      <div class="logo">
+        <img src="assets/brand/ngvault-landscape-dark.svg" alt="ngVault" />
+      </div>
+      <span class="subtitle">DevTools</span>
+    </div>
+
+    <div class="meta">
+      <span class="event-count">{{ totalEvents() }} events</span>
+      <button class="btn-clear" (click)="clearEvents()">Clear</button>
+    </div>
+  </header>
+
+  <!-- Warning -->
+  @if (totalEvents() === 0) {
+    <section class="warning">
+      Events only appear <strong>after this panel opens</strong>. Trigger actions in your app.
+    </section>
+    <section class="vault-empty">
+      <img class="logo" src="assets/brand/ngvault-landscape-dark.svg" alt="ngVault logo" />
+    </section>
+  } @else {
+    <!-- Custom Tabs -->
+    <nav class="vault-tabs">
+      @for (tab of tabs; track tab; let i = $index) {
+        <div class="tab" [class.active]="selectedIndex() === i" (click)="onTabChange(i)">
+          {{ tab }}
+        </div>
+      }
+    </nav>
+
+    <!-- Content -->
+    <section class="vault-tab-content">
+      <!-- Only show the active tab -->
+      @if (selectedIndex() === 0) {
+        <ngvault-devtools-panel></ngvault-devtools-panel>
+      }
+      @if (selectedIndex() === 1) {
+        there
+        <!-- <ngvault-devtools-errors></ngvault-devtools-errors> -->
+      }
+      @if (selectedIndex() === 2) {
+        Hello
+        <!-- <ngvault-devtools-state></ngvault-devtools-state> -->
+      }
+    </section>
+  }
+</div>

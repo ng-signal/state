@@ -7,15 +7,16 @@ import { NgVaultEventBus } from '../utils/ngvault-event-bus';
 @Injectable({ providedIn: 'root' })
 export class NgVaultInsightService {
   readonly #event$ = new Subject<NgVaultEventModel>();
+  readonly isChromeExtension;
 
   constructor(
     private readonly zone: NgZone,
     private readonly eventBus: NgVaultEventBus
   ) {
     /** ✔ Only available inside Chrome extension */
-    const isChromeExtension = typeof chrome !== 'undefined' && !!chrome?.runtime?.onMessage;
+    this.isChromeExtension = typeof chrome !== 'undefined' && !!chrome?.runtime?.onMessage;
 
-    if (isChromeExtension) {
+    if (this.isChromeExtension) {
       chrome.runtime.onMessage.addListener((msg: NgVaultDevtoolsMessage) => {
         if (msg?.type === 'NGVAULT_EVENT') {
           // Execute inside Angular Zone so signals update
@@ -33,6 +34,10 @@ export class NgVaultInsightService {
 
   /** DevTools Chrome events → Angular signals */
   listen$() {
-    return this.#event$.asObservable();
+    if (this.isChromeExtension) {
+      return this.#event$.asObservable();
+    } else {
+      return this.eventBus.asObservable();
+    }
   }
 }

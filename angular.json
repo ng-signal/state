@@ -183,6 +183,11 @@
               {
                 "glob": "**/*",
                 "input": "projects/dev-tools-ui/public"
+              },
+              {
+                "glob": "**/*",
+                "input": "projects/dev-tools-ui/src/assets",
+                "output": "assets"
               }
             ],
             "styles": ["projects/dev-tools-ui/src/styles.scss"],

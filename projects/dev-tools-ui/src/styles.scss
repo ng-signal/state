@@ -12,6 +12,7 @@ body {
   color-scheme: light;
 
   background-color: var(--ngvault-surface-light);
+  background-color: red;
   color: var(--ngvault-text-inverse);
   font-family: global.$ngvault-font-family;
   font-weight: global.$ngvault-font-weight;
@@ -127,4 +128,9 @@ body {
 
 *::-webkit-scrollbar-track {
   background: var(--surface-bg);
+}
+
+::ng-deep .mat-mdc-tab-label-container {
+  background-color: global.$ngvault-text-primary !important;
+  border: 1px solid red;
 }

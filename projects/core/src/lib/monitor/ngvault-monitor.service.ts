@@ -50,112 +50,124 @@ export class NgVaultMonitor {
     return `${domain}:${phase}:${operation}`;
   }
 
+  #toSnapshot<T>(ctx: Readonly<NgVaultBehaviorContext<T>>): VaultStateSnapshot<T> {
+    // eslint-disable-next-line
+    const src: any = ctx.incoming ?? ctx.state ?? {};
+
+    return {
+      isLoading: src.loading ?? src.isLoading ?? false,
+      value: src.value ?? undefined,
+      error: src.error ?? null,
+      hasValue: src.hasValue ?? !!src.value
+    };
+  }
+
   startReplace<T>(cell: string, behaviorKey: string, ctx: Readonly<NgVaultBehaviorContext<T>>): void {
-    this.#emitEvent(cell, behaviorKey, 'startReplace', ctx.state);
+    this.#emitEvent(cell, behaviorKey, 'startReplace', ctx);
   }
 
   endReplace<T>(cell: string, behaviorKey: string, ctx: Readonly<NgVaultBehaviorContext<T>>): void {
-    this.#emitEvent(cell, behaviorKey, 'endReplace', ctx.state);
+    this.#emitEvent(cell, behaviorKey, 'endReplace', ctx);
   }
 
   startMerge<T>(cell: string, behaviorKey: string, ctx: Readonly<NgVaultBehaviorContext<T>>): void {
-    this.#emitEvent(cell, behaviorKey, 'startMerge', ctx.state);
+    this.#emitEvent(cell, behaviorKey, 'startMerge', ctx);
   }
 
   endMerge<T>(cell: string, behaviorKey: string, ctx: Readonly<NgVaultBehaviorContext<T>>, payload?: unknown): void {
-    this.#emitEvent(cell, behaviorKey, 'endMerge', ctx.state, payload);
+    this.#emitEvent(cell, behaviorKey, 'endMerge', ctx, payload);
   }
 
   startState<T>(cell: string, behaviorKey: string, ctx: Readonly<NgVaultBehaviorContext<T>>): void {
-    this.#emitEvent(cell, behaviorKey, 'startState', ctx.state);
+    this.#emitEvent(cell, behaviorKey, 'startState', ctx);
   }
 
   endState<T>(cell: string, behaviorKey: string, ctx: Readonly<NgVaultBehaviorContext<T>>): void {
-    this.#emitEvent(cell, behaviorKey, 'endState', ctx.state);
+    this.#emitEvent(cell, behaviorKey, 'endState', ctx);
   }
 
   startReducer<T>(cell: string, behaviorKey: string, ctx: Readonly<NgVaultBehaviorContext<T>>): void {
-    this.#emitEvent(cell, behaviorKey, 'startReducer', ctx.state);
+    this.#emitEvent(cell, behaviorKey, 'startReducer', ctx);
   }
 
   endReducer<T>(cell: string, behaviorKey: string, ctx: Readonly<NgVaultBehaviorContext<T>>): void {
-    this.#emitEvent(cell, behaviorKey, 'endReducer', ctx.state);
+    this.#emitEvent(cell, behaviorKey, 'endReducer', ctx);
   }
 
   error<T>(cell: string, behaviorKey: string, ctx: Readonly<NgVaultBehaviorContext<T>>, err: unknown): void {
-    this.#emitEvent(cell, behaviorKey, 'error', ctx.state, 'error', err instanceof Error ? err.message : String(err));
+    this.#emitEvent(cell, behaviorKey, 'error', ctx, 'error', err instanceof Error ? err.message : String(err));
   }
 
   startReset<T>(cell: string, behaviorKey: string, ctx: Readonly<NgVaultBehaviorContext<T>>): void {
-    this.#emitEvent(cell, behaviorKey, 'startReset', ctx.state);
+    this.#emitEvent(cell, behaviorKey, 'startReset', ctx);
   }
 
   endReset<T>(cell: string, behaviorKey: string, ctx: Readonly<NgVaultBehaviorContext<T>>): void {
-    this.#emitEvent(cell, behaviorKey, 'endReset', ctx.state);
+    this.#emitEvent(cell, behaviorKey, 'endReset', ctx);
   }
 
   startDestroy<T>(cell: string, behaviorKey: string, ctx: Readonly<NgVaultBehaviorContext<T>>): void {
-    this.#emitEvent(cell, behaviorKey, 'startDestroy', ctx.state);
+    this.#emitEvent(cell, behaviorKey, 'startDestroy', ctx);
   }
 
   endDestroy<T>(cell: string, behaviorKey: string, ctx: Readonly<NgVaultBehaviorContext<T>>): void {
-    this.#emitEvent(cell, behaviorKey, 'endDestroy', ctx.state);
+    this.#emitEvent(cell, behaviorKey, 'endDestroy', ctx);
   }
 
   startInitialized<T>(cell: string, behaviorKey: string, ctx: Readonly<NgVaultBehaviorContext<T>>): void {
-    this.#emitEvent(cell, behaviorKey, 'startInitialized', ctx.state);
+    this.#emitEvent(cell, behaviorKey, 'startInitialized', ctx);
   }
 
   endInitialized<T>(cell: string, behaviorKey: string, ctx: Readonly<NgVaultBehaviorContext<T>>): void {
-    this.#emitEvent(cell, behaviorKey, 'endInitialized', ctx.state);
+    this.#emitEvent(cell, behaviorKey, 'endInitialized', ctx);
   }
 
   startPersist<T>(cell: string, behaviorKey: string, ctx: Readonly<NgVaultBehaviorContext<T>>) {
-    this.#emitEvent(cell, behaviorKey, 'startPersist', ctx.state);
+    this.#emitEvent(cell, behaviorKey, 'startPersist', ctx);
   }
 
   endPersist<T>(cell: string, behaviorKey: string, ctx: Readonly<NgVaultBehaviorContext<T>>) {
-    this.#emitEvent(cell, behaviorKey, 'endPersist', ctx.state);
+    this.#emitEvent(cell, behaviorKey, 'endPersist', ctx);
   }
 
   startClearPersist<T>(cell: string, behaviorKey: string, ctx: Readonly<NgVaultBehaviorContext<T>>) {
-    this.#emitEvent(cell, behaviorKey, 'startClearPersist', ctx.state);
+    this.#emitEvent(cell, behaviorKey, 'startClearPersist', ctx);
   }
 
   endClearPersist<T>(cell: string, behaviorKey: string, ctx: Readonly<NgVaultBehaviorContext<T>>) {
-    this.#emitEvent(cell, behaviorKey, 'endClearPersist', ctx.state);
+    this.#emitEvent(cell, behaviorKey, 'endClearPersist', ctx);
   }
 
   startLoadPersist<T>(cell: string, behaviorKey: string, ctx: Readonly<NgVaultBehaviorContext<T>>) {
-    this.#emitEvent(cell, behaviorKey, 'startLoadPersist', ctx.state);
+    this.#emitEvent(cell, behaviorKey, 'startLoadPersist', ctx);
   }
 
   endLoadPersist<T>(cell: string, behaviorKey: string, ctx: Readonly<NgVaultBehaviorContext<T>>, payload?: unknown) {
-    this.#emitEvent(cell, behaviorKey, 'endLoadPersist', ctx.state, payload);
+    this.#emitEvent(cell, behaviorKey, 'endLoadPersist', ctx, payload);
   }
 
   startClearValue<T>(cell: string, behaviorKey: string, ctx: Readonly<NgVaultBehaviorContext<T>>) {
-    this.#emitEvent(cell, behaviorKey, 'startClearValue', ctx.state);
+    this.#emitEvent(cell, behaviorKey, 'startClearValue', ctx);
   }
 
   endClearValue<T>(cell: string, behaviorKey: string, ctx: Readonly<NgVaultBehaviorContext<T>>) {
-    this.#emitEvent(cell, behaviorKey, 'endClearValue', ctx.state);
+    this.#emitEvent(cell, behaviorKey, 'endClearValue', ctx);
   }
 
   startEncrypt<T>(cell: string, behaviorKey: string, ctx: Readonly<NgVaultBehaviorContext<T>>) {
-    this.#emitEvent(cell, behaviorKey, 'startEncrypt', ctx.state);
+    this.#emitEvent(cell, behaviorKey, 'startEncrypt', ctx);
   }
 
   endEncrypt<T>(cell: string, behaviorKey: string, ctx: Readonly<NgVaultBehaviorContext<T>>) {
-    this.#emitEvent(cell, behaviorKey, 'endEncrypt', ctx.state);
+    this.#emitEvent(cell, behaviorKey, 'endEncrypt', ctx);
   }
 
   startDecrypt<T>(cell: string, behaviorKey: string, ctx: Readonly<NgVaultBehaviorContext<T>>) {
-    this.#emitEvent(cell, behaviorKey, 'startDecrypt', ctx.state);
+    this.#emitEvent(cell, behaviorKey, 'startDecrypt', ctx);
   }
 
   endDecrypt<T>(cell: string, behaviorKey: string, ctx: Readonly<NgVaultBehaviorContext<T>>, payload?: unknown) {
-    this.#emitEvent(cell, behaviorKey, 'endDecrypt', ctx.state, payload);
+    this.#emitEvent(cell, behaviorKey, 'endDecrypt', ctx, payload);
   }
 
   registerCell(cellKey: string, insight?: NgVaultInsightDefinition): void {
@@ -170,11 +182,13 @@ export class NgVaultMonitor {
     cell: string,
     behaviorKey: string,
     type: string,
-    ctx: Readonly<VaultStateSnapshot<T>>,
+    ctx: Readonly<NgVaultBehaviorContext<T>>,
     payload?: unknown,
     error?: string
   ): void {
     if (!this.#devModeService.isDevMode) return;
+
+    const snapShot = this.#toSnapshot(ctx);
 
     let insight: NgVaultInsightDefinition;
 
@@ -199,7 +213,7 @@ export class NgVaultMonitor {
     };
 
     if (insight.wantsState) {
-      event.state = ctx;
+      event.state = snapShot;
     }
 
     if (insight.wantsPayload && payload !== undefined) {

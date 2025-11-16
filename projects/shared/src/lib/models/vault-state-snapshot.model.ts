@@ -5,5 +5,4 @@ export interface VaultStateSnapshot<T> {
   value: T | undefined;
   error: NgVaultResourceStateError | null;
   hasValue: boolean;
-  message?: string;
 }

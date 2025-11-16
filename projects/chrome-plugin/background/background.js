@@ -3,11 +3,11 @@ let devtoolsPort = null;
 
 chrome.runtime.onConnect.addListener((port) => {
   if (port.name === 'ngvault-devtools') {
-    console.warn(`[ngVault DevTools] Panel connected on port ${port.name}`);
+    // console.warn(`[ngVault DevTools] Panel connected on port ${port.name}`);
     devtoolsPort = port;
 
     port.onDisconnect.addListener(() => {
-      console.warn('[ngVault DevTools] Panel disconnected');
+      // console.warn('[ngVault DevTools] Panel disconnected');
       devtoolsPort = null;
     });
   }

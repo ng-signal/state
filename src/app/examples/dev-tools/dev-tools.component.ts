@@ -1,10 +1,10 @@
 import { Component } from '@angular/core';
-import { NgVaultDevtoolsPanelComponent } from '@ngvault/dev-tools-ui';
+import { SplashPageComponent } from '@ngvault/dev-tools-ui';
 
 @Component({
   selector: 'ngvault-devtools',
   standalone: true,
-  imports: [NgVaultDevtoolsPanelComponent],
-  template: `<ngvault-devtools-panel />`
+  imports: [SplashPageComponent],
+  template: `<ngvault-splash-page />`
 })
 export class DevToolsComponent {}

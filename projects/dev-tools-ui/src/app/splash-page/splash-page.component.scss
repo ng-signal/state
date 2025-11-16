@@ -1,0 +1,130 @@
+@use 'global' as global;
+
+.vault-devtools {
+  height: 100%;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  padding: global.$spacing-md;
+
+  @include global.ngvault-surface(global.$ngvault-surface-dark);
+  @include global.ngvault-text(global.$ngvault-text-primary);
+
+  /* HEADER ---------------------------------------------------- */
+  .header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: global.$spacing-md;
+    border-bottom: 1px solid global.$ngvault-surface-outline;
+
+    .title {
+      display: flex;
+      align-items: center;
+      gap: global.$spacing-sm;
+
+      .logo {
+        width: 120px;
+      }
+
+      .subtitle {
+        @include global.ngvault-text(global.$ngvault-text-secondary);
+        font-size: global.$font-size-md;
+      }
+    }
+
+    .meta {
+      display: flex;
+      align-items: center;
+      gap: global.$spacing-md;
+
+      .event-count {
+        @include global.ngvault-text(global.$ngvault-text-secondary);
+        font-size: global.$font-size-sm;
+      }
+
+      .btn-clear {
+        @include global.button-base(global.$ngvault-text-white, transparent, global.$ngvault-surface-outline);
+
+        &:hover {
+          background-color: global.$ngvault-hover-background-color !important;
+        }
+      }
+    }
+  }
+
+  /* WARNING --------------------------------------------------- */
+  .warning {
+    background-color: global.$ngvault-warn-light;
+    border-left: 4px solid global.$ngvault-warn-dark;
+    color: global.$ngvault-text-black;
+    padding: global.$spacing-sm global.$spacing-md;
+    border-radius: global.$border-radius-sm;
+    margin-bottom: global.$spacing-md;
+    font-size: global.$font-size-sm;
+  }
+
+  /* TABS ------------------------------------------------------ */
+  .vault-tabs {
+    display: flex;
+    gap: global.$spacing-sm;
+    margin-bottom: global.$spacing-sm;
+    border-bottom: 1px solid global.$ngvault-surface-outline;
+
+    .tab {
+      padding: global.$spacing-sm global.$spacing-md;
+      cursor: pointer;
+      border-radius: global.$border-radius-sm global.$border-radius-sm 0 0;
+      background: global.$ngvault-surface-darker;
+      @include global.ngvault-text(global.$ngvault-text-secondary);
+
+      &.active {
+        @include global.ngvault-text(global.$ngvault-text-primary, global.$font-weight-semibold);
+        background: global.$ngvault-surface-light;
+        color: global.$ngvault-text-inverse;
+      }
+
+      &:hover:not(.active) {
+        background: global.$ngvault-hover-background-color;
+      }
+    }
+  }
+
+  /* TAB CONTENT (scrolling) ----------------------------------- */
+  .vault-tab-content {
+    flex: 1;
+    min-height: 0;
+    overflow-y: auto;
+    padding-right: global.$spacing-sm;
+
+    &::-webkit-scrollbar {
+      width: 8px;
+    }
+
+    &::-webkit-scrollbar-thumb {
+      background-color: global.$ngvault-surface-outline;
+      border-radius: global.$border-radius-xs;
+    }
+  }
+
+  .vault-empty {
+    height: calc(100% - 260px);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+
+    .logo {
+      width: 420px;
+      height: auto;
+      opacity: 0.6;
+      filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.35));
+      transition: opacity 0.25s ease;
+
+      &:hover {
+        opacity: 0.9;
+      }
+    }
+  }
+}

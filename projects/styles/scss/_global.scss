@@ -44,10 +44,47 @@ $ngvault-text-inverse: #0f172a; // Deep navy
 $ngvault-text-white: #ffffff;
 $ngvault-text-black: #000000;
 
+// ===========================================
+// Dark Mode Surface Palette
+// ===========================================
+
+// App background (very dark)
+$ngvault-surface-darker: #0a0e1a;
+
+// Main background
+$ngvault-surface-dark: #0f172a;
+
+// Mid-elevation (tabs, cards, sheets)
+$ngvault-surface-mid: #1e293b;
+
+// Elevated cards / headers
+$ngvault-surface-lightish: #273449;
+
+// Outlines / dividers
+$ngvault-surface-outline: $ngvault-primary-light;
+
+// ===========================================
+// Light Mode Surface Palette
+// ===========================================
+
+// App background
+$ngvault-surface-light: #ffffff;
+
+// Mid-tone (panel backgrounds)
+$ngvault-surface-light-mid: #f1f5f9;
+
+// Elevated elements
+$ngvault-surface-light-accent: #e2e8f0;
+
+// Divider / outline stays primary-light
+$ngvault-surface-outline-light: $ngvault-primary-light;
+
+/*
 $ngvault-surface-dark: #0f172a; // Vault UI background
 $ngvault-surface-darker: #0a0e1a;
 $ngvault-surface-light: #ffffff; // Base for light mode
 $ngvault-surface-outline: $ngvault-primary-light; // Neutral outline tone
+*/
 
 // ────────────────────────────────
 // Shadows / Elevation
